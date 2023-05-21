@@ -14,7 +14,7 @@ class AuthController extends Controller {
     public function register(RegisterRequest $request) {
 
         $data = $request->validated();
-
+       
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
@@ -32,8 +32,9 @@ class AuthController extends Controller {
 
     // login a user method
     public function login(LoginRequest $request) {
+       
         $data = $request->validated();
-
+        
         $user = User::where('email', $data['email'])->first();
 
         if (!$user || !Hash::check($data['password'], $user->password)) {
@@ -45,7 +46,6 @@ class AuthController extends Controller {
         $token = $user->createToken('auth_token')->plainTextToken;
 
         $cookie = cookie('token', $token, 60 * 24); // 1 day
-
         return response()->json([
             'user' => new UserResource($user),
         ])->withCookie($cookie);
