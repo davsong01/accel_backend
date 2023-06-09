@@ -16,6 +16,7 @@ return new class extends Migration
             $table->integer('user_id');
             $table->integer('company_id')->nullable();
             $table->integer('branch_id')->nullable();
+            $table->enum('status', ['active', 'inactive']);
 
             $table->timestamps();
         });

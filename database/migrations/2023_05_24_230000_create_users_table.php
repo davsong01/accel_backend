@@ -16,8 +16,8 @@ return new class extends Migration
             $table->string('first_name')->nullable();
             $table->string('last_name')->nullable();
             $table->string('user_permissions')->nullable();
-            $table->integer('company_id');
-            $table->integer('branch_id');
+            $table->integer('company_id')->nullable();
+            $table->integer('branch_id')->nullable();
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
