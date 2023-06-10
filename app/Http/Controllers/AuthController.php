@@ -32,9 +32,8 @@ class AuthController extends Controller {
 
     // login a user method
     public function login(LoginRequest $request) {
-       
-        $data = $request->validated();
         
+        $data = $request->validated();
         $user = User::where('email', $data['email'])->first();
 
         if (!$user || !Hash::check($data['password'], $user->password)) {
@@ -44,11 +43,14 @@ class AuthController extends Controller {
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;
-
+        // $user->token = $token;
         $cookie = cookie('token', $token, 60 * 24); // 1 day
-        return response()->json([
-            'user' => new UserResource($user),
-        ])->withCookie($cookie);
+        $datax['token'] = $token;
+        return response()->json(['data' => $datax, 'message' => 'success'], 200);
+       
+        // return response()->json([
+        //     'user' => new UserResource($user),
+        // ])->withCookie($cookie);
     }
 
     // logout a user method
@@ -66,4 +68,6 @@ class AuthController extends Controller {
     public function user(Request $request) {
         return new UserResource($request->user());
     }
+
+
 }

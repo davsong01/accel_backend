@@ -17,7 +17,7 @@ class DatabaseSeeder extends Seeder
     {
         // Create Company
         $company = \App\Models\Company::Create([
-            'slug' => 'Consode',
+            'slug' => 'local',
             'name' => 'Consode Services Limited',
             'location' => 'Abuja',
             'url' => 'https://consode.com'
@@ -52,6 +52,8 @@ class DatabaseSeeder extends Seeder
         $superAd = \App\Models\User::Create([
             'first_name' => 'Super',
             'last_name' => 'Admin',
+            'type' => 'admin',
+            'status' => 'active',
             'email' => 'test@example.com',
             'password' => Hash::make('123456789'),
         ]);
@@ -88,6 +90,8 @@ class DatabaseSeeder extends Seeder
             $use = \App\Models\User::create([
                 'first_name' => Str::random(10),
                 'last_name' => Str::random(10),
+                'status' => 'active',
+                'type' => 'customer',
                 'email' => Str::random(10).'@gmail.com',
                 'password' => Hash::make('123456789'),
             ]);
@@ -96,7 +100,6 @@ class DatabaseSeeder extends Seeder
                 'company_id' => $company2->id,
                 'branch_id'=>$branch->id,
                 'user_id'=>$use->id,
-                'status'=>'active',
                 'type'=>'lead'
             ]);
 

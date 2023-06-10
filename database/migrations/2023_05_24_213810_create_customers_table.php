@@ -16,7 +16,6 @@ return new class extends Migration
             $table->integer('company_id');
             $table->integer('branch_id');
             $table->integer('user_id');
-            $table->enum('status', ['active', 'inactive']);
             $table->enum('type', ['lead', 'prospect','subscriber']);
 
             $table->timestamps();

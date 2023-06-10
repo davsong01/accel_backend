@@ -8,4 +8,14 @@ use Illuminate\Database\Eloquent\Model;
 class AdminRole extends Model
 {
     use HasFactory;
+
+    public function admin()
+    {
+        return $this->belongsTo(Admin::class);
+    }
+
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
+    }
 }
