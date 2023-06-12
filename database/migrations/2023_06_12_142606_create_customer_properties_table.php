@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->integer('customer_id')->nullable();
             $table->integer('property_id')->nullable();
+            $table->integer('company_id');
             $table->timestamps();
         });
     }
