@@ -41,7 +41,6 @@ class MenuController extends Controller
      */
     public function index(Request $request,$status=null)
     {
-        
         $individual_permissions = Session::get('individual_permissions');
 
         $parents = RolePermission::where(['parent' => 0])->orderBy('order', 'ASC')->get();
@@ -72,9 +71,9 @@ class MenuController extends Controller
         ;         
     }
 
-    public function generateLinks($linkid, $link_name, $link_route, $link_slug, $link_icon)
+    public function generateLinks($linkid, $link_name, $link_route, $link_slug, $link_icon,$description, $parent_id)
     {
-        // dd($linkid, $link_name, $link_url,  $link_icon);
+        // dd($linkid, $link_name,$link_icon, $parent_id);
         $individual_permissions = Session::get('individual_permissions') ?? [];
         $user_role_ids = Session::get('admin_roles');
         $links = [];
@@ -95,9 +94,8 @@ class MenuController extends Controller
         if (count($getChildren) > 0) {
             foreach ($getChildren as $key => $value) {
                 $perms = $this->checkUserHasRightToPage($value->slug, $user_role_ids);
-                // dd($value->id, $value->menu_name, $value->route, $value->slug, $value->icon);
                 if ($perms === true) {
-                    $linko[] = $this->generateLinks($value->id, $value->menu_name, $value->route, $value->slug, $value->icon);
+                    $linko[] = $this->generateLinks($value->id, $value->menu_name, $value->route, $value->slug, $value->icon,$value->description,$value->parent);
                 } else {
                     $linko[] = '';
                 }
@@ -106,27 +104,35 @@ class MenuController extends Controller
             $sub_links = $linko;
             
             $links = [
+                'id' => $linkid,
                 'name' => $link_name,
                 'icon' => $link_icon,
                 'link' => Route::has($link_route) ? route($link_route) : '',
                 'slug' => $link_slug,
+                'description' => $description,
                 'children' => $sub_links
             ];
 
         } else {
             if (\Route::has($link_route)) {
                 $links = [
+                    'id' => $linkid,
+                    'parent_id' => $parent_id,
                     'name' => $link_name,
                     'icon' => $link_icon,
                     'link' => Route::has($link_route) ? route($link_route) : '',
                     'slug' => $link_slug,
+                    'description' => $description
                 ];
             } else {
                 $links = [
+                    'id' => $linkid,
+                    'parent_id' => $parent_id,
                     'name' => $link_name,
                     'icon' => $link_icon,
                     'link' => Route::has($link_route) ? route($link_route) : '',
                     'slug' => $link_slug,
+                    'description' => $description
                 ];
             }
         }
@@ -156,11 +162,11 @@ class MenuController extends Controller
        
         foreach ($links as $key => $value) {
             $perms = $this->checkUserHasRightToPage($value->slug, $admin_roles);
-            // $perm_status = $this->getPermissionStatus($value, $user_role_ids);//
+
             if ($perms === TRUE) {
                 // if ($perms === TRUE && $perm_status === TRUE) {
                 $lox[] = $value->link_name;
-                $lo[] = $this->generateLinks($value->id, $value->menu_name, $value->route, $value->slug, $value->icon);
+                $lo[] = $this->generateLinks($value->id, $value->menu_name, $value->route, $value->slug, $value->icon, $value->description,$value->parent);
             }
         }
 

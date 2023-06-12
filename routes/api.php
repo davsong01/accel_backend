@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MenuController;
+use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 
 /*
@@ -29,5 +30,9 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('/user', [AuthController::class, 'user']);
         Route::get('/permissions', [MenuController::class, 'linkGenerator']);
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+        // Customer Module Routes
+        Route::resource('customers', CustomerController::class);
+        
     });
 });

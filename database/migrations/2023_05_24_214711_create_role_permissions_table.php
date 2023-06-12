@@ -18,6 +18,7 @@ return new class extends Migration
             $table->enum('type', ['admin', 'customer']);
             $table->enum('is_menu', ['yes', 'no']);
             $table->string('menu_name')->nullable();
+            $table->string('description')->nullable();
             $table->string('slug')->nullable();
             $table->string('route');
             $table->string('icon')->nullable();

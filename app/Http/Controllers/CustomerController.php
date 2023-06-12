@@ -12,10 +12,16 @@ class CustomerController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): Response
+    public function index()
     {
-        //
+
+        $customers = Customer::with(['user:id,first_name,last_name,status'])->withCount('properties')
+        ->where('company_id', $this->sessionDetails('company_id'))
+        ->where('branch_id', auth()->user()->admin->branch_id)->get();
+
+        return response()->json(['message'=>'success','data' => $customers], 200);
     }
+
 
     /**
      * Show the form for creating a new resource.
