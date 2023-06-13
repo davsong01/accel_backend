@@ -19,7 +19,7 @@ class EstateController extends Controller
         $estates = Estate::with(['location:id,name','city:id,name'])
         ->where('company_id', $this->sessionDetails('company_id'))
         // ->where('branch_id', auth()->user()->admin->branch_id)
-        ->paginate();
+        ->paginate(20);
 
         return response()->json(['message' => 'success', 'data' => $estates], 200);
     }
@@ -32,7 +32,7 @@ class EstateController extends Controller
         
     }
     
-    public function filterPropertyCount($estate, $query){
+    public function filterPropertyCount($estate, $query=null){
         $property_count = Property::where('estate_id', $estate);
 
         if($query == 'land'){
@@ -85,7 +85,7 @@ class EstateController extends Controller
      */
     public function show(Estate $estate)
     {
-        
+        return response()->json(['message' => 'success', 'data' => $estate], 200);
     }
 
     /**
