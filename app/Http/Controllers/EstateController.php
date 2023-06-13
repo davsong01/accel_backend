@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Estate;
+use App\Models\Property;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Http\RedirectResponse;
@@ -18,7 +19,7 @@ class EstateController extends Controller
         $estates = Estate::with(['location:id,name','city:id,name'])
         ->where('company_id', $this->sessionDetails('company_id'))
         // ->where('branch_id', auth()->user()->admin->branch_id)
-        ->get();
+        ->paginate();
 
         return response()->json(['message' => 'success', 'data' => $estates], 200);
     }
@@ -28,7 +29,24 @@ class EstateController extends Controller
      */
     public function create()
     {
-        //
+        
+    }
+    
+    public function filterPropertyCount($estate, $query){
+        $property_count = Property::where('estate_id', $estate);
+
+        if($query == 'land'){
+            $estates = $property_count->where('property_type','land');
+        }
+
+        if ($query == 'land') {
+            $estates = $property_count->where('property_type','house');
+        }
+
+        $property_count = $property_count->count();
+    
+        return response()->json(['message' => 'success', 'data' => $property_count], 200);
+        
     }
 
     /**

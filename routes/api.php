@@ -41,6 +41,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::resource('location', LocationController::class);
         Route::resource('plotsize', PlotSizeController::class);
         Route::resource('estate', EstateController::class);
+        Route::get('estate-count/{estate_id}/{search?}', [EstateController::class, 'filterPropertyCount']);
         
     });
 });
