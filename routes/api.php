@@ -28,10 +28,10 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
     // });
     Route::post('/login', [AuthController::class, 'login']);
     
-    Route::middleware(['auth:sanctum', 'company_check', 'user_roles'])->group(function () {
+    Route::middleware(['auth:sanctum', 'company_check', 'user_roles', 'otherchecks'])->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/user', [AuthController::class, 'user']);
-        Route::get('/permissions', [MenuController::class, 'linkGenerator']);
+        Route::get('/permissions', [MenuController::class, 'linkGenerator'])->name('permissions.index');
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
         // Customer Module Routes
