@@ -39,7 +39,7 @@ class LocationController extends Controller
 
         if ($validator->fails()) {
             return response()->json([
-                'message' => $validator->messages()->first(),
+                'error' => $validator->messages()->first(),
                 'data' => null,
             ], 422);
         }
@@ -81,7 +81,7 @@ class LocationController extends Controller
 
         if ($validator->fails()) {
             return response()->json([
-                'message' => $validator->messages()->first(),
+                'error' => $validator->messages()->first(),
                 'data' => null,
             ], 422);
         }

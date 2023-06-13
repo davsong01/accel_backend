@@ -14,7 +14,6 @@ class CustomerController extends Controller
      */
     public function index()
     {
-
         $customers = Customer::with(['user:id,first_name,last_name,status'])->withCount('properties')
         ->where('company_id', $this->sessionDetails('company_id'))
         ->where('branch_id', auth()->user()->admin->branch_id)->get();

@@ -16,6 +16,8 @@ return new class extends Migration
             $table->string('name');
             $table->integer('city_id');
             $table->integer('company_id');
+            $table->integer('branch_id')->nullable();
+
             $table->timestamps();
         });
     }

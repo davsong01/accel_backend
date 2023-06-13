@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CityController;
 use App\Http\Controllers\MenuController;
+use App\Http\Controllers\EstateController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\PlotSizeController;
@@ -34,11 +35,12 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('/permissions', [MenuController::class, 'linkGenerator'])->name('permissions.index');
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-        // Customer Module Routes
+        // Admin Module Routes
         Route::resource('customers', CustomerController::class);
         Route::resource('city', CityController::class);
         Route::resource('location', LocationController::class);
         Route::resource('plotsize', PlotSizeController::class);
+        Route::resource('estate', EstateController::class);
         
     });
 });
