@@ -17,7 +17,7 @@ class EstateController extends Controller
      */
     public function index()
     {
-        $estates = Estate::with(['location:id,name','city:id,name'])
+        $estates = Estate::with(['location:id,name','city:id,name', 'estate_property_type'])
         ->where('company_id', $this->sessionDetails('company_id'))
         // ->where('branch_id', auth()->user()->admin->branch_id)
         ->paginate(20);
