@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Estate;
+use App\Models\EstatePropertyTypeDetails;
 use App\Models\Property;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -59,6 +60,7 @@ class EstateController extends Controller
             'city' => 'required|exists:cities,id',
             'location' => 'required|exists:locations,id',
             'property_type' => 'required|in:land,house,both',
+            'project_supervisor' => 'nullable|exists:admins,id',
         ]);
        
         if ($validator->fails()) {
@@ -73,9 +75,38 @@ class EstateController extends Controller
             'city_id' => $request->city,
             'location_id' => $request->location,
             'property_type' => $request->property_type,
+            'project_supervisor' => $request->project_supervisor,
             'company_id' => $this->sessionDetails('company_id'),
             'branch_id' => $this->sessionDetails('branch_id'),
         ]);
+
+        // Create Property Type Details
+        if($request->has('building_details') && !empty($request->building_details)){
+            foreach($request->building_details as $details){
+                EstatePropertyTypeDetails::updateOrcreate([
+                    'estate_id' => $estate->id,
+                    'type' => 'building',
+                    "building_type" => $details['building_type'],
+                    "estate_price" => $details['estate_price'],
+                    "settings_and_excavation" => $details['settings_and_excavation'],
+                    "infrastructural_fee" => $details['infrastructural_fee']
+                ]);
+
+            }
+        }
+        if ($request->has('land_details') && !empty($request->land_details)) {
+            foreach ($request->land_details as $details) {
+                EstatePropertyTypeDetails::updateOrcreate([
+                    'estate_id' => $estate->id,
+                    'type' => 'land',
+                    "plot_size" => $details['plot_size'],
+                    "building_type" => $details['building_type'],
+                    "estate_price" => $details['estate_price'],
+                    "settings_and_excavation" => $details['settings_and_excavation'],
+                    "infrastructural_fee" => $details['infrastructural_fee']
+                ]);
+            }
+        }
 
         return response()->json(['message' => 'Estate Added Succesfully', 'data' => $estate], 200);
     }
@@ -85,6 +116,7 @@ class EstateController extends Controller
      */
     public function show(Estate $estate)
     {
+        $estate = $estate->load('estate_property_type');
         return response()->json(['message' => 'success', 'data' => $estate], 200);
     }
 

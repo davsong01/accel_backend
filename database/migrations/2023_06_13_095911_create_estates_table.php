@@ -16,9 +16,12 @@ return new class extends Migration
             $table->string('name');
             $table->string('city_id');
             $table->string('location_id');
-            $table->string('property_type');
             $table->string('company_id');
+            $table->string('project_supervisor')->nullable();
+            $table->string('property_type')->nullable();
+            $table->string('description')->nullable();
             $table->integer('branch_id')->nullable();
+            $table->integer('bypass_approval')->default(0);
 
             $table->timestamps();
         });
