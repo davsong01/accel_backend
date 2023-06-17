@@ -60,7 +60,7 @@ class EstateController extends Controller
             'city' => 'required|exists:cities,id',
             'location' => 'required|exists:locations,id',
             'property_type' => 'required|in:land,house,both',
-            'project_supervisor' => 'nullable|exists:admins,id',
+            'project_supervisor' => 'sometimes|exists:admins,id',
         ]);
        
         if ($validator->fails()) {
@@ -140,6 +140,7 @@ class EstateController extends Controller
             'city' => 'required|exists:cities,id',
             'location' => 'required|exists:locations,id',
             'property_type' => 'required|in:land,house,both',
+            'bypass_approval' => 'required'
         ]);
 
         if ($validator->fails()) {
@@ -155,6 +156,7 @@ class EstateController extends Controller
             'location_id' => $request->location,
             'property_type' => $request->property_type,
             'company_id' => $this->sessionDetails('company_id'),
+            'project_supervisor' => $request->project_supervisor,
             'branch_id' => $this->sessionDetails('branch_id'),
             'bypass_approval' => $request->bypass_approval,
             'description' => $request->description,
