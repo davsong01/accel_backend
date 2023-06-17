@@ -76,10 +76,12 @@ class EstateController extends Controller
             'location_id' => $request->location,
             'property_type' => $request->property_type,
             'project_supervisor' => $request->project_supervisor,
+            'bypass_approval' => $request->bypass_approval,
+            'description' => $request->description,
             'company_id' => $this->sessionDetails('company_id'),
             'branch_id' => $this->sessionDetails('branch_id'),
         ]);
-
+        
         // Create Property Type Details
         if($request->has('building_details') && !empty($request->building_details)){
             foreach($request->building_details as $details){
