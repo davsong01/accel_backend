@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\LoginRequest;
-use App\Http\Requests\RegisterRequest;
-use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Http\Requests\LoginRequest;
+use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Hash;
+use App\Http\Requests\RegisterRequest;
+use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller {
     // register a new user method
@@ -31,14 +32,30 @@ class AuthController extends Controller {
     }
 
     // login a user method
-    public function login(LoginRequest $request) {
-        
-        $data = $request->validated();
-        $user = User::where('email', $data['email'])->first();
+    public function login(Request $request) {
+        $validator = Validator::make($request->all(), [
+            'email' => 'sometimes',
+            'password' => 'required|string',
+        ]);
 
-        if (!$user || !Hash::check($data['password'], $user->password)) {
+        if ($validator->fails()) {
             return response()->json([
-                'message' => 'Email or password is incorrect!'
+                // 'error' => $validator->messages()->first(),
+                'error' => 'Invalid Credentials',
+                'data' => null,
+            ], 401);
+        }
+        
+        if(!$request['email']){
+            return response()->json([
+                'error' => 'Email or staff ID is required!'
+            ], 422);
+        }
+        $user = User::where('email', $request['email'])->orWhere('staff_id', $request['email'])->first();
+        
+        if (!$user || !Hash::check($request['password'], $user->password)) {
+            return response()->json([
+                'message' => 'Invalid Credentials!'
             ], 401);
         }
 
@@ -47,10 +64,7 @@ class AuthController extends Controller {
         $cookie = cookie('token', $token, 60 * 24); // 1 day
         $datax['token'] = $token;
         return response()->json(['data' => $datax, 'message' => 'success'], 200);
-       
-        // return response()->json([
-        //     'user' => new UserResource($user),
-        // ])->withCookie($cookie);
+ 
     }
 
     // logout a user method
@@ -68,6 +82,5 @@ class AuthController extends Controller {
     public function user(Request $request) {
         return new UserResource($request->user());
     }
-
 
 }

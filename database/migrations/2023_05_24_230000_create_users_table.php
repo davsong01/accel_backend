@@ -17,8 +17,9 @@ return new class extends Migration
             $table->string('last_name')->nullable();
             $table->string('user_permissions')->nullable();
             $table->integer('company_id')->nullable();
-            $table->integer('branch_id')->nullable();
             $table->string('email')->unique();
+            $table->integer('staff_id')->unique();
+            $table->integer('branch_id')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->enum('status', ['active', 'inactive']);
             $table->enum('type', ['admin', 'customer']);
