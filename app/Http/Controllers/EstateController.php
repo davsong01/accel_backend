@@ -81,7 +81,7 @@ class EstateController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
             'branch_id' => $this->sessionDetails('branch_id'),
         ]);
-        
+
         // Create Property Type Details
         if($request->has('building_details') && !empty($request->building_details)){
             foreach($request->building_details as $details){
@@ -156,8 +156,35 @@ class EstateController extends Controller
             'property_type' => $request->property_type,
             'company_id' => $this->sessionDetails('company_id'),
             'branch_id' => $this->sessionDetails('branch_id'),
+            'bypass_approval' => $request->bypass_approval,
+            'description' => $request->description,
         ]);
 
+        if ($request->has('building_details') && !empty($request->building_details)) {
+            foreach ($request->building_details as $details) {
+                EstatePropertyTypeDetails::updateOrcreate([
+                    'estate_id' => $estate->id,
+                    'type' => 'building',
+                    "building_type" => $details['building_type'],
+                    "estate_price" => $details['estate_price'],
+                    "settings_and_excavation" => $details['settings_and_excavation'],
+                    "infrastructural_fee" => $details['infrastructural_fee']
+                ]);
+            }
+        }
+        if ($request->has('land_details') && !empty($request->land_details)) {
+            foreach ($request->land_details as $details) {
+                EstatePropertyTypeDetails::updateOrcreate([
+                    'estate_id' => $estate->id,
+                    'type' => 'land',
+                    "plot_size" => $details['plot_size'],
+                    "building_type" => $details['building_type'],
+                    "estate_price" => $details['estate_price'],
+                    "settings_and_excavation" => $details['settings_and_excavation'],
+                    "infrastructural_fee" => $details['infrastructural_fee']
+                ]);
+            }
+        }
         return response()->json(['message' => 'Update Successful', 'data' => $estate], 200);
     }
 
