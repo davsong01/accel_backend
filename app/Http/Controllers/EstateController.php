@@ -201,7 +201,7 @@ class EstateController extends Controller
 
     public function updateEstatePropertyType(Request $request, $id){
         $property_type = EstatePropertyTypeDetails::find($id);
-        
+
         $property_type->update([
             "plot_size" => $request->plot_size,
             "building_type" => $request->building_type,
@@ -213,7 +213,7 @@ class EstateController extends Controller
         return response()->json(['message' => 'Update Successful', 'data' => $property_type], 200);
     }
 
-    public function changeEstatePropertyType(Request $request, $id)
+    public function changeEstatePropertyTypeStatus(Request $request, $id)
     {
         $property_type = EstatePropertyTypeDetails::find($id);
         if($property_type->status == 1){
@@ -223,5 +223,24 @@ class EstateController extends Controller
         }
 
         return response()->json(['message' => 'Update Successful', 'data' => $property_type], 200);
+    }
+
+    public function changeEstateStatus($id){
+        $estate = Estate::find($id);
+        if ($estate->status == 1) {
+            $estate->update(['status' => 0]);
+        } else {
+            $estate->update(['status' => 1]);
+        }
+
+        return response()->json(['message' => 'Update Successful', 'data' => $estate], 200);
+    }
+
+    public function deleteEstatePropertyType($id)
+    {
+        $estate = EstatePropertyTypeDetails::find($id);
+        $estate->delete();
+        
+        return response()->json(['message' => 'Delete Successful', 'data' => null], 200);
     }
 }

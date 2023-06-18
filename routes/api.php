@@ -42,8 +42,10 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::resource('plotsize', PlotSizeController::class);
         Route::resource('estate', EstateController::class);
         Route::resource('estate', EstateController::class);
+        Route::get('change-estate-status/{id}', [EstateController::class, 'changeEstateStatus']);
         Route::get('estate-count/{estate_id}/{search?}', [EstateController::class, 'filterPropertyCount']);
         Route::post('update-estate-property-type/{id}', [EstateController::class, 'updateEstatePropertyType']);
-        Route::get('change-estate-property-type-status/{id}', [EstateController::class, 'changeEstatePropertyType']);
+        Route::get('change-estate-property-type-status/{id}', [EstateController::class, 'changeEstatePropertyTypeStatus']);
+        Route::get('delete-estate-property-type/{id}', [EstateController::class, 'deleteEstatePropertyType']);
     });
 });
