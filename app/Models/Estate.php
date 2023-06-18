@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Estate extends Model
 {
-    protected $fillable = ['name', 'city_id', 'location_id', 'company_id', 'branch_id', 'property_type', 'bypass_approval','project_supervisor','description']; 
+    protected $fillable = ['name', 'city_id', 'location_id', 'company_id', 'branch_id', 'property_type', 'bypass_approval','project_supervisor','description', 'status']; 
     use HasFactory;
 
     public function location(){

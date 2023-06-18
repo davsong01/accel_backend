@@ -198,4 +198,30 @@ class EstateController extends Controller
         $estate->delete();
         return response()->json(['message' => 'Delete Successful', 'data' => null], 200);
     }
+
+    public function updateEstatePropertyType(Request $request, $id){
+        $property_type = EstatePropertyTypeDetails::find($id);
+        
+        $property_type->update([
+            "plot_size" => $request->plot_size,
+            "building_type" => $request->building_type,
+            "estate_price" => $request->estate_price,
+            "settings_and_excavation" => $request->settings_and_excavation,
+            "infrastructural_fee" => $request->infrastructural_fee
+        ]);
+
+        return response()->json(['message' => 'Update Successful', 'data' => $property_type], 200);
+    }
+
+    public function changeEstatePropertyType(Request $request, $id)
+    {
+        $property_type = EstatePropertyTypeDetails::find($id);
+        if($property_type->status == 1){
+            $property_type->update(['status'=>0]);
+        }else{
+            $property_type->update(['status' => 1]);
+        }
+
+        return response()->json(['message' => 'Update Successful', 'data' => $property_type], 200);
+    }
 }

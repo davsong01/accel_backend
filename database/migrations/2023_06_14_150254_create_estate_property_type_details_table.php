@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->integer('estate_id');
             $table->string('type');
+            $table->string('status')->default(1);
             $table->string('plot_size')->nullable();
             $table->string('building_type')->nullable();
             $table->double('estate_price', 11, 2)->nullable();

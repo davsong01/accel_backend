@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('city_id');
             $table->string('location_id');
+            $table->string('status')->default(1);
             $table->string('company_id');
             $table->string('project_supervisor')->nullable();
             $table->string('property_type')->nullable();
