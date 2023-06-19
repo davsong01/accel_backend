@@ -94,7 +94,6 @@ class EstateController extends Controller
                     "settings_and_excavation" => $details['settings_and_excavation'],
                     "infrastructural_fee" => $details['infrastructural_fee']
                 ]);
-
             }
         }
         if ($request->has('land_details') && !empty($request->land_details)) {
