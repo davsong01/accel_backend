@@ -88,6 +88,7 @@ class EstateController extends Controller
                 EstatePropertyTypeDetails::updateOrcreate([
                     'estate_id' => $estate->id,
                     'type' => 'building',
+                    "plot_size" => $details['plot_size'],
                     "building_type" => $details['building_type'],
                     "estate_price" => $details['estate_price'],
                     "settings_and_excavation" => $details['settings_and_excavation'],
