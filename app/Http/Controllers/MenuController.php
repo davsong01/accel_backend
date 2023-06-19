@@ -73,7 +73,6 @@ class MenuController extends Controller
 
     public function generateLinks($linkid, $link_name, $link_route, $link_slug, $link_icon,$description, $parent_id)
     {
-        // dd($linkid, $link_name,$link_icon, $parent_id);
         $individual_permissions = Session::get('individual_permissions') ?? [];
         $user_role_ids = Session::get('admin_roles');
         $links = [];
@@ -170,6 +169,41 @@ class MenuController extends Controller
             }
         }
 
+        return response()->json(['message' => 'success', 'data' => $lo], 200);
+    }
+
+    public function singleLinkGenerator($parent_id)
+    {
+        $links = [];
+        $individual_permissions = Session::get('individual_permissions') ?? [];
+        $admin_roles = Session::get('admin_roles');
+
+        if (Session::has('admin_id')) {
+            $links = RolePermission::where(['status' => 'active', 'is_menu' => 'yes', 'id' => $parent_id, 'type' => 'admin'])->orderBy('order', 'ASC')->get();
+            if(!$links){
+                return;
+            }
+            $links = $links->filter(function ($query) use ($admin_roles, $individual_permissions) {
+                $query->role_ids = (isset($query->role_ids) && !empty($query->role_ids)) ? explode(',', $query->role_ids) : [];
+
+                foreach ($admin_roles as $role) {
+                    if (in_array($role, $query->role_ids) || in_array($query->id, $individual_permissions)) {
+                        return $query;
+                    }
+                }
+            });
+        }
+
+        $lo = [];
+        
+        foreach ($links as $key => $value) {
+            $perms = $this->checkUserHasRightToPage($value->slug, $admin_roles);
+
+            if ($perms === TRUE) {
+                $lo[] = $this->generateLinks($value->id, $value->menu_name, $value->route, $value->slug, $value->icon, $value->description, $value->parent);
+            }
+        }
+        
         return response()->json(['message' => 'success', 'data' => $lo], 200);
     }
 

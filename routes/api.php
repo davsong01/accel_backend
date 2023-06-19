@@ -33,6 +33,8 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/user', [AuthController::class, 'user']);
         Route::get('/permissions', [MenuController::class, 'linkGenerator'])->name('permissions.index');
+        Route::get('/single-menu-generator/{parent_id}', [MenuController::class, 'singleLinkGenerator'])->name('single.linkgenerator');
+        
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
         // Admin Module Routes
