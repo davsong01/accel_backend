@@ -67,8 +67,7 @@ class MenuController extends Controller
         $roles = Role::where(['type' => 'admin'])->get();
 
         return response()->json(['data' => $menus, 'message' => 'success'], 200);
-
-        ;         
+       
     }
 
     public function generateLinks($linkid, $link_name, $link_route, $link_slug, $link_icon,$description, $parent_id)
@@ -177,33 +176,25 @@ class MenuController extends Controller
         $links = [];
         $individual_permissions = Session::get('individual_permissions') ?? [];
         $admin_roles = Session::get('admin_roles');
-
+        $all_roles = array_unique(array_merge($individual_permissions, $admin_roles));
         if (Session::has('admin_id')) {
-            $links = RolePermission::where(['status' => 'active', 'is_menu' => 'yes', 'id' => $parent_id, 'type' => 'admin'])->orderBy('order', 'ASC')->get();
+            $links = RolePermission::where(['status' => 'active', 'is_menu' => 'yes', 'id' => $parent_id, 'type' => 'admin'])->orderBy('order', 'ASC')->first();
             if(!$links){
                 return;
             }
-            $links = $links->filter(function ($query) use ($admin_roles, $individual_permissions) {
-                $query->role_ids = (isset($query->role_ids) && !empty($query->role_ids)) ? explode(',', $query->role_ids) : [];
 
-                foreach ($admin_roles as $role) {
-                    if (in_array($role, $query->role_ids) || in_array($query->id, $individual_permissions)) {
-                        return $query;
-                    }
-                }
-            });
+            $link_role_ids = (isset($links->role_ids) && !empty($links->role_ids)) ? explode(',', $links->role_ids) : [];
+            $allowed = array_intersect($link_role_ids, $all_roles);
+
+            if(!$allowed && count($allowed) <= 0){
+                return response()->json(['error' => 'You do not have access to this resource'], 403);
+            }
+
         }
 
         $lo = [];
-        
-        foreach ($links as $key => $value) {
-            $perms = $this->checkUserHasRightToPage($value->slug, $admin_roles);
-
-            if ($perms === TRUE) {
-                $lo[] = $this->generateLinks($value->id, $value->menu_name, $value->route, $value->slug, $value->icon, $value->description, $value->parent);
-            }
-        }
-        
+        $lo = $this->generateLinks($links->id, $links->menu_name, $links->route, $links->slug, $links->icon, $links->description, $links->parent);
+       
         return response()->json(['message' => 'success', 'data' => $lo], 200);
     }
 

@@ -41,6 +41,9 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::resource('customers', CustomerController::class);
         Route::resource('city', CityController::class);
         Route::resource('location', LocationController::class);
+        Route::get('city-locations/{city_id}', [LocationController::class, 'cityLocations'])->name('dashboard');
+
+        
         Route::resource('plotsize', PlotSizeController::class);
         Route::resource('estate', EstateController::class);
         Route::resource('estate', EstateController::class);

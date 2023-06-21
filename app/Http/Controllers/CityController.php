@@ -19,6 +19,7 @@ class CityController extends Controller
         return response()->json(['message' => 'success', 'data' => $cities],200);
     }
 
+    
     /**
      * Show the form for creating a new resource.
      */

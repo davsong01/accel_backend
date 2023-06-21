@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Company;
 use Illuminate\Http\Request;
 use App\Http\Requests\LoginRequest;
 use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\RegisterRequest;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller {
@@ -60,10 +62,19 @@ class AuthController extends Controller {
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;
+        $company = Company::where('id', $user->company_id)->first();
+        
+        if(!$company){
+            return response()->json([
+                'message' => 'Invalid Company details!'
+            ], 403); 
+        }
+        
         // $user->token = $token;
         $cookie = cookie('token', $token, 60 * 24); // 1 day
         $datax['token'] = $token;
-        return response()->json(['data' => $datax, 'message' => 'success'], 200);
+
+        return response()->json(['data' => $datax, 'message' => Session::all()], 200);
  
     }
 
@@ -72,7 +83,7 @@ class AuthController extends Controller {
         $request->user()->currentAccessToken()->delete();
 
         $cookie = cookie()->forget('token');
-
+        Session::flush();
         return response()->json([
             'message' => 'Logged out successfully!'
         ])->withCookie($cookie);

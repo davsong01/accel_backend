@@ -19,20 +19,24 @@ class CompanyCheckMiddleware
     {
         // Get company
         if(!Session::has('company_id')){
-            if(!$request->header('company-slug')){
-                return response()->json(['error' => 'Company slug is required', 'data' => null], 422);
+            if(Session::has('company_slug')){
+                $slug = Session::get('company_slug');
             }else{
-                $slug = $request->header('company-slug');
-                $company = Company::whereSlug($slug)->first();
-                if(!$company){
-                    return response()->json(['error' => 'Company with slug: '.$slug.' not found', 'data' => null], 422);
-                }else{
-                    Session::put('company_id', $company->id);
-                    Session::put('company_name', $company->name);
-                    Session::put('company_url', $company->url);
-                    Session::put('company_location', $company->location);   
+                if(auth()->user()){
+                    $company = Company::whereId(auth()->user()->company_id)->first();
                 }
             }
+
+            if (!$company) {
+                return response()->json(['error' => 'Company with slug: ' . $slug . ' not found', 'data' => null], 422);
+            } else {
+                Session::put('company_id', $company->id);
+                Session::put('company_name', $company->name);
+                Session::put('company_url', $company->url);
+                Session::put('company_location', $company->location);
+                Session::put('company_slug', $company->slug);
+            }
+            
         }
         
         return $next($request);
