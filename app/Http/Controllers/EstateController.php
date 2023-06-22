@@ -118,7 +118,11 @@ class EstateController extends Controller
      */
     public function show(Estate $estate)
     {
-        $estate = $estate->load('estate_property_type');
+        $estate = $estate->load('city', 'location','estate_property_type');
+        // $estate->city_name = $estate->city->name;
+        // $estate->location_name = $estate->location->name;
+        $estate->project_supervisor_name = ($estate->admin->user->first_name ?? '') .' '. ($estate->admin->user->last_name ?? '');
+
         return response()->json(['message' => 'success', 'data' => $estate], 200);
     }
 

@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\EstatePropertyTypeDetails;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 class Estate extends Model
 {
@@ -24,9 +25,19 @@ class Estate extends Model
         return $this->belongsTo(City::class);
     }
 
+    public function admin(){
+        return $this->belongsTo(Admin::class, 'project_supervisor');
+    }
+
     public function estate_property_type(){
         return $this->hasMany(EstatePropertyTypeDetails::class);
     }
+
+    // public function adminUser(): HasOneThrough
+    // {
+    //     return $this->hasOneThrough(User::class, Admin::class, 'project_supervisor');
+    // }
+
 
     protected function createdAt(): Attribute
     {
@@ -35,10 +46,4 @@ class Estate extends Model
         );
     }
 
-    // protected function updatedAt(): Attribute
-    // {
-    //     return Attribute::make(
-    //         get: fn (string $value) => date("M jS, Y  g:iA", strtotime($value)),
-    //     );
-    // }
 }
