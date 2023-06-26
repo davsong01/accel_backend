@@ -67,7 +67,7 @@ class EstateController extends Controller
             return response()->json([
                 'error' => $validator->messages()->first(),
                 'data' => null,
-            ], 422);
+            ], 412);
         }
        
         $estate = Estate::updateOrcreate([
@@ -88,11 +88,11 @@ class EstateController extends Controller
                 EstatePropertyTypeDetails::updateOrcreate([
                     'estate_id' => $estate->id,
                     'type' => 'building',
-                    "plot_size" => $details['plot_size'],
-                    "building_type" => $details['building_type'],
+                    "plot_size" => $details['plot_size'] ?? null,
+                    "building_type" => $details['building_type'] ?? null,
                     "estate_price" => $details['estate_price'],
-                    "settings_and_excavation" => $details['settings_and_excavation'],
-                    "infrastructural_fee" => $details['infrastructural_fee']
+                    "settings_and_excavation" => $details['settings_and_excavation'] ?? null,
+                    "infrastructural_fee" => $details['infrastructural_fee'] ?? null
                 ]);
             }
         }
@@ -101,11 +101,11 @@ class EstateController extends Controller
                 EstatePropertyTypeDetails::updateOrcreate([
                     'estate_id' => $estate->id,
                     'type' => 'land',
-                    "plot_size" => $details['plot_size'],
-                    "building_type" => $details['building_type'],
+                    "plot_size" => $details['plot_size'] ?? null,
+                    "building_type" => $details['building_type'] ?? null,
                     "estate_price" => $details['estate_price'],
-                    "settings_and_excavation" => $details['settings_and_excavation'],
-                    "infrastructural_fee" => $details['infrastructural_fee']
+                    "settings_and_excavation" => $details['settings_and_excavation'] ?? null,
+                    "infrastructural_fee" => $details['infrastructural_fee'] ?? null
                 ]);
             }
         }
@@ -119,10 +119,8 @@ class EstateController extends Controller
     public function show(Estate $estate)
     {
         $estate = $estate->load('city', 'location','estate_property_type');
-        // $estate->city_name = $estate->city->name;
-        // $estate->location_name = $estate->location->name;
         $estate->project_supervisor_name = ($estate->admin->user->first_name ?? '') .' '. ($estate->admin->user->last_name ?? '');
-
+        
         return response()->json(['message' => 'success', 'data' => $estate], 200);
     }
 

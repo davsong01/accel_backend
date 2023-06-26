@@ -24,9 +24,6 @@ use App\Http\Controllers\DashboardController;
 Route::post('/register', [AuthController::class, 'register']);
 
 Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
-    // Route::post('/login', function () {
-    //     dd('sds');
-    // });
     Route::post('/login', [AuthController::class, 'login']);
     
     Route::middleware(['auth:sanctum', 'company_check', 'user_roles', 'otherchecks'])->group(function () {
@@ -43,7 +40,6 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::resource('location', LocationController::class);
         Route::get('city-locations/{city_id}', [LocationController::class, 'cityLocations'])->name('dashboard');
 
-        
         Route::resource('plotsize', PlotSizeController::class);
         Route::resource('estate', EstateController::class);
         Route::resource('estate', EstateController::class);
@@ -52,5 +48,8 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::post('update-estate-property-type/{id}', [EstateController::class, 'updateEstatePropertyType']);
         Route::get('change-estate-property-type-status/{id}', [EstateController::class, 'changeEstatePropertyTypeStatus']);
         Route::get('delete-estate-property-type/{id}', [EstateController::class, 'deleteEstatePropertyType']);
+
+        Route::resource('estate-setting', LocationController::class);
+
     });
 });
