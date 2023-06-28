@@ -88,4 +88,17 @@ class AdminController extends Controller
         return response()->json(['message' => 'successfull', 'data' => $assign], 200);
 
     }
+
+    public function getSingleAdminRoles($admin_id){
+        $admin = Admin::where(['id' => $admin_id])->first();
+
+        if(!$admin){
+            return response()->json(['error'=>'Admin not found'], 422);
+        }
+
+        $roles = $admin->roles->pluck('id')->toArray();
+
+        return response()->json(['message' => 'successfull', 'data' => $roles], 200);
+        
+    }
 }

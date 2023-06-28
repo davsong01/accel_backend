@@ -61,5 +61,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('get-active-admins', [AdminController::class, 'getActiveAdmins']);
         Route::get('get-active-admins-in-role/{id}', [AdminController::class, 'getActiveAdminsInRole']);
         Route::post('assign-role-to-admin', [AdminController::class, 'assignRoleToAdmin']);
+        Route::get('admin-roles/{admin_id}', [AdminController::class, 'getSingleAdminRoles']);
+
     });
 });
