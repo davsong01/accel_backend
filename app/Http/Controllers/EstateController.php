@@ -20,7 +20,7 @@ class EstateController extends Controller
         $estates = Estate::with(['location:id,name','city:id,name', 'estate_property_type'])
         ->where('company_id', $this->sessionDetails('company_id'))
         // ->where('branch_id', auth()->user()->admin->branch_id)
-        ->paginate(20);
+        ->orderBy('created_at', 'DESC')->paginate(20);
 
         return response()->json(['message' => 'success', 'data' => $estates], 200);
     }

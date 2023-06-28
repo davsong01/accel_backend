@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->integer('admin_id');
             $table->integer('role_id');
+            $table->integer('company_id')->nullable();
+            $table->integer('branch_id')->nullable();
             $table->timestamps();
         });
     }

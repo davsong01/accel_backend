@@ -57,7 +57,7 @@ class AuthController extends Controller {
         
         if (!$user || !Hash::check($request['password'], $user->password)) {
             return response()->json([
-                'message' => 'Invalid Credentials!'
+                'error' => 'Invalid Credentials!'
             ], 401);
         }
 
@@ -66,7 +66,7 @@ class AuthController extends Controller {
         
         if(!$company){
             return response()->json([
-                'message' => 'Invalid Company details!'
+                'error' => 'Invalid Company details!'
             ], 403); 
         }
         

@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CityController;
 use App\Http\Controllers\MenuController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\EstateController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\LocationController;
@@ -50,6 +52,11 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('delete-estate-property-type/{id}', [EstateController::class, 'deleteEstatePropertyType']);
 
         Route::resource('estate-setting', LocationController::class);
-
+        Route::resource('roles', RoleController::class);
+        
+        Route::get('get-all-admins', [AdminController::class, 'getAllAdmins']);
+        Route::get('get-active-admins', [AdminController::class, 'getActiveAdmins']);
+        Route::get('get-active-admins-in-role/{id}', [AdminController::class, 'getActiveAdminsInRole']);
+        Route::post('assign-role-to-admin', [AdminController::class, 'assignRoleToAdmin']);
     });
 });

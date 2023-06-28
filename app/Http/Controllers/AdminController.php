@@ -2,66 +2,90 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Role;
 use App\Models\Admin;
-use Illuminate\Http\RedirectResponse;
+use App\Models\AdminRole;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Validator;
 
 class AdminController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(): Response
+    public function getActiveAdminsInRole($id)
     {
-        //
+        $admins = AdminRole::where("role_id", $id)
+            ->join("admins", "admin_roles.admin_id", "=", "admins.id")
+            ->where('admins.company_id', $this->sessionDetails('company_id'))
+            ->join("users", "admins.user_id", "=", "users.id")->where(['users.status'=>'active', 'type'=>'admin'])
+            ->select("admins.id AS admin_id", "users.id As user_id","users.status", "admins.created_at", "users.first_name", "users.last_name", "users.email", "users.staff_id", "users.type", "users.company_id")
+            ->orderBy("admins.created_at", "desc")
+            ->groupBy("admins.id")
+            ->get();
+       
+        return response()->json(['message' => 'success', 'data' => $admins], 200);
+        
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create(): Response
-    {
-        //
+    public function getAllAdmins(){
+        $admins = Admin::where(['admins.company_id' => $this->sessionDetails('company_id')])
+            ->join("users", "admins.user_id", "=", "users.id")->where(['type' => 'admin'])
+            ->select("admins.id AS admin_id", "users.id As user_id", "users.status", "admins.created_at", "users.first_name", "users.last_name", "users.email", "users.staff_id", "users.type", "users.company_id")
+            ->orderBy("admins.created_at", "desc")
+            ->get();
+        return response()->json(['message' => 'success', 'data' => $admins], 200);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request): RedirectResponse
+    public function getActiveAdmins()
     {
-        //
+        $admins = Admin::where(['admins.company_id'=>$this->sessionDetails('company_id')])
+        ->join("users", "admins.user_id", "=", "users.id")->where(['users.status' => 'active', 'type' => 'admin'])
+        ->select("admins.id AS admin_id", "users.id As user_id", "users.status", "admins.created_at", "users.first_name", "users.last_name", "users.email", "users.staff_id", "users.type", "users.company_id")
+        ->orderBy("admins.created_at", "desc")
+        ->get();
+        return response()->json(['message' => 'success', 'data' => $admins], 200);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Admin $admin): Response
+    public function getMultipleRoleAdmins(Request $request)
     {
-        //
+        // $departments = AdminDepartment::where(['status' => 'active', 'domain_id' => \Request::get('domain_id')])->orderBy('id', 'DESC')->get();
+
+        // foreach ($departments as $department) {
+        //     $departmentRoles = Role::where(['type' => 'admin', 'admin_department_id' => $department->id, 'status' => 'active',])->get()->pluck('id');
+
+        //     $department['admins'] = AdminRole::whereIn("role_id", $departmentRoles)
+        //         ->join("admins", "admin_roles.admin_id", "=", "admins.id")->where(['admins.status' => 'active'])
+        //         ->join("users", "admins.user_id", "=", "users.id")
+        //         ->select("admins.id", "admins.status", "admins.type", "admins.created_at", "users.name")
+        //         ->orderBy("admins.created_at", "desc")
+        //         ->groupBy("admins.id")
+        //         ->get();
+        // }
+
+        // return response()->json(['message' => 'successfull', 'data' => $departments], 200);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Admin $admin): Response
-    {
-        //
-    }
+    public function assignRoleToAdmin(Request $request){
+        $validator = Validator::make($request->all(), [
+            'role_id' => 'required|exists:roles,id',
+            'admin_id' => 'required|exists:admins,id',
+        ]);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Admin $admin): RedirectResponse
-    {
-        //
-    }
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->messages()->first(),
+                'data' => null,
+            ], 422);
+        }
+        
+        $assign = AdminRole::updateOrCreate([
+            'role_id' => $request->role_id,
+            'admin_id' => $request->admin_id,
+            'company_id' => $this->sessionDetails('company_id'),
+            'branch_id' => $this->sessionDetails('branch_id'),
+        ]);
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Admin $admin): RedirectResponse
-    {
-        //
+        return response()->json(['message' => 'successfull', 'data' => $assign], 200);
+
     }
 }
