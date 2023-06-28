@@ -43,8 +43,11 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('city-locations/{city_id}', [LocationController::class, 'cityLocations'])->name('dashboard');
 
         Route::resource('plotsize', PlotSizeController::class);
+        Route::get('sample-bulk-plotsizes-import', [PlotSizeController::class, 'sampleBulkPlotSize']);
+        Route::post('import-bulk-plotsizes', [PlotSizeController::class,'importBulkPlotSize']);
         Route::resource('estate', EstateController::class);
-        Route::resource('estate', EstateController::class);
+        Route::get('sample-bulk-estate-import', [EstateController::class, 'sampleBulkEstate']);
+        Route::post('import-bulk-estate', [EstateController::class, 'importBulkEstates']);
         Route::get('change-estate-status/{id}', [EstateController::class, 'changeEstateStatus']);
         Route::get('estate-count/{estate_id}/{search?}', [EstateController::class, 'filterPropertyCount']);
         Route::post('update-estate-property-type/{id}', [EstateController::class, 'updateEstatePropertyType']);

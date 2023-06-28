@@ -5,8 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\PlotSize;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use App\Imports\PlotSizeImport;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Validator;
+
 
 class PlotSizeController extends Controller
 {
@@ -49,6 +52,26 @@ class PlotSizeController extends Controller
         ]);
 
         return response()->json(['message' => 'Plot Size Added Succesfully', 'data' => $plot], 200);
+    }
+
+    public function importBulkPlotSize(Request $request)
+    {
+        $this->validate(request(), [
+            'file' => 'required|
+				mimetypes:xlsv,xlsx,xls,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,
+				application/excel,application/x-excel,application/x-msexcel,text/comma-seperated-values, text/csv'
+        ], [
+            'file.mimetypes' => 'The file must be a file of type: xlsx'
+        ]);
+
+        Excel::import(new PlotSizeImport(), request()->file('file'));
+        
+        return response()->json(['message' => 'Plot Sizes Added Succesfully', 'data' => null], 200);
+    }
+
+    public function sampleBulkPlotSize(){
+        $realpath = base_path() . '/sampleimports/plotsize.xlsx';
+        return response()->download($realpath);
     }
 
     /**

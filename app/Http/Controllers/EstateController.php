@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Estate;
-use App\Models\EstatePropertyTypeDetails;
 use App\Models\Property;
 use Illuminate\Http\Request;
+use App\Imports\EstateImport;
 use Illuminate\Http\Response;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\RedirectResponse;
+use App\Models\EstatePropertyTypeDetails;
 use Illuminate\Support\Facades\Validator;
 
 class EstateController extends Controller
@@ -62,14 +64,14 @@ class EstateController extends Controller
             'property_type' => 'required|in:land,building,both',
             'project_supervisor' => 'sometimes|exists:admins,id',
         ]);
-       
+        
         if ($validator->fails()) {
             return response()->json([
                 'error' => $validator->messages()->first(),
                 'data' => null,
             ], 412);
         }
-       
+        
         $estate = Estate::updateOrcreate([
             'name' => $request->name,
             'city_id' => $request->city,
@@ -247,5 +249,31 @@ class EstateController extends Controller
         return response()->json(['message' => 'Delete Successful', 'data' => null], 200);
     }
 
-    
+    public function importBulkEstates(Request $request)
+    {
+        $this->validate(request(), [
+            'file' => 'required|
+				mimetypes:xlsv,xlsx,xls,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,
+				application/excel,application/x-excel,application/x-msexcel,text/comma-seperated-values, text/csv'
+        ], [
+            'file.mimetypes' => 'The file must be a file of type: xlsx'
+        ]);
+
+        try {
+            //code...
+            Excel::import(new EstateImport(), request()->file('file'));
+        } catch (\Throwable $th) {
+            return response()->json(['errors'=>$th->getMessage()],422);
+        }
+
+        return response()->json(['message' => 'Plot Sizes Added Succesfully', 'data' => null], 200);
+
+    }
+
+    public function sampleBulkEstate()
+    {
+        $realpath = base_path() . '/sampleimports/sample_estate.xlsx';
+        return response()->download($realpath);
+    }
+
 }
