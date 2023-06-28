@@ -59,7 +59,7 @@ class EstateController extends Controller
             'name' => 'required',
             'city' => 'required|exists:cities,id',
             'location' => 'required|exists:locations,id',
-            'property_type' => 'required|in:land,house,both',
+            'property_type' => 'required|in:land,building,both',
             'project_supervisor' => 'sometimes|exists:admins,id',
         ]);
        
@@ -246,4 +246,6 @@ class EstateController extends Controller
         
         return response()->json(['message' => 'Delete Successful', 'data' => null], 200);
     }
+
+    
 }
