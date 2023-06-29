@@ -3,24 +3,26 @@
 namespace App\Http\Controllers;
 
 use App\Models\BuildingType;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Validator;
 
 class BuildingTypeController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index(): Response
+    public function index()
     {
-        //
+        $building_types = BuildingType::where('company_id', $this->sessionDetails('company_id'))->get();
+        return response()->json(['message' => 'success', 'data' => $building_types], 200);
     }
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create(): Response
+    public function create()
     {
         //
     }
@@ -28,15 +30,31 @@ class BuildingTypeController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'name' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->messages()->first(),
+                'data' => null,
+            ], 422);
+        }
+
+        $building_type = BuildingType::updateOrcreate([
+            'name' => $request->name,
+            'company_id' => $this->sessionDetails('company_id'),
+        ]);
+
+        return response()->json(['message' => 'Plot Size Added Succesfully', 'data' => $building_type], 200);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(BuildingType $buildingType): Response
+    public function show(BuildingType $buildingType)
     {
         //
     }
@@ -44,7 +62,7 @@ class BuildingTypeController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(BuildingType $buildingType): Response
+    public function edit(BuildingType $buildingType)
     {
         //
     }
@@ -52,16 +70,33 @@ class BuildingTypeController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, BuildingType $buildingType): RedirectResponse
+    public function update(Request $request, BuildingType $buildingType)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'name' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->messages()->first(),
+                'data' => null,
+            ], 422);
+        }
+
+        $buildingType->update([
+            'name' => $request->name,
+            'company_id' => $this->sessionDetails('company_id'),
+        ]);
+
+        return response()->json(['message' => 'Update Successful', 'data' => $buildingType], 200);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(BuildingType $buildingType): RedirectResponse
+    public function destroy(BuildingType $buildingType)
     {
-        //
+        $buildingType->delete();
+        return response()->json(['message' => 'Delete Successful', 'data' => null], 200);
     }
 }

@@ -38,7 +38,7 @@ class PlotSizeController extends Controller
         $validator = Validator::make($request->all(), [
             'size' => 'required',
         ]);
-
+        
         if ($validator->fails()) {
             return response()->json([
                 'error' => $validator->messages()->first(),
@@ -95,7 +95,6 @@ class PlotSizeController extends Controller
      */
     public function update(Request $request, PlotSize $plotsize)
     {
-
         $validator = Validator::make($request->all(), [
             'size' => 'required',
         ]);

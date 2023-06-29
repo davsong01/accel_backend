@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\SpecialRequest;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CityController;
@@ -11,6 +12,8 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\PlotSizeController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\BuildingTypeController;
+use App\Http\Controllers\SpecialRequestController;
 
 /*
 |--------------------------------------------------------------------------
@@ -43,6 +46,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('city-locations/{city_id}', [LocationController::class, 'cityLocations'])->name('dashboard');
 
         Route::resource('plotsize', PlotSizeController::class);
+        Route::resource('building-type', BuildingTypeController::class);
         Route::get('sample-bulk-plotsizes-import', [PlotSizeController::class, 'sampleBulkPlotSize']);
         Route::post('import-bulk-plotsizes', [PlotSizeController::class,'importBulkPlotSize']);
         Route::resource('estate', EstateController::class);
@@ -62,6 +66,9 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('get-active-admins-in-role/{id}', [AdminController::class, 'getActiveAdminsInRole']);
         Route::post('assign-role-to-admin', [AdminController::class, 'assignRoleToAdmin']);
         Route::get('admin-roles/{admin_id}', [AdminController::class, 'getSingleAdminRoles']);
+
+        Route::resource('special-request', SpecialRequestController::class);
+
 
     });
 });
