@@ -2,65 +2,48 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
+use App\Models\EstateSettings;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Validator;
+
 
 class EstateSettingController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(): Response
+   
+    public function update(Request $request)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            "form_payment_for_land" => 'sometimes',
+            "form_payment_for_building" => "sometimes",
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->messages()->first(),
+                'data' => null,
+            ], 412);
+        }
+
+        $estateSettings = EstateSettings::where('company_id',$this->sessionDetails('company_id'))->first();
+       
+        if ($request->has('form_payment_for_land') && !is_null($request->form_payment_for_land)) {
+            $data['form_payment_for_land'] = $request->form_payment_for_land;
+        }
+
+        if ($request->has('form_payment_for_building') && !is_null($request->form_payment_for_building)) {
+            $data['form_payment_for_building'] = $request->form_payment_for_building;
+        }
+
+        $data['company_id'] = $this->sessionDetails('company_id');
+        
+        if(!$estateSettings){
+            EstateSettings::create($data);
+        }else{
+            $estateSettings->update($data);
+        }
+        
+        return response()->json(['message' => 'Estate settings updated succesfully', 'data' => null], 200);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create(): Response
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request): RedirectResponse
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id): Response
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id): Response
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id): RedirectResponse
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id): RedirectResponse
-    {
-        //
-    }
 }

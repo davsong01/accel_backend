@@ -13,6 +13,9 @@ use App\Http\Controllers\LocationController;
 use App\Http\Controllers\PlotSizeController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\BuildingTypeController;
+use App\Http\Controllers\CompanyDocumentController;
+use App\Http\Controllers\EstateSettingController;
+use App\Http\Controllers\CompanySettingController;
 use App\Http\Controllers\SpecialRequestController;
 
 /*
@@ -54,11 +57,15 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::post('import-bulk-estate', [EstateController::class, 'importBulkEstates']);
         Route::get('change-estate-status/{id}', [EstateController::class, 'changeEstateStatus']);
         Route::get('estate-count/{estate_id}/{search?}', [EstateController::class, 'filterPropertyCount']);
+        Route::post('add-estate-property-type', [EstateController::class, 'addEstatePropertyType']);
         Route::post('update-estate-property-type/{id}', [EstateController::class, 'updateEstatePropertyType']);
         Route::get('change-estate-property-type-status/{id}', [EstateController::class, 'changeEstatePropertyTypeStatus']);
         Route::get('delete-estate-property-type/{id}', [EstateController::class, 'deleteEstatePropertyType']);
 
-        Route::resource('estate-setting', LocationController::class);
+        Route::post('update-estate-setting', [EstateSettingController::class, 'update']);
+        Route::post('update-company-profile', [CompanySettingController::class, 'updateCompanyProfile']);
+        Route::resource('company-document', CompanyDocumentController::class);
+
         Route::resource('roles', RoleController::class);
         
         Route::get('get-all-admins', [AdminController::class, 'getAllAdmins']);

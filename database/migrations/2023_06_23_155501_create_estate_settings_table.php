@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('estate_settings', function (Blueprint $table) {
             $table->id();
-            $table->string('form_payment_for_land')->nullable();
-            $table->string('form_payment_for_building')->nullable();
+            $table->float('form_payment_for_land',11,2)->nullable();
+            $table->float('form_payment_for_building',11,2)->nullable();
             
             $table->timestamps();
         });

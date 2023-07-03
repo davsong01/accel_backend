@@ -94,7 +94,8 @@ class EstateController extends Controller
                     "building_type" => $details['building_type'] ?? null,
                     "estate_price" => $details['estate_price'],
                     "settings_and_excavation" => $details['settings_and_excavation'] ?? null,
-                    "infrastructural_fee" => $details['infrastructural_fee'] ?? null
+                    "infrastructural_fee" => $details['infrastructural_fee'] ?? null,
+                    "company_id" => $this->sessionDetails('company_id') ?? null
                 ]);
             }
         }
@@ -107,12 +108,47 @@ class EstateController extends Controller
                     "building_type" => $details['building_type'] ?? null,
                     "estate_price" => $details['estate_price'],
                     "settings_and_excavation" => $details['settings_and_excavation'] ?? null,
-                    "infrastructural_fee" => $details['infrastructural_fee'] ?? null
+                    "infrastructural_fee" => $details['infrastructural_fee'] ?? null,
+                    "company_id" => $this->sessionDetails('company_id') ?? null
                 ]);
             }
         }
 
         return response()->json(['message' => 'Estate Added Succesfully', 'data' => $estate], 200);
+    }
+
+    public function addEstatePropertyType(Request $request){
+        $validator = Validator::make($request->all(), [
+            "estate_id" => 'required|exists:estates,id',
+            "type" => "required|in:land,building,both",
+            "estate_price" => "sometimes",
+            "plot_size" => "sometimes",
+            "estate_price" => "sometimes",
+            "settings_and_excavation" => "sometimes",
+            "infrastructural_fee" => "sometimes"
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->messages()->first(),
+                'data' => null,
+            ], 412);
+        }
+
+        $p_type = EstatePropertyTypeDetails::updateOrcreate([
+            'estate_id' => $request->estate_id,
+            'type' => $request->type,
+            "plot_size" => $request->plot_size ?? null,
+            "building_type" => $request->building_type ?? null,
+            "estate_price" => $request->estate_price ?? null,
+            "settings_and_excavation" => $request->settings_and_excavation ?? null,
+            "infrastructural_fee" => $request->infrastructural_fee ?? null,
+            "company_id" => $this->sessionDetails('company_id') ?? null
+
+        ]);
+
+        return response()->json(['message' => 'Estate Property Type added Succesfully', 'data' => $p_type], 200);
+
     }
 
     /**
@@ -188,7 +224,8 @@ class EstateController extends Controller
                     "building_type" => $details['building_type'],
                     "estate_price" => $details['estate_price'],
                     "settings_and_excavation" => $details['settings_and_excavation'],
-                    "infrastructural_fee" => $details['infrastructural_fee']
+                    "infrastructural_fee" => $details['infrastructural_fee'],
+                    
                 ]);
             }
         }

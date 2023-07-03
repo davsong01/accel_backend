@@ -7,5 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class EstateSettings extends Model
 {
+    protected $guarded = [];
     use HasFactory;
 }
