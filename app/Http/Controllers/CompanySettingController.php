@@ -15,7 +15,9 @@ class CompanySettingController extends Controller
      */
     public function index()
     {
-        //
+        $companySetting = CompanySetting::where('company_id', $this->sessionDetails('company_id'))->first();
+        return response()->json(['message' => 'success', 'data' => $companySetting], 200);
+        
     }
 
     /**

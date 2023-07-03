@@ -8,15 +8,16 @@ use App\Http\Controllers\MenuController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\EstateController;
+use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\PlotSizeController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\BuildingTypeController;
-use App\Http\Controllers\CompanyDocumentController;
 use App\Http\Controllers\EstateSettingController;
 use App\Http\Controllers\CompanySettingController;
 use App\Http\Controllers\SpecialRequestController;
+use App\Http\Controllers\CompanyDocumentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -65,6 +66,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::post('update-estate-setting', [EstateSettingController::class, 'update']);
         Route::post('update-company-profile', [CompanySettingController::class, 'updateCompanyProfile']);
         Route::resource('company-document', CompanyDocumentController::class);
+        Route::get('company-settings', [CompanySettingController::class, 'index']);
 
         Route::resource('roles', RoleController::class);
         
