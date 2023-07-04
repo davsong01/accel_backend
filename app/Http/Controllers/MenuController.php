@@ -24,15 +24,6 @@ class MenuController extends Controller
     private $company_location;
 
     public function __construct(Request $request){
-        // $this->individual_permissions = $request->session('individual_permissions');
-        // $this->admin_id = Session::get('admin_id');
-        // $this->admin_roles = Session::get('admin_roles');
-        // $this->customer_id = Session::get('customer_id');
-        // $this->customer_roles = Session::get('customer_roles');
-        // $this->company_id = Session::get('company_id');
-        // $this->company_name = Session::get('company_name');
-        // $this->company_url = Session::get('company_url');
-        // $this->company_location = Session::get('company_location');
     }
     /**
      * Display a listing of the resource.
@@ -77,7 +68,7 @@ class MenuController extends Controller
         $links = [];
         
         if (Session::has('admin_id')) {
-            $getChildren = RolePermission::where(['status' => 'active', 'is_menu' => 'yes', 'parent' => $linkid, 'type' => 'admin'])->orderBy('order', 'ASC')->get();
+            $getChildren = RolePermission::where(['status' => 'active', 'is_menu' => 'yes', 'parent' => $linkid, 'type' => 'admin', 'company_id'=>$this->sessionDetails('company_id')])->orderBy('order', 'ASC')->get();
             
             $getChildren = $getChildren->filter(function ($query) use ($user_role_ids, $individual_permissions) {
                 $query->role_ids = (isset($query->role_ids) && !empty($query->role_ids)) ? explode(',', $query->role_ids) : [];
@@ -144,7 +135,7 @@ class MenuController extends Controller
         $admin_roles = Session::get('admin_roles');
 
         if(Session::has('admin_id')){
-            $links = RolePermission::where(['status' => 'active', 'is_menu' => 'yes', 'parent' => NULL, 'type' => 'admin'])->orderBy('order', 'ASC')->get();
+            $links = RolePermission::where(['status' => 'active', 'is_menu' => 'yes', 'parent' => NULL, 'type' => 'admin', 'company_id' => $this->sessionDetails('company_id')])->orderBy('order', 'ASC')->get();
             $links = $links->filter(function ($query) use ($admin_roles, $individual_permissions) {
                 $query->role_ids = (isset($query->role_ids) && !empty($query->role_ids)) ? explode(',', $query->role_ids) : [];
                 

@@ -77,7 +77,9 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('admin-roles/{admin_id}', [AdminController::class, 'getSingleAdminRoles']);
 
         Route::resource('special-request', SpecialRequestController::class);
+        Route::get('get-countries-currencies/{country_id?}', [CompanySettingController::class, 'countryAnCurrencies']);
 
+        
 
     });
 });

@@ -14,7 +14,9 @@ return new class extends Migration
         Schema::create('roles', function (Blueprint $table) {
             $table->id();
             $table->string('name')->nullable();
+            $table->text('description')->nullable();
             $table->enum('type', ['admin', 'customer']);
+            $table->integer('company_id')->nullable();
 
             $table->timestamps();
         });
