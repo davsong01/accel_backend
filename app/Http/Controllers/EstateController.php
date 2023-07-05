@@ -52,6 +52,16 @@ class EstateController extends Controller
         
     }
 
+    public function getPropertyCount(){
+        $data = [
+            'estate_count' => Estate::where('company_id',$this->sessionDetails('company_id'))->count(),
+            'building_count' => EstatePropertyTypeDetails::where('company_id', $this->sessionDetails('company_id'))->where('type', 'building')->count(),
+            'land_count' => EstatePropertyTypeDetails::where('company_id',$this->sessionDetails('company_id'))->where('type','land')->count(),
+        ];
+        
+        return response()->json(['message'=>'success', 'data'=>$data]);
+    }
+
     /**
      * Store a newly created resource in storage.
      */

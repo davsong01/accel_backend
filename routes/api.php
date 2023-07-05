@@ -57,7 +57,9 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('sample-bulk-estate-import', [EstateController::class, 'sampleBulkEstate']);
         Route::post('import-bulk-estate', [EstateController::class, 'importBulkEstates']);
         Route::get('change-estate-status/{id}', [EstateController::class, 'changeEstateStatus']);
-        Route::get('estate-count/{estate_id}/{search?}', [EstateController::class, 'filterPropertyCount']);
+        // Route::get('estate-count/{estate_id}/{search?}', [EstateController::class, 'filterPropertyCount']);
+        Route::get('property_count', [EstateController::class, 'getPropertyCount']);
+        
         Route::post('add-estate-property-type', [EstateController::class, 'addEstatePropertyType']);
         Route::post('update-estate-property-type/{id}', [EstateController::class, 'updateEstatePropertyType']);
         Route::get('change-estate-property-type-status/{id}', [EstateController::class, 'changeEstatePropertyTypeStatus']);
