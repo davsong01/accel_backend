@@ -36,14 +36,14 @@ class EstateController extends Controller
     }
     
     public function filterPropertyCount($estate, $query=null){
-        $property_count = Property::where('estate_id', $estate);
+        $property_count = EstatePropertyTypeDetails::where('estate_id', $estate);
 
         if($query == 'land'){
-            $estates = $property_count->where('property_type','land');
+            $estates = $property_count->where('type','land');
         }
 
-        if ($query == 'land') {
-            $estates = $property_count->where('property_type','house');
+        if ($query == 'building') {
+            $estates = $property_count->where('type','building');
         }
 
         $property_count = $property_count->count();
