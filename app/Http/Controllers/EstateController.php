@@ -17,12 +17,47 @@ class EstateController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $estates = Estate::with(['location:id,name','city:id,name', 'estate_property_type'])
         ->where('company_id', $this->sessionDetails('company_id'))
-        // ->where('branch_id', auth()->user()->admin->branch_id)
         ->orderBy('created_at', 'DESC')->paginate(20);
+
+        return response()->json(['message' => 'success', 'data' => $estates], 200);
+    }
+
+
+    public function filterEstates(Request $request)
+    {
+        $estates = Estate::with(['location:id,name', 'city:id,name', 'estate_property_type'])
+        ->where('company_id', $this->sessionDetails('company_id'));
+
+        if ($request->has('name') && !is_null($request->name)) {
+            $estates = $estates->where('name', 'LIKE', "%{$request->name}%");
+        }
+
+        if ($request->has('status') && !is_null($request->status)) {
+            $estates = $estates->where('status', $request->status);
+        }
+
+        if ($request->has('city') && !is_null($request->city)) {
+            $estates = $estates->where('city_id', $request->city);
+        }
+
+        if ($request->has('location') && !is_null($request->location)) {
+            $estates = $estates->where('location_id', $request->location);
+        }
+
+        if ($request->has('property_type') && !is_null($request->property_type)) {
+            $estates = $estates->where('property_type', $request->property_type);
+        }
+
+        if ($request->has('project_supervisor') && !is_null($request->project_supervisor)) {
+            $estates = $estates->where('project_supervisor', $request->project_supervisor);
+        }
+
+        // dd($estates->get(), $request->status);
+        $estates = $estates->orderBy('created_at', 'DESC')->paginate(20);
 
         return response()->json(['message' => 'success', 'data' => $estates], 200);
     }

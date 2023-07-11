@@ -9,4 +9,8 @@ class PlotSize extends Model
 {
     protected $fillable = ['size', 'company_id'];
     use HasFactory;
+
+    public function estate(){
+        return $this->belongsTo(Estate::class);
+    }
 }
