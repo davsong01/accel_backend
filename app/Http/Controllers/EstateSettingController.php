@@ -16,6 +16,7 @@ class EstateSettingController extends Controller
         $validator = Validator::make($request->all(), [
             "form_payment_for_land" => 'sometimes',
             "form_payment_for_building" => "sometimes",
+            "plot_size_unit" => "sometimes",
         ]);
 
         if ($validator->fails()) {
@@ -33,6 +34,10 @@ class EstateSettingController extends Controller
 
         if ($request->has('form_payment_for_building') && !is_null($request->form_payment_for_building)) {
             $data['form_payment_for_building'] = $request->form_payment_for_building;
+        }
+
+        if ($request->has('plot_size_unit') && !is_null($request->plot_size_unit)) {
+            $data['plot_size_unit'] = $request->plot_size_unit;
         }
 
         $data['company_id'] = $this->sessionDetails('company_id');
