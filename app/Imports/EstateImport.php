@@ -33,7 +33,7 @@ class EstateImport implements ToCollection, WithHeadingRow
                     'location' => 'required|exists:locations,name',
                     'description' => 'nullable',
                     'project_supervisor_staff_id' => 'required|exists:users,staff_id',
-                    'bypass_approval' => 'required|in:0,1',
+                    // 'bypass_approval' => 'required|in:0,1',
                     'property_type' => 'required|in:land,building,both'
                 ],
                 [
@@ -41,7 +41,7 @@ class EstateImport implements ToCollection, WithHeadingRow
                     'city.required' => 'Undefined city in one or more rows, please check and try again',
                     'location.required' => 'Undefined location in one or more rows, please check and try again',
                     'project_supervisor_staff_id.required' => 'Project Supervisor staff Id is invalid in one or more rows',
-                    'bypass_approval.required' => 'Bypass Approval is not defined in one or more rows',
+                    // 'bypass_approval.required' => 'Bypass Approval is not defined in one or more rows',
                     'property_type.required' => 'Property Typel is not defined in one or more rows'
                 ]
             )->validate();
@@ -55,7 +55,7 @@ class EstateImport implements ToCollection, WithHeadingRow
                 'city_id' => $city_id,
                 'location_id' => $location_id,
                 'project_supervisor' => $project_supervisor,
-                'bypass_approval' => $row['bypass_approval'],
+                // 'bypass_approval' => $row['bypass_approval'],
                 'description' => $row['description'],
                 'property_type' => $row['property_type'],
                 'company_id' =>  $company_id
