@@ -13,6 +13,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\PlotSizeController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\BuildingTypeController;
 use App\Http\Controllers\EstateSettingController;
 use App\Http\Controllers\CompanySettingController;
@@ -84,6 +85,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::resource('special-request', SpecialRequestController::class);
         Route::get('get-countries-currencies/{country_id?}', [CompanySettingController::class, 'countryAnCurrencies']);
 
+        Route::resource('department', DepartmentController::class);
         
 
     });
