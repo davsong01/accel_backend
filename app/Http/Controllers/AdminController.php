@@ -19,8 +19,8 @@ class AdminController extends Controller
             ->where('admins.company_id', $this->sessionDetails('company_id'))
             ->join("users", "admins.user_id", "=", "users.id")->where(['users.status'=>'active', 'type'=>'admin'])
             ->select("admins.id AS admin_id", "users.id As user_id","users.status", "admins.created_at", "users.first_name", "users.last_name", "users.email", "users.staff_id", "users.type", "users.company_id")
-            ->orderBy("admins.created_at", "desc")
-            // ->groupBy("admins.id")
+            ->orderBy("admin_id", "desc")
+            ->groupBy("admins.id")
             ->get();
        
         return response()->json(['message' => 'success', 'data' => $admins], 200);
