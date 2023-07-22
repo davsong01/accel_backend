@@ -54,37 +54,35 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::resource('building-type', BuildingTypeController::class);
         Route::get('sample-bulk-plotsizes-import', [PlotSizeController::class, 'sampleBulkPlotSize']);
         Route::post('import-bulk-plotsizes', [PlotSizeController::class,'importBulkPlotSize']);
+
         Route::resource('estate', EstateController::class);
         Route::get('filter-estates', [EstateController::class, 'filterEstates']);
-
-        
         Route::get('sample-bulk-estate-import', [EstateController::class, 'sampleBulkEstate']);
         Route::post('import-bulk-estate', [EstateController::class, 'importBulkEstates']);
         Route::get('change-estate-status/{id}', [EstateController::class, 'changeEstateStatus']);
         // Route::get('estate-count/{estate_id}/{search?}', [EstateController::class, 'filterPropertyCount']);
         Route::get('property_count', [EstateController::class, 'getPropertyCount']);
-        
         Route::post('add-estate-property-type', [EstateController::class, 'addEstatePropertyType']);
         Route::post('update-estate-property-type/{id}', [EstateController::class, 'updateEstatePropertyType']);
         Route::get('change-estate-property-type-status/{id}', [EstateController::class, 'changeEstatePropertyTypeStatus']);
         Route::get('delete-estate-property-type/{id}', [EstateController::class, 'deleteEstatePropertyType']);
-
         Route::post('update-estate-setting', [EstateSettingController::class, 'update']);
+
         Route::post('update-company-profile', [CompanySettingController::class, 'updateCompanyProfile']);
         Route::resource('company-document', CompanyDocumentController::class);
         Route::get('company-settings', [CompanySettingController::class, 'index']);
+        Route::get('get-countries-currencies/{country_id?}', [CompanySettingController::class, 'countryAnCurrencies']);
 
         Route::resource('roles', RoleController::class);
         
         Route::get('get-all-admins', [AdminController::class, 'getAllAdmins']);
+        Route::post('admin/store', [AdminController::class, 'storeAdmin']);
         Route::get('get-active-admins', [AdminController::class, 'getActiveAdmins']);
         Route::get('get-active-admins-in-role/{id}', [AdminController::class, 'getActiveAdminsInRole']);
         Route::post('assign-role-to-admin', [AdminController::class, 'assignRoleToAdmin']);
         Route::get('admin-roles/{admin_id}', [AdminController::class, 'getSingleAdminRoles']);
 
         Route::resource('special-request', SpecialRequestController::class);
-        Route::get('get-countries-currencies/{country_id?}', [CompanySettingController::class, 'countryAnCurrencies']);
-
         Route::resource('department', DepartmentController::class);
         
 

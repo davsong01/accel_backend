@@ -27,12 +27,26 @@ class AdminController extends Controller
         
     }
 
-    public function getAllAdmins(){
+    public function getAllAdmins(Request $request){
+
         $admins = Admin::where(['admins.company_id' => $this->sessionDetails('company_id')])
-            ->join("users", "admins.user_id", "=", "users.id")->where(['type' => 'admin'])
-            ->select("admins.id AS admin_id", "users.id As user_id", "users.status", "admins.created_at", "users.first_name", "users.last_name", "users.email", "users.staff_id", "users.type", "users.company_id")
-            ->orderBy("admins.created_at", "desc")
-            ->get();
+            ->join("users", "admins.user_id", "=", "users.id")
+            ->where(['type' => 'admin'])
+            ->select("admins.id AS admin_id", "users.id As user_id", "users.status", "admins.created_at", "users.first_name", "users.last_name", "users.email", "users.staff_id", "users.type", "users.company_id");
+
+
+
+        if ($request->has('name') && !is_null($request->status)) {
+            $admins = $admins->where('users.first_name', 'LIKE', "%{$request->name}%")
+            ->orWhere('users.last_name', 'LIKE', "%{$request->name}%");
+        }
+
+        if ($request->has('status') && !is_null($request->status)) {
+            $admins = $admins->where('users.status', $request->status);
+        }
+
+        $admins = $admins->orderBy("admins.created_at", "desc")->get();
+
         return response()->json(['message' => 'success', 'data' => $admins], 200);
     }
 
@@ -87,6 +101,20 @@ class AdminController extends Controller
 
         return response()->json(['message' => 'successfull', 'data' => $assign], 200);
 
+    }
+
+    public function storeAdmin(Request $request){
+        $validator = Validator::make($request->all(), [
+            'role_id' => 'required|exists:roles,id',
+            'admin_id' => 'required|exists:admins,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->messages()->first(),
+                'data' => null,
+            ], 422);
+        }
     }
 
     public function getSingleAdminRoles($admin_id){

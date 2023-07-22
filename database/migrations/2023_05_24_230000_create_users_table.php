@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('first_name')->nullable();
+            $table->string('middle_name')->nullable();
             $table->string('last_name')->nullable();
             $table->string('user_permissions')->nullable();
             $table->integer('company_id')->nullable();
@@ -23,7 +24,11 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->enum('status', ['active', 'inactive']);
             $table->enum('type', ['admin', 'customer']);
-            $table->string('password');
+            $table->string('password')->nullable();
+            $table->text('contact_information')->nullable();
+            $table->text('next_of_kin')->nullable();
+            $table->text('job_information')->nullable();
+
             $table->rememberToken();
             $table->timestamps();
 
