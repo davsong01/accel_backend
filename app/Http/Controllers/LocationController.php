@@ -15,7 +15,7 @@ class LocationController extends Controller
      */
     public function index()
     {
-        $location = Location::where('company_id', $this->sessionDetails('company_id'))->get();
+        $location = Location::with('city')->where('company_id', $this->sessionDetails('company_id'))->get();
         return response()->json(['message' => 'success', 'data' => $location], 200);
     }
 
