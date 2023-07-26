@@ -8,6 +8,7 @@ use Illuminate\Http\Response;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Validator;
 
+
 class BuildingTypeController extends Controller
 {
     /**
@@ -15,7 +16,7 @@ class BuildingTypeController extends Controller
      */
     public function index()
     {
-        $building_types = BuildingType::where('company_id', $this->sessionDetails('company_id'))->get();
+        $building_types = BuildingType::where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'desc')->get();
         return response()->json(['message' => 'success', 'data' => $building_types], 200);
     }
 

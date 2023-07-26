@@ -49,7 +49,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::resource('city', CityController::class);
         Route::resource('location', LocationController::class);
         Route::get('city-locations/{city_id}', [LocationController::class, 'cityLocations'])->name('dashboard');
-
+        
         Route::resource('plotsize', PlotSizeController::class);
         Route::resource('building-type', BuildingTypeController::class);
         Route::get('sample-bulk-plotsizes-import', [PlotSizeController::class, 'sampleBulkPlotSize']);

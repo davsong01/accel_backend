@@ -15,7 +15,7 @@ class CityController extends Controller
      */
     public function index()
     {
-        $cities = City::where('company_id', $this->sessionDetails('company_id'))->get();
+        $cities = City::where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'desc')->get();
         return response()->json(['message' => 'success', 'data' => $cities],200);
     }
 

@@ -18,7 +18,7 @@ class PlotSizeController extends Controller
      */
     public function index()
     {
-        $plot = PlotSize::where('company_id', $this->sessionDetails('company_id'))->get();
+        $plot = PlotSize::where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at','desc')->get();
        
         return response()->json(['message' => 'success', 'data' => $plot], 200);
     }
