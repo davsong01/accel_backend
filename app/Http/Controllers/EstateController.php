@@ -19,8 +19,8 @@ class EstateController extends Controller
      */
     public function index(Request $request)
     {
-        $estates = Estate::with(['location:id,name','city:id,name', 'estate_property_type'])
-        ->where('company_id', $this->sessionDetails('company_id'));
+        $estates = Estate::with(['location:id,name', 'city:id,name', 'estate_property_type'])
+            ->where('company_id', $this->sessionDetails('company_id'));
 
         if ($request->has('name') && !is_null($request->name)) {
             $estates = $estates->where('name', 'LIKE', "%{$request->name}%");
@@ -56,7 +56,7 @@ class EstateController extends Controller
         return response()->json(['error' => 'Deprecated', 'data' => ''], 404);
 
         $estates = Estate::with(['location:id,name', 'city:id,name', 'estate_property_type'])
-        ->where('company_id', $this->sessionDetails('company_id'));
+            ->where('company_id', $this->sessionDetails('company_id'));
 
         if ($request->has('name') && !is_null($request->name)) {
             $estates = $estates->where('name', 'LIKE', "%{$request->name}%");
@@ -93,34 +93,34 @@ class EstateController extends Controller
      */
     public function create()
     {
-        
     }
-    
-    public function filterPropertyCount($estate, $query=null){
+
+    public function filterPropertyCount($estate, $query = null)
+    {
         $property_count = EstatePropertyTypeDetails::where('estate_id', $estate);
 
-        if($query == 'land'){
-            $estates = $property_count->where('type','land');
+        if ($query == 'land') {
+            $estates = $property_count->where('type', 'land');
         }
 
         if ($query == 'building') {
-            $estates = $property_count->where('type','building');
+            $estates = $property_count->where('type', 'building');
         }
 
         $property_count = $property_count->count();
-    
+
         return response()->json(['message' => 'success', 'data' => $property_count], 200);
-        
     }
 
-    public function getPropertyCount(){
+    public function getPropertyCount()
+    {
         $data = [
-            'estate_count' => Estate::where('company_id',$this->sessionDetails('company_id'))->count(),
+            'estate_count' => Estate::where('company_id', $this->sessionDetails('company_id'))->count(),
             'building_count' => EstatePropertyTypeDetails::where('company_id', $this->sessionDetails('company_id'))->where('type', 'building')->count(),
-            'land_count' => EstatePropertyTypeDetails::where('company_id',$this->sessionDetails('company_id'))->where('type','land')->count(),
+            'land_count' => EstatePropertyTypeDetails::where('company_id', $this->sessionDetails('company_id'))->where('type', 'land')->count(),
         ];
-        
-        return response()->json(['message'=>'success', 'data'=>$data]);
+
+        return response()->json(['message' => 'success', 'data' => $data]);
     }
 
     /**
@@ -135,14 +135,14 @@ class EstateController extends Controller
             'property_type' => 'required|in:land,building,both',
             'project_supervisor' => 'sometimes|exists:admins,id',
         ]);
-        
+
         if ($validator->fails()) {
             return response()->json([
                 'error' => $validator->messages()->first(),
                 'data' => null,
             ], 412);
         }
-        
+
         $estate = Estate::updateOrcreate([
             'name' => $request->name,
             'city_id' => $request->city,
@@ -156,8 +156,8 @@ class EstateController extends Controller
         ]);
 
         // Create Property Type Details
-        if($request->has('building_details') && !empty($request->building_details)){
-            foreach($request->building_details as $details){
+        if ($request->has('building_details') && !empty($request->building_details)) {
+            foreach ($request->building_details as $details) {
                 EstatePropertyTypeDetails::updateOrcreate([
                     'estate_id' => $estate->id,
                     'type' => 'building',
@@ -188,7 +188,8 @@ class EstateController extends Controller
         return response()->json(['message' => 'Created successfully', 'data' => $estate], 200);
     }
 
-    public function addEstatePropertyType(Request $request){
+    public function addEstatePropertyType(Request $request)
+    {
         $validator = Validator::make($request->all(), [
             "estate_id" => 'required|exists:estates,id',
             "type" => "required|in:land,building,both",
@@ -218,7 +219,6 @@ class EstateController extends Controller
         ]);
 
         return response()->json(['message' => 'Estate Property Type added Succesfully', 'data' => $p_type], 200);
-
     }
 
     /**
@@ -226,9 +226,9 @@ class EstateController extends Controller
      */
     public function show(Estate $estate)
     {
-        $estate = $estate->load('city', 'location','estate_property_type');
-        $estate->project_supervisor_name = ($estate->admin->user->first_name ?? '') .' '. ($estate->admin->user->last_name ?? '');
-        
+        $estate = $estate->load('city', 'location', 'estate_property_type');
+        $estate->project_supervisor_name = ($estate->admin->user->first_name ?? '') . ' ' . ($estate->admin->user->last_name ?? '');
+
         return response()->json(['message' => 'success', 'data' => $estate], 200);
     }
 
@@ -293,11 +293,11 @@ class EstateController extends Controller
                     "estate_price" => $details['estate_price'],
                     "settings_and_excavation" => $details['settings_and_excavation'],
                     "infrastructural_fee" => $details['infrastructural_fee'],
-                    
+
                 ]);
             }
         }
-        return response()->json(['message' => 'Update Successful', 'data' => $estate], 200);
+        return response()->json(['message' => 'Updated Successfully.', 'data' => $estate], 200);
     }
 
     /**
@@ -306,10 +306,11 @@ class EstateController extends Controller
     public function destroy(Estate $estate)
     {
         $estate->delete();
-        return response()->json(['message' => 'Delete Successful', 'data' => null], 200);
+        return response()->json(['message' => 'Deleted Successfully.', 'data' => null], 200);
     }
 
-    public function updateEstatePropertyType(Request $request, $id){
+    public function updateEstatePropertyType(Request $request, $id)
+    {
         $property_type = EstatePropertyTypeDetails::find($id);
 
         $property_type->update([
@@ -320,22 +321,23 @@ class EstateController extends Controller
             "infrastructural_fee" => $request->infrastructural_fee
         ]);
 
-        return response()->json(['message' => 'Update Successful', 'data' => $property_type], 200);
+        return response()->json(['message' => 'Updated Successfully.', 'data' => $property_type], 200);
     }
 
     public function changeEstatePropertyTypeStatus(Request $request, $id)
     {
         $property_type = EstatePropertyTypeDetails::find($id);
-        if($property_type->status == 1){
-            $property_type->update(['status'=>0]);
-        }else{
+        if ($property_type->status == 1) {
+            $property_type->update(['status' => 0]);
+        } else {
             $property_type->update(['status' => 1]);
         }
 
-        return response()->json(['message' => 'Update Successful', 'data' => $property_type], 200);
+        return response()->json(['message' => 'Updated Successfully.', 'data' => $property_type], 200);
     }
 
-    public function changeEstateStatus($id){
+    public function changeEstateStatus($id)
+    {
         $estate = Estate::find($id);
         if ($estate->status == 1) {
             $estate->update(['status' => 0]);
@@ -343,15 +345,15 @@ class EstateController extends Controller
             $estate->update(['status' => 1]);
         }
 
-        return response()->json(['message' => 'Update Successful', 'data' => $estate], 200);
+        return response()->json(['message' => 'Updated Successfully.', 'data' => $estate], 200);
     }
 
     public function deleteEstatePropertyType($id)
     {
         $estate = EstatePropertyTypeDetails::find($id);
         $estate->delete();
-        
-        return response()->json(['message' => 'Delete Successful', 'data' => null], 200);
+
+        return response()->json(['message' => 'Deleted Successfully.', 'data' => null], 200);
     }
 
     public function importBulkEstates(Request $request)
@@ -368,11 +370,10 @@ class EstateController extends Controller
             //code...
             Excel::import(new EstateImport(), request()->file('file'));
         } catch (\Throwable $th) {
-            return response()->json(['errors'=>$th->getMessage()],422);
+            return response()->json(['errors' => $th->getMessage()], 422);
         }
 
         return response()->json(['message' => 'Estates Added Succesfully', 'data' => null], 200);
-
     }
 
     public function sampleBulkEstate()
@@ -380,5 +381,4 @@ class EstateController extends Controller
         $realpath = base_path() . '/sampleimports/sample_estate.xlsx';
         return response()->download($realpath);
     }
-
 }

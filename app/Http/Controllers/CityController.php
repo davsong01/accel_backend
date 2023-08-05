@@ -16,16 +16,15 @@ class CityController extends Controller
     public function index()
     {
         $cities = City::where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'desc')->get();
-        return response()->json(['message' => 'success', 'data' => $cities],200);
+        return response()->json(['message' => 'success', 'data' => $cities], 200);
     }
 
-    
+
     /**
      * Show the form for creating a new resource.
      */
     public function create()
     {
-        
     }
 
     /**
@@ -36,7 +35,7 @@ class CityController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required',
         ]);
-        
+
         if ($validator->fails()) {
             return response()->json([
                 'error' => $validator->messages()->first(),
@@ -65,7 +64,6 @@ class CityController extends Controller
      */
     public function edit(Request $request, City $city)
     {
-        
     }
 
     /**
@@ -89,7 +87,7 @@ class CityController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
-        return response()->json(['message' => 'Update Successful', 'data' => $city], 200);
+        return response()->json(['message' => 'Updated Successfully.', 'data' => $city], 200);
     }
 
     /**
@@ -98,6 +96,6 @@ class CityController extends Controller
     public function destroy(City $city)
     {
         $city->delete();
-        return response()->json(['message' => 'Delete Successful', 'data' => null], 200);
+        return response()->json(['message' => 'Deleted Successfully.', 'data' => null], 200);
     }
 }

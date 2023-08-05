@@ -54,7 +54,6 @@ class DepartmentController extends Controller
         ]);
 
         return response()->json(['message' => 'Created successfully', 'data' => $department], 200);
-        
     }
 
     /**
@@ -107,6 +106,6 @@ class DepartmentController extends Controller
     public function destroy(Department $department)
     {
         $department->delete();
-        return response()->json(['message' => 'Delete Successful', 'data' => null], 200);
+        return response()->json(['message' => 'Deleted Successfully.', 'data' => null], 200);
     }
 }

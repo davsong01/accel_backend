@@ -19,15 +19,15 @@ class LocationController extends Controller
         return response()->json(['message' => 'success', 'data' => $location], 200);
     }
 
-    public function cityLocations($city_id){
+    public function cityLocations($city_id)
+    {
         $locations = Location::where(['company_id' => $this->sessionDetails('company_id'), 'city_id' => $city_id])->get();
-       
-        if(($locations->count() <= 0)){
+
+        if (($locations->count() <= 0)) {
             return response()->json(['message' => 'No records found', 'data' => null], 200);
         }
-        
-        return response()->json(['message' => 'success', 'data' => $locations], 200);
 
+        return response()->json(['message' => 'success', 'data' => $locations], 200);
     }
     /**
      * Show the form for creating a new resource.
@@ -102,7 +102,7 @@ class LocationController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
-        return response()->json(['message' => 'Update Successful', 'data' => $location], 200);
+        return response()->json(['message' => 'Updated Successfully.', 'data' => $location], 200);
     }
 
     /**
@@ -111,6 +111,6 @@ class LocationController extends Controller
     public function destroy(Location $location)
     {
         $location->delete();
-        return response()->json(['message' => 'Delete Successful', 'data' => null], 200);
+        return response()->json(['message' => 'Deleted Successfully.', 'data' => null], 200);
     }
 }

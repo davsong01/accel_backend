@@ -89,7 +89,7 @@ class BuildingTypeController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
-        return response()->json(['message' => 'Update Successful', 'data' => $buildingType], 200);
+        return response()->json(['message' => 'Updated Successfully.', 'data' => $buildingType], 200);
     }
 
     /**
@@ -98,6 +98,6 @@ class BuildingTypeController extends Controller
     public function destroy(BuildingType $buildingType)
     {
         $buildingType->delete();
-        return response()->json(['message' => 'Delete Successful', 'data' => null], 200);
+        return response()->json(['message' => 'Deleted Successfully.', 'data' => null], 200);
     }
 }

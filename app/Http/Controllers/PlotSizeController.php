@@ -18,8 +18,8 @@ class PlotSizeController extends Controller
      */
     public function index()
     {
-        $plot = PlotSize::where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at','desc')->get();
-       
+        $plot = PlotSize::where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'desc')->get();
+
         return response()->json(['message' => 'success', 'data' => $plot], 200);
     }
 
@@ -39,7 +39,7 @@ class PlotSizeController extends Controller
         $validator = Validator::make($request->all(), [
             'size' => 'required',
         ]);
-        
+
         if ($validator->fails()) {
             return response()->json([
                 'error' => $validator->messages()->first(),
@@ -66,11 +66,12 @@ class PlotSizeController extends Controller
         ]);
 
         Excel::import(new PlotSizeImport(), request()->file('file'));
-        
+
         return response()->json(['message' => 'Plot Sizes Added Succesfully', 'data' => null], 200);
     }
 
-    public function sampleBulkPlotSize(){
+    public function sampleBulkPlotSize()
+    {
         $realpath = base_path() . '/sampleimports/plotsize.xlsx';
         return response()->download($realpath);
     }
@@ -112,7 +113,7 @@ class PlotSizeController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
-        return response()->json(['message' => 'Update Successful', 'data' => $plotsize], 200);
+        return response()->json(['message' => 'Updated Successfully.', 'data' => $plotsize], 200);
     }
 
     /**
@@ -121,6 +122,6 @@ class PlotSizeController extends Controller
     public function destroy(PlotSize $plotsize)
     {
         $plotsize->delete();
-        return response()->json(['message' => 'Delete Successful', 'data' => null], 200);
+        return response()->json(['message' => 'Deleted Successfully.', 'data' => null], 200);
     }
 }
