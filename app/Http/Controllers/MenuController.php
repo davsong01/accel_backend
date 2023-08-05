@@ -248,7 +248,7 @@ class MenuController extends Controller
             $this->logMessages('email', $user->email, $message, $data['status'], $subject, auth()->user()->admin->id);
         }
        
-        return back()->with('message', 'Admin Added successfully');
+        return back()->with('message', 'Created successfully');
 
     }
 

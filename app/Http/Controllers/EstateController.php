@@ -185,7 +185,7 @@ class EstateController extends Controller
             }
         }
 
-        return response()->json(['message' => 'Estate Added Succesfully', 'data' => $estate], 200);
+        return response()->json(['message' => 'Created successfully', 'data' => $estate], 200);
     }
 
     public function addEstatePropertyType(Request $request){

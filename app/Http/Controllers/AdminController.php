@@ -99,7 +99,7 @@ class AdminController extends Controller
             'branch_id' => $this->sessionDetails('branch_id'),
         ]);
 
-        return response()->json(['message' => 'successfull', 'data' => $assign], 200);
+        return response()->json(['message' => 'Created successfully', 'data' => $assign], 200);
 
     }
 

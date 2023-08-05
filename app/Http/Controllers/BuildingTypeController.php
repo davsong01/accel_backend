@@ -49,7 +49,7 @@ class BuildingTypeController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
-        return response()->json(['message' => 'Plot Size Added Succesfully', 'data' => $building_type], 200);
+        return response()->json(['message' => 'Created successfully', 'data' => $building_type], 200);
     }
 
     /**

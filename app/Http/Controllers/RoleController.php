@@ -56,7 +56,7 @@ class RoleController extends Controller
             'type' => $request->type,
         ]);
 
-        return response()->json(['message' => 'Role Added Succesfully', 'data' => $role], 200);
+        return response()->json(['message' => 'Created successfully', 'data' => $role], 200);
 
     }
 

@@ -60,7 +60,7 @@ class LocationController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
-        return response()->json(['message' => 'Location Added Succesfully', 'data' => $location], 200);
+        return response()->json(['message' => 'Created successfully', 'data' => $location], 200);
     }
 
     /**

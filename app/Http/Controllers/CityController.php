@@ -49,7 +49,7 @@ class CityController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
-        return response()->json(['message' => 'City Added Succesfully', 'data' => $city], 200);
+        return response()->json(['message' => 'Created successfully', 'data' => $city], 200);
     }
 
     /**

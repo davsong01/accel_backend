@@ -52,7 +52,7 @@ class PlotSizeController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
-        return response()->json(['message' => 'Plot Size Added Succesfully', 'data' => $plot], 200);
+        return response()->json(['message' => 'Created successfully', 'data' => $plot], 200);
     }
 
     public function importBulkPlotSize(Request $request)

@@ -53,7 +53,7 @@ class DepartmentController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
-        return response()->json(['message' => 'Department Added Succesfully', 'data' => $department], 200);
+        return response()->json(['message' => 'Created successfully', 'data' => $department], 200);
         
     }
 
