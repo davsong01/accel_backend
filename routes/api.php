@@ -54,6 +54,9 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         
         Route::resource('plotsize', PlotSizeController::class);
         Route::resource('building-type', BuildingTypeController::class);
+        Route::get('sample-bulk-building-type-import', [BuildingTypeController::class, 'sampleBulkBuildingType']);
+        Route::post('import-bulk-building-type', [BuildingTypeController::class, 'importBulkBuildingType']);
+
         Route::get('sample-bulk-plotsizes-import', [PlotSizeController::class, 'sampleBulkPlotSize']);
         Route::post('import-bulk-plotsizes', [PlotSizeController::class,'importBulkPlotSize']);
 

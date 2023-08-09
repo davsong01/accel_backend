@@ -3,19 +3,51 @@
 namespace App\Imports;
 
 use App\Models\BuildingType;
-use Maatwebsite\Excel\Concerns\ToModel;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Validator;
+use Maatwebsite\Excel\Concerns\ToCollection;
+use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
-class BuildingTypeImport implements ToModel
+class BuildingTypeImport implements ToCollection, WithHeadingRow
 {
+    private $session;
+
+    function __construct()
+    {
+        $this->session = app('App\Http\Controllers\Controller');
+    }
+
     /**
     * @param array $row
     *
     * @return \Illuminate\Database\Eloquent\Model|null
     */
-    public function model(array $row)
+    public function collection(Collection $rows)
     {
-        return new BuildingType([
-            //
-        ]);
+        $company_id = $this->session->sessionDetails('company_id');
+
+        foreach ($rows as $row) {
+            Validator::make(
+                $row->toArray(),
+                [
+                    'name' => 'required',
+                ],
+                [
+                    'name.required' => 'One or more rows do not have name, please check and try again',
+                ]
+            )->validate();
+
+            BuildingType::updateOrCreate([
+                'name' => $row['name'],
+                'company_id' => $company_id
+            ]);
+        }
+    }
+
+    public function headings(): array
+    {
+        return [
+            'name',
+        ];
     }
 }
