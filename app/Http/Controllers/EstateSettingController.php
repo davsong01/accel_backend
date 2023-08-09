@@ -40,6 +40,28 @@ class EstateSettingController extends Controller
             $data['plot_size_unit'] = $request->plot_size_unit;
         }
 
+        if ($request->has('special_request_status') && !is_null($request->special_request_status)) {
+            $validator = Validator::make($request->all(), [
+                "special_request_status" => 'required',
+                "expiry_date" => "sometimes",
+            ]);
+          
+            if ($validator->fails()) {
+                return response()->json([
+                    'error' => $validator->messages()->first(),
+                    'data' => null,
+                ], 412);
+            }
+
+            $c_setting = [
+                'special_request_status' => $request->special_request_status,
+                'expiry_date' => $request->expiry_date ?? null,
+            ];
+
+            $data['customer_settings'] = json_encode($c_setting); 
+            
+        }
+       
         $data['company_id'] = $this->sessionDetails('company_id');
         
         if(!$estateSettings){
@@ -49,6 +71,15 @@ class EstateSettingController extends Controller
         }
         
         return response()->json(['message' => 'Estate settings updated succesfully', 'data' => null], 200);
+    }
+
+    public function getEstateSettings(){
+        $estateSettings = EstateSettings::where('company_id', $this->sessionDetails('company_id'))->first();
+        $other = $estateSettings->customer_settings ? json_decode($estateSettings->customer_settings) : (object) [];
+        $estateSettings->special_request_status = $other->special_request_status ?? null;
+        $estateSettings->expiry_date = $other->expiry_date ?? null;
+        return response()->json(['message' => 'Retrieved succesfully', 'data' => $estateSettings], 200);
+
     }
 
 }

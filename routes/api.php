@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CityController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\RoleController;
+use App\Models\LeaveAndAbenceManagement;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\EstateController;
 use App\Http\Controllers\CompanyController;
@@ -19,6 +20,7 @@ use App\Http\Controllers\EstateSettingController;
 use App\Http\Controllers\CompanySettingController;
 use App\Http\Controllers\SpecialRequestController;
 use App\Http\Controllers\CompanyDocumentController;
+use App\Http\Controllers\LeaveAndAbenceManagementController;
 
 /*
 |--------------------------------------------------------------------------
@@ -67,6 +69,8 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('change-estate-property-type-status/{id}', [EstateController::class, 'changeEstatePropertyTypeStatus']);
         Route::get('delete-estate-property-type/{id}', [EstateController::class, 'deleteEstatePropertyType']);
         Route::post('update-estate-setting', [EstateSettingController::class, 'update']);
+        Route::get('get-estate-setting', [EstateSettingController::class, 'getEstateSettings']);
+        
 
         Route::post('update-company-profile', [CompanySettingController::class, 'updateCompanyProfile']);
         Route::resource('company-document', CompanyDocumentController::class);
@@ -84,7 +88,10 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
 
         Route::resource('special-request', SpecialRequestController::class);
         Route::resource('department', DepartmentController::class);
-        
 
+        Route::get('leave-and-absence/{id?}', [LeaveAndAbenceManagementController::class, 'index']);
+        Route::post('create-leave-and-absence', [LeaveAndAbenceManagementController::class, 'store']);
+        Route::get('approve-leave-and-absence/{id}', [LeaveAndAbenceManagementController::class, 'approveLeaveAndAbsence']);
+        Route::get('decline-leave-and-absence/{id}', [LeaveAndAbenceManagementController::class, 'declineLeaveAndAbsence']);
     });
 });

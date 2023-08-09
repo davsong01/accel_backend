@@ -25,20 +25,15 @@ class Estate extends Model
         return $this->belongsTo(City::class);
     }
 
-    public function admin(){
-        return $this->belongsTo(Admin::class, 'project_supervisor');
-    }
-
     public function estate_property_type(){
         return $this->hasMany(EstatePropertyTypeDetails::class);
     }
 
-    // public function adminUser(): HasOneThrough
-    // {
-    //     return $this->hasOneThrough(User::class, Admin::class, 'project_supervisor');
-    // }
-
-
+    public function admin()
+    {
+        return $this->belongsTo(Admin::class, 'project_supervisor');
+    }
+    
     protected function createdAt(): Attribute
     {
         return Attribute::make(
