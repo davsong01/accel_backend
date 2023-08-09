@@ -78,8 +78,8 @@ class EstateSettingController extends Controller
         $other = $estateSettings->customer_settings ? json_decode($estateSettings->customer_settings) : (object) [];
         $estateSettings->special_request_status = $other->special_request_status ?? null;
         $estateSettings->expiry_date = $other->expiry_date ?? null;
+        
         return response()->json(['message' => 'Retrieved succesfully', 'data' => $estateSettings], 200);
-
     }
 
 }
