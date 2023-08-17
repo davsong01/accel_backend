@@ -40,5 +40,4 @@ class Estate extends Model
             get: fn (string $value) => date("M jS, Y", strtotime($value)),
         );
     }
-
 }

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Department;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use App\Imports\DepartmentImport;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Validator;
 
@@ -16,7 +18,6 @@ class DepartmentController extends Controller
     public function index()
     {
         $departments = Department::where('company_id', $this->sessionDetails('company_id'))->get();
-
         return response()->json(['message' => 'success', 'data' => $departments], 200);
     }
 
@@ -52,7 +53,7 @@ class DepartmentController extends Controller
             'status' => $request->status,
             'company_id' => $this->sessionDetails('company_id'),
         ]);
-
+        
         return response()->json(['message' => 'Created successfully', 'data' => $department], 200);
     }
 
@@ -107,5 +108,26 @@ class DepartmentController extends Controller
     {
         $department->delete();
         return response()->json(['message' => 'Deleted Successfully.', 'data' => null], 200);
+    }
+
+    public function importBulkDepartment(Request $request)
+    {
+        $this->validate(request(), [
+            'file' => 'required|
+				mimetypes:xlsv,xlsx,xls,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,
+				application/excel,application/x-excel,application/x-msexcel,text/comma-seperated-values, text/csv'
+        ], [
+            'file.mimetypes' => 'The file must be a file of type: xlsx'
+        ]);
+
+        Excel::import(new DepartmentImport, request()->file('file'));
+
+        return response()->json(['message' => 'Department Imported Succesfully', 'data' => null], 200);
+    }
+
+    public function sampleBulkDepartment()
+    {
+        $realpath = base_path() . '/sampleimports/sampledepartment.xlsx';
+        return response()->download($realpath);
     }
 }

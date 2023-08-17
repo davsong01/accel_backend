@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\City;
+use App\Models\Estate;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Http\RedirectResponse;
@@ -95,6 +96,11 @@ class CityController extends Controller
      */
     public function destroy(City $city)
     {
+        $count = Estate::where(['city_id' => $city->id, 'company_id' => $city->company_id])->count();
+     
+        if ($count > 0) {
+            return response()->json(['message' => 'Unable to delete, resource in use', 'data' => null], 422);
+        }
         $city->delete();
         return response()->json(['message' => 'Deleted Successfully.', 'data' => null], 200);
     }

@@ -42,7 +42,7 @@ class OtherChecksMiddleware
 
             $allowed_roles = explode(",", $permission->role_ids);
             $check = !empty(array_intersect($allowed_roles, $user_role_ids));
-            if(!$check) return response()->json(['error' => 'You are not permitted to use this resource!', 'data' => null], 403);
+            if(!$check) return response()->json(['auth-error' => 'You are not permitted to use this resource!', 'data' => null], 403);
             
         }else{
             return $next($request);

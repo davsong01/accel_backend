@@ -3,24 +3,30 @@
 namespace App\Http\Controllers;
 
 use App\Models\Branch;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Validator;
 
 class BranchController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index(): Response
+    public function index()
     {
-        //
+        $branches = Branch::where('company_id', $this->sessionDetails('company_id'))->get();
+        if ($branches->count() > 0) {
+            return response()->json(['message' => 'Retrieved Successfully', 'data' => $branches], 200);
+        } else {
+            return response()->json(['message' => 'No records found', 'data' => null], 200);
+        }
     }
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create(): Response
+    public function create()
     {
         //
     }
@@ -28,15 +34,33 @@ class BranchController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'name' => 'required',
+            'location' => 'sometimes',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->messages()->first(),
+                'data' => null,
+            ], 412);
+        }
+
+        $branch = Branch::updateOrcreate([
+            'name' => $request->name,
+            'location' => $request->location,
+            'company_id' => $this->sessionDetails('company_id'),
+        ]);
+
+        return response()->json(['message' => 'Created successfully', 'data' => $branch], 200);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Branch $branch): Response
+    public function show(Branch $branch)
     {
         //
     }
@@ -44,7 +68,7 @@ class BranchController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Branch $branch): Response
+    public function edit(Branch $branch)
     {
         //
     }
@@ -52,16 +76,37 @@ class BranchController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Branch $branch): RedirectResponse
+    public function update(Request $request, Branch $branch)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'name' => 'required',
+            'location' => 'sometimes',
+            'status' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->messages()->first(),
+                'data' => null,
+            ], 422);
+        }
+
+        $branch->update([
+            'name' => $request->name,
+            'location' => $request->location,
+            'status' => $request->status,
+            'company_id' => $this->sessionDetails('company_id'),
+        ]);
+
+        return response()->json(['message' => 'Updated Successfully.', 'data' => $branch], 200);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Branch $branch): RedirectResponse
+    public function destroy(Branch $branch)
     {
-        //
+        $branch->delete();
+        return response()->json(['message' => 'Deleted Successfully.', 'data' => null], 200);
     }
 }

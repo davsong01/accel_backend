@@ -8,6 +8,7 @@ use Illuminate\Http\Response;
 use App\Imports\PlotSizeImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\RedirectResponse;
+use App\Models\EstatePropertyTypeDetails;
 use Illuminate\Support\Facades\Validator;
 
 
@@ -121,6 +122,10 @@ class PlotSizeController extends Controller
      */
     public function destroy(PlotSize $plotsize)
     {
+        $count = EstatePropertyTypeDetails::where(['plot_size'=>$plotsize->size, 'company_id'=> $plotsize->company_id])->count();
+        if($count > 0){
+            return response()->json(['message' => 'Unable to delete, resource in use', 'data' => null], 422);
+        }
         $plotsize->delete();
         return response()->json(['message' => 'Deleted Successfully.', 'data' => null], 200);
     }

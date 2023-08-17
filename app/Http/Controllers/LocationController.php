@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Estate;
 use App\Models\Location;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -110,6 +111,12 @@ class LocationController extends Controller
      */
     public function destroy(Location $location)
     {
+        $count = Estate::where(['city_id' => $location->id, 'company_id' => $location->company_id])->count();
+
+        if ($count > 0) {
+            return response()->json(['message' => 'Unable to delete, resource in use', 'data' => null], 422);
+        }
+        
         $location->delete();
         return response()->json(['message' => 'Deleted Successfully.', 'data' => null], 200);
     }

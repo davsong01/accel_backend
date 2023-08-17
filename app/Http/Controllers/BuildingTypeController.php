@@ -8,6 +8,7 @@ use Illuminate\Http\Response;
 use App\Imports\BuildingTypeImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\RedirectResponse;
+use App\Models\EstatePropertyTypeDetails;
 use Illuminate\Support\Facades\Validator;
 
 
@@ -121,6 +122,11 @@ class BuildingTypeController extends Controller
      */
     public function destroy(BuildingType $buildingType)
     {
+        $count = EstatePropertyTypeDetails::where(['building_type' => $buildingType->size, 'company_id' => $buildingType->company_id])->count();
+        if ($count > 0) {
+            return response()->json(['message' => 'Unable to delete, resource in use', 'data' => null], 422);
+        }
+       
         $buildingType->delete();
         return response()->json(['message' => 'Deleted Successfully.', 'data' => null], 200);
     }
