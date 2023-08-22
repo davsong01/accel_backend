@@ -17,8 +17,7 @@ return new class extends Migration
             $table->integer('branch_id');
             $table->integer('user_id');
             $table->integer('verified')->default(0);
-            $table->enum('type', ['lead', 'prospect','subscriber']);
-
+            
             $table->timestamps();
         });
     }

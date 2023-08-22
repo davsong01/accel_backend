@@ -51,6 +51,8 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
 
         // Admin Module Routes
         Route::resource('customers', CustomerController::class);
+        Route::get('customers-count', [CustomerController::class, 'CustomerCount']);
+        
         Route::resource('city', CityController::class);
         Route::resource('location', LocationController::class);
         Route::get('city-locations/{city_id}', [LocationController::class, 'cityLocations'])->name('dashboard');

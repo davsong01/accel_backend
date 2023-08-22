@@ -16,6 +16,8 @@ return new class extends Migration
             $table->string('first_name')->nullable();
             $table->string('middle_name')->nullable();
             $table->string('last_name')->nullable();
+            $table->string('phone_number')->nullable();
+            $table->string('residential_address')->nullable();
             $table->string('user_permissions')->nullable();
             $table->integer('company_id')->nullable();
             $table->string('email')->unique();
@@ -28,7 +30,7 @@ return new class extends Migration
             $table->text('contact_information')->nullable();
             $table->text('next_of_kin')->nullable();
             $table->text('job_information')->nullable();
-
+            
             $table->rememberToken();
             $table->timestamps();
 
