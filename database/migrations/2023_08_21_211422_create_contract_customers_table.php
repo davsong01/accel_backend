@@ -19,7 +19,6 @@ return new class extends Migration
             $table->integer('estate_id')->nullable();
             $table->string('plot_size')->nullable();
             $table->string('building_type')->nullable();
-            $table->integer('no_of_units')->nullable();
             $table->string('property_type')->nullable();
             $table->enum('status', ['lead', 'prospect', 'subscriber']);
             $table->integer('company_id')->nullable();

@@ -286,6 +286,22 @@ class MenuController extends Controller
         return back()->with('message', 'Update succesful');
     }
 
+    public function changeSpecialRequestStatus(){
+        $permission = RolePermission::where('slug', 'special-requests')->where('company_id', $this->sessionDetails('company_id'))->first();
+        if($permission){
+            if($permission->status == 'active'){
+                $permission->update(['status' => 'inactive']);
+            } else{
+                $permission->update(['status' => 'active']);
+            }
+        }else{
+            return response()->json(['error' => 'Resource not found', 'data' => null], 422);
+        }
+
+        return response()->json(['message' => 'Update successful', 'data' => null], 200);
+
+    }
+
     public function destroy($id)
     {
         

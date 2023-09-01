@@ -60,22 +60,16 @@ class CustomerController extends Controller
             'first_name' => 'required',
             'last_name' => 'required',
             'gender' => 'required|in:male,female',
-            // 'email' => [
-            //     'required', 'email', Rule::unique('users')->where(function ($query) {
-            //         $query->where('company_id', $this->sessionDetails('company_id'));
-            //     })
-            // ],
-            'email' => 'required',
+            'email' => [
+                'required', 'email', Rule::unique('users')->where(function ($query) {
+                    $query->where('company_id', $this->sessionDetails('company_id'));
+                })
+            ],
             'phone_number' => 'required',
             'city' => 'required|exists:cities,id,company_id,' . $this->sessionDetails('company_id'),
             'location' => 'required|exists:locations,id,company_id,' . $this->sessionDetails('company_id'),
             'estate' => 'required|exists:estates,id,company_id,' . $this->sessionDetails('company_id'),
             'residential_address' => 'required',
-            'property_type' => 'required|in:land,building,both',
-            'plot_size' => 'nullable',
-            'building_type' => 'nullable',
-            'no_of_units' => 'required',
-            'contract_type' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -88,7 +82,6 @@ class CustomerController extends Controller
         // Add User
         $user = User::updateOrCreate([
             'first_name' => $request->first_name,
-            // 'middle_name' => $request->middle_name,
             'email' => $request->email,
             'gender' => $request->gender,
             'last_name' => $request->last_name,
@@ -103,27 +96,15 @@ class CustomerController extends Controller
             'branch_id' => $this->sessionDetails('branch_id'),
         ]);
        
-        // Add Customer
-        $customer = Customer::updateOrCreate([
-            'company_id' => $this->sessionDetails('company_id'),
-            'branch_id' => $this->sessionDetails('branch_id'),
-            'user_id' => $user->id,
-        ]);
-
-        // Add contract
-        $contract = ContractCustomer::updateOrCreate([
-            'customer_id' => $customer->id,
-            'city_id' => $request->city,
-            'location_id' => $request->location,
-            'estate_id' => $request->estate,
-            'plot_size' => $request->plot_size,
-            'building_type' => $request->building_type,
-            'no_of_units' => $request->no_of_units,
-            'property_type' => $request->property_type,
-            'status' => $request->contract_type,
-            'company_id' => $this->sessionDetails('company_id'),
-
-        ]);
+        if($user){
+            // Add Customer
+            $customer = Customer::updateOrCreate([
+                'company_id' => $this->sessionDetails('company_id'),
+                'branch_id' => $this->sessionDetails('branch_id'),
+                'user_id' => $user->id,
+                'verified' => 1,
+            ]);
+        }
 
         return response()->json(['message' => 'success', 'data' => $user], 200);
         

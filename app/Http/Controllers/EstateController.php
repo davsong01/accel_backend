@@ -7,6 +7,7 @@ use App\Models\Property;
 use Illuminate\Http\Request;
 use App\Imports\EstateImport;
 use Illuminate\Http\Response;
+use App\Models\EstateSettings;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\RedirectResponse;
 use App\Models\EstatePropertyTypeDetails;
@@ -140,7 +141,7 @@ class EstateController extends Controller
             return response()->json([
                 'error' => $validator->messages()->first(),
                 'data' => null,
-            ], 412);
+            ], 422);
         }
 
         $estate = Estate::updateOrcreate([
@@ -346,6 +347,24 @@ class EstateController extends Controller
         }
 
         return response()->json(['message' => 'Updated Successfully.', 'data' => $estate], 200);
+    }
+
+    public function changeFormExpiry(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'form_expiry' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->messages()->first(),
+                'data' => null,
+            ], 412);
+        }
+   
+        $estateSettings = EstateSettings::where('company_id', $this->sessionDetails('company_id'))->update(['form_expiry_date' => $request->form_expiry]);
+        
+        return response()->json(['message' => 'Updated Successfully.', 'data' => null], 200);
     }
 
     public function deleteEstatePropertyType($id)

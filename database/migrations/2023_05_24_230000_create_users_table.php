@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('residential_address')->nullable();
             $table->string('user_permissions')->nullable();
             $table->integer('company_id')->nullable();
-            $table->string('email')->unique();
+            $table->string('email');
             $table->integer('staff_id')->unique();
             $table->integer('branch_id')->nullable();
             $table->timestamp('email_verified_at')->nullable();

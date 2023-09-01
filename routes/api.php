@@ -22,6 +22,7 @@ use App\Http\Controllers\EstateSettingController;
 use App\Http\Controllers\CompanySettingController;
 use App\Http\Controllers\SpecialRequestController;
 use App\Http\Controllers\CompanyDocumentController;
+use App\Http\Controllers\ContractCustomerController;
 use App\Http\Controllers\LeaveAndAbenceManagementController;
 use App\Http\Controllers\EstateConstructionSettingController;
 
@@ -109,5 +110,9 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::resource('jobrole', JobRoleController::class);
         Route::get('sample-bulk-jobrole-import', [JobRoleController::class, 'sampleBulkJobRole']);
         Route::post('import-bulk-jobrole', [JobRoleController::class, 'importBulkJobRole']);
+        
+        Route::post('form-expiry-status', [EstateController::class, 'changeFormExpiry']);
+        Route::get('change-special-request-status', [MenuController::class, 'changeSpecialRequestStatus']);
+        Route::post('add-new-contract', [ContractCustomerController::class, 'store']);
     });
 });
