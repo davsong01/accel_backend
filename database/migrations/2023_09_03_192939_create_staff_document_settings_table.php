@@ -11,12 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('staff_roles', function (Blueprint $table) {
+        Schema::create('staff_document_settings', function (Blueprint $table) {
             $table->id();
-            $table->integer('staff_id');
-            $table->integer('role_id');
-            $table->integer('company_id')->nullable();
-            $table->integer('branch_id')->nullable();
+            $table->string('name');
+            $table->string('description')->nullable();
+            $table->integer('required')->nullable();
+            $table->integer('company_id');
+
             $table->timestamps();
         });
     }
@@ -26,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('staff_roles');
+        Schema::dropIfExists('staff_document_settings');
     }
 };

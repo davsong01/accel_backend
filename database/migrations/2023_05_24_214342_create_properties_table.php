@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name')->nullable();
             $table->integer('estate_id');
-            $table->integer('company_id')->nullable();
+            $table->integer('company_id');
             $table->integer('branch_id')->nullable();
 
             $table->timestamps();

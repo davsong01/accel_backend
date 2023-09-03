@@ -22,6 +22,7 @@ use App\Http\Controllers\EstateSettingController;
 use App\Http\Controllers\CompanySettingController;
 use App\Http\Controllers\SpecialRequestController;
 use App\Http\Controllers\CompanyDocumentController;
+use App\Http\Controllers\AdvanceAndClaimsController;
 use App\Http\Controllers\ContractCustomerController;
 use App\Http\Controllers\LeaveAndAbenceManagementController;
 use App\Http\Controllers\EstateConstructionSettingController;
@@ -96,7 +97,13 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::post('assign-role-to-staff', [StaffController::class, 'assignRoleToStaff']);
         Route::get('staff-roles/{staff_id}', [StaffController::class, 'getSingleStaffRoles']);
 
-
+        Route::get('staff-identification-settings/{id?}', [StaffController::class, 'staffIdentificationSetting']);
+        Route::post('update-staff-identification-settings', [StaffController::class, 'updateStaffIdentificationSetting']);
+        Route::get('staff-document-settings/{id?}', [StaffController::class, 'staffDocumentSetting']);
+        Route::post('staff-document-setting', [StaffController::class, 'addStaffDocumentSetting']);
+        Route::post('staff-document-setting/{id}', [StaffController::class, 'updateStaffDocumentSetting']);
+        Route::get('delete-staff-identification-settings/{id}', [StaffController::class, 'deleteStaffDocumentSetting']);
+        
         Route::resource('special-request', SpecialRequestController::class);
         Route::resource('department', DepartmentController::class);
         Route::get('sample-bulk-department-import', [DepartmentController::class, 'sampleBulkDepartment']);
@@ -107,6 +114,9 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('approve-leave-and-absence/{id}', [LeaveAndAbenceManagementController::class, 'approveLeaveAndAbsence']);
         Route::get('decline-leave-and-absence/{id}', [LeaveAndAbenceManagementController::class, 'declineLeaveAndAbsence']);
 
+        Route::get('advance-and-claims/{id?}', [AdvanceAndClaimsController::class, 'index']);
+
+
         Route::resource('branch', BranchController::class);
         Route::resource('jobrole', JobRoleController::class);
         Route::get('sample-bulk-jobrole-import', [JobRoleController::class, 'sampleBulkJobRole']);
@@ -116,5 +126,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('change-special-request-status', [MenuController::class, 'changeSpecialRequestStatus']);
         Route::post('add-new-contract', [ContractCustomerController::class, 'store']);
         Route::post('single-customer-contract/{customer_id}', [ContractCustomerController::class, 'index']);
+
+
     });
 });

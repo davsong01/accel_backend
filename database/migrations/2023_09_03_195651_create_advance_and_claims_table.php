@@ -11,13 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('staff', function (Blueprint $table) {
+        Schema::create('advance_and_claims', function (Blueprint $table) {
             $table->id();
-            $table->integer('user_id');
-            $table->integer('company_id')->nullable();
-            $table->integer('branch_id')->nullable();
-            $table->enum('status', ['active', 'inactive']);
-
+            $table->string('staff_id');
+            $table->integer('period')->nullable();
+            $table->string('amount')->nullable();
+            $table->enum('type', ['advance','claims']);
+            $table->string('status')->default('pending');
+            $table->integer('company_id');
             $table->timestamps();
         });
     }
@@ -27,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('staff');
+        Schema::dropIfExists('advance_and_claims');
     }
 };

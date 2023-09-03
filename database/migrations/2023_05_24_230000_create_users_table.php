@@ -19,13 +19,13 @@ return new class extends Migration
             $table->string('phone_number')->nullable();
             $table->string('residential_address')->nullable();
             $table->string('user_permissions')->nullable();
-            $table->integer('company_id')->nullable();
+            $table->integer('company_id');
             $table->string('email');
             $table->integer('staff_id')->unique();
             $table->integer('branch_id')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->enum('status', ['active', 'inactive']);
-            $table->enum('type', ['Staff', 'customer']);
+            $table->enum('type', ['staff', 'customer']);
             $table->string('password')->nullable();
             $table->text('contact_information')->nullable();
             $table->text('next_of_kin')->nullable();

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('role_ids')->nullable();
             $table->enum('status', ['active', 'inactive']);
-            $table->enum('type', ['Staff', 'customer']);
+            $table->enum('type', ['staff', 'customer']);
             $table->enum('is_menu', ['yes', 'no']);
             $table->string('menu_name')->nullable();
             $table->string('description')->nullable();
@@ -24,7 +24,7 @@ return new class extends Migration
             $table->string('icon')->nullable();
             $table->integer('parent')->nullable();
             $table->char('order')->nullable();
-            $table->integer('company_id')->nullable();
+            $table->integer('company_id');
 
             $table->timestamps();
         });

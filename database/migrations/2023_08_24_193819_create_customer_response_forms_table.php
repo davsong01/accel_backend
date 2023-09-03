@@ -21,8 +21,8 @@ return new class extends Migration
             $table->text('identification')->nullable();
             $table->text('uploaded_documents')->nullable();
             $table->text('contract_type')->nullable();
-            $table->integer('status')->default('pending');
-
+            $table->integer('status')->default(0);
+            $table->integer('company_id');
             $table->timestamps();
         });
     }

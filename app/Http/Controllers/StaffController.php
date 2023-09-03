@@ -7,6 +7,7 @@ use App\Models\Staff;
 use App\Models\StaffRole;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Validator;
 
@@ -19,7 +20,7 @@ class StaffController extends Controller
             ->where('staff.company_id', $this->sessionDetails('company_id'))
             ->join("users", "staff.user_id", "=", "users.id")->where(['users.status' => 'active', 'type' => 'staff'])
             ->select("staff.id AS staff_id", "users.id As user_id", "users.status", "staff.created_at", "users.first_name", "users.last_name", "users.email", "users.staff_id", "users.type", "users.company_id")
-            ->orderBy("staff_id", "desc")
+            ->orderBy("staff_roles.staff_id", "desc")
             ->groupBy("staff.id")
             ->get();
 
@@ -128,5 +129,113 @@ class StaffController extends Controller
         $roles = $staff->roles->pluck('id')->toArray();
 
         return response()->json(['message' => 'successfull', 'data' => $roles], 200);
+    }
+
+    public function staffIdentificationSetting($id=null){
+        
+        $staff_ientification_settings = DB::table('staff_identification_settings')->where(['company_id' => $this->sessionDetails('company_id')])->get();
+        return response()->json(['message' => 'successfull', 'data' => $staff_ientification_settings], 200);
+    }
+
+    public function updateStaffIdentificationSetting(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'use_id_generator' => 'in:0,1',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->messages()->first(),
+                'data' => null,
+            ], 412);
+        }
+
+        if ($request->use_id_generator == 1) {
+            $validator = Validator::make($request->all(), [
+                'id_generator_type' => 'nullable|in:employment_year,employment_month,employment_day,auto_increment_number,random_number',
+                'next_auto_increment_number' => 'nullable',
+                'auto_increment_number_digit' => 'nullable',
+            ]);
+        }
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->messages()->first(),
+                'data' => null,
+            ], 412);
+        }
+
+        $data = $validator->valid();
+        $data['company_id'] = $this->sessionDetails('company_id');
+        $data['created_at'] = date('Y-m-d H:i:s');
+        $data['updated_at'] = date('Y-m-d H:i:s');
+
+        $settings = DB::table('staff_identification_settings')->updateOrInsert($data);
+    
+        return response()->json(['message' => 'successfull', 'data' => $settings], 200);
+    }
+
+    public function staffDocumentSetting($id=null){
+        if (isset($id) && !empty($id)) {
+            $settings = DB::table('staff_document_settings')->where(['company_id' => $this->sessionDetails('company_id'), 'id' => $id])->first();
+           
+        } else {
+            $settings = DB::table('staff_document_settings')->where(['company_id' => $this->sessionDetails('company_id')])->get();
+        }
+        return response()->json(['message' => 'successfull', 'data' => $settings], 200);
+    }
+
+    public function addStaffDocumentSetting(Request $request){
+        $validator = Validator::make($request->all(), [
+            'name' => 'required',
+            'description' => 'nullable',
+            'required' => 'nullable',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->messages()->first(),
+                'data' => null,
+            ], 412);
+        }
+
+        $data = $validator->valid();
+        $data['company_id'] = $this->sessionDetails('company_id');
+        $data['created_at'] = date('Y-m-d H:i:s');
+        $data['updated_at'] = date('Y-m-d H:i:s');
+
+        $settings = DB::table('staff_document_settings')->updateOrInsert($data);
+
+        return response()->json(['message' => 'successfull', 'data' => $settings], 200);
+    }
+
+    public function updateStaffDocumentSetting(Request $request, $id){
+        $validator = Validator::make($request->all(), [
+            'name' => 'required',
+            'description' => 'nullable',
+            'required' => 'nullable',
+        ]);
+       
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->messages()->first(),
+                'data' => null,
+            ], 412);
+        }
+
+        $data = $validator->valid();
+        $data['updated_at'] = date('Y-m-d H:i:s');
+
+        $settings = DB::table('staff_document_settings')->where(['id'=>$id, 'company_id'=> $this->sessionDetails('company_id')])->update($data);
+
+        return response()->json(['message' => 'successfull', 'data' => $settings], 200);
+
+    }
+
+    public function deleteStaffDocumentSetting(Request $request, $id)
+    {
+        $settings = DB::table('staff_document_settings')->where(['id' => $id, 'company_id' => $this->sessionDetails('company_id')])->delete();
+
+        return response()->json(['message' => 'successfull', 'data' => $settings], 200);
     }
 }

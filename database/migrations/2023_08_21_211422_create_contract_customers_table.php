@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('building_type')->nullable();
             $table->string('property_type')->nullable();
             $table->enum('status', ['lead', 'prospect', 'subscriber']);
-            $table->integer('company_id')->nullable();
+            $table->integer('company_id');
             
             $table->timestamps();
         });

@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('current_contract')->nullable();
             $table->string('new_contract')->nullable();
             $table->float('termination_charge')->nullable();
-            $table->integer('company_id')->nullable();
+            $table->integer('company_id');
             $table->integer('original_owner_id')->nullable();
             $table->integer('new_owner_id')->nullable();
             $table->double('amount', 11, 2)->nullable();

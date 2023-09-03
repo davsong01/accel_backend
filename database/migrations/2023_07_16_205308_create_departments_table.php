@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name')->nullable();
             $table->text('description')->nullable();
             $table->integer('status')->default(1);
-            $table->integer('company_id')->nullable();
+            $table->integer('company_id');
             $table->timestamps();
         });
     }

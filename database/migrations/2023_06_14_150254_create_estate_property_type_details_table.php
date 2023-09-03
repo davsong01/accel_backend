@@ -21,7 +21,7 @@ return new class extends Migration
             $table->double('estate_price', 11, 2)->nullable();
             $table->string('settings_and_excavation')->nullable();
             $table->string('infrastructural_fee')->nullable();
-            $table->integer('company_id')->nullable();
+            $table->integer('company_id');
             $table->timestamps();
         });
     }
