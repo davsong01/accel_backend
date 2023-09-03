@@ -41,7 +41,7 @@ class CityController extends Controller
             return response()->json([
                 'error' => $validator->messages()->first(),
                 'data' => null,
-            ], 422);
+            ], 412);
         }
 
         $city = City::updateOrcreate([
@@ -80,7 +80,7 @@ class CityController extends Controller
             return response()->json([
                 'error' => $validator->messages()->first(),
                 'data' => null,
-            ], 422);
+            ], 412);
         }
 
         $city->update([
@@ -97,9 +97,9 @@ class CityController extends Controller
     public function destroy(City $city)
     {
         $count = Estate::where(['city_id' => $city->id, 'company_id' => $city->company_id])->count();
-     
+
         if ($count > 0) {
-            return response()->json(['message' => 'Unable to delete, resource in use', 'data' => null], 422);
+            return response()->json(['message' => 'Unable to delete, resource in use', 'data' => null], 412);
         }
         $city->delete();
         return response()->json(['message' => 'Deleted Successfully.', 'data' => null], 200);

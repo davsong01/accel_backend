@@ -10,8 +10,8 @@ class Role extends Model
     use HasFactory;
     protected $guarded = [];
 
-    public function admins()
+    public function staff()
     {
-        return $this->hasMany(AdminRole::class);
+        return $this->hasMany(StaffRole::class);
     }
 }

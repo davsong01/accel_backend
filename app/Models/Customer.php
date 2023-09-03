@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\User;
 use App\Models\Property;
 use App\Models\CustomerRole;
+use App\Models\ContractCustomer;
 use App\Models\CustomerProperty;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -27,4 +28,10 @@ class Customer extends Model
     {
         return $this->hasMany(CustomerProperty::class);
     }
+
+    public function contracts()
+    {
+        return $this->hasMany(ContractCustomer::class);
+    }
+
 }

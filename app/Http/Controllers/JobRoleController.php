@@ -37,7 +37,7 @@ class JobRoleController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required',
-            'department_id' => 'required|exists:departments,id,company_id,'. $this->sessionDetails('company_id'),
+            'department_id' => 'required|exists:departments,id,company_id,' . $this->sessionDetails('company_id'),
         ]);
 
         if ($validator->fails()) {
@@ -86,7 +86,7 @@ class JobRoleController extends Controller
             return response()->json([
                 'error' => $validator->messages()->first(),
                 'data' => null,
-            ], 422);
+            ], 412);
         }
 
         $jobrole = JobRole::updateOrcreate([

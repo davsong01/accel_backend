@@ -17,6 +17,7 @@ return new class extends Migration
             $table->integer('city_id')->nullable();
             $table->integer('location_id')->nullable();
             $table->integer('estate_id')->nullable();
+            $table->text('subscribers')->nullable();
             $table->string('plot_size')->nullable();
             $table->string('building_type')->nullable();
             $table->string('property_type')->nullable();

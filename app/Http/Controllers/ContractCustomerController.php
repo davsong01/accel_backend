@@ -14,9 +14,12 @@ class ContractCustomerController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index($customer_id)
     {
-        //
+        $contracts = ContractCustomer::where('customer_id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->get();
+        
+        return response()->json(['message' => 'success', 'data' => $contracts], 200);
+
     }
 
     /**
@@ -42,6 +45,7 @@ class ContractCustomerController extends Controller
             'no_of_units' => 'required',
             'contract_type' => 'required',
             'customer_id' => 'required',
+            'subscribers' => 'nullable'
         ]);
 
         if ($validator->fails()) {
@@ -53,7 +57,9 @@ class ContractCustomerController extends Controller
 
         $data = $validator->valid();
         $range = range(1, $data['no_of_units']);
+        $data['subscribers'] = json_encode($data['subscribers']);
         $data = Arr::except($data, 'no_of_units');
+       
         // Add contract
         foreach($range as $units){
             $contract = ContractCustomer::Create([
@@ -64,6 +70,7 @@ class ContractCustomerController extends Controller
                 'plot_size' => $data['plot_size'] ?? null,
                 'building_type' => $data['building_type'] ?? null,
                 'property_type' => $data['property_type'],
+                'subscribers' => $data['subscribers'],
                 'status' => 'lead',
                 'contract_type' => $data['contract_type'],
                 'company_id' => $this->sessionDetails('company_id'),

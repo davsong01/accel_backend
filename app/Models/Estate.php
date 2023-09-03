@@ -13,10 +13,11 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 class Estate extends Model
 {
-    protected $fillable = ['name', 'city_id', 'location_id', 'company_id', 'branch_id', 'property_type','project_supervisor','description', 'status']; 
+    protected $fillable = ['name', 'city_id', 'location_id', 'company_id', 'branch_id', 'property_type', 'project_supervisor', 'description', 'status'];
     use HasFactory;
 
-    public function location(){
+    public function location()
+    {
         return $this->belongsTo(Location::class);
     }
 
@@ -25,15 +26,16 @@ class Estate extends Model
         return $this->belongsTo(City::class);
     }
 
-    public function estate_property_type(){
+    public function estate_property_type()
+    {
         return $this->hasMany(EstatePropertyTypeDetails::class);
     }
 
-    public function admin()
+    public function staff()
     {
-        return $this->belongsTo(Admin::class, 'project_supervisor');
+        return $this->belongsTo(Staff::class, 'project_supervisor');
     }
-    
+
     protected function createdAt(): Attribute
     {
         return Attribute::make(

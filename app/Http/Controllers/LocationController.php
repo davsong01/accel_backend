@@ -52,7 +52,7 @@ class LocationController extends Controller
             return response()->json([
                 'error' => $validator->messages()->first(),
                 'data' => null,
-            ], 422);
+            ], 412);
         }
 
         $location = Location::updateOrcreate([
@@ -94,7 +94,7 @@ class LocationController extends Controller
             return response()->json([
                 'error' => $validator->messages()->first(),
                 'data' => null,
-            ], 422);
+            ], 412);
         }
 
         $location->update([
@@ -114,9 +114,9 @@ class LocationController extends Controller
         $count = Estate::where(['city_id' => $location->id, 'company_id' => $location->company_id])->count();
 
         if ($count > 0) {
-            return response()->json(['message' => 'Unable to delete, resource in use', 'data' => null], 422);
+            return response()->json(['message' => 'Unable to delete, resource in use', 'data' => null], 412);
         }
-        
+
         $location->delete();
         return response()->json(['message' => 'Deleted Successfully.', 'data' => null], 200);
     }

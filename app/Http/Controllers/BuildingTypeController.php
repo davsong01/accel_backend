@@ -44,7 +44,7 @@ class BuildingTypeController extends Controller
             return response()->json([
                 'error' => $validator->messages()->first(),
                 'data' => null,
-            ], 422);
+            ], 412);
         }
 
         $building_type = BuildingType::updateOrcreate([
@@ -106,7 +106,7 @@ class BuildingTypeController extends Controller
             return response()->json([
                 'error' => $validator->messages()->first(),
                 'data' => null,
-            ], 422);
+            ], 412);
         }
 
         $buildingType->update([
@@ -124,9 +124,9 @@ class BuildingTypeController extends Controller
     {
         $count = EstatePropertyTypeDetails::where(['building_type' => $buildingType->size, 'company_id' => $buildingType->company_id])->count();
         if ($count > 0) {
-            return response()->json(['message' => 'Unable to delete, resource in use', 'data' => null], 422);
+            return response()->json(['message' => 'Unable to delete, resource in use', 'data' => null], 412);
         }
-       
+
         $buildingType->delete();
         return response()->json(['message' => 'Deleted Successfully.', 'data' => null], 200);
     }

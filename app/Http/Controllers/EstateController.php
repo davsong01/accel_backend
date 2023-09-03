@@ -134,14 +134,14 @@ class EstateController extends Controller
             'city' => 'required|exists:cities,id',
             'location' => 'required|exists:locations,id',
             'property_type' => 'required|in:land,building,both',
-            'project_supervisor' => 'sometimes|exists:admins,id',
+            'project_supervisor' => 'sometimes|exists:staff,id',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'error' => $validator->messages()->first(),
                 'data' => null,
-            ], 422);
+            ], 412);
         }
 
         $estate = Estate::updateOrcreate([
@@ -228,7 +228,7 @@ class EstateController extends Controller
     public function show(Estate $estate)
     {
         $estate = $estate->load('city', 'location', 'estate_property_type');
-        $estate->project_supervisor_name = ($estate->admin->user->first_name ?? '') . ' ' . ($estate->admin->user->last_name ?? '');
+        $estate->project_supervisor_name = ($estate->staff->user->first_name ?? '') . ' ' . ($estate->staff->user->last_name ?? '');
 
         return response()->json(['message' => 'success', 'data' => $estate], 200);
     }
@@ -257,7 +257,7 @@ class EstateController extends Controller
             return response()->json([
                 'error' => $validator->messages()->first(),
                 'data' => null,
-            ], 422);
+            ], 412);
         }
 
         $estate->update([
@@ -361,9 +361,9 @@ class EstateController extends Controller
                 'data' => null,
             ], 412);
         }
-   
+
         $estateSettings = EstateSettings::where('company_id', $this->sessionDetails('company_id'))->update(['form_expiry_date' => $request->form_expiry]);
-        
+
         return response()->json(['message' => 'Updated Successfully.', 'data' => null], 200);
     }
 
@@ -389,7 +389,7 @@ class EstateController extends Controller
             //code...
             Excel::import(new EstateImport(), request()->file('file'));
         } catch (\Throwable $th) {
-            return response()->json(['errors' => $th->getMessage()], 422);
+            return response()->json(['errors' => $th->getMessage()], 412);
         }
 
         return response()->json(['message' => 'Estates Added Succesfully', 'data' => null], 200);

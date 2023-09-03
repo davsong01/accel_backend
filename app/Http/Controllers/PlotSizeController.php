@@ -45,7 +45,7 @@ class PlotSizeController extends Controller
             return response()->json([
                 'error' => $validator->messages()->first(),
                 'data' => null,
-            ], 422);
+            ], 412);
         }
 
         $plot = PlotSize::updateOrcreate([
@@ -106,7 +106,7 @@ class PlotSizeController extends Controller
             return response()->json([
                 'error' => $validator->messages()->first(),
                 'data' => null,
-            ], 422);
+            ], 412);
         }
 
         $plotsize->update([
@@ -122,9 +122,9 @@ class PlotSizeController extends Controller
      */
     public function destroy(PlotSize $plotsize)
     {
-        $count = EstatePropertyTypeDetails::where(['plot_size'=>$plotsize->size, 'company_id'=> $plotsize->company_id])->count();
-        if($count > 0){
-            return response()->json(['message' => 'Unable to delete, resource in use', 'data' => null], 422);
+        $count = EstatePropertyTypeDetails::where(['plot_size' => $plotsize->size, 'company_id' => $plotsize->company_id])->count();
+        if ($count > 0) {
+            return response()->json(['message' => 'Unable to delete, resource in use', 'data' => null], 412);
         }
         $plotsize->delete();
         return response()->json(['message' => 'Deleted Successfully.', 'data' => null], 200);

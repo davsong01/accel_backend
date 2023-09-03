@@ -7,7 +7,7 @@ use App\Http\Controllers\CityController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\RoleController;
 use App\Models\LeaveAndAbenceManagement;
-use App\Http\Controllers\AdminController;
+use App\Http\Controllers\StaffController;
 use App\Http\Controllers\BranchController;
 use App\Http\Controllers\EstateController;
 use App\Http\Controllers\CompanyController;
@@ -41,30 +41,30 @@ Route::post('/register', [AuthController::class, 'register']);
 
 Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
     Route::post('/login', [AuthController::class, 'login']);
-    
+
     Route::middleware(['auth:sanctum', 'company_check', 'user_roles', 'otherchecks'])->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/user', [AuthController::class, 'user']);
         Route::get('/permissions', [MenuController::class, 'linkGenerator'])->name('permissions.index');
         Route::get('/single-menu-generator/{parent_id}', [MenuController::class, 'singleLinkGenerator'])->name('single.linkgenerator');
-        
+
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-        // Admin Module Routes
+        // Staff Module Routes
         Route::resource('customers', CustomerController::class);
         Route::get('customers-count', [CustomerController::class, 'CustomerCount']);
-        
+
         Route::resource('city', CityController::class);
         Route::resource('location', LocationController::class);
         Route::get('city-locations/{city_id}', [LocationController::class, 'cityLocations'])->name('dashboard');
-        
+
         Route::resource('plotsize', PlotSizeController::class);
         Route::resource('building-type', BuildingTypeController::class);
         Route::get('sample-bulk-building-type-import', [BuildingTypeController::class, 'sampleBulkBuildingType']);
         Route::post('import-bulk-building-type', [BuildingTypeController::class, 'importBulkBuildingType']);
 
         Route::get('sample-bulk-plotsizes-import', [PlotSizeController::class, 'sampleBulkPlotSize']);
-        Route::post('import-bulk-plotsizes', [PlotSizeController::class,'importBulkPlotSize']);
+        Route::post('import-bulk-plotsizes', [PlotSizeController::class, 'importBulkPlotSize']);
 
         Route::resource('estate', EstateController::class);
         Route::get('filter-estates', [EstateController::class, 'filterEstates']);
@@ -88,13 +88,14 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('get-countries-currencies/{country_id?}', [CompanySettingController::class, 'countryAnCurrencies']);
 
         Route::resource('roles', RoleController::class);
-        
-        Route::get('get-all-admins', [AdminController::class, 'getAllAdmins']);
-        Route::post('admin/store', [AdminController::class, 'storeAdmin']);
-        Route::get('get-active-admins', [AdminController::class, 'getActiveAdmins']);
-        Route::get('get-active-admins-in-role/{id}', [AdminController::class, 'getActiveAdminsInRole']);
-        Route::post('assign-role-to-admin', [AdminController::class, 'assignRoleToAdmin']);
-        Route::get('admin-roles/{admin_id}', [AdminController::class, 'getSingleAdminRoles']);
+
+        Route::get('get-all-staff', [StaffController::class, 'getAllStaff']);
+        Route::post('staff/store', [StaffController::class, 'storeStaff']);
+        Route::get('get-active-staff', [StaffController::class, 'getActiveStaff']);
+        Route::get('get-active-staff-in-role/{id}', [StaffController::class, 'getActiveStaffInRole']);
+        Route::post('assign-role-to-staff', [StaffController::class, 'assignRoleToStaff']);
+        Route::get('staff-roles/{staff_id}', [StaffController::class, 'getSingleStaffRoles']);
+
 
         Route::resource('special-request', SpecialRequestController::class);
         Route::resource('department', DepartmentController::class);
@@ -110,9 +111,10 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::resource('jobrole', JobRoleController::class);
         Route::get('sample-bulk-jobrole-import', [JobRoleController::class, 'sampleBulkJobRole']);
         Route::post('import-bulk-jobrole', [JobRoleController::class, 'importBulkJobRole']);
-        
+
         Route::post('form-expiry-status', [EstateController::class, 'changeFormExpiry']);
         Route::get('change-special-request-status', [MenuController::class, 'changeSpecialRequestStatus']);
         Route::post('add-new-contract', [ContractCustomerController::class, 'store']);
+        Route::post('single-customer-contract/{customer_id}', [ContractCustomerController::class, 'index']);
     });
 });

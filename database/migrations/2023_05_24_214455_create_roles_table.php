@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name')->nullable();
             $table->text('description')->nullable();
-            $table->enum('type', ['admin', 'customer']);
+            $table->enum('type', ['staff', 'customer']);
             $table->integer('company_id')->nullable();
 
             $table->timestamps();

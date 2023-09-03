@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AdminRole;
+use App\Models\StaffRole;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -36,7 +36,7 @@ class AdminRoleController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(AdminRole $adminRole): Response
+    public function show(StaffRole $StaffRole): Response
     {
         //
     }
@@ -44,7 +44,7 @@ class AdminRoleController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(AdminRole $adminRole): Response
+    public function edit(StaffRole $StaffRole): Response
     {
         //
     }
@@ -52,7 +52,7 @@ class AdminRoleController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, AdminRole $adminRole): RedirectResponse
+    public function update(Request $request, StaffRole $StaffRole): RedirectResponse
     {
         //
     }
@@ -60,7 +60,7 @@ class AdminRoleController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(AdminRole $adminRole): RedirectResponse
+    public function destroy(StaffRole $StaffRole): RedirectResponse
     {
         //
     }

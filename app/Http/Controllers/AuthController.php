@@ -12,12 +12,14 @@ use App\Http\Requests\RegisterRequest;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 
-class AuthController extends Controller {
+class AuthController extends Controller
+{
     // register a new user method
-    public function register(RegisterRequest $request) {
+    public function register(RegisterRequest $request)
+    {
 
         $data = $request->validated();
-       
+
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
@@ -34,7 +36,8 @@ class AuthController extends Controller {
     }
 
     // login a user method
-    public function login(Request $request) {
+    public function login(Request $request)
+    {
         $validator = Validator::make($request->all(), [
             'email' => 'sometimes',
             'password' => 'required|string',
@@ -47,14 +50,14 @@ class AuthController extends Controller {
                 'data' => null,
             ], 401);
         }
-        
-        if(!$request['email']){
+
+        if (!$request['email']) {
             return response()->json([
                 'error' => 'Email or staff ID is required!'
-            ], 422);
+            ], 412);
         }
         $user = User::where('email', $request['email'])->orWhere('staff_id', $request['email'])->first();
-        
+
         if (!$user || !Hash::check($request['password'], $user->password)) {
             return response()->json([
                 'error' => 'Invalid Credentials!'
@@ -63,23 +66,23 @@ class AuthController extends Controller {
 
         $token = $user->createToken('auth_token')->plainTextToken;
         $company = Company::where('id', $user->company_id)->first();
-        
-        if(!$company){
+
+        if (!$company) {
             return response()->json([
                 'error' => 'Invalid Company details!'
-            ], 403); 
+            ], 403);
         }
-        
+
         // $user->token = $token;
         $cookie = cookie('token', $token, 60 * 24); // 1 day
         $datax['token'] = $token;
 
         return response()->json(['data' => $datax, 'message' => Session::all()], 200);
- 
     }
 
     // logout a user method
-    public function logout(Request $request) {
+    public function logout(Request $request)
+    {
         $request->user()->currentAccessToken()->delete();
 
         $cookie = cookie()->forget('token');
@@ -90,8 +93,8 @@ class AuthController extends Controller {
     }
 
     // get the authenticated user method
-    public function user(Request $request) {
+    public function user(Request $request)
+    {
         return new UserResource($request->user());
     }
-
 }

@@ -25,15 +25,14 @@ return new class extends Migration
             $table->integer('branch_id')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->enum('status', ['active', 'inactive']);
-            $table->enum('type', ['admin', 'customer']);
+            $table->enum('type', ['Staff', 'customer']);
             $table->string('password')->nullable();
             $table->text('contact_information')->nullable();
             $table->text('next_of_kin')->nullable();
             $table->text('job_information')->nullable();
-            
+
             $table->rememberToken();
             $table->timestamps();
-
         });
     }
 

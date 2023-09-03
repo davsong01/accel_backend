@@ -3,7 +3,8 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use App\Models\AdminRole;
+use App\Models\Staff;
+use App\Models\StaffRole;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -19,7 +20,7 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $guarded = [];
-    
+
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -39,9 +40,8 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public function admin(){
-        return $this->hasOne(Admin::class);
+    public function staff()
+    {
+        return $this->hasOne(Staff::class);
     }
-
-    
 }

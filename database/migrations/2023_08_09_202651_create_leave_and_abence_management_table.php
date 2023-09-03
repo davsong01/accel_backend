@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('leave_and_abence_management', function (Blueprint $table) {
             $table->id();
-            $table->string('admin_id');
+            $table->string('staff_id');
             $table->string('period')->nullable();
             $table->string('reason')->nullable();
             $table->string('type')->nullable(); // Absence, Leave

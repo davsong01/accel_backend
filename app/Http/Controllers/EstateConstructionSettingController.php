@@ -87,7 +87,7 @@ class EstateConstructionSettingController extends Controller
             return response()->json([
                 'error' => $validator->messages()->first(),
                 'data' => null,
-            ], 422);
+            ], 412);
         }
 
         $estateConstructionSetting->update([

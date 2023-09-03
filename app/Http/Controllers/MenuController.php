@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Role;
 use App\Models\User;
-use App\Models\Admin;
+use App\Models\Staff;
 use Illuminate\Http\Request;
 use App\Models\RolePermission;
 use Illuminate\Support\Facades\Route;
@@ -14,8 +14,8 @@ use Symfony\Component\VarDumper\Caster\LinkStub;
 class MenuController extends Controller
 {
     private  $individual_permissions;
-    private $admin_id;
-    private $admin_roles;
+    private $staff_id;
+    private $staff_roles;
     private $customer_id;
     private $customer_roles;
     private $company_id;
@@ -23,14 +23,15 @@ class MenuController extends Controller
     private $company_url;
     private $company_location;
 
-    public function __construct(Request $request){
+    public function __construct(Request $request)
+    {
     }
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request,$status=null)
+    public function index(Request $request, $status = null)
     {
         $individual_permissions = Session::get('individual_permissions');
 
@@ -42,8 +43,8 @@ class MenuController extends Controller
         foreach ($menus as $parent) {
             $rolex = [];
             $roleIds = [];
-            $roles = isset($parent->role_ids) ? explode(',',$parent->role_ids):[];
-            
+            $roles = isset($parent->role_ids) ? explode(',', $parent->role_ids) : [];
+
             if (count($roles) > 0) {
                 foreach ($roles as $role) {
                     $rrr = Role::where('id', $role)->first();
@@ -54,22 +55,21 @@ class MenuController extends Controller
             $parent['roles'] = $rolex;
             $parent['roleIds'] = $roleIds;
         }
-        
-        $roles = Role::where(['type' => 'admin'])->get();
+
+        $roles = Role::where(['type' => 'Staff'])->get();
 
         return response()->json(['data' => $menus, 'message' => 'success'], 200);
-       
     }
 
-    public function generateLinks($linkid, $link_name, $link_route, $link_slug, $link_icon,$description, $parent_id)
+    public function generateLinks($linkid, $link_name, $link_route, $link_slug, $link_icon, $description, $parent_id)
     {
         $individual_permissions = Session::get('individual_permissions') ?? [];
-        $user_role_ids = Session::get('admin_roles');
+        $user_role_ids = Session::get('staff_roles');
         $links = [];
-        
-        if (Session::has('admin_id')) {
-            $getChildren = RolePermission::where(['status' => 'active', 'is_menu' => 'yes', 'parent' => $linkid, 'type' => 'admin', 'company_id'=>$this->sessionDetails('company_id')])->orderBy('order', 'ASC')->get();
-            
+
+        if (Session::has('staff_id')) {
+            $getChildren = RolePermission::where(['status' => 'active', 'is_menu' => 'yes', 'parent' => $linkid, 'type' => 'Staff', 'company_id' => $this->sessionDetails('company_id')])->orderBy('order', 'ASC')->get();
+
             $getChildren = $getChildren->filter(function ($query) use ($user_role_ids, $individual_permissions) {
                 $query->role_ids = (isset($query->role_ids) && !empty($query->role_ids)) ? explode(',', $query->role_ids) : [];
                 foreach ($user_role_ids as $role) {
@@ -84,14 +84,14 @@ class MenuController extends Controller
             foreach ($getChildren as $key => $value) {
                 $perms = $this->checkUserHasRightToPage($value->slug, $user_role_ids);
                 if ($perms === true) {
-                    $linko[] = $this->generateLinks($value->id, $value->menu_name, $value->route, $value->slug, $value->icon,$value->description,$value->parent);
+                    $linko[] = $this->generateLinks($value->id, $value->menu_name, $value->route, $value->slug, $value->icon, $value->description, $value->parent);
                 } else {
                     $linko[] = '';
                 }
             }
-          
+
             $sub_links = $linko;
-            
+
             $links = [
                 'id' => $linkid,
                 'name' => $link_name,
@@ -101,7 +101,6 @@ class MenuController extends Controller
                 'description' => $description,
                 'children' => $sub_links
             ];
-
         } else {
             if (\Route::has($link_route)) {
                 $links = [
@@ -132,30 +131,30 @@ class MenuController extends Controller
     {
         $links = [];
         $individual_permissions = Session::get('individual_permissions') ?? [];
-        $admin_roles = Session::get('admin_roles');
+        $staff_roles = Session::get('staff_roles');
 
-        if(Session::has('admin_id')){
-            $links = RolePermission::where(['status' => 'active', 'is_menu' => 'yes', 'parent' => NULL, 'type' => 'admin', 'company_id' => $this->sessionDetails('company_id')])->orderBy('order', 'ASC')->get();
-            $links = $links->filter(function ($query) use ($admin_roles, $individual_permissions) {
+        if (Session::has('staff_id')) {
+            $links = RolePermission::where(['status' => 'active', 'is_menu' => 'yes', 'parent' => NULL, 'type' => 'Staff', 'company_id' => $this->sessionDetails('company_id')])->orderBy('order', 'ASC')->get();
+            $links = $links->filter(function ($query) use ($staff_roles, $individual_permissions) {
                 $query->role_ids = (isset($query->role_ids) && !empty($query->role_ids)) ? explode(',', $query->role_ids) : [];
-                
-                foreach ($admin_roles as $role) {
-                    if (in_array($role, $query->role_ids)|| in_array($query->id, $individual_permissions)) {
+
+                foreach ($staff_roles as $role) {
+                    if (in_array($role, $query->role_ids) || in_array($query->id, $individual_permissions)) {
                         return $query;
-                    } 
+                    }
                 }
             });
         }
-        
+
         $lo = [];
-       
+
         foreach ($links as $key => $value) {
-            $perms = $this->checkUserHasRightToPage($value->slug, $admin_roles);
+            $perms = $this->checkUserHasRightToPage($value->slug, $staff_roles);
 
             if ($perms === TRUE) {
                 // if ($perms === TRUE && $perm_status === TRUE) {
                 $lox[] = $value->link_name;
-                $lo[] = $this->generateLinks($value->id, $value->menu_name, $value->route, $value->slug, $value->icon, $value->description,$value->parent);
+                $lo[] = $this->generateLinks($value->id, $value->menu_name, $value->route, $value->slug, $value->icon, $value->description, $value->parent);
             }
         }
 
@@ -166,26 +165,25 @@ class MenuController extends Controller
     {
         $links = [];
         $individual_permissions = Session::get('individual_permissions') ?? [];
-        $admin_roles = Session::get('admin_roles');
-        $all_roles = array_unique(array_merge($individual_permissions, $admin_roles));
-        if (Session::has('admin_id')) {
-            $links = RolePermission::where(['status' => 'active', 'is_menu' => 'yes', 'id' => $parent_id, 'type' => 'admin'])->orderBy('order', 'ASC')->first();
-            if(!$links){
+        $staff_roles = Session::get('staff_roles');
+        $all_roles = array_unique(array_merge($individual_permissions, $staff_roles));
+        if (Session::has('staff_id')) {
+            $links = RolePermission::where(['status' => 'active', 'is_menu' => 'yes', 'id' => $parent_id, 'type' => 'Staff'])->orderBy('order', 'ASC')->first();
+            if (!$links) {
                 return;
             }
 
             $link_role_ids = (isset($links->role_ids) && !empty($links->role_ids)) ? explode(',', $links->role_ids) : [];
             $allowed = array_intersect($link_role_ids, $all_roles);
 
-            if(!$allowed && count($allowed) <= 0){
+            if (!$allowed && count($allowed) <= 0) {
                 return response()->json(['error' => 'You do not have access to this resource'], 403);
             }
-
         }
 
         $lo = [];
         $lo = $this->generateLinks($links->id, $links->menu_name, $links->route, $links->slug, $links->icon, $links->description, $links->parent);
-       
+
         return response()->json(['message' => 'success', 'data' => $lo], 200);
     }
 
@@ -211,8 +209,8 @@ class MenuController extends Controller
      */
     public function store(Request $request)
     {
-       
-        $data = $this->validate($request,[
+
+        $data = $this->validate($request, [
             "name" => "required|string",
             "email" => "required|unique:users,email",
             "phone" => "required",
@@ -222,34 +220,33 @@ class MenuController extends Controller
         ]);
 
         $user = User::create([
-            'name'=>$data['name'],
-            'email'=>$data['email'],
-            'phone'=>$data['phone'],
-            'password'=>bcrypt($data['password']),
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'phone' => $data['phone'],
+            'password' => bcrypt($data['password']),
         ]);
 
-        $admin=Admin::create([
-            'user_id'=>$user->id,
-            'status'=>$data['status']
+        $staff = Staff::create([
+            'user_id' => $user->id,
+            'status' => $data['status']
         ]);
 
-        if($request->has('roles')){
-            $admin->roles()->sync(array_values($data['roles']));
+        if ($request->has('roles')) {
+            $staff->roles()->sync(array_values($data['roles']));
         }
 
-        if($this->settings->send_sms == 'yes'){
+        if ($this->settings->send_sms == 'yes') {
             $message = $this->getCreateAdminSms($user, $data['password']);
-            $this->logMessages('sms',$user->phone,$message,$data['status'],null,auth()->user()->admin->id);
+            $this->logMessages('sms', $user->phone, $message, $data['status'], null, auth()->user()->staff->id);
         }
 
         if ($this->settings->send_email == 'yes') {
-            $subject = 'You are now an Admin';
+            $subject = 'You are now an Staff';
             $message = $this->getCreateAdminEmail($user, $data['password']);
-            $this->logMessages('email', $user->email, $message, $data['status'], $subject, auth()->user()->admin->id);
+            $this->logMessages('email', $user->email, $message, $data['status'], $subject, auth()->user()->staff->id);
         }
-       
-        return back()->with('message', 'Created successfully');
 
+        return back()->with('message', 'Created successfully');
     }
 
     public function show(RolePermission $rolePermission)
@@ -272,7 +269,7 @@ class MenuController extends Controller
      */
     public function update(Request $request)
     {
-        $permission = RolePermission::where('id',$request->permission_id)->first();
+        $permission = RolePermission::where('id', $request->permission_id)->first();
 
         $data['status'] = $request->status;
         $data['link_name'] = $request->link_name;
@@ -280,31 +277,29 @@ class MenuController extends Controller
         $data['icon'] = $request->icon;
         $data['parent'] = $request->parent == 'none' ? 0 : $request->parent;
         $data['role_ids'] = isset($request->role_ids) ? implode(',', $request->role_ids) : NULL;
-        
+
         $permission->update($data);
 
         return back()->with('message', 'Update succesful');
     }
 
-    public function changeSpecialRequestStatus(){
+    public function changeSpecialRequestStatus()
+    {
         $permission = RolePermission::where('slug', 'special-requests')->where('company_id', $this->sessionDetails('company_id'))->first();
-        if($permission){
-            if($permission->status == 'active'){
+        if ($permission) {
+            if ($permission->status == 'active') {
                 $permission->update(['status' => 'inactive']);
-            } else{
+            } else {
                 $permission->update(['status' => 'active']);
             }
-        }else{
-            return response()->json(['error' => 'Resource not found', 'data' => null], 422);
+        } else {
+            return response()->json(['error' => 'Resource not found', 'data' => null], 412);
         }
 
         return response()->json(['message' => 'Update successful', 'data' => null], 200);
-
     }
 
     public function destroy($id)
     {
-        
     }
-
 }

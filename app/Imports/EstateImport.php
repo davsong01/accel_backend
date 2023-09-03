@@ -63,10 +63,11 @@ class EstateImport implements ToCollection, WithHeadingRow
         }
     }
 
-    public function getCityId($city, $company_id){
-        $cityId = City::where(['name'=>$city,'company_id'=> $company_id])->first();
+    public function getCityId($city, $company_id)
+    {
+        $cityId = City::where(['name' => $city, 'company_id' => $company_id])->first();
         if (!$cityId) {
-			throw new \Exception('City: '.$city . ' not found!');
+            throw new \Exception('City: ' . $city . ' not found!');
         }
         return $cityId->id;
     }
@@ -75,19 +76,19 @@ class EstateImport implements ToCollection, WithHeadingRow
     {
         $locationId = Location::where(['name' => $location, 'company_id' => $company_id])->first();
         if (!$locationId) {
-			throw new \Exception('Location: ' . $location . ' not found!');
+            throw new \Exception('Location: ' . $location . ' not found!');
         }
         return $locationId->id;
     }
 
     public function getStaffId($staff_id, $company_id)
     {
-        $staffId = User::where(['staff_id' => $staff_id, 'company_id' => $company_id, 'type'=>'admin'])->first();
-        
+        $staffId = User::where(['staff_id' => $staff_id, 'company_id' => $company_id, 'type' => 'Staff'])->first();
+
         if (!$staffId) {
-			throw new \Exception('Staff with staff Id of : ' . $staff_id . ' not found!');
+            throw new \Exception('Staff with staff Id of : ' . $staff_id . ' not found!');
         }
 
-        return $staffId->admin->id;
+        return $staffId->staff->id;
     }
 }

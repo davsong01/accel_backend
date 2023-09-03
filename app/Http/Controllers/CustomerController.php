@@ -16,32 +16,37 @@ class CustomerController extends Controller
     /**
      * Display a listing of the resource.
      */
-    
+
     public function index(Request $request)
     {
-        $customers = Customer::with(['user:id,first_name,last_name,status'])->withCount('properties')
-        ->where('company_id', $this->sessionDetails('company_id'))
-        ->where('branch_id', auth()->user()->admin->branch_id)->paginate(20);
-        
-        return response()->json(['message'=>'success','data' => $customers], 200);
+        $customers = Customer::with(['user:id,first_name,last_name,status', 'contracts:id,status,customer_id'])->withCount('contracts')
+            ->where('company_id', $this->sessionDetails('company_id'))
+            ->where('branch_id', auth()->user()->staff->branch_id)->paginate(20);
+       
+        foreach ($customers as $customer) {
+            $statuses = $customer->contracts->pluck('status')->toArray();
+            $customer->contract_statuses = array_count_values($statuses);
+        }
+
+        return response()->json(['message' => 'success', 'data' => $customers], 200);
     }
 
-    public function CustomerCount(){
+    public function CustomerCount()
+    {
         $all = ContractCustomer::where('company_id', $this->sessionDetails('company_id'))->count();
         $leads = ContractCustomer::where('company_id', $this->sessionDetails('company_id'))->where('status', 'lead')->count();
         $subscriber = ContractCustomer::where('company_id', $this->sessionDetails('company_id'))->where('status', 'subscriber')->count();
         $prospect = ContractCustomer::where('company_id', $this->sessionDetails('company_id'))->where('status', 'prospect')->count();
-        
+
         $contract = [
             'all' => $all,
             'lead' => $leads,
             'subscriber' => $subscriber,
             'prospect' => $prospect,
-        ];  
-        
+        ];
+
         return response()->json(['message' => 'success', 'data' => $contract], 200);
     }
-
 
     /**
      * Show the form for creating a new resource.
@@ -95,8 +100,8 @@ class CustomerController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
             'branch_id' => $this->sessionDetails('branch_id'),
         ]);
-       
-        if($user){
+
+        if ($user) {
             // Add Customer
             $customer = Customer::updateOrCreate([
                 'company_id' => $this->sessionDetails('company_id'),
@@ -107,7 +112,6 @@ class CustomerController extends Controller
         }
 
         return response()->json(['message' => 'success', 'data' => $user], 200);
-        
     }
 
     /**
@@ -131,19 +135,18 @@ class CustomerController extends Controller
      */
     public function update(Request $request, Customer $customer)
     {
-        	$request->validate([
+        $request->validate([
 
-    		'name' => 'required',
+            'name' => 'required',
 
             'email' => [
 
-                'required','email',Rule::unique('transporters')->where(function($query) {
+                'required', 'email', Rule::unique('transporters')->where(function ($query) {
 
-                  $query->where('deleted', '=', '0')
+                    $query->where('deleted', '=', '0')
 
-                  ->where('id', '!=', $id);
-
-              })
+                        ->where('id', '!=', $id);
+                })
 
             ],
 

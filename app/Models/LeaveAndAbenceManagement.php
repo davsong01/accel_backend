@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\Admin;
+use App\Models\Staff;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,9 +12,9 @@ class LeaveAndAbenceManagement extends Model
     use HasFactory;
     protected $guarded = [];
 
-    public function admin()
+    public function staff()
     {
-        return $this->belongsTo(Admin::class, 'admin_id');
+        return $this->belongsTo(Staff::class, 'staff_id');
     }
 
     protected function createdAt(): Attribute

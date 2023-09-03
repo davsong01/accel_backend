@@ -16,14 +16,14 @@ class RoleController extends Controller
     public function index()
     {
         $type = \Request::get('type');
-        if(!$type){
-            return response()->json(['error'=>'The role type is required as a query param!'], 412);
+        if (!$type) {
+            return response()->json(['error' => 'The role type is required as a query param!'], 412);
         }
         $roles = Role::where('type', $type)
-        ->where('company_id', $this->sessionDetails('company_id'))
-        ->get();
+            ->where('company_id', $this->sessionDetails('company_id'))
+            ->get();
 
-        return response()->json(['message' => 'success', 'data'=> $roles], 200);
+        return response()->json(['message' => 'success', 'data' => $roles], 200);
     }
 
     /**
@@ -41,7 +41,7 @@ class RoleController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required',
-            'type' => 'required|in:customer,admin',
+            'type' => 'required|in:customer,staff',
         ]);
 
         if ($validator->fails()) {
@@ -57,7 +57,6 @@ class RoleController extends Controller
         ]);
 
         return response()->json(['message' => 'Created successfully', 'data' => $role], 200);
-
     }
 
     /**
@@ -74,7 +73,7 @@ class RoleController extends Controller
     public function edit(Role $role)
     {
         // dd($role);
-       
+
     }
 
     /**
@@ -85,7 +84,7 @@ class RoleController extends Controller
 
         $validator = Validator::make($request->all(), [
             'name' => 'required',
-            'type' => 'required|in:customer,admin',
+            'type' => 'required|in:customer,staff',
         ]);
 
         if ($validator->fails()) {
@@ -101,7 +100,6 @@ class RoleController extends Controller
         ]);
 
         return response()->json(['message' => 'Role Updated Succesfully', 'data' => $role], 200);
-
     }
 
     /**
@@ -109,6 +107,5 @@ class RoleController extends Controller
      */
     public function destroy(Role $role)
     {
-        
     }
 }

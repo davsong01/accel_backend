@@ -15,9 +15,9 @@ class SpecialRequestController extends Controller
     public function index()
     {
         $special_requests = SpecialRequest::with(['location:id,name', 'city:id,name', 'estate_property_type'])
-        ->where('company_id', $this->sessionDetails('company_id'))
-        // ->where('branch_id', auth()->user()->admin->branch_id)
-        ->orderBy('created_at', 'DESC')->paginate(20);
+            ->where('company_id', $this->sessionDetails('company_id'))
+            // ->where('branch_id', auth()->user()->staff->branch_id)
+            ->orderBy('created_at', 'DESC')->paginate(20);
 
         return response()->json(['message' => 'success', 'data' => $special_requests], 200);
     }

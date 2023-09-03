@@ -18,41 +18,41 @@ class UserRoleMiddleware
     public function handle(Request $request, Closure $next): Response
     {
         // Check if user is active
-        if(auth()->user()->status != 'active'){
+        if (auth()->user()->status != 'active') {
             return response()->json(['error' => 'Account is inactive!', 'data' => null], 403);
         }
-        
-        if(!Session::has('user_roles')){
+
+        if (!Session::has('user_roles')) {
             // Get user type
             if (auth()->user()->type == 'customer') {
                 // Get roles from customer
                 $user_roles = auth()->user()->customer->roles->pluck('id')->toArray();
                 if (!$user_roles) {
-                    return response()->json(['error' => 'No roles found for this user', 'data' => null], 422);
+                    return response()->json(['error' => 'No roles found for this user', 'data' => null], 412);
                 } else {
                     Session::put('customer_id',  auth()->user()->customer->id);
                     Session::put('customer_roles',  $user_roles);
                 }
             }
+            if (auth()->user()->type == 'staff') {
+                // Get roles from Staff
+                $user_roles = auth()->user()->staff->roles->pluck('id')->toArray();
 
-            if(auth()->user()->type == 'admin'){
-                // Get roles from admin
-                $user_roles = auth()->user()->admin->roles->pluck('id')->toArray();
-                if(!$user_roles){
-                    return response()->json(['error' => 'No roles found for this user', 'data' => null], 422);
-                }else{
+                if (!$user_roles) {
+                    return response()->json(['error' => 'No roles found for this user', 'data' => null], 412);
+                } else {
                     $individual_permissions = auth()->user()->user_permissions;
-                    if($individual_permissions){
+                    if ($individual_permissions) {
                         $individual_permissions = explode(',', $individual_permissions);
                         Session::put('individual_permissions', $individual_permissions);
                     }
-                    
-                    Session::put('admin_id',  auth()->user()->admin->id);
-                    Session::put('admin_roles',  $user_roles);
+
+                    Session::put('staff_id',  auth()->user()->staff->id);
+                    Session::put('staff_roles',  $user_roles);
                 }
             }
         }
-     
+
         return $next($request);
     }
 }

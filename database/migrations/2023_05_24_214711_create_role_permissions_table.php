@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('role_ids')->nullable();
             $table->enum('status', ['active', 'inactive']);
-            $table->enum('type', ['admin', 'customer']);
+            $table->enum('type', ['Staff', 'customer']);
             $table->enum('is_menu', ['yes', 'no']);
             $table->string('menu_name')->nullable();
             $table->string('description')->nullable();

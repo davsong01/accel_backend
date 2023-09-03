@@ -5,14 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class AdminRole extends Model
+class StaffRole extends Model
 {
     use HasFactory;
-    protected $fillable = ['role_id','admin_id', 'company_id', 'branch_id'];
+    protected $fillable = ['role_id', 'staff_id', 'company_id', 'branch_id'];
 
-    public function admin()
+    public function staff()
     {
-        return $this->belongsTo(Admin::class);
+        return $this->belongsTo(Staff::class);
     }
 
     public function role()
