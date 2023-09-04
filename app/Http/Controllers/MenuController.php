@@ -56,7 +56,7 @@ class MenuController extends Controller
             $parent['roleIds'] = $roleIds;
         }
 
-        $roles = Role::where(['type' => 'Staff'])->get();
+        $roles = Role::where(['type' => 'staff'])->get();
 
         return response()->json(['data' => $menus, 'message' => 'success'], 200);
     }
@@ -68,7 +68,7 @@ class MenuController extends Controller
         $links = [];
 
         if (Session::has('staff_id')) {
-            $getChildren = RolePermission::where(['status' => 'active', 'is_menu' => 'yes', 'parent' => $linkid, 'type' => 'Staff', 'company_id' => $this->sessionDetails('company_id')])->orderBy('order', 'ASC')->get();
+            $getChildren = RolePermission::where(['status' => 'active', 'is_menu' => 'yes', 'parent' => $linkid, 'type' => 'staff', 'company_id' => $this->sessionDetails('company_id')])->orderBy('order', 'ASC')->get();
 
             $getChildren = $getChildren->filter(function ($query) use ($user_role_ids, $individual_permissions) {
                 $query->role_ids = (isset($query->role_ids) && !empty($query->role_ids)) ? explode(',', $query->role_ids) : [];
@@ -134,7 +134,7 @@ class MenuController extends Controller
         $staff_roles = Session::get('staff_roles');
 
         if (Session::has('staff_id')) {
-            $links = RolePermission::where(['status' => 'active', 'is_menu' => 'yes', 'parent' => NULL, 'type' => 'Staff', 'company_id' => $this->sessionDetails('company_id')])->orderBy('order', 'ASC')->get();
+            $links = RolePermission::where(['status' => 'active', 'is_menu' => 'yes', 'parent' => NULL, 'type' => 'staff', 'company_id' => $this->sessionDetails('company_id')])->orderBy('order', 'ASC')->get();
             $links = $links->filter(function ($query) use ($staff_roles, $individual_permissions) {
                 $query->role_ids = (isset($query->role_ids) && !empty($query->role_ids)) ? explode(',', $query->role_ids) : [];
 
@@ -168,7 +168,7 @@ class MenuController extends Controller
         $staff_roles = Session::get('staff_roles');
         $all_roles = array_unique(array_merge($individual_permissions, $staff_roles));
         if (Session::has('staff_id')) {
-            $links = RolePermission::where(['status' => 'active', 'is_menu' => 'yes', 'id' => $parent_id, 'type' => 'Staff'])->orderBy('order', 'ASC')->first();
+            $links = RolePermission::where(['status' => 'active', 'is_menu' => 'yes', 'id' => $parent_id, 'type' => 'staff'])->orderBy('order', 'ASC')->first();
             if (!$links) {
                 return;
             }
