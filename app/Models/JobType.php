@@ -5,10 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ContractCustomer extends Model
+class JobType extends Model
 {
     use HasFactory;
-    protected $table = 'contract_customer';
     protected $guarded = [];
 
 }

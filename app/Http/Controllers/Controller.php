@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\EstateSettings;
 use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Routing\Controller as BaseController;
@@ -72,6 +73,40 @@ class Controller extends BaseController
         return $name;
     }
 
+    public function getContractFormAmount($estate_contracts, $single=null){
+        $buildAmount = [];
+        $settings = EstateSettings::select(['form_payment_for_land', 'form_payment_for_building'])->where('company_id', $this->sessionDetails('company_id'))->first();
+        
+        if(isset($single)){
+            $buildAmount = 0;
+            if ($estate_contracts->property_type == 'building') {
+                $buildAmount += $settings->form_payment_for_building;
+            }
+
+            if ($estate_contracts->property_type == 'land') {
+                $buildAmount += $settings->form_payment_for_land;
+            }
+           
+            return $buildAmount;
+
+        }else{
+            foreach($estate_contracts as $contract){
+                if($contract->property_type == 'building'){
+                    $buildAmount[] = $settings->form_payment_for_building;
+                }
+
+                if ($contract->property_type == 'land') {
+                    $buildAmount[] = $settings->form_payment_for_land;
+                }
+               
+            }
+         
+            $buildAmount = array_sum(array_unique($buildAmount));
+
+        }
+
+        return $buildAmount;
+    }
    
 }
 

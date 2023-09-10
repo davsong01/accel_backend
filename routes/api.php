@@ -12,6 +12,7 @@ use App\Http\Controllers\BranchController;
 use App\Http\Controllers\EstateController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\JobRoleController;
+use App\Http\Controllers\JobTypeController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\PlotSizeController;
@@ -23,7 +24,8 @@ use App\Http\Controllers\CompanySettingController;
 use App\Http\Controllers\SpecialRequestController;
 use App\Http\Controllers\CompanyDocumentController;
 use App\Http\Controllers\AdvanceAndClaimsController;
-use App\Http\Controllers\ContractCustomerController;
+use App\Http\Controllers\CustomerContractController;
+use App\Http\Controllers\PropertyTypeDetailsController;
 use App\Http\Controllers\LeaveAndAbenceManagementController;
 use App\Http\Controllers\EstateConstructionSettingController;
 
@@ -80,6 +82,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('delete-estate-property-type/{id}', [EstateController::class, 'deleteEstatePropertyType']);
         Route::post('update-estate-setting', [EstateSettingController::class, 'update']);
         Route::get('get-estate-setting', [EstateSettingController::class, 'getEstateSettings']);
+        Route::get('estate-in-location/{location_id}', [EstateController::class, 'getEstateInLocation']);
 
         Route::resource('estate-construction-setting', EstateConstructionSettingController::class);
 
@@ -103,7 +106,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::post('staff-document-setting', [StaffController::class, 'addStaffDocumentSetting']);
         Route::post('staff-document-setting/{id}', [StaffController::class, 'updateStaffDocumentSetting']);
         Route::get('delete-staff-identification-settings/{id}', [StaffController::class, 'deleteStaffDocumentSetting']);
-        
+
         Route::resource('special-request', SpecialRequestController::class);
         Route::resource('department', DepartmentController::class);
         Route::get('sample-bulk-department-import', [DepartmentController::class, 'sampleBulkDepartment']);
@@ -116,17 +119,18 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
 
         Route::get('advance-and-claims/{id?}', [AdvanceAndClaimsController::class, 'index']);
 
-
         Route::resource('branch', BranchController::class);
         Route::resource('jobrole', JobRoleController::class);
+        Route::resource('jobtype', JobTypeController::class);
         Route::get('sample-bulk-jobrole-import', [JobRoleController::class, 'sampleBulkJobRole']);
         Route::post('import-bulk-jobrole', [JobRoleController::class, 'importBulkJobRole']);
 
         Route::post('form-expiry-status', [EstateController::class, 'changeFormExpiry']);
         Route::get('change-special-request-status', [MenuController::class, 'changeSpecialRequestStatus']);
-        Route::post('add-new-contract', [ContractCustomerController::class, 'store']);
-        Route::post('single-customer-contract/{customer_id}', [ContractCustomerController::class, 'index']);
+        Route::post('add-new-contract', [CustomerContractController::class, 'store']);
+        Route::post('single-customer-contract/{customer_id}', [CustomerContractController::class, 'index']);
 
-
+        Route::get('customercontract/{contract_id}', [CustomerContractController::class, 'show']);
+        Route::get('estate-property-type', [PropertyTypeDetailsController::class, 'index']);
     });
 });

@@ -7,7 +7,7 @@ use App\Models\Customer;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Validation\Rule;
-use App\Models\ContractCustomer;
+use App\Models\CustomerContract;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Validator;
 
@@ -22,7 +22,7 @@ class CustomerController extends Controller
         $customers = Customer::with(['user:id,first_name,last_name,status', 'contracts:id,status,customer_id'])->withCount('contracts')
             ->where('company_id', $this->sessionDetails('company_id'))
             ->where('branch_id', auth()->user()->staff->branch_id)->paginate(20);
-       
+
         foreach ($customers as $customer) {
             $statuses = $customer->contracts->pluck('status')->toArray();
             $customer->contract_statuses = array_count_values($statuses);
@@ -33,10 +33,10 @@ class CustomerController extends Controller
 
     public function CustomerCount()
     {
-        $all = ContractCustomer::where('company_id', $this->sessionDetails('company_id'))->count();
-        $leads = ContractCustomer::where('company_id', $this->sessionDetails('company_id'))->where('status', 'lead')->count();
-        $subscriber = ContractCustomer::where('company_id', $this->sessionDetails('company_id'))->where('status', 'subscriber')->count();
-        $prospect = ContractCustomer::where('company_id', $this->sessionDetails('company_id'))->where('status', 'prospect')->count();
+        $all = CustomerContract::where('company_id', $this->sessionDetails('company_id'))->count();
+        $leads = CustomerContract::where('company_id', $this->sessionDetails('company_id'))->where('status', 'lead')->count();
+        $subscriber = CustomerContract::where('company_id', $this->sessionDetails('company_id'))->where('status', 'subscriber')->count();
+        $prospect = CustomerContract::where('company_id', $this->sessionDetails('company_id'))->where('status', 'prospect')->count();
 
         $contract = [
             'all' => $all,

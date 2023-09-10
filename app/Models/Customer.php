@@ -5,7 +5,7 @@ namespace App\Models;
 use App\Models\User;
 use App\Models\Property;
 use App\Models\CustomerRole;
-use App\Models\ContractCustomer;
+use App\Models\CustomerContract;
 use App\Models\CustomerProperty;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,13 +14,14 @@ class Customer extends Model
 {
     use HasFactory;
     protected $guarded = [];
-    
+
     public function roles()
     {
         return $this->hasMany(CustomerRole::class);
     }
 
-    public function user(){
+    public function user()
+    {
         return $this->belongsTo(User::class);
     }
 
@@ -31,7 +32,6 @@ class Customer extends Model
 
     public function contracts()
     {
-        return $this->hasMany(ContractCustomer::class);
+        return $this->hasMany(CustomerContract::class);
     }
-
 }

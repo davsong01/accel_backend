@@ -89,7 +89,7 @@ class JobRoleController extends Controller
             ], 412);
         }
 
-        $jobrole = JobRole::updateOrcreate([
+        $jobrole->update([
             'name' => $request->name,
             'department_id' => $request->department_id,
             'company_id' => $this->sessionDetails('company_id'),

@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\PlotSize;
+use App\Models\BuildingType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,6 +19,14 @@ class EstatePropertyTypeDetails extends Model
         return Attribute::make(
             get: fn (string $value) => date("M jS, Y", strtotime($value)),
         );
+    }
+
+    public function plot_details(){
+        return $this->belongsTo(PlotSize::class, 'plot_size');
+    }
+
+    public function building_details(){
+        return $this->belongsTo(BuildingType::class, 'building_type');
     }
 
 }

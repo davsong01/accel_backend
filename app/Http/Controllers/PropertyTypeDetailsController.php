@@ -2,19 +2,30 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\PropertyTypeDetails;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Http\RedirectResponse;
+use App\Models\EstatePropertyTypeDetails;
 
 class PropertyTypeDetailsController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index(): Response
+    public function index(Request $request)
     {
-        //
+        $property_types = EstatePropertyTypeDetails::with('plot_details:id,size', 'building_details:id,name')->select(['id','type','plot_size','building_type','company_id','created_at'])->where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at','DESC');
+       
+        if (!empty($request->estate)) {
+            $property_types = $property_types->where('estate_id', $request->estate);
+        }
+
+        if(!empty($request->type)){
+            $property_types = $property_types->where('type',$request->type);
+        }
+
+        return response()->json(['message' => 'success', 'data' => $property_types->get()], 200);
+       
     }
 
     /**
@@ -38,7 +49,7 @@ class PropertyTypeDetailsController extends Controller
      */
     public function show(PropertyTypeDetails $propertyTypeDetails): Response
     {
-        //
+    
     }
 
     /**

@@ -54,6 +54,7 @@ class RoleController extends Controller
         $role = Role::updateOrcreate([
             'name' => $request->name,
             'type' => $request->type,
+            'department_id' => $request->department_id,
         ]);
 
         return response()->json(['message' => 'Created successfully', 'data' => $role], 200);

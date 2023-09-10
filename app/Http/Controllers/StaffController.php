@@ -33,6 +33,9 @@ class StaffController extends Controller
         $staff = Staff::where(['staff.company_id' => $this->sessionDetails('company_id')])
             ->join("users", "staff.user_id", "=", "users.id")
             ->where(['type' => 'staff'])
+            ->join("departments", "staff.department_id", "=", "departments.id")
+            ->join("jobroles", "staff.jobrole_id", "=", "jobroles.id")
+            ->join("jobtypes", "staff.jobtype_id", "=", "jobtypes.id")
             ->select("staff.id AS staff_id", "users.id As user_id", "users.status", "staff.created_at", "users.first_name", "users.last_name", "users.email", "users.staff_id", "users.type", "users.company_id");
 
 
@@ -105,6 +108,7 @@ class StaffController extends Controller
 
     public function storeStaff(Request $request)
     {
+        dd($request->all());
         $validator = Validator::make($request->all(), [
             'role_id' => 'required|exists:roles,id',
             'staff_id' => 'required|exists:staff,id',

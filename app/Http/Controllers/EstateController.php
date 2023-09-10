@@ -144,6 +144,36 @@ class EstateController extends Controller
             ], 412);
         }
 
+        if ($request->has('building_details') && !empty($request->building_details)) {
+            foreach ($request->building_details as $details) {
+                $validator = Validator::make($details, [
+                    'building_type' => 'required|exists:building_types,id',
+                ]);
+
+                if ($validator->fails()) {
+                    return response()->json([
+                        'error' => $validator->messages()->first(),
+                        'data' => null,
+                    ], 412);
+                }
+            }   
+        }
+
+        if ($request->has('land_details') && !empty($request->land_details)) {
+            foreach ($request->land_details as $details) {
+                $validator = Validator::make($details, [
+                    'plot_size' => 'required|exists:plot_sizes,id',
+                ]);
+
+                if ($validator->fails()) {
+                    return response()->json([
+                        'error' => $validator->messages()->first(),
+                        'data' => null,
+                    ], 412);
+                }
+            }
+        }
+        
         $estate = Estate::updateOrcreate([
             'name' => $request->name,
             'city_id' => $request->city,
@@ -162,12 +192,12 @@ class EstateController extends Controller
                 EstatePropertyTypeDetails::updateOrcreate([
                     'estate_id' => $estate->id,
                     'type' => 'building',
-                    "plot_size" => $details['plot_size'] ?? null,
-                    "building_type" => $details['building_type'] ?? null,
-                    "estate_price" => $details['estate_price'],
-                    "settings_and_excavation" => $details['settings_and_excavation'] ?? null,
-                    "infrastructural_fee" => $details['infrastructural_fee'] ?? null,
-                    "company_id" => $this->sessionDetails('company_id') ?? null
+                    'plot_size' => $details['plot_size'] ?? null,
+                    'building_type' => $details['building_type'] ?? null,
+                    'estate_price' => $details['estate_price'],
+                    'settings_and_excavation' => $details['settings_and_excavation'] ?? null,
+                    'infrastructural_fee' => $details['infrastructural_fee'] ?? null,
+                    'company_id' => $this->sessionDetails('company_id') ?? null
                 ]);
             }
         }
@@ -399,5 +429,11 @@ class EstateController extends Controller
     {
         $realpath = base_path() . '/sampleimports/sample_estate.xlsx';
         return response()->download($realpath);
+    }
+
+    public function getEstateInLocation($location_id)
+    {
+        $estates = Estate::where('location_id', $location_id)->where('company_id', $this->sessionDetails('company_id'))->get();
+        return response()->json(['message' => 'Retrieved succesfully', 'data' => $estates], 200);
     }
 }
