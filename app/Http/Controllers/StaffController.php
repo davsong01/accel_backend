@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Role;
+use App\Models\User;
 use App\Models\Staff;
 use App\Models\StaffRole;
 use Illuminate\Http\Request;
@@ -29,16 +30,14 @@ class StaffController extends Controller
 
     public function getAllStaff(Request $request)
     {
-
         $staff = Staff::where(['staff.company_id' => $this->sessionDetails('company_id')])
             ->join("users", "staff.user_id", "=", "users.id")
             ->where(['type' => 'staff'])
             ->join("departments", "staff.department_id", "=", "departments.id")
-            ->join("jobroles", "staff.jobrole_id", "=", "jobroles.id")
-            ->join("jobtypes", "staff.jobtype_id", "=", "jobtypes.id")
-            ->select("staff.id AS staff_id", "users.id As user_id", "users.status", "staff.created_at", "users.first_name", "users.last_name", "users.email", "users.staff_id", "users.type", "users.company_id");
-
-
+            ->leftjoin("job_roles", "staff.jobrole_id", "=", "job_roles.id")
+            ->leftjoin("job_types", "staff.jobtype_id", "=", "job_types.id")
+            ->select("staff.id AS staff_id", "users.id As user_id", "users.status", "staff.created_at", "users.first_name", "users.last_name", "users.email", "users.staff_id", "users.type", "users.company_id","job_roles.name AS job_role","job_types.name AS job_type", "departments.name AS department", "users.middle_name", "users.email", "users.staff_id", "users.type", "users.phone_number", "users.gender");
+       
         if ($request->has('name') && !is_null($request->status)) {
             $staff = $staff->where('users.first_name', 'LIKE', "%{$request->name}%")
                 ->orWhere('users.last_name', 'LIKE', "%{$request->name}%");
@@ -57,7 +56,7 @@ class StaffController extends Controller
     {
         $staff = Staff::where(['staff.company_id' => $this->sessionDetails('company_id')])
             ->join("users", "staff.user_id", "=", "users.id")->where(['users.status' => 'active', 'type' => 'staff'])
-            ->select("staff.id AS staff_id", "users.id As user_id", "users.status", "staff.created_at", "users.first_name", "users.last_name", "users.email", "users.staff_id", "users.type", "users.company_id")
+            ->select("staff.id AS staff_id", "users.id As user_id", "users.status", "staff.created_at", "users.first_name", "users.last_name", "users.middle_name", "users.email", "users.staff_id", "users.type", "users.phone_number", "users.gender", "users.company_id")
             ->orderBy("staff.created_at", "desc")
             ->get();
         return response()->json(['message' => 'success', 'data' => $staff], 200);
@@ -108,18 +107,124 @@ class StaffController extends Controller
 
     public function storeStaff(Request $request)
     {
-        dd($request->all());
+        if(!isset($request->staff_id) && empty($request->staff_id)){
+            $validator = Validator::make($request->all(), [
+                'email' => [
+                    'required', 'email', Rule::unique('users')->where(function ($query) {
+                        $query->where('company_id', $this->sessionDetails('company_id'));
+                    })
+                ],
+                'first_name' => 'required',
+                'middle_name' => 'nullable',
+                'last_name' => 'required',
+                'username' => 'required',
+                'phone' => 'required',
+                'gender' => 'required',
+                'branch_id' => 'required',
+                'jobtype_id' => 'required',
+                'date_of_employment' => 'required',
+                'department_id' => 'required',
+                'jobrole_id' => 'required',
+                'commision_percentage' => 'required'
+            ]);
+        }
         $validator = Validator::make($request->all(), [
-            'role_id' => 'required|exists:roles,id',
-            'staff_id' => 'required|exists:staff,id',
-        ]);
+            'date_of_birth' => 'required',
+            'alternate_number' => 'nullable',
+            'state' => 'required',
+            'residential_address' => 'required',
+            'marital_status' => 'required',
+            'nationality' => 'required',
+            'lga' => 'required',
+            
+            'nok_first_name' => 'required',
+            'nok_last_name' => 'required',
+            'nok_phone_number' => 'required',
+            'nok_house_address' => 'required',
+            'nok_email_address' => 'required',
+            'nok_relationship' => 'required',
 
+            'staff_documents' => 'nullable',
+        ]);
+        
+
+        // Additional_information'
         if ($validator->fails()) {
             return response()->json([
                 'error' => $validator->messages()->first(),
                 'data' => null,
             ], 412);
         }
+
+        $data = $validator->valid();
+        $data['addition_details'] = json_encode([
+            'date_of_birth' => $data['date_of_birth'] ?? null,
+            'alternate_number' => $data['alternate_number'] ?? null,
+            'state' => $data['state'] ?? null,
+            'residential_address' => $data['residential_address'] ?? null,
+            'marital_status' => $data['marital_status'] ?? null,
+            'nationality' => $data['nationality'] ?? null,
+            'lga' => $data['lga'] ?? null,
+        ]);
+        
+        $data['next_of_kin'] = json_encode([
+            'nok_first_name' => $data['nok_first_name'],
+            'nok_last_name' => $data['nok_last_name'],
+            'nok_phone_number' => $data['nok_phone_number'],
+            'nok_house_address' => $data['nok_house_address'],
+            'nok_email_address' => $data['nok_email_address'],
+            'nok_relationship' => $data['nok_relationship'],
+        ]);
+
+        dd($data);
+        // Create user
+        if (!isset($request->staff_id) && empty($request->staff_id)) {
+            $user = User::create([
+                'email' => $data['email'],
+                'first_name' => $data['first_name'],
+                'middle_name' => $data['middle_name'] ?? null,
+                'last_name' => $data['last_name'] ?? null,
+                'username' => $data['username'] ?? null,
+                'phone' => $data['phone'] ?? null,
+                'gender' => $data['gender'] ?? null,
+                'addition_details' => $data['addition_details'],
+                'next_of_kin' => $data['next_of_kin'],
+                'branch_id' => $data['branch_id'] ?? null,
+                'company_id' => $this->sessionDetails('company_id'),
+            ]);
+            
+            
+            // Create staff
+            $staff = Staff::create([
+                'jobtype_id' => $data['jobtype_id'] ?? null,
+                'date_of_employment' => $data['date_of_employment'] ?? null,
+                'department_id' => $data['department_id'] ?? null,
+                'jobrole_id' => $data['jobrole_id'] ?? null,
+                'commision_percentage' => $data['commision_percentage'] ?? null,
+                'company_id' => $this->sessionDetails('company_id'), 
+            ]);
+                
+        }else{
+            $staff = Staff::where('id', $request->staff_id)->where('company_id', $this->sessionDetails('company_id'));
+            $user = $staff->user();
+        }
+
+        // Create staff documents
+        if($request->staff_documents){
+            foreach($request->staff_documents as $document){
+                \DB::table('staff_uploaded_documents')->insert([
+                    'staff_document_id' => $document->id,
+                    'name' =>  $document->name,
+                    'uploaded' =>  $document->uploaded ?? null,
+                    'required' =>  $document->required ?? null,
+                    'company_id' => $this->sessionDetails('company_id'),
+                ]);
+            }
+           
+        }
+
+        return response()->json(['message' => 'Successfully created!', 'data' => $user], 200);
+
     }
 
     public function getSingleStaffRoles($staff_id)

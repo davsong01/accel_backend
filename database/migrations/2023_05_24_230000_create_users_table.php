@@ -28,6 +28,7 @@ return new class extends Migration
             $table->enum('type', ['staff', 'customer']);
             $table->string('password')->nullable();
             $table->text('contact_information')->nullable();
+            $table->text('additional_information')->nullable();
             $table->text('next_of_kin')->nullable();
             $table->text('job_information')->nullable();
 

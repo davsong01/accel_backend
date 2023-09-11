@@ -99,7 +99,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('get-active-staff-in-role/{id}', [StaffController::class, 'getActiveStaffInRole']);
         Route::post('assign-role-to-staff', [StaffController::class, 'assignRoleToStaff']);
         Route::get('staff-roles/{staff_id}', [StaffController::class, 'getSingleStaffRoles']);
-
+        
         Route::get('staff-identification-settings/{id?}', [StaffController::class, 'staffIdentificationSetting']);
         Route::post('update-staff-identification-settings', [StaffController::class, 'updateStaffIdentificationSetting']);
         Route::get('staff-document-settings/{id?}', [StaffController::class, 'staffDocumentSetting']);

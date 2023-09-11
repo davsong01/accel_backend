@@ -17,6 +17,8 @@ return new class extends Migration
             $table->integer('company_id');
             $table->integer('branch_id')->nullable();
             $table->enum('status', ['active', 'inactive']);
+            $table->date('date_of_employment')->nullable();
+            $table->string('commision_percentage')->nullable();
 
             $table->timestamps();
         });
