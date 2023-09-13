@@ -225,8 +225,8 @@ class EstateController extends Controller
             "estate_id" => 'required|exists:estates,id',
             "type" => "required|in:land,building,both",
             "estate_price" => "sometimes",
-            'plot_size' => 'nullable|exists:plot_sizes,id,' . $this->sessionDetails('company_id'),
-            'building_type' => 'nullable|exists:building_types,id,' . $this->sessionDetails('company_id'),
+            'plot_size' => 'nullable|exists:plot_sizes,id,company_id,' . $this->sessionDetails('company_id'),
+            'building_type' => 'nullable|exists:building_types,id,company_id,' . $this->sessionDetails('company_id'),
             "estate_price" => "sometimes",
             "settings_and_excavation" => "sometimes",
             "infrastructural_fee" => "sometimes"
