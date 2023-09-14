@@ -14,7 +14,7 @@ class PropertyTypeDetailsController extends Controller
      */
     public function index(Request $request)
     {
-        $property_types = EstatePropertyTypeDetails::with('plot_details:id,size', 'building_details:id,name')->select(['id','type','plot_size','building_type','company_id','created_at'])->where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at','DESC');
+        $property_types = EstatePropertyTypeDetails::with('plot_details:id,size', 'building_details:id,name')->select(['id','type','plot_size','building_type','company_id','created_at','status'])->where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at','DESC');
        
         if (!empty($request->estate)) {
             $property_types = $property_types->where('estate_id', $request->estate);
