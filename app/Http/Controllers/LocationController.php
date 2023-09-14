@@ -111,7 +111,7 @@ class LocationController extends Controller
      */
     public function destroy(Location $location)
     {
-        $count = Estate::where(['city_id' => $location->id, 'company_id' => $location->company_id])->count();
+        $count = Estate::where(['location_id' => $location->id, 'company_id' => $location->company_id])->count();
 
         if ($count > 0) {
             return response()->json(['message' => 'Unable to delete, resource in use', 'data' => null], 412);

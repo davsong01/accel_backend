@@ -122,6 +122,7 @@ class BuildingTypeController extends Controller
      */
     public function destroy(BuildingType $buildingType)
     {
+        
         $count = EstatePropertyTypeDetails::where(['building_type' => $buildingType->size, 'company_id' => $buildingType->company_id])->count();
         if ($count > 0) {
             return response()->json(['message' => 'Unable to delete, resource in use', 'data' => null], 412);
