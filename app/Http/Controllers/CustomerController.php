@@ -111,7 +111,7 @@ class CustomerController extends Controller
             ]);
         }
 
-        return response()->json(['message' => 'success', 'data' => $user], 200);
+        return response()->json(['message' => 'success', 'data' => $customer], 200);
     }
 
     /**
