@@ -71,9 +71,9 @@ class CustomerController extends Controller
                 })
             ],
             'phone_number' => 'required',
-            'city' => 'required|exists:cities,id,company_id,' . $this->sessionDetails('company_id'),
-            'location' => 'required|exists:locations,id,company_id,' . $this->sessionDetails('company_id'),
-            'estate' => 'required|exists:estates,id,company_id,' . $this->sessionDetails('company_id'),
+            // 'city' => 'required|exists:cities,id,company_id,' . $this->sessionDetails('company_id'),
+            // 'location' => 'required|exists:locations,id,company_id,' . $this->sessionDetails('company_id'),
+            // 'estate' => 'required|exists:estates,id,company_id,' . $this->sessionDetails('company_id'),
             'residential_address' => 'required',
         ]);
 

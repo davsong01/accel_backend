@@ -51,7 +51,7 @@ class CustomerContractController extends Controller
             'building_type' => 'nullable|exists:building_types,id',
             'no_of_units' => 'required',
             'contract_type' => 'required',
-            'customer_id' => 'required',
+            'customer_id' => 'required|exists:customers,id,company_id,' . $this->sessionDetails('company_id'),
             'subscribers' => 'nullable'
         ]);
 
