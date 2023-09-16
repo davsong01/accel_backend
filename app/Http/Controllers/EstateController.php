@@ -281,7 +281,7 @@ class EstateController extends Controller
             'name' => 'required',
             'city' => 'required|exists:cities,id',
             'location' => 'required|exists:locations,id',
-            'property_type' => 'required|in:land,house,both',
+            'property_type' => 'required|in:land,building,both',
         ]);
 
         if ($validator->fails()) {
@@ -343,6 +343,21 @@ class EstateController extends Controller
 
     public function updateEstatePropertyType(Request $request, $id)
     {
+        $validator = Validator::make($request->all(), [
+            'plot_size' => 'nullable|exists:plot_sizes,id,company_id,' . $this->sessionDetails('company_id'),
+            'building_type' => 'nullable|exists:building_types,id,company_id,' . $this->sessionDetails('company_id'),
+            "estate_price" => 'required',
+            "settings_and_excavation" => 'required',
+            "infrastrutural_fee" => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->messages()->first(),
+                'data' => null,
+            ], 412);
+        }
+
         $property_type = EstatePropertyTypeDetails::find($id);
 
         $property_type->update([
