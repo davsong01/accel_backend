@@ -19,9 +19,10 @@ class CustomerController extends Controller
 
     public function index(Request $request)
     {
-        $customers = Customer::with(['user:id,first_name,last_name,status', 'contracts:id,status,customer_id'])->withCount('contracts')
+        $customers = Customer::with(['user:id,first_name,last_name,status,gender,phone_number,residential_address', 'contracts:id,status,customer_id'])->withCount('contracts')
             ->where('company_id', $this->sessionDetails('company_id'))
-            ->where('branch_id', auth()->user()->staff->branch_id)->paginate(20);
+            // ->where('branch_id', auth()->user()->staff->branch_id)
+            ->paginate(20);
 
         foreach ($customers as $customer) {
             $statuses = $customer->contracts->pluck('status')->toArray();
@@ -31,13 +32,53 @@ class CustomerController extends Controller
         return response()->json(['message' => 'success', 'data' => $customers], 200);
     }
 
+    public function getLeads(){
+        $leads = Customer::with(['user:id,first_name,last_name,status,gender,phone_number,residential_address'])->whereHas('contracts', function ($query) {
+            $query->where('status', 'lead');
+        })->withCount('contracts')->where('company_id', $this->sessionDetails('company_id'))->paginate(20);
+
+        // $leads = Customer::with(['user:id,first_name,last_name,status,gender,phone_number,residential_address', 'contracts:id,status,customer_id'])->whereHas('contracts', function ($query) {
+        //     $query->where('status', 'lead');
+        // })->withCount('contracts')->where('company_id', $this->sessionDetails('company_id'))->paginate(20);
+
+        return response()->json(['message' => 'success', 'data' => $leads], 200);
+    }
+
+    public function getSubscribers(){
+        $subscriber = Customer::with(['user:id,first_name,last_name,status,gender,phone_number,residential_address'])->whereHas('contracts', function ($query) {
+            $query->where('status', 'subscriber');
+        })->withCount('contracts')->where('company_id', $this->sessionDetails('company_id'))->paginate(20);
+
+        return response()->json(['message' => 'success', 'data' => $subscriber], 200);
+    }
+
+    public function getProspects(){
+        $prospect = Customer::with(['user:id,first_name,last_name,status,gender,phone_number,residential_address'])->whereHas('contracts', function ($query) {
+            $query->where('status', 'prospect');
+        })->withCount('contracts')->where('company_id', $this->sessionDetails('company_id'))->paginate(20);
+
+        return response()->json(['message' => 'success', 'data' => $prospect], 200);
+
+    }
+
+    
+
     public function CustomerCount()
     {
-        $all = CustomerContract::where('company_id', $this->sessionDetails('company_id'))->count();
-        $leads = CustomerContract::where('company_id', $this->sessionDetails('company_id'))->where('status', 'lead')->count();
-        $subscriber = CustomerContract::where('company_id', $this->sessionDetails('company_id'))->where('status', 'subscriber')->count();
-        $prospect = CustomerContract::where('company_id', $this->sessionDetails('company_id'))->where('status', 'prospect')->count();
+        // $all = CustomerContract::where('company_id', $this->sessionDetails('company_id'))->count();
+        $all = Customer::count();
+        $leads = Customer::whereHas('contracts', function($query){
+            $query->where('status', 'lead');
+        })->where('company_id', $this->sessionDetails('company_id'))->count();
 
+        $subscriber = Customer::whereHas('contracts', function ($query) {
+            $query->where('status', 'subscriber');
+        })->where('company_id', $this->sessionDetails('company_id'))->count();
+
+        $prospect = Customer::whereHas('contracts', function ($query) {
+            $query->where('status', 'prospect');
+        })->where('company_id', $this->sessionDetails('company_id'))->count();
+        
         $contract = [
             'all' => $all,
             'lead' => $leads,
@@ -135,22 +176,20 @@ class CustomerController extends Controller
      */
     public function update(Request $request, Customer $customer)
     {
-        $request->validate([
+        // $request->validate([
 
-            'name' => 'required',
+        //     'name' => 'required',
 
-            'email' => [
+        //     'email' => [
 
-                'required', 'email', Rule::unique('transporters')->where(function ($query) {
+        //         'required', 'email', Rule::unique('transporters')->where(function ($query) {
 
-                    $query->where('deleted', '=', '0')
+        //             $query->where('deleted', '=', '0')->where('id', '!=', $id);
+        //         })
 
-                        ->where('id', '!=', $id);
-                })
+        //     ],
 
-            ],
-
-        ]);
+        // ]);
     }
 
     /**
