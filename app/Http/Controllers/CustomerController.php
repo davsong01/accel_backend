@@ -158,9 +158,13 @@ class CustomerController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Customer $customer)
+    public function show($id)
     {
-        //
+        $user = Customer::where('customers.id',$id)->join('users','users.id','=','customers.user_id')
+        ->select('users.status', 'users.type', 'users.first_name', 'users.last_name', 'users.middle_name', 'users.phone_number', 'users.residential_address', 'users.gender', 'users.email', 'users.contact_information', 'users.next_of_kin', 'users.additional_information', 'job_information','customers.id AS customer_id')
+        ->first();
+        // $user = User::select('customers.id','users.*')->where('id', $customer->user_id)->first();
+        return response()->json(['message' => 'success', 'data' => $user], 200);
     }
 
     /**

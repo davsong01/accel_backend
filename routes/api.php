@@ -136,6 +136,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('get-leads', [CustomerController::class, 'getLeads']);
         Route::get('get-prospects', [CustomerController::class, 'getProspects']);
         Route::get('get-subscribers', [CustomerController::class, 'getSubscribers']);
+        Route::get('get-single-customer-details/{id}', [CustomerController::class, 'show']);
 
     });
 });
