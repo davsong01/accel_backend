@@ -22,14 +22,19 @@ class CustomerContractController extends Controller
         $contracts = CustomerContract::where('customer_id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->select(['id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'contract_type', 'property_type'])
         ->groupBy('estate_id')
             ->get();
-
+           
         $allContracts = [];
-        foreach ($contracts as $key => $contract) {
-            $allContracts[$key]['contracts'] = $contract;
-            $allContracts[$key]['form_amount'] = $this->getContractFormAmount($contract);
-        }
+        if($contracts){
+            foreach ($contracts as $key => $contract) {
+                $allContracts[$key]['contracts'] = $contract;
+                $allContracts[$key]['form_amount'] = $this->getContractFormAmount($contract, 'single');
+            }
+    
+            return response()->json(['message' => 'success', 'data' => $allContracts], 200);
+        }else{
+            return response()->json(['message' => 'No records found', 'data' => null], 200);
 
-        return response()->json(['message' => 'success', 'data' => $allContracts], 200);
+        }
     }
 
     /**

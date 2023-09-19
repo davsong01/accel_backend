@@ -91,6 +91,7 @@ class Controller extends BaseController
 
         }else{
             foreach($estate_contracts as $contract){
+               
                 if($contract->property_type == 'building'){
                     $buildAmount[] = $settings->form_payment_for_building;
                 }
