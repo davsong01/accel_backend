@@ -128,7 +128,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::post('form-expiry-status', [EstateController::class, 'changeFormExpiry']);
         Route::get('change-special-request-status', [MenuController::class, 'changeSpecialRequestStatus']);
         Route::post('add-new-contract', [CustomerContractController::class, 'store']);
-        Route::post('single-customer-contract/{customer_id}', [CustomerContractController::class, 'index']);
+        Route::get('single-customer-contract/{customer_id}', [CustomerContractController::class, 'index']);
 
         Route::get('customercontract/{contract_id}', [CustomerContractController::class, 'show']);
         Route::get('estate-property-type', [PropertyTypeDetailsController::class, 'index']);
@@ -137,6 +137,8 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('get-prospects', [CustomerController::class, 'getProspects']);
         Route::get('get-subscribers', [CustomerController::class, 'getSubscribers']);
         Route::get('get-single-customer-details/{id}', [CustomerController::class, 'show']);
+        Route::post('form-payment-history', [CustomerContractController::class, 'formPaymentHistory']);
+        Route::post('make-form-payment', [CustomerContractController::class, 'makeFormPayment']);
 
     });
 });

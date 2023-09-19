@@ -165,6 +165,9 @@ class CustomerContractController extends Controller
 
         return response()->json(['message' => 'success', 'data' => $contract], 200);
     }
+    public function makeFormPayment(Request $request){
+
+    }
 
     /**
      * Show the form for editing the specified resource.
