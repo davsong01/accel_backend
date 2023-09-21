@@ -50,61 +50,97 @@ class CustomerContractController extends Controller
      */
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'city_id' => 'required|exists:cities,id,company_id,' . $this->sessionDetails('company_id'),
-            'location_id' => 'required|exists:locations,id,company_id,' . $this->sessionDetails('company_id'),
-            'estate_id' => 'required|exists:estates,id,company_id,' . $this->sessionDetails('company_id'),
-            'property_type' => 'required|in:land,building,both',
-            'plot_size' => 'nullable|exists:plot_sizes,id',
-            'building_type' => 'nullable|exists:building_types,id',
-            'no_of_units' => 'required',
-            'contract_type' => 'required',
-            // 'customer_id' => 'required|exists:customers,id,company_id,' . $this->sessionDetails('company_id'),
-            'subscribers' => 'nullable',
-            
-            'first_name' => 'required',
-            'last_name' => 'required',
-            'gender' => 'required|in:male,female',
-            'email' => [
-                'required', 'email', Rule::unique('users')->where(function ($query) {
-                    $query->where('company_id', $this->sessionDetails('company_id'));
-                })
-            ],
-            'phone_number' => 'required',
-            'residential_address' => 'required',
-        ]);
+        if(!empty($request->customer_id)){
+            $validator = Validator::make($request->all(), [
+                'city_id' => 'required|exists:cities,id,company_id,' . $this->sessionDetails('company_id'),
+                'location_id' => 'required|exists:locations,id,company_id,' . $this->sessionDetails('company_id'),
+                'estate_id' => 'required|exists:estates,id,company_id,' . $this->sessionDetails('company_id'),
+                'property_type' => 'required|in:land,building,both',
+                'plot_size' => 'nullable|exists:plot_sizes,id',
+                'building_type' => 'nullable|exists:building_types,id',
+                'no_of_units' => 'required',
+                'contract_type' => 'required',
+                'customer_id' => 'required|exists:customers,id,company_id,' . $this->sessionDetails('company_id'),
+                'subscribers' => 'nullable',
+            ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'error' => $validator->messages()->first(),
-                'data' => null,
-            ], 412);
-        }
+            if ($validator->fails()) {
+                return response()->json([
+                    'error' => $validator->messages()->first(),
+                    'data' => null,
+                ], 412);
+            }
 
-        $data = $validator->valid();
+            $data = $validator->valid();
+            $range = range(1, $data['no_of_units']);
+            $data['subscribers'] = json_encode($data['subscribers']);
+            $data = Arr::except($data, 'no_of_units');
 
-        $range = range(1, $data['no_of_units']);
-        $data['subscribers'] = json_encode($data['subscribers']);
-        $data = Arr::except($data, 'no_of_units');
-
-        // Add user
-        $user = $this->createUser($data);
-
-        // Add customer
-        if($user) {
-            $customer = $this->createCustomer($user);
-        }else{
-            return response()->json(['message' => 'Could not create user', 'data' => null], 422);
-        }
-        
-        if($customer) {
             // Add contract
             foreach ($range as $units) {
-            $data['customer_id'] = $customer->id;
-                $contract = $this->createCustomerContract($data);
+                $data['customer_id'] = $data['customer_id'];
+                $this->createCustomerContract($data);
             }
+
+            return response()->json(['message' => 'success', 'data' => ['customer_id' => $data['customer_id']]], 200);
         }else{
-            return response()->json(['message' => 'Could not create customer', 'data' => null], 422);
+            $validator = Validator::make($request->all(), [
+                'city_id' => 'required|exists:cities,id,company_id,' . $this->sessionDetails('company_id'),
+                'location_id' => 'required|exists:locations,id,company_id,' . $this->sessionDetails('company_id'),
+                'estate_id' => 'required|exists:estates,id,company_id,' . $this->sessionDetails('company_id'),
+                'property_type' => 'required|in:land,building,both',
+                'plot_size' => 'nullable|exists:plot_sizes,id',
+                'building_type' => 'nullable|exists:building_types,id',
+                'no_of_units' => 'required',
+                'contract_type' => 'required',
+                'subscribers' => 'nullable',
+
+                'first_name' => 'required',
+                'last_name' => 'required',
+                'gender' => 'required|in:male,female',
+                'email' => [
+                    'required', 'email', Rule::unique('users')->where(function ($query) {
+                        $query->where('company_id', $this->sessionDetails('company_id'));
+                    })
+                ],
+                'phone_number' => 'required',
+                'residential_address' => 'required',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'error' => $validator->messages()->first(),
+                    'data' => null,
+                ], 412);
+            }
+
+            $data = $validator->valid();
+            $range = range(1, $data['no_of_units']);
+            $data['subscribers'] = json_encode($data['subscribers']);
+            $data = Arr::except($data, 'no_of_units');
+
+            // Add user
+            $user = $this->createUser($data);
+
+            // Add customer
+            if ($user) {
+                $customer = $this->createCustomer($user);
+            } else {
+                return response()->json(['message' => 'Could not create user', 'data' => null], 422);
+            }
+
+            if ($customer) {
+                // Add contract
+                foreach ($range as $units) {
+                    $data['customer_id'] = $customer->id;
+                    $contract = $this->createCustomerContract($data);
+                }
+            } else {
+                return response()->json(['message' => 'Could not create customer', 'data' => null], 422);
+            }
+
+            return response()->json(['message' => 'success', 'data' => ['customer_id' => $customer->id]], 200);
+
         }
 
         return response()->json(['message' => 'success', 'data' => null], 200);
