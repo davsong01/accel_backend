@@ -19,8 +19,8 @@ class CustomerContractController extends Controller
      */
     public function index($customer_id)
     {
-        $contracts = CustomerContract::where('customer_id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->select(['id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'contract_type', 'property_type'])
-        ->groupBy('estate_id')
+        $contracts = CustomerContract::with('location:name,id')->where('customer_id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->select(['id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'contract_type', 'property_type'])
+        // ->groupBy('estate_id')
             ->orderBy('created_at','DESC')
                 ->get();
 
@@ -40,6 +40,8 @@ class CustomerContractController extends Controller
             $data['contract_count'] = $dataX;
            
             foreach ($contracts as $key => $contract) {
+                // $estate->load('city', 'location', 'estate_property_type')
+                $contract['location'] = $contract->location->name;
                 $allContracts[$key] = $contract;
                 $allContracts[$key]['form_amount'] = $this->getContractFormAmount($contract, 'single');
             }
@@ -222,7 +224,33 @@ class CustomerContractController extends Controller
         return response()->json(['message' => 'success', 'data' => $contract], 200);
     }
     public function makeFormPayment(Request $request){
+        $validator = Validator::make($request->all(), [
+            'contract_id' => 'required|exists:customer_contracts,id,company_id,' . $this->sessionDetails('company_id'),
+            'account_id' => 'required|exists:accounts,id',
+            'payment_slip' => 'required',
+            'description' => 'required',
+            'amount' => 'required',
+        ]);
 
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->messages()->first(),
+                'data' => null,
+            ], 412);
+        }
+
+        // Check if contract exists in multiple estates and get the form payment amount
+        // Check amount
+        if(!empty($request->estate_id)){
+
+        }else{
+
+        }
+        $amount = $this->getContractFormAmount($estate_contracts);
+        FormPayment::create([
+            
+        ]);
+        dd($request->all());
     }
 
     /**

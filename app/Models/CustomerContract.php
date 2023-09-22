@@ -14,4 +14,9 @@ class CustomerContract extends Model
     public function customer(){
         return $this->belongsTo(Customer::class, 'customer_id');
     }
+
+    public function location()
+    {
+        return $this->belongsTo(Location::class);
+    }
 }
