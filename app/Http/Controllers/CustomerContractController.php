@@ -21,7 +21,8 @@ class CustomerContractController extends Controller
     {
         $contracts = CustomerContract::where('customer_id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->select(['id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'contract_type', 'property_type'])
         ->groupBy('estate_id')
-            ->get();
+            ->orderBy('created_at','DESC')
+                ->get();
            
         $allContracts = [];
         if($contracts){

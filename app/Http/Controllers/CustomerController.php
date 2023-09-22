@@ -20,7 +20,7 @@ class CustomerController extends Controller
     public function index(Request $request)
     {
         $customers = Customer::with(['user:id,first_name,last_name,status,gender,phone_number,residential_address', 'contracts:id,status,customer_id'])->withCount('contracts')
-            ->where('company_id', $this->sessionDetails('company_id'))
+            ->where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at','DESC')
             // ->where('branch_id', auth()->user()->staff->branch_id)
             ->paginate(20);
 
