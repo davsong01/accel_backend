@@ -137,6 +137,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('get-prospects', [CustomerController::class, 'getProspects']);
         Route::get('get-subscribers', [CustomerController::class, 'getSubscribers']);
         Route::get('get-single-customer-details/{id}', [CustomerController::class, 'show']);
+        Route::get('get-single-customer-contract-count/{customer_id}', [CustomerController::class, 'singleCustomerContractCount']);
         Route::post('form-payment-history', [CustomerContractController::class, 'formPaymentHistory']);
         Route::post('make-form-payment', [CustomerContractController::class, 'makeFormPayment']);
 

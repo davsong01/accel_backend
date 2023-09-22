@@ -203,4 +203,21 @@ class CustomerController extends Controller
     {
         //
     }
+
+    public function singleCustomerContractCount($customer_id){
+        $customer = Customer::withCount(['singleContract', 'joinContract', 'contracts'])->where('id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->first();
+
+        if(!$customer){
+            return response()->json(['message' => 'No record found', 'data' => null], 404);
+        }
+
+        $data = [
+            'all_contracts' => $customer->contracts_count,
+            'joint_contracts' => $customer->single_contract_count,
+            'single_contracts' => $customer->join_contract_count
+        ];
+
+        return response()->json(['message' => 'success', 'data' => $data], 200);
+
+    }
 }

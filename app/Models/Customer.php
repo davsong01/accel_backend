@@ -34,4 +34,14 @@ class Customer extends Model
     {
         return $this->hasMany(CustomerContract::class);
     }
+
+    public function singleContract()
+    {
+        return $this->hasMany(CustomerContract::class, 'customer_id')->where(['contract_type'=>'single']);
+    }
+
+    public function joinContract()
+    {
+        return $this->hasMany(CustomerContract::class, 'customer_id')->where(['contract_type' => 'joint']);
+    }
 }
