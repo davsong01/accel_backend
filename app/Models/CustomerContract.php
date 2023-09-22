@@ -10,4 +10,8 @@ class CustomerContract extends Model
     use HasFactory;
     protected $table = 'customer_contracts';
     protected $guarded = [];
+
+    public function customer(){
+        return $this->belongsTo(Customer::class, 'customer_id');
+    }
 }

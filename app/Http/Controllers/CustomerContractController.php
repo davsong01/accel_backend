@@ -23,15 +23,29 @@ class CustomerContractController extends Controller
         ->groupBy('estate_id')
             ->orderBy('created_at','DESC')
                 ->get();
-           
+
+            
+        // $contracts_count = $contracts->first()->customer->contracts->count();
+       
+
         $allContracts = [];
         if($contracts){
+            // get the customer
+            $customer = Customer::withCount(['singleContract', 'joinContract', 'contracts'])->where('id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->first();
+            $dataX = [
+                'all_contracts' => $customer->contracts_count,
+                'joint_contracts' => $customer->single_contract_count,
+                'single_contracts' => $customer->join_contract_count
+            ];
+            $data['contract_count'] = $dataX;
+           
             foreach ($contracts as $key => $contract) {
-                $allContracts[$key]['contracts'] = $contract;
+                $allContracts[$key] = $contract;
                 $allContracts[$key]['form_amount'] = $this->getContractFormAmount($contract, 'single');
             }
+            $data['all_contracts'] = $allContracts;
     
-            return response()->json(['message' => 'success', 'data' => $allContracts], 200);
+            return response()->json(['message' => 'success', 'data' => $data], 200);
         }else{
             return response()->json(['message' => 'No records found', 'data' => null], 200);
 
