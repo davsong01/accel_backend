@@ -135,6 +135,7 @@ class EstateController extends Controller
             'location' => 'required|exists:locations,id',
             'property_type' => 'required|in:land,building,both',
             'project_supervisor' => 'sometimes|exists:staff,id',
+            'form_amount' => 'required|numeric',
         ]);
 
         if ($validator->fails()) {
@@ -180,7 +181,7 @@ class EstateController extends Controller
             'location_id' => $request->location,
             'property_type' => $request->property_type,
             'project_supervisor' => $request->project_supervisor,
-            // 'bypass_approval' => $request->bypass_approval,
+            'form_amount' => $request->form_amount,
             'description' => $request->description,
             'company_id' => $this->sessionDetails('company_id'),
             'branch_id' => $this->sessionDetails('branch_id'),
@@ -281,6 +282,7 @@ class EstateController extends Controller
             'name' => 'required',
             'city' => 'required|exists:cities,id',
             'location' => 'required|exists:locations,id',
+            'form_amount' => 'required|numeric',
             'property_type' => 'required|in:land,building,both',
         ]);
 
@@ -300,6 +302,7 @@ class EstateController extends Controller
             'project_supervisor' => $request->project_supervisor,
             'branch_id' => $this->sessionDetails('branch_id'),
             'description' => $request->description,
+            'form_amount' => $request->form_amount,
         ]);
 
         if ($request->has('building_details') && !empty($request->building_details)) {

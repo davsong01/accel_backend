@@ -132,7 +132,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
 
         Route::get('customercontract/{contract_id}', [CustomerContractController::class, 'show']);
         Route::get('estate-property-type', [PropertyTypeDetailsController::class, 'index']);
-
+        
         Route::get('get-leads', [CustomerController::class, 'getLeads']);
         Route::get('get-prospects', [CustomerController::class, 'getProspects']);
         Route::get('get-subscribers', [CustomerController::class, 'getSubscribers']);

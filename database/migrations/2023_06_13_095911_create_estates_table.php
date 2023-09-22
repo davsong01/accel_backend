@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('property_type')->nullable();
             $table->string('description')->nullable();
             $table->integer('branch_id')->nullable();
-            // $table->integer('bypass_approval')->default(0);
+            $table->integer('form_amount')->nullable();
 
             $table->timestamps();
         });
