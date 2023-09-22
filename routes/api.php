@@ -113,11 +113,13 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::post('import-bulk-department', [DepartmentController::class, 'importBulkDepartment']);
 
         Route::get('leave-and-absence/{id?}', [LeaveAndAbenceManagementController::class, 'index']);
+        Route::get('single-staff-leave-and-absence/{staff_id}', [LeaveAndAbenceManagementController::class, 'staffLeaveAndAbsence']);
         Route::post('create-leave-and-absence', [LeaveAndAbenceManagementController::class, 'store']);
         Route::get('approve-leave-and-absence/{id}', [LeaveAndAbenceManagementController::class, 'approveLeaveAndAbsence']);
         Route::get('decline-leave-and-absence/{id}', [LeaveAndAbenceManagementController::class, 'declineLeaveAndAbsence']);
 
         Route::get('advance-and-claims/{id?}', [AdvanceAndClaimsController::class, 'index']);
+        Route::get('single-staff-advance-and-claims/{staff_id}', [LeaveAndAbenceManagementController::class, 'staffAdvanceAndClaims']);
 
         Route::resource('branch', BranchController::class);
         Route::resource('jobrole', JobRoleController::class);
@@ -132,7 +134,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
 
         Route::get('customercontract/{contract_id}', [CustomerContractController::class, 'show']);
         Route::get('estate-property-type', [PropertyTypeDetailsController::class, 'index']);
-        
+
         Route::get('get-leads', [CustomerController::class, 'getLeads']);
         Route::get('get-prospects', [CustomerController::class, 'getProspects']);
         Route::get('get-subscribers', [CustomerController::class, 'getSubscribers']);

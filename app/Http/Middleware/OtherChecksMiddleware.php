@@ -39,7 +39,7 @@ class OtherChecksMiddleware
 
             // confirm permission has roles
             if (is_null($permission->role_ids)) return $next($request);
-
+            
             $allowed_roles = explode(",", $permission->role_ids);
             $check = !empty(array_intersect($allowed_roles, $user_role_ids));
             if (!$check) return response()->json(['auth-error' => 'You are not permitted to use this resource!', 'data' => null], 403);

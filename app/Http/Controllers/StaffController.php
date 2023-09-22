@@ -20,7 +20,7 @@ class StaffController extends Controller
             ->join("staff", "staff_roles.staff_id", "=", "staff.id")
             ->where('staff.company_id', $this->sessionDetails('company_id'))
             ->join("users", "staff.user_id", "=", "users.id")->where(['users.status' => 'active', 'type' => 'staff'])
-            ->select("staff.id AS staff_id", "users.id As user_id", "users.status", "staff.created_at", "users.first_name", "users.last_name", "users.email", "users.staff_id", "users.type", "users.company_id")
+            ->select("staff.id AS staff_id", "users.id As user_id", "users.status", "staff.created_at", "users.first_name", "users.last_name", "users.email", "users.staff_id AS user_staff_id","staff.id AS staff_id", "users.type", "users.company_id")
             ->orderBy("staff_roles.staff_id", "desc")
             ->groupBy("staff.id")
             ->get();
@@ -36,7 +36,7 @@ class StaffController extends Controller
             ->join("departments", "staff.department_id", "=", "departments.id")
             ->leftjoin("job_roles", "staff.jobrole_id", "=", "job_roles.id")
             ->leftjoin("job_types", "staff.jobtype_id", "=", "job_types.id")
-            ->select("staff.id AS staff_id", "users.id As user_id", "users.status", "staff.created_at", "users.first_name", "users.last_name", "users.email", "users.staff_id", "users.type", "users.company_id","job_roles.name AS job_role","job_types.name AS job_type", "departments.name AS department", "users.middle_name", "users.email", "users.staff_id", "users.type", "users.phone_number", "users.gender");
+            ->select("staff.id AS staff_id", "users.id As user_id", "users.status", "staff.created_at", "users.first_name", "users.last_name", "users.email","users.staff_id AS user_staff_id", "staff.id AS staff_id", "users.type", "users.company_id","job_roles.name AS job_role","job_types.name AS job_type", "departments.name AS department", "users.middle_name", "users.email", "users.type", "users.phone_number", "users.gender");
        
         if ($request->has('name') && !is_null($request->status)) {
             $staff = $staff->where('users.first_name', 'LIKE', "%{$request->name}%")
@@ -56,8 +56,7 @@ class StaffController extends Controller
     {
         $staff = Staff::where(['staff.company_id' => $this->sessionDetails('company_id')])
             ->join("users", "staff.user_id", "=", "users.id")->where(['users.status' => 'active', 'type' => 'staff'])
-            ->select("staff.id AS staff_id", "users.id As user_id", "users.status", "staff.created_at", "users.first_name", "users.last_name", "users.middle_name", "users.email", "users.staff_id", "users.type", "users.phone_number", "users.gender", "users.company_id")
-            ->orderBy("staff.created_at", "desc")
+            ->select("staff.id AS staff_id", "users.id As user_id", "users.status", "staff.created_at", "users.first_name", "users.last_name", "users.email", "users.staff_id AS user_staff_id", "staff.id AS staff_id", "users.type", "users.company_id")
             ->get();
         return response()->json(['message' => 'success', 'data' => $staff], 200);
     }
