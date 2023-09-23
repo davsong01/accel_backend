@@ -131,8 +131,8 @@ class EstateController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required',
-            'city' => 'required|exists:cities,id',
-            'location' => 'required|exists:locations,id',
+            'city' => 'required|exists:cities,id,company_id,' . $this->sessionDetails('company_id'),
+            'location' => 'required|exists:locations,id,company_id,' . $this->sessionDetails('company_id'),
             'property_type' => 'required|in:land,building,both',
             'project_supervisor' => 'sometimes|exists:staff,id',
             'form_amount' => 'required|numeric',

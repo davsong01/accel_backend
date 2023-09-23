@@ -129,38 +129,18 @@ class StaffController extends Controller
                 'first_name' => 'required',
                 'middle_name' => 'nullable',
                 'last_name' => 'required',
-                'username' => 'required',
-                'phone' => 'required',
+                'username' => 'nullable',
+                'phone_number' => 'required',
                 'gender' => 'required',
-                'branch_id' => 'required',
-                'jobtype_id' => 'required',
-                'date_of_employment' => 'required',
-                'department_id' => 'required',
-                'jobrole_id' => 'required',
-                'commision_percentage' => 'required'
+                'branch_id' => 'nullable',
+                'jobtype_id' => 'required|exists:job_types,id,company_id,' . $this->sessionDetails('company_id'),
+                'jobrole_id' => 'required|exists:job_roles,id,company_id,' . $this->sessionDetails('company_id'),
+                'date_of_employment' => 'nullable',
+                'department_id' => 'required|exists:departments,id,company_id,' . $this->sessionDetails('company_id'),
+                'commision_percentage' => 'nullable'
             ]);
         }
-        // $validator = Validator::make($request->all(), [
-        //     'date_of_birth' => 'required',
-        //     'alternate_number' => 'nullable',
-        //     'state' => 'required',
-        //     'residential_address' => 'required',
-        //     'marital_status' => 'required',
-        //     'nationality' => 'required',
-        //     'lga' => 'required',
-            
-        //     'nok_first_name' => 'required',
-        //     'nok_last_name' => 'required',
-        //     'nok_phone_number' => 'required',
-        //     'nok_house_address' => 'required',
-        //     'nok_email_address' => 'required',
-        //     'nok_relationship' => 'required',
-
-        //     'staff_documents' => 'nullable',
-        // ]);
-        
-
-        // Additional_information'
+  
         if ($validator->fails()) {
             return response()->json([
                 'error' => $validator->messages()->first(),
@@ -170,50 +150,48 @@ class StaffController extends Controller
 
         $data = $validator->valid();
         $data['addition_details'] = json_encode([
-            'date_of_birth' => $data['date_of_birth'] ?? null,
-            'alternate_number' => $data['alternate_number'] ?? null,
-            'alternate_email' => $data['alternate_email'] ?? null,
-            'state' => $data['state'] ?? null,
-            'residential_address' => $data['residential_address'] ?? null,
-            'marital_status' => $data['marital_status'] ?? null,
-            'nationality' => $data['nationality'] ?? null,
-            'lga' => $data['lga'] ?? null,
+            'date_of_birth' => $data['date_of_birth'] ?? '',
+            'alternate_number' => $data['alternate_number'] ?? '',
+            'alternate_email' => $data['alternate_email'] ?? '',
+            'state' => $data['state'] ?? '',
+            'residential_address' => $data['residential_address'] ?? '',
+            'marital_status' => $data['marital_status'] ?? '',
+            'nationality' => $data['nationality'] ?? '',
+            'lga' => $data['lga'] ?? '',
         ]);
         
         $data['next_of_kin'] = json_encode([
-            'nok_first_name' => $data['nok_first_name'],
-            'nok_last_name' => $data['nok_last_name'],
-            'nok_phone_number' => $data['nok_phone_number'],
-            'nok_house_address' => $data['nok_house_address'],
-            'nok_email_address' => $data['nok_email_address'],
-            'nok_relationship' => $data['nok_relationship'],
+            'nok_first_name' => $data['nok_first_name'] ?? '',
+            'nok_last_name' => $data['nok_last_name'] ?? '',
+            'nok_phone_number' => $data['nok_phone_number'] ?? '',
+            'nok_house_address' => $data['nok_house_address'] ?? '',
+            'nok_email_address' => $data['nok_email_address'] ?? '',
+            'nok_relationship' => $data['nok_relationship'] ?? '',
         ]);
 
-        dd($data);
         // Create user
-        if (!isset($request->staff_id) && empty($request->staff_id)) {
+        if (!$request->staff_id && empty($request->staff_id)) {
             $user = User::create([
                 'email' => $data['email'],
                 'first_name' => $data['first_name'],
-                'middle_name' => $data['middle_name'] ?? null,
-                'last_name' => $data['last_name'] ?? null,
-                'username' => $data['username'] ?? null,
-                'phone' => $data['phone'] ?? null,
-                'gender' => $data['gender'] ?? null,
+                'middle_name' => $data['middle_name'] ?? '',
+                'last_name' => $data['last_name'] ?? '',
+                'username' => $data['username'] ?? '',
+                'phone_number' => $data['phone_number'] ?? '',
+                'gender' => $data['gender'] ?? '',
                 'addition_details' => $data['addition_details'],
                 'next_of_kin' => $data['next_of_kin'],
-                'branch_id' => $data['branch_id'] ?? null,
+                'branch_id' => $data['branch_id'] ?? '',
                 'company_id' => $this->sessionDetails('company_id'),
             ]);
             
-            
             // Create staff
             $staff = Staff::create([
-                'jobtype_id' => $data['jobtype_id'] ?? null,
-                'date_of_employment' => $data['date_of_employment'] ?? null,
-                'department_id' => $data['department_id'] ?? null,
-                'jobrole_id' => $data['jobrole_id'] ?? null,
-                'commision_percentage' => $data['commision_percentage'] ?? null,
+                'jobtype_id' => $data['jobtype_id'] ?? '',
+                'date_of_employment' => $data['date_of_employment'] ?? '',
+                'department_id' => $data['department_id'] ?? '',
+                'jobrole_id' => $data['jobrole_id'] ?? '',
+                'commision_percentage' => $data['commision_percentage'] ?? '',
                 'company_id' => $this->sessionDetails('company_id'), 
             ]);
                 
@@ -228,15 +206,15 @@ class StaffController extends Controller
                 \DB::table('staff_uploaded_documents')->insert([
                     'staff_document_id' => $document->id,
                     'name' =>  $document->name,
-                    'uploaded' =>  $document->uploaded ?? null,
-                    'required' =>  $document->required ?? null,
+                    'uploaded' =>  $document->uploaded ?? '',
+                    'required' =>  $document->required ?? '',
                     'company_id' => $this->sessionDetails('company_id'),
                 ]);
             }
            
         }
 
-        return response()->json(['message' => 'Successfully created!', 'data' => $user], 200);
+        return response()->json(['message' => 'Successfully created!', 'data' => ['staff_id' => $staff->id]], 200);
 
     }
 

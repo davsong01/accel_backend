@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Staff extends Model
 {
     use HasFactory;
+    protected $guarded = [];
+    
     public function adminRoles()
     {
         return $this->hasMany(StaffRole::class);

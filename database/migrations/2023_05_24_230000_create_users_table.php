@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('middle_name')->nullable();
             $table->string('last_name')->nullable();
             $table->string('phone_number')->nullable();
+            $table->string('username')->nullable();
             $table->string('residential_address')->nullable();
             $table->string('avatar')->nullable();
             $table->string('user_permissions')->nullable();
@@ -30,6 +31,7 @@ return new class extends Migration
             $table->string('password')->nullable();
             $table->text('contact_information')->nullable();
             $table->text('additional_information')->nullable();
+            $table->text('addition_details')->nullable();
             $table->text('next_of_kin')->nullable();
             $table->text('job_information')->nullable();
 
