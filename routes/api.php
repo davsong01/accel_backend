@@ -10,6 +10,7 @@ use App\Models\LeaveAndAbenceManagement;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\BranchController;
 use App\Http\Controllers\EstateController;
+use App\Http\Controllers\AccountController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\JobRoleController;
 use App\Http\Controllers\JobTypeController;
@@ -18,16 +19,20 @@ use App\Http\Controllers\LocationController;
 use App\Http\Controllers\PlotSizeController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\AccountTypeController;
 use App\Http\Controllers\BuildingTypeController;
 use App\Http\Controllers\EstateSettingController;
+use App\Http\Controllers\ChartOfAccountController;
 use App\Http\Controllers\CompanySettingController;
 use App\Http\Controllers\SpecialRequestController;
 use App\Http\Controllers\CompanyDocumentController;
 use App\Http\Controllers\AdvanceAndClaimsController;
 use App\Http\Controllers\CustomerContractController;
 use App\Http\Controllers\PropertyTypeDetailsController;
+use App\Http\Controllers\AccountClassificationController;
 use App\Http\Controllers\LeaveAndAbenceManagementController;
 use App\Http\Controllers\EstateConstructionSettingController;
+use App\Http\Controllers\TransactionTypeDefinitionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -119,7 +124,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('decline-leave-and-absence/{id}', [LeaveAndAbenceManagementController::class, 'declineLeaveAndAbsence']);
 
         Route::get('advance-and-claims/{id?}', [AdvanceAndClaimsController::class, 'index']);
-        Route::get('single-staff-advance-and-claims/{staff_id}', [LeaveAndAbenceManagementController::class, 'staffAdvanceAndClaims']);
+        Route::get('single-staff-advance-and-claims/{staff_id}', [AdvanceAndClaimsController::class, 'staffAdvanceAndClaims']);
 
         Route::resource('branch', BranchController::class);
         Route::resource('jobrole', JobRoleController::class);
@@ -140,6 +145,14 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('get-subscribers', [CustomerController::class, 'getSubscribers']);
         Route::get('get-single-customer-details/{id}', [CustomerController::class, 'show']);
         Route::get('get-single-customer-contract-count/{customer_id}', [CustomerController::class, 'singleCustomerContractCount']);
+        Route::resource('account-type', AccountTypeController::class);
+        Route::resource('account-classification', AccountClassificationController::class);
+        Route::resource('chart-of-account', ChartOfAccountController::class);
+        Route::resource('transaction-type-definition', TransactionTypeDefinitionController::class);
+        Route::resource('account', AccountController::class);
+
+        Route::get('single-customer-form-payment-details/{customer_id}', [CustomerContractController::class, 'singleCustomerFormDetails']);
+
         Route::post('form-payment-history', [CustomerContractController::class, 'formPaymentHistory']);
         Route::post('make-form-payment', [CustomerContractController::class, 'makeFormPayment']);
 

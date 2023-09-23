@@ -37,6 +37,30 @@ class AdvanceAndClaimsController extends Controller
         }
     }
 
+    public function staffAdvanceAndClaims(Request $request, $staff_id){
+        $lam = AdvanceAndClaims::where('company_id', $this->sessionDetails('company_id'))->where('staff_id',$staff_id);
+
+        if (isset($request->type) && !empty($request->type)) {
+            $lam = $lam->where('type', $request->type);
+        }
+        if (isset($id) && !empty($id)) {
+            $lam = $lam->where('id', $id)->first();
+            if ($lam) {
+                return response()->json(['message' => 'Retrieved Successfully', 'data' => $lam], 200);
+            } else {
+                return response()->json(['message' => 'No records found', 'data' => null], 200);
+            }
+        }
+
+        $lam = $lam->orderBy('created_at', 'DESC')->paginate(20);
+
+        if ($lam->count() > 0) {
+            return response()->json(['message' => 'Retrieved Successfully', 'data' => $lam], 200);
+        } else {
+            return response()->json(['message' => 'No records found', 'data' => null], 200);
+        }
+    }
+
     /**
      * Show the form for creating a new resource.
      */

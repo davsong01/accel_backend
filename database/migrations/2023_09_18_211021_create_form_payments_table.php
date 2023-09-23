@@ -13,11 +13,13 @@ return new class extends Migration
     {
         Schema::create('form_payments', function (Blueprint $table) {
             $table->id();
-            $table->integer('customer_contract_id');
+            $table->string('customer_contract_ids');
             $table->integer('account_id');
+            $table->integer('estate_id');
             $table->string('payment_slip')->nullable();
             $table->string('description')->nullable();
             $table->float('amount');
+            $table->integer('company_id');
             $table->timestamps();
         });
     }

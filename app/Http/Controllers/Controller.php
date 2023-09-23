@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Estate;
 use App\Models\EstateSettings;
+use App\Models\CustomerContract;
 use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Routing\Controller as BaseController;
@@ -107,6 +109,62 @@ class Controller extends BaseController
         }
 
         return $buildAmount;
+    }
+
+    public function generateFormPayment(array $contract_ids, $customer_id){
+        $contracts = [];
+        $ids = [];
+        $estates = [];
+        foreach($contract_ids as $contract_id){
+            // Get estates
+            $est = CustomerContract::select('estate_id')->where('id', $contract_id)
+            ->where('customer_id', $customer_id)
+            ->where('company_id', $this->sessionDetails('company_id'))->value('estate_id');
+
+            if(!empty($est)){
+                $estates[]= $est;
+                $ids[] = $contract_id;
+            }
+        }
+       
+        $estateContracts = [];
+        
+        foreach($estates as $e){
+            // Get the contracts for each estate
+            $es = Estate::where('id', $e)->first();
+            
+            $estateContracts[$e] = [
+                'estate_id' => $es->id,
+                'form_payment' => $es->form_amount,
+                'contracts' => $es->contracts($customer_id)
+            ];
+        }
+        
+        $form_payment = [];
+       
+        foreach($estateContracts as $contract){
+           
+            $contract['i_form_payment'] = [];
+            $s_ids = array_intersect($contract['contracts'], $ids);
+            if(array_diff($contract['contracts'], $ids)){
+                $dif = (count($contract['contracts']) - count(array_diff($contract['contracts'], $ids)));
+                $contract['i_form_payment']['form_amount'] = $dif *  $contract['form_payment'];
+            }
+            else{
+                $contract['i_form_payment']['form_amount'] = $contract['form_payment'];
+            }
+
+            
+            
+            $contract['i_form_payment']['contracts'] =  array_values($s_ids);
+            $form_payment[$contract['estate_id']] = $contract['i_form_payment'];
+        }
+      
+        $amount = array_sum(array_column($form_payment, 'form_amount'));
+        return [
+            'form_payment' => $amount,
+            'explanation' => $form_payment
+        ];
     }
    
 }

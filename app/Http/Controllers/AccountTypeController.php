@@ -1,0 +1,117 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\AccountType;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Validator;
+
+class AccountTypeController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        $account_type = AccountType::where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'desc')->get();
+        return response()->json(['message' => 'success', 'data' => $account_type], 200);
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'type' => 'required',
+            'code_from' => 'required',
+            'code_to' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->messages()->first(),
+                'data' => null,
+            ], 412);
+        }
+
+        $account_type = AccountType::updateOrcreate([
+            'type' => $request->type,
+            'code_from' => $request->code_from,
+            'code_to' => $request->code_to,
+            'company_id' => $this->sessionDetails('company_id'),
+        ]);
+
+        return response()->json(['message' => 'Created successfully', 'data' => $account_type], 200);
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(AccountType $account_type)
+    {
+        if($account_type){
+            return response()->json(['message' => 'Retrieved successfully', 'data' => $account_type], 200);
+        }else{
+            return response()->json(['message' => 'No records found', 'data' => null], 200);
+        }
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(AccountType $account_type): Response
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, AccountType $account_type)
+    {
+        $validator = Validator::make($request->all(), [
+            'type' => 'required',
+            'code_from' => 'required',
+            'code_to' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->messages()->first(),
+                'data' => null,
+            ], 412);
+        }
+
+        $account_type->update([
+            'type' => $request->type,
+            'code_from' => $request->code_from,
+            'code_to' => $request->code_to,
+        ]);
+
+        return response()->json(['message' => 'Updated Successfully.', 'data' => $account_type], 200);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(AccountType $account_type)
+    {
+        // $count = EstatePropertyTypeDetails::where(['plot_size' => $plotsize->size, 'company_id' => $plotsize->company_id])->count();
+        // if ($count > 0) {
+        //     return response()->json(['message' => 'Unable to delete, resource in use', 'data' => null], 412);
+        // }
+        $account_type->delete();
+        return response()->json(['message' => 'Deleted Successfully.', 'data' => null], 200);
+    }
+}

@@ -82,7 +82,7 @@ class PlotSizeController extends Controller
      */
     public function show(PlotSize $plotsize)
     {
-        //
+        return response()->json(['message' => 'success', 'data' => $plotsize], 200);
     }
 
     /**

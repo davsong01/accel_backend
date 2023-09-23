@@ -2,8 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Estate;
+use App\Models\PlotSize;
+use App\Models\BuildingType;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class CustomerContract extends Model
 {
@@ -19,4 +22,20 @@ class CustomerContract extends Model
     {
         return $this->belongsTo(Location::class);
     }
+
+    public function estate()
+    {
+        return $this->belongsTo(Estate::class);
+    }
+
+    public function building_type()
+    {
+        return $this->belongsTo(BuildingType::class, 'building_type');
+    }
+
+    public function plot_size()
+    {
+        return $this->belongsTo(PlotSize::class, 'plot_size');
+    }
+
 }

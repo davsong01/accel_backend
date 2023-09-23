@@ -42,4 +42,9 @@ class Estate extends Model
             get: fn (string $value) => date("M jS, Y", strtotime($value)),
         );
     }
+
+    public function contracts($customer_id)
+    {
+        return $this->hasMany(CustomerContract::class)->select('id')->where('customer_id',$customer_id)->pluck('id')->toArray();
+    }
 }
