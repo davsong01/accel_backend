@@ -8,6 +8,7 @@ use App\Models\Staff;
 use App\Models\StaffRole;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Validator;
@@ -35,8 +36,8 @@ class StaffController extends Controller
             ->where(['type' => 'staff'])
             ->join("departments", "staff.department_id", "=", "departments.id")
             ->leftjoin("job_roles", "staff.jobrole_id", "=", "job_roles.id")
-            ->leftjoin("job_types", "staff.jobtype_id", "=", "job_types.id")
-            ->select("staff.id AS staff_id", "users.id As user_id", "users.status", "staff.created_at", "users.first_name", "users.last_name", "users.email","users.staff_id AS user_staff_id", "staff.id AS staff_id", "users.type", "users.company_id","job_roles.name AS job_role","job_types.name AS job_type", "departments.name AS department", "users.middle_name", "users.email", "users.type", "users.phone_number", "users.gender");
+            ->leftjoin("job_types", "staff.jobtype_id", "=", "job_types.id");
+            
        
         if ($request->has('name') && !is_null($request->status)) {
             $staff = $staff->where('users.first_name', 'LIKE', "%{$request->name}%")
@@ -47,7 +48,19 @@ class StaffController extends Controller
             $staff = $staff->where('users.status', $request->status);
         }
 
-        $staff = $staff->orderBy("staff.created_at", "desc")->get();
+        if ($request->has('job_type') && !is_null($request->job_type)) {
+            $staff = $staff->where('staff.jobtype_id', $request->job_type);
+        }
+
+        if ($request->has('job_role') && !is_null($request->job_role)) {
+            $staff = $staff->where('staff.jobrole_id', $request->job_role);
+        }
+
+        if ($request->has('department') && !is_null($request->department)) {
+            $staff = $staff->where('staff.department_id', $request->department);
+        }
+
+        $staff = $staff->select("staff.id AS staff_id", "users.id As user_id", "users.status", "staff.created_at", "users.first_name", "users.last_name", "users.email","users.staff_id AS user_staff_id", "staff.id AS staff_id", "users.type", "users.company_id","job_roles.name AS job_role","job_types.name AS job_type", "departments.name AS department", "users.middle_name", "users.email", "users.type", "users.phone_number", "users.gender")->orderBy("staff.created_at", "desc")->get();
 
         return response()->json(['message' => 'success', 'data' => $staff], 200);
     }
@@ -127,24 +140,24 @@ class StaffController extends Controller
                 'commision_percentage' => 'required'
             ]);
         }
-        $validator = Validator::make($request->all(), [
-            'date_of_birth' => 'required',
-            'alternate_number' => 'nullable',
-            'state' => 'required',
-            'residential_address' => 'required',
-            'marital_status' => 'required',
-            'nationality' => 'required',
-            'lga' => 'required',
+        // $validator = Validator::make($request->all(), [
+        //     'date_of_birth' => 'required',
+        //     'alternate_number' => 'nullable',
+        //     'state' => 'required',
+        //     'residential_address' => 'required',
+        //     'marital_status' => 'required',
+        //     'nationality' => 'required',
+        //     'lga' => 'required',
             
-            'nok_first_name' => 'required',
-            'nok_last_name' => 'required',
-            'nok_phone_number' => 'required',
-            'nok_house_address' => 'required',
-            'nok_email_address' => 'required',
-            'nok_relationship' => 'required',
+        //     'nok_first_name' => 'required',
+        //     'nok_last_name' => 'required',
+        //     'nok_phone_number' => 'required',
+        //     'nok_house_address' => 'required',
+        //     'nok_email_address' => 'required',
+        //     'nok_relationship' => 'required',
 
-            'staff_documents' => 'nullable',
-        ]);
+        //     'staff_documents' => 'nullable',
+        // ]);
         
 
         // Additional_information'
@@ -159,6 +172,7 @@ class StaffController extends Controller
         $data['addition_details'] = json_encode([
             'date_of_birth' => $data['date_of_birth'] ?? null,
             'alternate_number' => $data['alternate_number'] ?? null,
+            'alternate_email' => $data['alternate_email'] ?? null,
             'state' => $data['state'] ?? null,
             'residential_address' => $data['residential_address'] ?? null,
             'marital_status' => $data['marital_status'] ?? null,
