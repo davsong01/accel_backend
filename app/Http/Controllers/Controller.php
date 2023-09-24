@@ -7,6 +7,7 @@ use App\Models\EstateSettings;
 use App\Models\CustomerContract;
 use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -30,49 +31,6 @@ class Controller extends BaseController
         }
 
         return;
-    }
-
-    public function uploadImage($file, $folder, $width = null, $height = null)
-    {
-        $imageName = uniqid(9) . '.' . $file->getClientOriginalExtension();
-        $imageFile = Image::make($file);
-
-        $imgWidth = $width ?? $imageFile->width();
-        $imgHeight = $height ?? $imageFile->height();
-
-        if (!is_null($imgWidth) && !is_null($imgHeight)
-        ) {
-            if ($imgWidth < $imgHeight) {
-                $imageFile->resize($imgWidth, null, function ($constraint) {
-                    $constraint->aspectRatio();
-                });
-            } else {
-                $imageFile->resize(null, $imgHeight, function ($constraint) {
-                    $constraint->aspectRatio();
-                });
-            }
-        }
-        
-        if (!is_dir($folder)) {
-            mkdir($folder, 0700);
-        }
-
-        $imageFile->save($folder . '/' . $imageName);
-        
-        return $imageName;
-    }
-
-    public function uploadPrivateFile($file, $location)
-    {
-        $name = uniqid(9) . '.' . $file->getClientOriginalExtension();
-
-        if (!is_dir($location)) {
-            mkdir($location, 0700);
-        }
-
-        $file->move($location, $name);
-
-        return $name;
     }
 
     public function getContractFormAmount($estate_contracts, $single=null){
@@ -165,6 +123,68 @@ class Controller extends BaseController
             'form_payment' => $amount,
             'explanation' => $form_payment
         ];
+    }
+
+    public function deleteUploadsFile($imagePath)
+    {
+
+        if (file_exists(base_path() . $imagePath)) {
+            unlink(base_path() . $imagePath);
+        }
+
+        return;
+    }
+
+    public function uploadFile($file, $location = null, $width = null, $height = null)
+    {
+        $folder = $this->getPathToSaveFile($location);
+        $name = uniqid(11) . '.' . $file->getClientOriginalExtension();
+       
+        if (substr($file->getMimeType(), 0, 5) == 'image') {
+            $imageFile = Image::make($file);
+            $imgWidth = $width ?? $imageFile->width();
+            $imgHeight = $imgHeight ?? $imageFile->height();
+            if (!is_null($imgWidth) && !is_null($imgHeight)) {
+                if ($imgWidth < $imgHeight) {
+                    $imageFile->resize($imgWidth, null, function ($constraint) {
+                        $constraint->aspectRatio();
+                    });
+                } else {
+                    $imageFile->resize(null, $imgWidth, function ($constraint) {
+                        $constraint->aspectRatio();
+                    });
+                }
+            }
+            
+        }
+
+        $file->storeAs($folder, $name, "uploads");
+
+        return $location.'/'.$name;
+    }
+
+    public function getPathToSaveFile($location = null){
+        $year = date('Y');
+        $month = date('m');
+        $day = date('d');
+
+        if($location){
+            $location = $location .'/' . $year . '/' . $month . '/' . $day;
+        }else{
+            $location = $year . '/' . $month . '/' . $day;
+        }
+
+        if (file_exists(base_path() . $location)) {
+            unlink(base_path() . $location);
+        }
+
+        return $location;
+    }
+
+    public function deleteFile($file){
+        if(Storage::disk('uploads')->exists($file)){
+            Storage::disk('uploads')->delete($file);
+        }
     }
    
 }

@@ -4,12 +4,10 @@ namespace App\Models;
 
 use App\Models\City;
 use App\Models\Location;
-use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\EstatePropertyTypeDetails;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 class Estate extends Model
 {
@@ -47,4 +45,7 @@ class Estate extends Model
     {
         return $this->hasMany(CustomerContract::class)->select('id')->where('customer_id',$customer_id)->pluck('id')->toArray();
     }
+
+    
+
 }

@@ -153,7 +153,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
 
         Route::get('single-customer-form-payment-details/{customer_id}', [CustomerContractController::class, 'singleCustomerFormDetails']);
 
-        Route::post('form-payment-history', [CustomerContractController::class, 'formPaymentHistory']);
+        Route::get('form-payment-history/{customer_id}', [CustomerContractController::class, 'formPaymentHistory']);
         Route::post('make-form-payment', [CustomerContractController::class, 'makeFormPayment']);
 
     });

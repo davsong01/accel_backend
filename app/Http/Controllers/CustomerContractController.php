@@ -233,6 +233,7 @@ class CustomerContractController extends Controller
             'payment_slip' => 'required',
             'description' => 'required',
             'amount' => 'required',
+            'customer_id' => 'required'
         ]);
 
         if ($validator->fails()) {
@@ -241,6 +242,7 @@ class CustomerContractController extends Controller
                 'data' => null,
             ], 412);
         }
+
         $data = $validator->valid();
         $form_payment = $this->generateFormPayment($request['contract_ids'], $request->customer_id);
        
@@ -251,15 +253,23 @@ class CustomerContractController extends Controller
             ], 412);
         }
 
+        if(!empty($request->payment_slip)){
+            $filename = $this->uploadFile($request->payment_slip, 'payments');
+        }
+
         if($form_payment){
             foreach($form_payment['explanation'] as $key=>$form){
-                FormPayment::updateOrCreate([
-                    'customer_contract_ids' => implode(',', $form['contracts']),
+                $customer_contract_ids = implode(',', $form['contracts']);
+                
+                FormPayment::updateOrCreate(['customer_contract_ids'=>$customer_contract_ids], [
+                    'customer_contract_ids' => $customer_contract_ids,
                     'account_id' => $data['account_id'],
-                    'payment_slip' => $data['payment_slip'],
+                    'purpose' => 'form_payment',
+                    'payment_slip' => $filename ?? null,
                     'description' => $data['description'],
                     'amount' => $form['form_amount'],
                     'estate_id' => $key,
+                    'customer_id' => $data['customer_id'],
                     'company_id' => $this->sessionDetails('company_id'),
                 ]);
             }
@@ -333,5 +343,41 @@ class CustomerContractController extends Controller
         } else {
             return response()->json(['message' => 'No records found', 'data' => null], 200);
         }
+    }
+
+    public function formPaymentHistory($customer_id){
+        $histories = FormPayment::with('estate:id,name')->where(['customer_id'=>$customer_id,'company_id' => $this->sessionDetails('company_id'), 'purpose'=>'form_payment'])->orderBy('created_at', 'DESC')->get();
+
+        $data = [];
+      
+        foreach($histories as $history){
+            $contracts = [];
+            $h_contracts = !empty($history->customer_contract_ids) ? explode(',',$history->customer_contract_ids) : [];
+            
+            foreach($h_contracts as $sub){
+                $cont = CustomerContract::with('building_type_details:id,name', 'plot_size_details:id,size')->where('id', $sub)->select('id','building_type','plot_size')->first();
+                $contracts[] = [
+                    'id' => $cont->id,
+                    'plot_size' => $cont->plot_size_details,
+                    'building_type' => $cont->building_type_details,
+                ];
+ 
+            }
+          
+            $data[$history->estate_id] = [
+                'id' => $history->id,
+                'customer_id' => $history->customer_id,
+                'created_at' => $history->created_at,
+                'amount' => $history->amount,
+                'estate_id' => $history->estate_id,
+                'estate_name' => $history->estate->name,
+                'payment_slip' => $history->payment_slip,
+                'purpose' => ucwords(str_replace('_', ' ', $history->purpose)),
+                'contracts' => $contracts
+            ]; 
+        }
+       
+        return response()->json(['message' => 'success', 'data' => $data], 200);
+
     }
 }
