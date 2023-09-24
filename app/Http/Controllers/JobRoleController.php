@@ -16,9 +16,14 @@ class JobRoleController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $jobroles = JobRole::where('company_id', $this->sessionDetails('company_id'))->get();
+
+        // if(!empty($request->type)){
+        //     $jobroles = $jobroles->whereType($request->type);
+        // }
+
         return response()->json(['message' => 'success', 'data' => $jobroles], 200);
     }
 
@@ -46,7 +51,7 @@ class JobRoleController extends Controller
                 'data' => null,
             ], 412);
         }
-
+        
         $jobrole = JobRole::updateOrcreate([
             'name' => $request->name,
             'department_id' => $request->department_id,

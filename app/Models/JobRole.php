@@ -10,4 +10,5 @@ class JobRole extends Model
     use HasFactory;
 
     protected $guarded = [];
+    
 }

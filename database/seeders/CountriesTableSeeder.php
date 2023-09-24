@@ -16,9 +16,7 @@ class CountriesTableSeeder extends Seeder
 
         \DB::table('countries')->truncate();
 
-        \DB::insert("INSERT INTO `countries` (`id`, `country_code`, `name`, `mobile_code`, `state_label`, `lga_label`, `created_at`, `updated_at`)
-          VALUES
-            (1,'AD','Andorra','376',NULL,NULL,NULL,NULL),
+        \DB::insert("INSERT INTO `countries`(`id`, `country_code`, `name`, `mobile_code`, `state_label`, `lga_label`, `created_at`, `updated_at`) VALUES
             (2,'AE','United Arab Emirates','971',NULL,NULL,NULL,NULL),
             (3,'AF','Afghanistan','93',NULL,NULL,NULL,NULL),
             (4,'AG','Antigua and Barbuda','1268',NULL,NULL,NULL,NULL),
@@ -267,7 +265,7 @@ class CountriesTableSeeder extends Seeder
             (249,'SS','South Sudan','211',NULL,NULL,NULL,NULL),
             (250,'UM','United States Minor Outlying Islands','1',NULL,NULL,NULL,NULL),
             (251,'VA','Vatican City State (Holy See)','39',NULL,NULL,NULL,NULL),
-            (252,'YU','Yugoslavia','38',NULL,NULL,NULL,NULL,NULL);
+            (252,'YU','Yugoslavia','38',NULL,NULL,NULL,NULL);
             ");
 
         \Schema::enableForeignKeyConstraints();

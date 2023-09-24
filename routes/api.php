@@ -12,6 +12,7 @@ use App\Http\Controllers\BranchController;
 use App\Http\Controllers\EstateController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\GeneralController;
 use App\Http\Controllers\JobRoleController;
 use App\Http\Controllers\JobTypeController;
 use App\Http\Controllers\CustomerController;
@@ -101,7 +102,8 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('get-all-staff', [StaffController::class, 'getAllStaff']);
         Route::post('staff/store', [StaffController::class, 'storeStaff']);
         Route::get('get-active-staff', [StaffController::class, 'getActiveStaff']);
-        Route::get('get-active-staff-in-role/{id}', [StaffController::class, 'getActiveStaffInRole']);
+        Route::get('get-single-staff-profile/{staff_id}', [StaffController::class, 'getSingleStaffProfile']);
+        Route::get('get-active-staff-in-role/{staff_id}', [StaffController::class, 'getActiveStaffInRole']);
         Route::post('assign-role-to-staff', [StaffController::class, 'assignRoleToStaff']);
         Route::get('staff-roles/{staff_id}', [StaffController::class, 'getSingleStaffRoles']);
         
@@ -155,6 +157,12 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
 
         Route::get('form-payment-history/{customer_id}', [CustomerContractController::class, 'formPaymentHistory']);
         Route::post('make-form-payment', [CustomerContractController::class, 'makeFormPayment']);
+        Route::get('get-countries', [GeneralController::class, 'getCountries']);
+        Route::get('get-states', [GeneralController::class, 'getStates']);
+        Route::get('get-lga', [GeneralController::class, 'getLgas']);
+        Route::get('get-banks', [GeneralController::class, 'getBanks']);
+        Route::get('get-currencies', [GeneralController::class, 'getCurrencies']);
+
 
     });
 });

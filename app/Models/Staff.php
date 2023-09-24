@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\User;
+use App\Models\JobType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -27,4 +28,19 @@ class Staff extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+    public function department(){
+        return $this->belongsTo(Department::class, 'department_id');
+    }
+
+    public function job_type()
+    {
+        return $this->belongsTo(JobType::class, 'jobtype_id');
+    }
+
+    public function job_role()
+    {
+        return $this->belongsTo(JobRole::class, 'jobrole_id');
+    }
+    
 }

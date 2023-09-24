@@ -13,6 +13,9 @@ return new class extends Migration
     {
         Schema::create('lgas', function (Blueprint $table) {
             $table->id();
+            $table->string('name');
+            $table->integer('state_id');
+            $table->dateTime('deleted_at');
             $table->timestamps();
         });
     }

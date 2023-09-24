@@ -15,9 +15,9 @@ use Illuminate\Support\Facades\Validator;
 
 class StaffController extends Controller
 {
-    public function getActiveStaffInRole($id)
+    public function getActiveStaffInRole($staff_id)
     {
-        $staff = StaffRole::where("role_id", $id)
+        $staff = StaffRole::where("role_id", $staff_id)
             ->join("staff", "staff_roles.staff_id", "=", "staff.id")
             ->where('staff.company_id', $this->sessionDetails('company_id'))
             ->join("users", "staff.user_id", "=", "users.id")->where(['users.status' => 'active', 'type' => 'staff'])
@@ -149,7 +149,7 @@ class StaffController extends Controller
         }
 
         $data = $validator->valid();
-        $data['addition_details'] = json_encode([
+        $data['additional_details'] = json_encode([
             'date_of_birth' => $data['date_of_birth'] ?? '',
             'alternate_number' => $data['alternate_number'] ?? '',
             'alternate_email' => $data['alternate_email'] ?? '',
@@ -174,12 +174,13 @@ class StaffController extends Controller
             $user = User::create([
                 'email' => $data['email'],
                 'first_name' => $data['first_name'],
+                'type' => 'staff',
                 'middle_name' => $data['middle_name'] ?? '',
                 'last_name' => $data['last_name'] ?? '',
                 'username' => $data['username'] ?? '',
                 'phone_number' => $data['phone_number'] ?? '',
                 'gender' => $data['gender'] ?? '',
-                'addition_details' => $data['addition_details'],
+                'additional_details' => $data['additional_details'],
                 'next_of_kin' => $data['next_of_kin'],
                 'branch_id' => $data['branch_id'] ?? '',
                 'company_id' => $this->sessionDetails('company_id'),
@@ -189,11 +190,14 @@ class StaffController extends Controller
             $staff = Staff::create([
                 'jobtype_id' => $data['jobtype_id'] ?? '',
                 'date_of_employment' => $data['date_of_employment'] ?? '',
+                'user_id' => $user->id ?? '',
                 'department_id' => $data['department_id'] ?? '',
                 'jobrole_id' => $data['jobrole_id'] ?? '',
                 'commision_percentage' => $data['commision_percentage'] ?? '',
                 'company_id' => $this->sessionDetails('company_id'), 
             ]);
+
+
                 
         }else{
             $staff = Staff::where('id', $request->staff_id)->where('company_id', $this->sessionDetails('company_id'));
@@ -337,5 +341,75 @@ class StaffController extends Controller
         $settings = DB::table('staff_document_settings')->where(['id' => $id, 'company_id' => $this->sessionDetails('company_id')])->delete();
 
         return response()->json(['message' => 'successfull', 'data' => $settings], 200);
+    }
+
+    public function getSingleStaffProfile($staff_id){
+        $staff = Staff::with('roles')->
+            where(['staff.id' => $staff_id])
+            ->join("users", "staff.user_id", "=", "users.id")->where(['users.status' => 'active', 'type' => 'staff'])
+            ->join("job_types", "staff.jobtype_id", "=", "job_types.id")
+            ->join("job_roles", "staff.jobrole_id", "=", "job_roles.id")
+            ->join("branches", "users.branch_id", "=", "branches.id")
+            ->join("departments", "staff.department_id", "=", "departments.id")
+            ->select("staff.id AS staff_id", "users.status", "staff.created_at", "users.first_name","users.username", "users.last_name", "users.email", "staff.id AS staff_id", "users.type", "users.company_id","staff.jobtype_id","users.id AS user_id", "staff.date_of_employment","branches.id AS branch_id","branches.name AS branch_name","departments.id AS department_id","departments.name AS department_name","job_roles.id AS job_role_id","job_roles.name AS job_role_name", "job_types.id AS job_type_id", "job_types.name AS job_type_name","users.residential_address AS staff_residential_address", "users.additional_details","users.next_of_kin")
+            ->first();
+        $additional_details = !empty($staff->additional_details) ? json_decode($staff->additional_details) : collect([]);
+        $next_of_kin = !empty($staff->next_of_kin) ? json_decode($staff->next_of_kin) : collect([]);
+        
+        $data['job_information'] = [
+            'job_type' => [
+                'id' => $staff->job_type_id ?? null,
+                'name' => $staff->job_type_name ?? null,
+            ],
+            'employment_date' => $staff->date_of_employment ?? null,
+            'time_in_company' => '',
+            'work_anniversary' => '',
+            'department' => [
+                'id' => $staff->department_id ?? null,
+                'name' => $staff->department_name?? null
+            ],
+            'job_role' => [
+                'id' => $staff->job_role_id ?? null,
+                'name' => $staff->job_role_name ?? null,
+            ],
+            'role' => [
+                'id' => $staff->role->id ?? null,
+                'name' => $staff->role->name ?? null,
+            ],
+            'branch' => [
+                'id' => $staff->branch_id ?? null,
+                'name' => $staff->branch_name ?? null,
+            ]
+        ];
+       
+        $data['personal_information'] = [
+            'first_name' => $staff->first_name ?? null,
+            'middle_name' => $staff->middle_name ?? null,
+            'last_name' => $staff->last_name ?? null,
+            'username' => $staff->user->username ?? null,
+            'gender' => $staff->user->gender ?? null,
+            'marital_status' => $additional_details->marital_status ?? null,
+            'dob' => $additional_details->date_of_birth ?? null,
+        ];
+       
+        $data['contact_and_additional_information'] = [
+            'residential_address' => $staff->staff_residential_address ?? null,
+            'address' => $staff->email ?? null,
+            'alternate_email' => $additional_details->alternate_email ?? null,
+            'state' => $additional_details->state ?? null,
+            'lga' => $additional_details->lga ?? null,
+            'nationality' => $additional_details->nationality ?? null,
+        ];
+
+        $data['next_of_kin_information'] = [
+            'first_name' => $next_of_kin->nok_first_name ?? null,
+            'last_name' => $next_of_kin->nok_last_name ?? null,
+            'house_address' => $next_of_kin->nok_house_address ?? null,
+            'email_address' => $next_of_kin->nok_email_address ?? null,
+            'phone_number' => $next_of_kin->nok_phone_number ?? null,
+            'relationship' => $next_of_kin->nok_relationship ?? null,
+        ];
+
+        return response()->json(['message' => 'success', 'data' => $data], 200);        
     }
 }
