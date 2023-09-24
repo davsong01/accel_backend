@@ -101,6 +101,8 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
 
         Route::get('get-all-staff', [StaffController::class, 'getAllStaff']);
         Route::post('staff/store', [StaffController::class, 'storeStaff']);
+        Route::post('update-staff', [StaffController::class, 'updateStaff']);
+        
         Route::get('get-active-staff', [StaffController::class, 'getActiveStaff']);
         Route::get('get-single-staff-profile/{staff_id}', [StaffController::class, 'getSingleStaffProfile']);
         Route::get('get-active-staff-in-role/{staff_id}', [StaffController::class, 'getActiveStaffInRole']);

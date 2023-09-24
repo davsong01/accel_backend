@@ -38,7 +38,6 @@ class StaffController extends Controller
             ->leftjoin("job_roles", "staff.jobrole_id", "=", "job_roles.id")
             ->leftjoin("job_types", "staff.jobtype_id", "=", "job_types.id");
             
-       
         if ($request->has('name') && !is_null($request->status)) {
             $staff = $staff->where('users.first_name', 'LIKE', "%{$request->name}%")
                 ->orWhere('users.last_name', 'LIKE', "%{$request->name}%");
@@ -219,8 +218,104 @@ class StaffController extends Controller
         }
 
         return response()->json(['message' => 'Successfully created!', 'data' => ['staff_id' => $staff->id]], 200);
-
     }
+
+    public function updateStaff(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            // 'email' => [
+            //     'required', 'email', Rule::unique('users')->where(function ($query) {
+            //         $query->where('company_id', $this->sessionDetails('company_id'));
+            //     })
+            // ],
+            'first_name' => 'required',
+            'middle_name' => 'nullable',
+            'last_name' => 'nullable',
+            'username' => 'nullable',
+            'phone_number' => 'nullable',
+            'gender' => 'nullable',
+            'branch_id' => 'nullable',
+            'jobtype_id' => 'nullable|exists:job_types,id,company_id,' . $this->sessionDetails('company_id'),
+            'jobrole_id' => 'nullable|exists:job_roles,id,company_id,' . $this->sessionDetails('company_id'),
+            'date_of_employment' => 'nullable',
+            'department_id' => 'nullable|exists:departments,id,company_id,' . $this->sessionDetails('company_id'),
+            'commision_percentage' => 'nullable'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->messages()->first(),
+                'data' => null,
+            ], 412);
+        }
+
+        $data = $request->all();
+        $staff = Staff::with('roles')->where(['staff.id' => $request->staff_id])
+            ->join("users", "staff.user_id", "=", "users.id")->where(['users.status' => 'active', 'type' => 'staff'])
+            ->leftjoin("job_types", "staff.jobtype_id", "=", "job_types.id")
+            ->leftjoin("job_roles", "staff.jobrole_id", "=", "job_roles.id")
+            ->leftjoin("branches", "users.branch_id", "=", "branches.id")
+            ->leftjoin("departments", "staff.department_id", "=", "departments.id")
+            ->select("staff.id AS staff_id", "users.status", "staff.created_at", "users.first_name", "users.username", "users.last_name", "users.email", "staff.id AS staff_id", "users.type", "users.company_id", "staff.jobtype_id", "users.id AS user_id", "staff.date_of_employment", "branches.id AS branch_id", "branches.name AS branch_name", "departments.id AS department_id", "departments.name AS department_name", "job_roles.id AS job_role_id", "job_roles.name AS job_role_name", "job_types.id AS job_type_id", "job_types.name AS job_type_name", "users.residential_address AS staff_residential_address", "users.additional_details", "users.next_of_kin")
+            ->first();
+        
+        $a_details = !empty($staff->additional_details) ? json_decode($staff->additional_details) : collect([]);
+        
+        foreach($a_details as $key=>$details){
+            $a_details->$key = !empty($request->$key) ? $request->$key : $a_details->$key;
+        }
+        $additional_details = $a_details;
+
+        $t_next_of_kin = !empty($staff->next_of_kin) ? json_decode($staff->next_of_kin) : collect([]);
+
+        foreach ($t_next_of_kin as $key => $details) {
+            $t_next_of_kin->$key = !empty($request->$key) ? $request->$key : $t_next_of_kin->$key;
+        }
+
+        $next_of_kin = $t_next_of_kin;
+       
+        $user = $staff->user->update([
+            'email' => $data['email'],
+            'first_name' => $data['first_name'],
+            'type' => 'staff',
+            'middle_name' => $data['middle_name'] ?? '',
+            'last_name' => $data['last_name'] ?? '',
+            'username' => $data['username'] ?? '',
+            'phone_number' => $data['phone_number'] ?? '',
+            'gender' => $data['gender'] ?? '',
+            'additional_details' => json_encode($additional_details),
+            'next_of_kin' => json_encode($next_of_kin),
+            'branch_id' => $data['branch_id'] ?? '',
+            'company_id' => $this->sessionDetails('company_id'),
+        ]);
+        
+        if($user){
+            $staff->update([
+                'jobtype_id' => $data['jobtype_id'] ?? '',
+                'date_of_employment' => $data['date_of_employment'] ?? '',
+                'department_id' => $data['department_id'] ?? '',
+                'jobrole_id' => $data['jobrole_id'] ?? '',
+                'commision_percentage' => $data['commision_percentage'] ?? '',
+                'company_id' => $this->sessionDetails('company_id'),
+            ]);
+        }
+
+        // Create staff documents
+        if ($request->staff_documents) {
+            foreach ($request->staff_documents as $document) {
+                \DB::table('staff_uploaded_documents')->insert([
+                    'staff_document_id' => $document->id,
+                    'name' =>  $document->name,
+                    'uploaded' =>  $document->uploaded ?? '',
+                    'required' =>  $document->required ?? '',
+                    'company_id' => $this->sessionDetails('company_id'),
+                ]);
+            }
+        }
+
+        return response()->json(['message' => 'Successfully created!', 'data' => ['staff_id' => $request->staff_id]], 200);
+    }
+
 
     public function getSingleStaffRoles($staff_id)
     {
@@ -346,11 +441,11 @@ class StaffController extends Controller
     public function getSingleStaffProfile($staff_id){
         $staff = Staff::with('roles')->
             where(['staff.id' => $staff_id])
-            ->join("users", "staff.user_id", "=", "users.id")->where(['users.status' => 'active', 'type' => 'staff'])
-            ->join("job_types", "staff.jobtype_id", "=", "job_types.id")
-            ->join("job_roles", "staff.jobrole_id", "=", "job_roles.id")
-            ->join("branches", "users.branch_id", "=", "branches.id")
-            ->join("departments", "staff.department_id", "=", "departments.id")
+            ->leftjoin("users", "staff.user_id", "=", "users.id")->where(['users.status' => 'active', 'type' => 'staff'])
+            ->leftjoin("job_types", "staff.jobtype_id", "=", "job_types.id")
+            ->leftjoin("job_roles", "staff.jobrole_id", "=", "job_roles.id")
+            ->leftjoin("branches", "users.branch_id", "=", "branches.id")
+            ->leftjoin("departments", "staff.department_id", "=", "departments.id")
             ->select("staff.id AS staff_id", "users.status", "staff.created_at", "users.first_name","users.username", "users.last_name", "users.email", "staff.id AS staff_id", "users.type", "users.company_id","staff.jobtype_id","users.id AS user_id", "staff.date_of_employment","branches.id AS branch_id","branches.name AS branch_name","departments.id AS department_id","departments.name AS department_name","job_roles.id AS job_role_id","job_roles.name AS job_role_name", "job_types.id AS job_type_id", "job_types.name AS job_type_name","users.residential_address AS staff_residential_address", "users.additional_details","users.next_of_kin")
             ->first();
         $additional_details = !empty($staff->additional_details) ? json_decode($staff->additional_details) : collect([]);

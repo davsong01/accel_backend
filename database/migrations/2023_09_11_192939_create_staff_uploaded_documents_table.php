@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('staff_uploaded_documents', function (Blueprint $table) {
             $table->id();
             $table->integer('staff_document_id');
+            $table->integer('staff_id');
             $table->string('name')->nullable();
             $table->string('uploaded')->nullable();
             $table->integer('required')->nullable();
@@ -28,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('staff_document_settings');
+        Schema::dropIfExists('staff_uploaded_documents');
     }
 };
