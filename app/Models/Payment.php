@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 
 
-class FormPayment extends Model
+class Payment extends Model
 {
     use HasFactory;
     protected $guarded = [];

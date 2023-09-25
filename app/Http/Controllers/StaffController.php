@@ -149,7 +149,6 @@ class StaffController extends Controller
 
         $data = $validator->valid();
         $data['additional_details'] = json_encode([
-            'date_of_birth' => $data['date_of_birth'] ?? '',
             'alternate_number' => $data['alternate_number'] ?? '',
             'alternate_email' => $data['alternate_email'] ?? '',
             'state' => $data['state'] ?? '',
@@ -182,9 +181,10 @@ class StaffController extends Controller
                 'additional_details' => $data['additional_details'],
                 'next_of_kin' => $data['next_of_kin'],
                 'branch_id' => $data['branch_id'] ?? '',
+                'date_of_birth' => $request->date_of_birth ?? null,
                 'company_id' => $this->sessionDetails('company_id'),
             ]);
-            
+           
             // Create staff
             $staff = Staff::create([
                 'jobtype_id' => $data['jobtype_id'] ?? '',
@@ -286,6 +286,7 @@ class StaffController extends Controller
             'additional_details' => json_encode($additional_details),
             'next_of_kin' => json_encode($next_of_kin),
             'branch_id' => $data['branch_id'] ?? '',
+            'date_of_birth' => $data['date_of_birth'] ?? '',
             'company_id' => $this->sessionDetails('company_id'),
         ]);
         
@@ -313,7 +314,7 @@ class StaffController extends Controller
             }
         }
 
-        return response()->json(['message' => 'Successfully created!', 'data' => ['staff_id' => $request->staff_id]], 200);
+        return response()->json(['message' => 'Successfully updated!', 'data' => ['staff_id' => $request->staff_id]], 200);
     }
 
 
@@ -446,7 +447,7 @@ class StaffController extends Controller
             ->leftjoin("job_roles", "staff.jobrole_id", "=", "job_roles.id")
             ->leftjoin("branches", "users.branch_id", "=", "branches.id")
             ->leftjoin("departments", "staff.department_id", "=", "departments.id")
-            ->select("staff.id AS staff_id", "users.status", "staff.created_at", "users.first_name","users.username", "users.last_name", "users.email", "staff.id AS staff_id", "users.type", "users.company_id","staff.jobtype_id","users.id AS user_id", "staff.date_of_employment","branches.id AS branch_id","branches.name AS branch_name","departments.id AS department_id","departments.name AS department_name","job_roles.id AS job_role_id","job_roles.name AS job_role_name", "job_types.id AS job_type_id", "job_types.name AS job_type_name","users.residential_address AS staff_residential_address", "users.additional_details","users.next_of_kin")
+            ->select("staff.id AS staff_id", "users.status", "staff.created_at", "users.first_name","users.username", "users.last_name", "users.email", "staff.id AS staff_id", "users.type", "users.company_id","staff.jobtype_id","users.id AS user_id", "staff.date_of_employment","branches.id AS branch_id","branches.name AS branch_name","departments.id AS department_id","departments.name AS department_name","job_roles.id AS job_role_id","job_roles.name AS job_role_name", "job_types.id AS job_type_id", "job_types.name AS job_type_name","users.residential_address AS staff_residential_address", "users.additional_details","users.next_of_kin","users.date_of_birth AS date_of_birth")
             ->first();
         $additional_details = !empty($staff->additional_details) ? json_decode($staff->additional_details) : collect([]);
         $next_of_kin = !empty($staff->next_of_kin) ? json_decode($staff->next_of_kin) : collect([]);
@@ -484,7 +485,7 @@ class StaffController extends Controller
             'username' => $staff->user->username ?? null,
             'gender' => $staff->user->gender ?? null,
             'marital_status' => $additional_details->marital_status ?? null,
-            'dob' => $additional_details->date_of_birth ?? null,
+            'dob' => $staff->date_of_birth,
         ];
        
         $data['contact_and_additional_information'] = [
@@ -507,4 +508,5 @@ class StaffController extends Controller
 
         return response()->json(['message' => 'success', 'data' => $data], 200);        
     }
+
 }

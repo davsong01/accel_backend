@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Customer;
-use App\Models\FormPayment;
+use App\Models\Payment;
 use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -20,17 +20,17 @@ class CustomerContractController extends Controller
      */
     public function index($customer_id)
     {
-        $contracts = CustomerContract::with('location:name,id','building_type:id,name')->where('customer_id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->select(['id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'contract_type', 'property_type'])
-        // ->groupBy('estate_id')
-            ->orderBy('created_at','DESC')
-                ->get();
+        $contracts = CustomerContract::with('location:name,id', 'building_type:id,name')->where('customer_id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->select(['id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'contract_type', 'property_type'])
+            // ->groupBy('estate_id')
+            ->orderBy('created_at', 'DESC')
+            ->get();
 
-            
+
         // $contracts_count = $contracts->first()->customer->contracts->count();
-       
+
 
         $allContracts = [];
-        if($contracts){
+        if ($contracts) {
             // get the customer
             $customer = Customer::withCount(['singleContract', 'joinContract', 'contracts'])->where('id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->first();
             $dataX = [
@@ -39,7 +39,7 @@ class CustomerContractController extends Controller
                 'single_contracts' => $customer->join_contract_count
             ];
             $data['contract_count'] = $dataX;
-           
+
             foreach ($contracts as $key => $contract) {
                 // $estate->load('city', 'location', 'estate_property_type')
                 $contract['location'] = $contract->location->name;
@@ -47,11 +47,10 @@ class CustomerContractController extends Controller
                 $allContracts[$key]['form_amount'] = $this->getContractFormAmount($contract, 'single');
             }
             $data['all_contracts'] = $allContracts;
-    
-            return response()->json(['message' => 'success', 'data' => $data], 200);
-        }else{
-            return response()->json(['message' => 'No records found', 'data' => null], 200);
 
+            return response()->json(['message' => 'success', 'data' => $data], 200);
+        } else {
+            return response()->json(['message' => 'No records found', 'data' => null], 200);
         }
     }
 
@@ -68,7 +67,7 @@ class CustomerContractController extends Controller
      */
     public function store(Request $request)
     {
-        if(!empty($request->customer_id)){
+        if (!empty($request->customer_id)) {
             $validator = Validator::make($request->all(), [
                 'city_id' => 'required|exists:cities,id,company_id,' . $this->sessionDetails('company_id'),
                 'location_id' => 'required|exists:locations,id,company_id,' . $this->sessionDetails('company_id'),
@@ -101,7 +100,7 @@ class CustomerContractController extends Controller
             }
 
             return response()->json(['message' => 'success', 'data' => ['customer_id' => $data['customer_id']]], 200);
-        }else{
+        } else {
             $validator = Validator::make($request->all(), [
                 'city_id' => 'required|exists:cities,id,company_id,' . $this->sessionDetails('company_id'),
                 'location_id' => 'required|exists:locations,id,company_id,' . $this->sessionDetails('company_id'),
@@ -158,13 +157,13 @@ class CustomerContractController extends Controller
             }
 
             return response()->json(['message' => 'success', 'data' => ['customer_id' => $customer->id]], 200);
-
         }
 
         return response()->json(['message' => 'success', 'data' => null], 200);
     }
 
-    public function createUser($request){
+    public function createUser($request)
+    {
         // Add User
         $user = User::updateOrCreate([
             'first_name' => $request['first_name'],
@@ -185,7 +184,8 @@ class CustomerContractController extends Controller
         return $user;
     }
 
-    public function createCustomer($user){
+    public function createCustomer($user)
+    {
         $customer = Customer::updateOrCreate([
             'company_id' => $this->sessionDetails('company_id'),
             'branch_id' => $this->sessionDetails('branch_id'),
@@ -196,7 +196,8 @@ class CustomerContractController extends Controller
         return $customer;
     }
 
-    public function createCustomerContract($data){
+    public function createCustomerContract($data)
+    {
         $contract = CustomerContract::Create([
             'customer_id' => $data['customer_id'],
             'city_id' => $data['city_id'],
@@ -225,7 +226,8 @@ class CustomerContractController extends Controller
         return response()->json(['message' => 'success', 'data' => $contract], 200);
     }
 
-    public function makeFormPayment(Request $request){
+    public function makeFormPayment(Request $request)
+    {
         // $request['contract_ids'] = [31,30,29,26];
         $validator = Validator::make($request->all(), [
             'contract_ids' => 'required',
@@ -245,23 +247,23 @@ class CustomerContractController extends Controller
 
         $data = $validator->valid();
         $form_payment = $this->generateFormPayment($request['contract_ids'], $request->customer_id);
-       
-        if($request->amount != $form_payment['form_payment']){
+
+        if ($request->amount != $form_payment['form_payment']) {
             return response()->json([
-                'error' => 'Amount does not correspond with selected contract. Amount should be exactly '. $form_payment['form_payment'],
+                'error' => 'Amount does not correspond with selected contract. Amount should be exactly ' . $form_payment['form_payment'],
                 'data' => null,
             ], 412);
         }
 
-        if(!empty($request->payment_slip)){
+        if (!empty($request->payment_slip)) {
             $filename = $this->uploadFile($request->payment_slip, 'payments');
         }
 
-        if($form_payment){
-            foreach($form_payment['explanation'] as $key=>$form){
+        if ($form_payment) {
+            foreach ($form_payment['explanation'] as $key => $form) {
                 $customer_contract_ids = implode(',', $form['contracts']);
-                
-                FormPayment::updateOrCreate(['customer_contract_ids'=>$customer_contract_ids], [
+
+                Payment::updateOrCreate(['customer_contract_ids' => $customer_contract_ids], [
                     'customer_contract_ids' => $customer_contract_ids,
                     'account_id' => $data['account_id'],
                     'purpose' => 'form_payment',
@@ -276,7 +278,6 @@ class CustomerContractController extends Controller
         }
 
         return response()->json(['message' => 'success', 'data' => null], 200);
-
     }
 
     /**
@@ -303,17 +304,18 @@ class CustomerContractController extends Controller
         //
     }
 
-    public function singleCustomerFormDetails($customer_id){
+    public function singleCustomerFormDetails($customer_id)
+    {
         $estates = CustomerContract::distinct('estate_id')->with('estate:id,name,form_amount')->select('estate_id')->where('customer_id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->get();
-        
+
         $contracts = CustomerContract::with('location:name,id')->where('customer_id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->select(['id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'contract_type', 'property_type'])->orderBy('created_at', 'DESC');
-        
-        $estates = $estates->map(function($query){
+
+        $estates = $estates->map(function ($query) {
             $query['estate_name'] = $query->estate->name;
             $query['form_amount'] = $query->estate->form_amount;
             return $query;
         });
-       
+
         $allContracts = [];
         if ($contracts) {
             // get the customer
@@ -327,16 +329,16 @@ class CustomerContractController extends Controller
 
             foreach ($estates as $estate) {
                 // foreach ($contracts as $key => $contract) {
-                    $details = CustomerContract::with('location:name,id','building_type:id,name','plot_size:id,size')->where('estate_id', $estate->estate_id)->where('customer_id', $customer_id)->select(['id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'contract_type', 'property_type'])->orderBy('created_at', 'DESC')->where('company_id', $this->sessionDetails('company_id'))->get();
-            
-                    foreach($details as $detail){
-                        $allContracts[$estate->estate_id]['estate_id'] = $estate->estate_id;
-                        $detail['form_amount'] = $estate->form_amount;
-                        $allContracts[$estate->estate_id]['estate_name'] = $estate->estate_name;
-                        $allContracts[$estate->estate_id]['contracts'][] = $detail;
-                    }
+                $details = CustomerContract::with('location:name,id', 'building_type:id,name', 'plot_size:id,size')->where('estate_id', $estate->estate_id)->where('customer_id', $customer_id)->select(['id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'contract_type', 'property_type'])->orderBy('created_at', 'DESC')->where('company_id', $this->sessionDetails('company_id'))->get();
+
+                foreach ($details as $detail) {
+                    $allContracts[$estate->estate_id]['estate_id'] = $estate->estate_id;
+                    $detail['form_amount'] = $estate->form_amount;
+                    $allContracts[$estate->estate_id]['estate_name'] = $estate->estate_name;
+                    $allContracts[$estate->estate_id]['contracts'][] = $detail;
+                }
             }
-            
+
             $data['all_contracts'] = $allContracts;
 
             return response()->json(['message' => 'success', 'data' => $data], 200);
@@ -345,25 +347,25 @@ class CustomerContractController extends Controller
         }
     }
 
-    public function formPaymentHistory($customer_id){
-        $histories = FormPayment::with('estate:id,name')->where(['customer_id'=>$customer_id,'company_id' => $this->sessionDetails('company_id'), 'purpose'=>'form_payment'])->orderBy('created_at', 'DESC')->get();
+    public function formPaymentHistory($customer_id)
+    {
+        $histories = Payment::with('estate:id,name')->where(['customer_id' => $customer_id, 'company_id' => $this->sessionDetails('company_id'), 'purpose' => 'form_payment'])->orderBy('created_at', 'DESC')->get();
 
         $data = [];
-      
-        foreach($histories as $history){
+
+        foreach ($histories as $history) {
             $contracts = [];
-            $h_contracts = !empty($history->customer_contract_ids) ? explode(',',$history->customer_contract_ids) : [];
-            
-            foreach($h_contracts as $sub){
-                $cont = CustomerContract::with('building_type_details:id,name', 'plot_size_details:id,size')->where('id', $sub)->select('id','building_type','plot_size')->first();
+            $h_contracts = !empty($history->customer_contract_ids) ? explode(',', $history->customer_contract_ids) : [];
+
+            foreach ($h_contracts as $sub) {
+                $cont = CustomerContract::with('building_type_details:id,name', 'plot_size_details:id,size')->where('id', $sub)->select('id', 'building_type', 'plot_size')->first();
                 $contracts[] = [
                     'id' => $cont->id,
                     'plot_size' => $cont->plot_size_details,
                     'building_type' => $cont->building_type_details,
                 ];
- 
             }
-          
+
             $data[$history->estate_id] = [
                 'id' => $history->id,
                 'customer_id' => $history->customer_id,
@@ -374,10 +376,9 @@ class CustomerContractController extends Controller
                 'payment_slip' => $history->payment_slip,
                 'purpose' => ucwords(str_replace('_', ' ', $history->purpose)),
                 'contracts' => $contracts
-            ]; 
+            ];
         }
-       
-        return response()->json(['message' => 'success', 'data' => $data], 200);
 
+        return response()->json(['message' => 'success', 'data' => $data], 200);
     }
 }

@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('user_permissions')->nullable();
             $table->integer('company_id');
             $table->string('email');
+            $table->dateTime('date_of_birth')->nullable();
             $table->integer('staff_id')->unique();
             $table->integer('branch_id')->nullable();
             $table->timestamp('email_verified_at')->nullable();

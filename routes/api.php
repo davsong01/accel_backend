@@ -21,6 +21,7 @@ use App\Http\Controllers\PlotSizeController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\AccountTypeController;
+use App\Http\Controllers\SelfServiceController;
 use App\Http\Controllers\BuildingTypeController;
 use App\Http\Controllers\EstateSettingController;
 use App\Http\Controllers\ChartOfAccountController;
@@ -95,7 +96,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::post('update-company-profile', [CompanySettingController::class, 'updateCompanyProfile']);
         Route::resource('company-document', CompanyDocumentController::class);
         Route::get('company-settings', [CompanySettingController::class, 'index']);
-        Route::get('get-countries-currencies/{country_id?}', [CompanySettingController::class, 'countryAnCurrencies']);
+        // Route::get('get-countries-currencies/{country_id?}', [CompanySettingController::class, 'countryAnCurrencies']);
 
         Route::resource('roles', RoleController::class);
 
@@ -164,6 +165,10 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('get-lga', [GeneralController::class, 'getLgas']);
         Route::get('get-banks', [GeneralController::class, 'getBanks']);
         Route::get('get-currencies', [GeneralController::class, 'getCurrencies']);
+
+        // Self Service
+        Route::get('self-service/my-profile', [SelfServiceController::class, 'myProfile']);
+        Route::get('self-service/my-coleagues', [SelfServiceController::class, 'myColleagues']);
 
 
     });

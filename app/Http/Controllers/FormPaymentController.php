@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\FormPayment;
+use App\Models\Payment;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -36,7 +36,7 @@ class FormPaymentController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(FormPayment $formPayment): Response
+    public function show(Payment $Payment): Response
     {
         //
     }
@@ -44,7 +44,7 @@ class FormPaymentController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(FormPayment $formPayment): Response
+    public function edit(Payment $Payment): Response
     {
         //
     }
@@ -52,7 +52,7 @@ class FormPaymentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, FormPayment $formPayment): RedirectResponse
+    public function update(Request $request, Payment $Payment): RedirectResponse
     {
         //
     }
@@ -60,7 +60,7 @@ class FormPaymentController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(FormPayment $formPayment): RedirectResponse
+    public function destroy(Payment $Payment): RedirectResponse
     {
         //
     }
