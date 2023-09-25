@@ -28,7 +28,7 @@ class SelfServiceController extends Controller
         dd($data);
     }
 
-    public function myColleagues()
+    public function dashboard()
     {
         $staffs = Staff::where('staff.company_id', $this->sessionDetails('company_id'))
             ->join('users', 'users.id', '=', 'staff.user_id')

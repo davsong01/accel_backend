@@ -167,8 +167,8 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('get-currencies', [GeneralController::class, 'getCurrencies']);
 
         // Self Service
-        Route::get('self-service/my-profile', [SelfServiceController::class, 'myProfile']);
-        Route::get('self-service/my-coleagues', [SelfServiceController::class, 'myColleagues']);
+        // Route::get('self-service/my-profile', [SelfServiceController::class, 'myProfile']);
+        Route::get('self-service/dashboard', [SelfServiceController::class, 'dashboard']);
 
 
     });
