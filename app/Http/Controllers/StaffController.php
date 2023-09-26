@@ -224,7 +224,7 @@ class StaffController extends Controller
         return response()->json(['message' => 'Successfully created!', 'data' => ['staff_id' => $staff->id]], 200);
     }
 
-    public function updateStaff(Request $request)
+    public function updateStaff(Request $request, $internal=null)
     {
         $validator = Validator::make($request->all(), [
             // 'email' => [
@@ -241,6 +241,9 @@ class StaffController extends Controller
             'branch_id' => 'nullable',
             'jobtype_id' => 'nullable|exists:job_types,id,company_id,' . $this->sessionDetails('company_id'),
             'jobrole_id' => 'nullable|exists:job_roles,id,company_id,' . $this->sessionDetails('company_id'),
+            'state' => 'nullable|exists:states,id',
+            'country' => 'nullable|exists:countries,id',
+            'lga' => 'nullable|exists:lgas,id',
             'date_of_employment' => 'nullable',
             'department_id' => 'nullable|exists:departments,id,company_id,' . $this->sessionDetails('company_id'),
             'commision_percentage' => 'nullable'
@@ -277,7 +280,6 @@ class StaffController extends Controller
         }
 
         $next_of_kin = $t_next_of_kin;
-       
         $user = $staff->user->update([
             'email' => $data['email'],
             'first_name' => $data['first_name'],
@@ -320,7 +322,6 @@ class StaffController extends Controller
 
         return response()->json(['message' => 'Successfully updated!', 'data' => ['staff_id' => $request->staff_id]], 200);
     }
-
 
     public function getSingleStaffRoles($staff_id)
     {
@@ -443,7 +444,7 @@ class StaffController extends Controller
         return response()->json(['message' => 'successfull', 'data' => $settings], 200);
     }
 
-    public function getSingleStaffProfile($staff_id){
+    public function getSingleStaffProfile($staff_id, $internal=null){
         $staff = Staff::with('roles')->
             where(['staff.id' => $staff_id])
             ->leftjoin("users", "staff.user_id", "=", "users.id")->where(['users.status' => 'active', 'type' => 'staff'])

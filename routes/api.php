@@ -171,6 +171,5 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('self-service/dashboard', [SelfServiceController::class, 'dashboard']);
         Route::get('self-service/my-profile', [SelfServiceController::class, 'myWorkProfile']);
         Route::post('self-service/update-my-profile', [SelfServiceController::class, 'updateMyWorkProfile']);
-    
     });
 });
