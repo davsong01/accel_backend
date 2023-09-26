@@ -350,8 +350,8 @@ class EstateController extends Controller
             'plot_size' => 'nullable|exists:plot_sizes,id,company_id,' . $this->sessionDetails('company_id'),
             'building_type' => 'nullable|exists:building_types,id,company_id,' . $this->sessionDetails('company_id'),
             "estate_price" => 'required',
-            "settings_and_excavation" => 'required',
-            "infrastrutural_fee" => 'required',
+            "settings_and_excavation" => 'nullable',
+            "infrastructural_fee" => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -362,7 +362,7 @@ class EstateController extends Controller
         }
 
         $property_type = EstatePropertyTypeDetails::find($id);
-
+       
         $property_type->update([
             "plot_size" => $request->plot_size,
             "building_type" => $request->building_type,

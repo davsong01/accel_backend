@@ -54,6 +54,30 @@ class SelfServiceController extends Controller
             ->take(10)
             ->get();
 
+        $expectedProfile = [
+            'first_name' => !empty(Auth::user()->first_name) ? 1 : 0,
+            'middle_name' => !empty(Auth::user()->middle_name) ? 1 : 0,
+            'last_name' => !empty(Auth::user()->last_name) ? 1 : 0,
+            'email_address',
+            'phone_number',
+            'alternate_email_address',
+            'username',
+            'gender',
+            'date_of_birth',
+            'marital_status',
+            'alternate_number',
+            'nationality',
+            'state',
+            'lga',
+            'residential_address',
+            'nok_first_name',
+            'nok_last_name',
+            'nok_phone_number',
+            'nok_house_address',
+            'nok_email_address',
+            'nok_relationship'
+
+        ];
         // $payments = Payment::where('staff_id', Auth::user()->staff->id)->get();
         // dd($payments);
         $birthdays = [];
