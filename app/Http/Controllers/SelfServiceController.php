@@ -122,7 +122,20 @@ class SelfServiceController extends Controller
                 'created_at' => Carbon::parse($b->created_at)->format('jS \\of F'),
             ];
         }
-
-        return response()->json(['birthdays' => $birthdays, 'work_anniversary' => $work_anniversary, 'colleagues' => $colleagues, 'time_in_company'=>$time_in_company,'profile_completeness'=> (int) $profile_completenes.'%','my_anniversary'=> $my_anniversary], 200);
+      
+        return response()->json([
+            'first_name' => Auth::user()->first_name ?? '',
+            'middle_name'=> Auth::user()->middle_name ?? '',
+            'last_name' => Auth::user()->last_name ?? '',
+            'work_id' => Auth::user()->staff_id ?? '',
+            'job_role'=> Auth::user()->staff->job_role->name ?? '',
+            'avatar' => !empty(Auth::user()->avatar) ? url('/') . Auth::user()->avatar : '',
+            'time_in_company'=>$time_in_company,
+            'profile_completeness'=> (int) $profile_completenes.'%',
+            'my_anniversary'=> $my_anniversary, 
+            'birthdays' => $birthdays, 
+            'work_anniversary' => $work_anniversary, 
+            'colleagues' => $colleagues
+        ], 200);
     }
 }
