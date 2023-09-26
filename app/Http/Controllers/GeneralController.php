@@ -19,16 +19,27 @@ class GeneralController extends Controller
 
     }
 
-    public function getStates()
+    public function getStates(Request $request)
     {
-        $states = States::all();
+        $states = States::orderBy('name');
+        
+        if(!empty($request->country_id)){
+            $states = $states->where('country_id', $request->country_id);
+        }
+
+        $states = $states->get();
 
         return response()->json(['message' => 'success', 'data' => $states], 200);
     }
 
-    public function getLgas()
+    public function getLgas(Request $request)
     {
-        $lgas = Lga::all();
+        $lgas = Lga::orderBy('name');
+
+        if (!empty($request->state_id)) {
+            $lgas = $lgas->where('state_id', $request->state_id);
+        }
+        $lgas = $lgas->get();
 
         return response()->json(['message' => 'success', 'data' => $lgas], 200);
     }

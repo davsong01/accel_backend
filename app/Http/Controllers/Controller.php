@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Estate;
+use App\Models\States;
+use App\Models\Country;
 use App\Models\EstateSettings;
 use App\Models\CustomerContract;
+use App\Models\Lga;
 use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
@@ -185,6 +188,20 @@ class Controller extends BaseController
         if(Storage::disk('uploads')->exists($file)){
             Storage::disk('uploads')->delete($file);
         }
+    }
+
+    public function getStateDetails($state_id){
+        return States::select('id','name')->where('id',$state_id)->first();
+    }
+
+    public function getCountryDetails($country_id)
+    {
+        return Country::select('id', 'name')->where('id', $country_id)->first();
+    }
+
+    public function getLgaDetails($lga_id)
+    {
+        return Lga::select('id', 'name')->where('id', $lga_id)->first();
     }
    
 }

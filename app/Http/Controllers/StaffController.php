@@ -8,6 +8,7 @@ use App\Models\Staff;
 use App\Models\StaffRole;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\RedirectResponse;
@@ -136,7 +137,10 @@ class StaffController extends Controller
                 'jobrole_id' => 'required|exists:job_roles,id,company_id,' . $this->sessionDetails('company_id'),
                 'date_of_employment' => 'nullable',
                 'department_id' => 'required|exists:departments,id,company_id,' . $this->sessionDetails('company_id'),
-                'commision_percentage' => 'nullable'
+                'commision_percentage' => 'nullable',
+                'nationality' => 'sometimes|integer',
+                'state' => 'sometimes|integer',
+                'lga' => 'sometimes|integer'
             ]);
         }
   
@@ -451,15 +455,19 @@ class StaffController extends Controller
             ->first();
         $additional_details = !empty($staff->additional_details) ? json_decode($staff->additional_details) : collect([]);
         $next_of_kin = !empty($staff->next_of_kin) ? json_decode($staff->next_of_kin) : collect([]);
-        
+
+        $time = Carbon::parse($staff->date_of_employment)->diff(Carbon::now());
+        $time_in_company = $time->y . ($time->y > 1 ? 'years, ' : 'year, ') . $time->m . ($time->m > 1 ? 'months' : 'month');
+        $my_anniversary = Carbon::parse($staff->date_of_employment)->format('jS\\, F');
+
         $data['job_information'] = [
             'job_type' => [
                 'id' => $staff->job_type_id ?? null,
                 'name' => $staff->job_type_name ?? null,
             ],
             'employment_date' => $staff->date_of_employment ?? null,
-            'time_in_company' => '',
-            'work_anniversary' => '',
+            'time_in_company' => $time_in_company,
+            'work_anniversary' => $my_anniversary,
             'department' => [
                 'id' => $staff->department_id ?? null,
                 'name' => $staff->department_name?? null
@@ -492,11 +500,10 @@ class StaffController extends Controller
             'residential_address' => $staff->staff_residential_address ?? null,
             'address' => $staff->email ?? null,
             'alternate_email' => $additional_details->alternate_email ?? null,
-            'state' => $additional_details->state ?? null,
-            'lga' => $additional_details->lga ?? null,
-            'nationality' => $additional_details->nationality ?? null,
+            'state' => !empty($additional_details->state) ? $this->getStateDetails($additional_details->state) : null,
+            'lga' => !empty($additional_details->lga) ? $this->getLgaDetails($additional_details->lga) : null,
+            'nationality' => !empty($additional_details->nationality) ? $this->getCountryDetails($additional_details->nationality) : null,
         ];
-
         $data['next_of_kin_information'] = [
             'first_name' => $next_of_kin->nok_first_name ?? null,
             'last_name' => $next_of_kin->nok_last_name ?? null,

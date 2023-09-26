@@ -10,24 +10,6 @@ use Illuminate\Support\Facades\Auth;
 
 class SelfServiceController extends Controller
 {
-    public function myProfile()
-    {
-        $user = auth()->user();
-        $data = [
-            'profile_completeness' => '',
-            'leave' => '',
-            'absence' => '',
-            'my_transactions' => '',
-            'time_in_company' => '1 year, 8 months',
-            'my_anniversary' => 'January 2nd',
-            'open_deals' => '',
-            'closed_deals' => '',
-
-        ];
-
-        dd($data);
-    }
-
     public function dashboard()
     {
         $staffs = Staff::where('staff.company_id', $this->sessionDetails('company_id'))
@@ -137,5 +119,79 @@ class SelfServiceController extends Controller
             'work_anniversary' => $work_anniversary, 
             'colleagues' => $colleagues
         ], 200);
+    }
+
+    public function myWorkProfile()
+    {
+        $staff = Staff::with('roles')->where(['staff.id' => Auth::user()->staff->id])
+            ->leftjoin("users", "staff.user_id", "=", "users.id")->where(['users.status' => 'active', 'type' => 'staff'])
+            ->leftjoin("job_types", "staff.jobtype_id", "=", "job_types.id")
+            ->leftjoin("job_roles", "staff.jobrole_id", "=", "job_roles.id")
+            ->leftjoin("branches", "users.branch_id", "=", "branches.id")
+            ->leftjoin("departments", "staff.department_id", "=", "departments.id")
+            ->select("staff.id AS staff_id", "users.status", "staff.created_at", "users.first_name", "users.username", "users.last_name", "users.email", "staff.id AS staff_id", "users.type", "users.company_id", "staff.jobtype_id", "users.id AS user_id", "staff.date_of_employment", "branches.id AS branch_id", "branches.name AS branch_name", "departments.id AS department_id", "departments.name AS department_name", "job_roles.id AS job_role_id", "job_roles.name AS job_role_name", "job_types.id AS job_type_id", "job_types.name AS job_type_name", "users.residential_address AS staff_residential_address", "users.additional_details", "users.next_of_kin", "users.date_of_birth AS date_of_birth")
+            ->first();
+
+        $additional_details = !empty($staff->additional_details) ? json_decode($staff->additional_details) : collect([]);
+        $next_of_kin = !empty($staff->next_of_kin) ? json_decode($staff->next_of_kin) : collect([]);
+        $time = Carbon::parse($staff->date_of_employment)->diff(Carbon::now());
+        $time_in_company = $time->y . ($time->y > 1 ? 'years, ' : 'year, ') . $time->m . ($time->m > 1 ? 'months' : 'month');
+        $my_anniversary = Carbon::parse($staff->date_of_employment)->format('jS\\, F');
+
+        $data['job_information'] = [
+            'job_type' => [
+                'id' => $staff->job_type_id ?? null,
+                'name' => $staff->job_type_name ?? null,
+            ],
+            'employment_date' => $staff->date_of_employment ?? null,
+            'time_in_company' => $time_in_company,
+            'work_anniversary' => $my_anniversary,
+            'department' => [
+                'id' => $staff->department_id ?? null,
+                'name' => $staff->department_name ?? null
+            ],
+            'job_role' => [
+                'id' => $staff->job_role_id ?? null,
+                'name' => $staff->job_role_name ?? null,
+            ],
+            'role' => [
+                'id' => $staff->role->id ?? null,
+                'name' => $staff->role->name ?? null,
+            ],
+            'branch' => [
+                'id' => $staff->branch_id ?? null,
+                'name' => $staff->branch_name ?? null,
+            ]
+        ];
+
+        $data['personal_information'] = [
+            'first_name' => $staff->first_name ?? null,
+            'middle_name' => $staff->middle_name ?? null,
+            'last_name' => $staff->last_name ?? null,
+            'username' => $staff->user->username ?? null,
+            'gender' => $staff->user->gender ?? null,
+            'marital_status' => $additional_details->marital_status ?? null,
+            'dob' => $staff->date_of_birth,
+        ];
+
+        $data['contact_and_additional_information'] = [
+            'residential_address' => $staff->staff_residential_address ?? null,
+            'address' => $staff->email ?? null,
+            'alternate_email' => $additional_details->alternate_email ?? null,
+            'state' => !empty($additional_details->state) ? $this->getStateDetails($additional_details->state) : null,
+            'lga' => !empty($additional_details->lga) ? $this->getLgaDetails($additional_details->lga) : null,
+            'nationality' => !empty($additional_details->nationality) ? $this->getCountryDetails($additional_details->nationality) : null,
+        ];
+
+        $data['next_of_kin_information'] = [
+            'first_name' => $next_of_kin->nok_first_name ?? null,
+            'last_name' => $next_of_kin->nok_last_name ?? null,
+            'house_address' => $next_of_kin->nok_house_address ?? null,
+            'email_address' => $next_of_kin->nok_email_address ?? null,
+            'phone_number' => $next_of_kin->nok_phone_number ?? null,
+            'relationship' => $next_of_kin->nok_relationship ?? null,
+        ];
+
+        return response()->json(['message' => 'success', 'data' => $data], 200);
     }
 }
