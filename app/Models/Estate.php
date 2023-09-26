@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Estate extends Model
 {
-    protected $fillable = ['name', 'city_id', 'location_id', 'company_id', 'branch_id', 'property_type', 'project_supervisor', 'description', 'status'];
+    protected $fillable = ['name', 'city_id', 'location_id', 'company_id', 'branch_id', 'property_type', 'project_supervisor', 'description', 'status','form_amount'];
     use HasFactory;
 
     public function location()
