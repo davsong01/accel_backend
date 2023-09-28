@@ -26,19 +26,26 @@ class CustomerContractController extends Controller
             ->get();
 
 
-        // $contracts_count = $contracts->first()->customer->contracts->count();
-
-
         $allContracts = [];
         if ($contracts) {
             // get the customer
             $customer = Customer::withCount(['singleContract', 'joinContract', 'contracts'])->where('id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->first();
+
+            $customerX = $customer;
+            $customerY = $customer;
+
             $dataX = [
                 'all_contracts' => $customer->contracts_count,
-                'joint_contracts' => $customer->single_contract_count,
-                'single_contracts' => $customer->join_contract_count
+                'joint_contracts' => $customerX->single_contract_count,
+                'single_contracts' => $customerY->join_contract_count
             ];
             $data['contract_count'] = $dataX;
+            // $dataX = [
+            //     'all_contracts' => $customer->contracts_count,
+            //     'joint_contracts' => $customer->single_contract_count,
+            //     'single_contracts' => $customer->join_contract_count
+            // ];
+            // $data['contract_count'] = $dataX;
 
             foreach ($contracts as $key => $contract) {
                 // $estate->load('city', 'location', 'estate_property_type')
@@ -220,9 +227,9 @@ class CustomerContractController extends Controller
      */
     public function show($contract_id)
     {
-        $contract = CustomerContract::whereId($contract_id)->first();
-        $contract->form_amount = $this->getContractFormAmount($contract, 'single');
+        $contract = CustomerContract::with('location:name,id', 'building_type:id,name', 'plot_size:id,size')->where('id', $contract_id)->select(['id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'contract_type', 'property_type'])->orderBy('created_at', 'DESC')->where('company_id', $this->sessionDetails('company_id'))->get();
 
+     
         return response()->json(['message' => 'success', 'data' => $contract], 200);
     }
 
@@ -315,15 +322,18 @@ class CustomerContractController extends Controller
             $query['form_amount'] = $query->estate->form_amount;
             return $query;
         });
-
+        $data = [];
         $allContracts = [];
         if ($contracts) {
             // get the customer
             $customer = Customer::withCount(['singleContract', 'joinContract', 'contracts'])->where('id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->first();
+            $customerX = $customer;
+            $customerY = $customer;
+           
             $dataX = [
                 'all_contracts' => $customer->contracts_count,
-                'joint_contracts' => $customer->single_contract_count,
-                'single_contracts' => $customer->join_contract_count
+                'joint_contracts' => $customerX->single_contract_count,
+                'single_contracts' => $customerY->join_contract_count
             ];
             $data['contract_count'] = $dataX;
 
@@ -333,13 +343,14 @@ class CustomerContractController extends Controller
 
                 foreach ($details as $detail) {
                     $allContracts[$estate->estate_id]['estate_id'] = $estate->estate_id;
+                    $allContracts[$estate->estate_id]['estate_id'] = $estate->estate_id;
                     $detail['form_amount'] = $estate->form_amount;
                     $allContracts[$estate->estate_id]['estate_name'] = $estate->estate_name;
                     $allContracts[$estate->estate_id]['contracts'][] = $detail;
                 }
             }
-
             $data['all_contracts'] = $allContracts;
+
 
             return response()->json(['message' => 'success', 'data' => $data], 200);
         } else {

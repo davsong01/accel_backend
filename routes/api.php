@@ -103,6 +103,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('get-all-staff', [StaffController::class, 'getAllStaff']);
         Route::post('staff/store', [StaffController::class, 'storeStaff']);
         Route::post('update-staff', [StaffController::class, 'updateStaff']);
+        Route::post('update-staff-personal-information', [StaffController::class, 'updateStaffPersonalInfo']);
         
         Route::get('get-active-staff', [StaffController::class, 'getActiveStaff']);
         Route::get('get-single-staff-profile/{staff_id}', [StaffController::class, 'getSingleStaffProfile']);
@@ -144,7 +145,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
 
         Route::get('customercontract/{contract_id}', [CustomerContractController::class, 'show']);
         Route::get('estate-property-type', [PropertyTypeDetailsController::class, 'index']);
-
+        
         Route::get('get-leads', [CustomerController::class, 'getLeads']);
         Route::get('get-prospects', [CustomerController::class, 'getProspects']);
         Route::get('get-subscribers', [CustomerController::class, 'getSubscribers']);
@@ -171,5 +172,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('self-service/dashboard', [SelfServiceController::class, 'dashboard']);
         Route::get('self-service/my-profile', [SelfServiceController::class, 'myWorkProfile']);
         Route::post('self-service/update-my-profile', [SelfServiceController::class, 'updateMyWorkProfile']);
+        // Route::post('self-service/create-leave-and-absence', [SelfServiceController::class, 'createLeaveAndAbsence']);
+
     });
 });

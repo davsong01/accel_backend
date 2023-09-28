@@ -65,11 +65,13 @@ class LeaveAndAbenceManagementController extends Controller
         }
     }
 
-    public function store(Request $request)
+    public function store(Request $request, $internal = null)
     {
         $validator = Validator::make($request->all(), [
             'period' => 'required',
             'reason' => 'required',
+            'start_date' => 'required',
+            'end_date' => 'required',
             'delegate_duty' => 'required',
         ]);
 
@@ -81,7 +83,9 @@ class LeaveAndAbenceManagementController extends Controller
         }
 
         $lam = LeaveAndAbenceManagement::updateOrcreate([
-            'staff_id' => $this->sessionDetails('staff_id'),
+            'staff_id' => isset($internal) ? $request['staff_id'] : $this->sessionDetails('staff_id'),
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
             'period' => $request->period,
             'reason' => $request->reason,
             'type' => $request->type ?? 'leave',
