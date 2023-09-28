@@ -29,7 +29,7 @@ class CustomerContractController extends Controller
         $allContracts = [];
         if ($contracts) {
             // get the customer
-            $customer = Customer::withCount(['singleContract', 'joinContract', 'contracts'])->where('id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->first();
+            $customer = Customer::withCount(['singleContract', 'jointContract', 'contracts'])->where('id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->first();
 
             $customerX = $customer;
             $customerY = $customer;
@@ -326,7 +326,7 @@ class CustomerContractController extends Controller
         $allContracts = [];
         if ($contracts) {
             // get the customer
-            $customer = Customer::withCount(['singleContract', 'joinContract', 'contracts'])->where('id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->first();
+            $customer = Customer::withCount(['singleContract', 'jointContract', 'contracts'])->where('id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->first();
             $customerX = $customer;
             $customerY = $customer;
            
