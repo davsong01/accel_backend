@@ -40,7 +40,7 @@ class Customer extends Model
         return $this->hasMany(CustomerContract::class, 'customer_id')->where('contract_type','Single');
     }
 
-    public function joinContract()
+    public function jointContract()
     {
         return $this->hasMany(CustomerContract::class, 'customer_id')->where('contract_type','Joint');
     }

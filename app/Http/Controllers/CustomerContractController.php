@@ -36,8 +36,8 @@ class CustomerContractController extends Controller
 
             $dataX = [
                 'all_contracts' => $customer->contracts_count,
-                'joint_contracts' => $customerX->single_contract_count,
-                'single_contracts' => $customerY->join_contract_count
+                'joint_contracts' => $customerX->joint_contract_count,
+                'single_contracts' => $customerY->single_contract_count
             ];
             $data['contract_count'] = $dataX;
             // $dataX = [
@@ -332,8 +332,8 @@ class CustomerContractController extends Controller
            
             $dataX = [
                 'all_contracts' => $customer->contracts_count,
-                'joint_contracts' => $customerX->single_contract_count,
-                'single_contracts' => $customerY->join_contract_count
+                'joint_contracts' => $customerX->joint_contract_count,
+                'single_contracts' => $customerY->single_contract_count
             ];
             $data['contract_count'] = $dataX;
 
