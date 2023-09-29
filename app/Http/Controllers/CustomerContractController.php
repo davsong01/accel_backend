@@ -228,7 +228,6 @@ class CustomerContractController extends Controller
     public function show($contract_id)
     {
         $contract = CustomerContract::with('location:name,id', 'building_type:id,name', 'plot_size:id,size')->where('id', $contract_id)->select(['id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'contract_type', 'property_type'])->orderBy('created_at', 'DESC')->where('company_id', $this->sessionDetails('company_id'))->get();
-
      
         return response()->json(['message' => 'success', 'data' => $contract], 200);
     }
