@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Http\RedirectResponse;
@@ -72,7 +73,7 @@ class LeaveAndAbenceManagementController extends Controller
             'reason' => 'required',
             'start_date' => 'required',
             'end_date' => 'required',
-            'delegate_duty' => 'required',
+            'delegate_duty' => 'required|exists:staff,id,company_id,' . $this->sessionDetails('company_id'),
         ]);
 
         if ($validator->fails()) {
@@ -82,11 +83,23 @@ class LeaveAndAbenceManagementController extends Controller
             ], 412);
         }
 
+        $start = Carbon::parse($request->start_date);
+        $end = Carbon::parse($request->end_date);
+
+        if($start > $end){
+            return response()->json([
+                'error' => 'Start date cannot be greater than end date',
+                'data' => null,
+            ], 412);
+        }
+       
+        $period = $end->diffInDays($start);
+        
         $lam = LeaveAndAbenceManagement::updateOrcreate([
             'staff_id' => isset($internal) ? $request['staff_id'] : $this->sessionDetails('staff_id'),
             'start_date' => $request->start_date,
             'end_date' => $request->end_date,
-            'period' => $request->period,
+            'period' => $period,
             'reason' => $request->reason,
             'type' => $request->type ?? 'leave',
             'delegate_duty' => $request->delegate_duty,
