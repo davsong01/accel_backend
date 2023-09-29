@@ -191,17 +191,47 @@ class Controller extends BaseController
     }
 
     public function getStateDetails($state_id){
-        return States::select('id','name')->where('id',$state_id)->first();
+        $state = collect([
+            'id' => null,
+            'name' => 'N/A',
+        ]);
+
+        $res = States::select('id','name')->where('id',$state_id)->first();
+        if($res){
+            $state = $res;
+        }
+
+        return $state;
     }
 
     public function getCountryDetails($country_id)
     {
-        return Country::select('id', 'name')->where('id', $country_id)->first();
+        $country = collect([
+            'id' => null,
+            'name' => 'N/A',
+        ]);
+        $res = Country::select('id', 'name')->where('id', $country_id)->first();
+
+        if ($res) {
+            $country = $res;
+        }
+
+        return $country;
     }
 
     public function getLgaDetails($lga_id)
     {
-        return Lga::select('id', 'name')->where('id', $lga_id)->first();
+        $lga = collect([
+            'id' => null,
+            'name' => 'N/A',
+        ]);
+        $res = Lga::select('id', 'name')->where('id', $lga_id)->first();
+
+        if ($res) {
+            $lga = $res;
+        }
+
+        return $lga;
     }
    
 }

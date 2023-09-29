@@ -60,7 +60,7 @@ class StaffController extends Controller
             $staff = $staff->where('staff.department_id', $request->department);
         }
 
-        $staff = $staff->select("staff.id AS staff_id", "users.id As user_id", "users.status", "staff.created_at", "users.first_name", "users.last_name", "users.email","users.staff_id AS user_staff_id", "staff.id AS staff_id", "users.type", "users.company_id","job_roles.name AS job_role","job_types.name AS job_type", "departments.name AS department", "users.middle_name", "users.email", "users.type", "users.phone_number", "users.gender")->orderBy("staff.created_at", "desc")->get();
+        $staff = $staff->select("staff.id AS staff_id", "users.id As user_id", "users.status", "staff.created_at", "users.first_name", "users.last_name", "users.email","users.staff_id AS user_staff_id", "staff.id AS staff_id", "users.type", "users.company_id","job_roles.name AS job_role","job_types.name AS job_type", "departments.name AS department", "users.middle_name", "users.email", "users.type", "users.phone_number", "users.gender")->orderBy("staff.created_at", "desc")->paginate(20);
 
         return response()->json(['message' => 'success', 'data' => $staff], 200);
     }
@@ -559,9 +559,9 @@ class StaffController extends Controller
             ->leftjoin("departments", "staff.department_id", "=", "departments.id")
             ->select("staff.id AS staff_id", "users.status", "staff.created_at", "users.first_name","users.username", "users.last_name", "users.email", "staff.id AS staff_id", "users.type", "users.company_id","staff.jobtype_id","users.id AS user_id", "staff.date_of_employment","branches.id AS branch_id","branches.name AS branch_name","departments.id AS department_id","departments.name AS department_name","job_roles.id AS job_role_id","job_roles.name AS job_role_name", "job_types.id AS job_type_id", "job_types.name AS job_type_name","users.residential_address AS staff_residential_address", "users.additional_details","users.next_of_kin","users.date_of_birth AS date_of_birth")
             ->first();
-        $additional_details = !empty($staff->additional_details) ? json_decode($staff->additional_details) : collect([]);
-        $next_of_kin = !empty($staff->next_of_kin) ? json_decode($staff->next_of_kin) : collect([]);
-       
+        $additional_details = !empty($staff->additional_details) ? json_decode($staff->additional_details, true) : [];
+        $next_of_kin = !empty($staff->next_of_kin) ? json_decode($staff->next_of_kin, true) : [];
+      
         $time = Carbon::parse($staff->date_of_employment)->diff(Carbon::now());
         $time_in_company = $time->y . ($time->y > 1 ? 'years, ' : 'year, ') . $time->m . ($time->m > 1 ? 'months' : 'month');
         $my_anniversary = Carbon::parse($staff->date_of_employment)->format('jS\\, F');
@@ -598,25 +598,26 @@ class StaffController extends Controller
             'last_name' => $staff->last_name ?? '',
             'username' => $staff->user->username ?? '',
             'gender' => $staff->user->gender ?? '',
-            'marital_status' => !empty($additional_details->marital_status) ? $additional_details->marital_status : '',
+            'marital_status' => $additional_details['marital_status'] ?? '',
             'dob' => $staff->date_of_birth,
         ];
-       
+      
         $data['contact_and_additional_information'] = [
             'residential_address' => $staff->staff_residential_address ?? '',
-            'address' => $staff->email ?? '',
-            'alternate_email' => !empty($additional_details->alternate_email) ? $additional_details->alternate_email : '',
-            'state' => !empty($additional_details->state) ? $this->getStateDetails($additional_details->state) : '',
-            'lga' => !empty($additional_details->lga) ? $this->getLgaDetails($additional_details->lga) : '',
-            'nationality' => !empty($additional_details->nationality) ? $this->getCountryDetails($additional_details->nationality) : '',
+            'address' => $staff->residential_address ?? '',
+            'alternate_email' => $additional_details['alternate_email'] ?? '',
+            'state' => !empty($additional_details['state']) ? $this->getStateDetails($additional_details['state']) : '',
+            'lga' => !empty($additional_details['lga']) ? $this->getLgaDetails($additional_details['lga']) : '',
+            'nationality' => !empty($additional_details['nationality']) ? $this->getCountryDetails($additional_details['nationality']) : '',
         ];
+        
         $data['next_of_kin_information'] = [
-            'first_name' => $next_of_kin->nok_first_name ?? '',
-            'last_name' => $next_of_kin->nok_last_name ?? '',
-            'house_address' => $next_of_kin->nok_house_address ?? '',
-            'email_address' => $next_of_kin->nok_email_address ?? '',
-            'phone_number' => $next_of_kin->nok_phone_number ?? '',
-            'relationship' => $next_of_kin->nok_relationship ?? '',
+            'first_name' => $next_of_kin['nok_first_name'] ?? '',
+            'last_name' => $next_of_kin['nok_last_name'] ?? '',
+            'house_address' => $next_of_kin['nok_house_address'] ?? '',
+            'email_address' => $next_of_kin['nok_email_address'] ?? '',
+            'phone_number' => $next_of_kin['nok_phone_number'] ?? '',
+            'relationship' => $next_of_kin['nok_relationship'] ?? '',
         ];
 
         return response()->json(['message' => 'success', 'data' => $data], 200);        
