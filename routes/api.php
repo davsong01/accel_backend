@@ -35,6 +35,7 @@ use App\Http\Controllers\AccountClassificationController;
 use App\Http\Controllers\LeaveAndAbenceManagementController;
 use App\Http\Controllers\EstateConstructionSettingController;
 use App\Http\Controllers\TransactionTypeDefinitionController;
+use App\Models\AdvanceAndClaims;
 
 /*
 |--------------------------------------------------------------------------
@@ -131,6 +132,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
 
         Route::get('advance-and-claims/{id?}', [AdvanceAndClaimsController::class, 'index']);
         Route::get('single-staff-advance-and-claims/{staff_id}', [AdvanceAndClaimsController::class, 'staffAdvanceAndClaims']);
+        Route::post('create-advance-and-claims', [AdvanceAndClaimsController::class, 'store']);
 
         Route::resource('branch', BranchController::class);
         Route::resource('jobrole', JobRoleController::class);

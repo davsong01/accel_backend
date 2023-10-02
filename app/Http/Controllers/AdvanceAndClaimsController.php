@@ -74,7 +74,7 @@ class AdvanceAndClaimsController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        
     }
 
     /**
