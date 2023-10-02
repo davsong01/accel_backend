@@ -3,11 +3,16 @@
 namespace App\Http\Controllers;
 
 use Carbon\Carbon;
+use App\Models\User;
 use App\Models\Staff;
 use App\Models\Payment;
 use Illuminate\Http\Request;
+use App\Models\StaffDocument;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use App\Models\StaffUploadedDocument;
 use App\Http\Controllers\StaffController;
+use Illuminate\Support\Facades\Validator;
 
 class SelfServiceController extends Controller
 {
@@ -101,7 +106,7 @@ class SelfServiceController extends Controller
                 'id' => $b->staff_id,
                 'first_name' => $b->first_name,
                 'last_name' => $b->last_name,
-                'avatar' => !empty($b->avatar) ? url('/') . $b->avatar : '',
+                'avatar' => !empty($b->avatar) ? $b->avatar : '',
                 'created_at' => Carbon::parse($b->created_at)->format('jS \\of F'),
             ];
         }
@@ -112,7 +117,7 @@ class SelfServiceController extends Controller
             'last_name' => Auth::user()->last_name ?? '',
             'work_id' => Auth::user()->staff_id ?? '',
             'job_role'=> Auth::user()->staff->job_role->name ?? '',
-            'avatar' => !empty(Auth::user()->avatar) ? url('/') . Auth::user()->avatar : '',
+            'avatar' => !empty(Auth::user()->avatar) ? Auth::user()->avatar : '',
             'time_in_company'=>$time_in_company,
             'profile_completeness'=> (int) $profile_completenes.'%',
             'my_anniversary'=> $my_anniversary, 
@@ -134,5 +139,76 @@ class SelfServiceController extends Controller
        
         $r = new \Illuminate\Http\Request($request->all());
         return $s_con->updateStaff($r, 'internal');
+    }
+
+    public function addAvatar(Request $request){
+        $validator = Validator::make($request->all(), [
+            'avatar' => 'required|image',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->messages()->first(),
+                'data' => null,
+            ], 412);
+        }
+        $avatar = $this->uploadFile($request->avatar, 'avatars',500,500);
+        Auth::user()->update(['avatar'=>$avatar]);
+
+        return response()->json(['message' => 'success', 'data' => Auth::user()->avatar], 200);
+    }
+
+    public function getAvatar(Request $request, $staff_id)
+    {
+        $avatar = Staff::where('id', $staff_id)->first()->user->avatar;
+        return response()->json(['message' => 'success', 'data' => $avatar], 200);
+    }
+
+    public function deleteAvatar(){
+        $file = DB::table('users')->where('id',Auth::user()->id)->value('avatar');
+        
+        $this->deleteFile($file);
+        return response()->json(['message' => 'Delete succesful', 'data' => null], 200);
+
+    }
+
+    public function uploadDocuments(Request $request){
+        $validator = Validator::make($request->all(), [
+            'id' => 'required|exists:staff_document_settings,id,company_id,' . $this->sessionDetails('company_id'),
+            'staff_id' => 'required|exists:staff,id,company_id,' . $this->sessionDetails('company_id'),
+            'file' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->messages()->first(),
+                'data' => null,
+            ], 412);
+        }
+
+        $setting = DB::table('staff_document_settings')->where(['company_id' => $this->sessionDetails('company_id'), 'id'=>$request->id])->first();
+        $count = StaffUploadedDocument::where('staff_document_id', $setting->id)->count();
+       
+        if ($count >= $setting->required) {
+            return response()->json([
+                'error' => 'You have already uploaded maximum number of required files for '.$setting->name,
+                'data' => null,
+            ], 422);
+        }
+      
+        $fileX = $this->uploadProtectedFile($request->file, $this->sessionDetails('company_slug'));
+
+        $upload = StaffUploadedDocument::create([
+            'staff_id' => $request->staff_id,
+            'staff_document_id' => $setting->id,
+            'name' => $setting->name,
+            'file' => $fileX,
+            'uploaded' => $count++,
+            'required' => $setting->required,
+            'company_id' =>  $this->sessionDetails('company_id')
+        ]);
+
+        return response()->json(['message' => 'Upload succesful', 'data' => $upload->file], 200);
+
     }
 }

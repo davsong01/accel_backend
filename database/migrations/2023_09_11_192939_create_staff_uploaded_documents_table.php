@@ -16,6 +16,7 @@ return new class extends Migration
             $table->integer('staff_document_id');
             $table->integer('staff_id');
             $table->string('name')->nullable();
+            $table->string('file');
             $table->string('uploaded')->nullable();
             $table->integer('required')->nullable();
             $table->integer('company_id');

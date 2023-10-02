@@ -7,6 +7,7 @@ use App\Models\Staff;
 use App\Models\StaffRole;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
@@ -44,4 +45,12 @@ class User extends Authenticatable
     {
         return $this->hasOne(Staff::class);
     }
+
+    protected function avatar(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string $value) => url('/') . '/uploads/' . base64_encode($value),
+        );
+    }
+
 }

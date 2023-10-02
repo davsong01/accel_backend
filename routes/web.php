@@ -16,3 +16,18 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     // return view('welcome');
 });
+
+Route::get('uploads/{filename}', function ($filename) {
+    $filename = base64_decode($filename);
+    $realpath = base_path() . '/uploads' . '/' . $filename;
+    return response()->download($realpath);
+});
+
+Route::middleware(['auth:sanctum', 'company_check', 'user_roles', 'otherchecks'])->group(function () {
+    Route::get('documents/{filename}', function ($filename) {
+        $filename = base64_decode($filename);
+        $realpath = base_path() . '/documents' . '/' . $filename;
+        return response()->download($realpath);
+    });
+});
+

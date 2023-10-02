@@ -163,14 +163,41 @@ class Controller extends BaseController
 
         $file->storeAs($folder, $name, "uploads");
 
-        return $location.'/'.$name;
+        return $folder.'/'.$name;
+    }
+
+    public function uploadProtectedFile($file, $location = null, $width = null, $height = null)
+    {
+        $folder = $this->getPathToSaveFile($location);
+        $name = uniqid(11) . '.' . $file->getClientOriginalExtension();
+
+        if (substr($file->getMimeType(), 0, 5) == 'image') {
+            $imageFile = Image::make($file);
+            $imgWidth = $width ?? $imageFile->width();
+            $imgHeight = $imgHeight ?? $imageFile->height();
+            if (!is_null($imgWidth) && !is_null($imgHeight)) {
+                if ($imgWidth < $imgHeight) {
+                    $imageFile->resize($imgWidth, null, function ($constraint) {
+                        $constraint->aspectRatio();
+                    });
+                } else {
+                    $imageFile->resize(null, $imgWidth, function ($constraint) {
+                        $constraint->aspectRatio();
+                    });
+                }
+            }
+        }
+
+        $file->storeAs($folder, $name, "documents");
+
+        return $folder . '/' . $name;
     }
 
     public function getPathToSaveFile($location = null){
         $year = date('Y');
         $month = date('m');
         $day = date('d');
-
+        
         if($location){
             $location = $location .'/' . $year . '/' . $month . '/' . $day;
         }else{

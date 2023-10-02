@@ -174,6 +174,10 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('self-service/dashboard', [SelfServiceController::class, 'dashboard']);
         Route::get('self-service/my-profile', [SelfServiceController::class, 'myWorkProfile']);
         Route::post('self-service/update-my-profile', [SelfServiceController::class, 'updateMyWorkProfile']);
+        Route::post('self-service/add-avatar', [SelfServiceController::class, 'addAvatar']);
+        Route::post('self-service/delete-avatar', [SelfServiceController::class, 'deleteAvatar']);
+        Route::post('self-service/get-avatar/{staff_id}', [SelfServiceController::class, 'getAvatar']);
+        Route::post('self-service/upload-documents', [SelfServiceController::class, 'uploadDocuments']);
         // Route::post('self-service/create-leave-and-absence', [SelfServiceController::class, 'createLeaveAndAbsence']);
 
     });

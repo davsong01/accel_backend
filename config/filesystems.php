@@ -63,6 +63,13 @@ return [
             'throw' => true,
         ],
 
+        'documents' => [
+            'driver' => 'local',
+            'root' => base_path('documents'),
+            'visibility' => 'private',
+            'throw' => true,
+        ],
+
     ],
 
     /*

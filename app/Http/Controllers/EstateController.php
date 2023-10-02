@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Imports\EstateImport;
 use Illuminate\Http\Response;
 use App\Models\EstateSettings;
+use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\RedirectResponse;
 use App\Models\EstatePropertyTypeDetails;
@@ -130,7 +131,11 @@ class EstateController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required',
+            'name' => [
+                'required', 'name', Rule::unique('estates')->where(function ($query) {
+                    $query->where('company_id', $this->sessionDetails('company_id'));
+                })
+            ],
             'city' => 'required|exists:cities,id,company_id,' . $this->sessionDetails('company_id'),
             'location' => 'required|exists:locations,id,company_id,' . $this->sessionDetails('company_id'),
             'property_type' => 'required|in:land,building,both',
