@@ -5,12 +5,13 @@ namespace Database\Seeders;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use App\Models\Company;
 use Illuminate\Support\Str;
+use Illuminate\Database\Seeder;
 use Database\Seeders\GeneralSeeder;
 use Illuminate\Support\Facades\Hash;
 use Database\Seeders\LgasTableSeeder;
 use Database\Seeders\StatesTableSeeder;
 use Database\Seeders\CountriesTableSeeder;
-use Illuminate\Database\Seeder;
+use Database\Seeders\MessageProvidersSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -21,9 +22,10 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             // GeneralSeeder::class,
-            CountriesTableSeeder::class,
-            StatesTableSeeder::class,
-            LgasTableSeeder::class
+            // CountriesTableSeeder::class,
+            // StatesTableSeeder::class,
+            // LgasTableSeeder::class,
+            MessageProvidersSeeder::class
         ]);
       
     }

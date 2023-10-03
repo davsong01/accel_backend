@@ -8,11 +8,14 @@ use App\Models\Staff;
 use App\Models\Payment;
 use Illuminate\Http\Request;
 use App\Models\StaffDocument;
+use App\Models\ResetCodePassword;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use App\Models\StaffUploadedDocument;
 use App\Http\Controllers\StaffController;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Controllers\MessageTransactionController;
 
 class SelfServiceController extends Controller
 {
@@ -211,4 +214,30 @@ class SelfServiceController extends Controller
         return response()->json(['message' => 'Upload succesful', 'data' => $upload->file], 200);
 
     }
+
+    public function sendResetPasswordEmail(Request $request){
+        $request->validate([
+            'password' => 'required',
+        ]);
+
+        // check if password for this user maches incoming
+        if (!Hash::check($request->password, Auth::user()->password)) {
+            return response()->json(['error' => 'Current Password supplied is incorrect', 'data' => null], 422);
+        }
+        // Delete all old code that user send before.
+        ResetCodePassword::where('email', Auth::user()->email)->delete();
+        // Generate random code
+        $data['token'] = base64_encode((mt_rand(100000000000, 999999999999)));
+        $data['email'] = Auth::user()->email;
+        
+        // Create a new code
+        $codeData = ResetCodePassword::create($data);
+        $data['type'] = 'password-reset';
+        // Log email only
+        $mes = new MessageTransactionController();
+        $mes->logEmailTransaction($data);
+
+        return response()->json(['message' => 'Password reset link has been sent to registered email', 'data' => null], 200);
+    }
+
 }

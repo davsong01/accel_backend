@@ -185,6 +185,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::post('self-service/delete-avatar', [SelfServiceController::class, 'deleteAvatar']);
         Route::post('self-service/get-avatar/{staff_id}', [SelfServiceController::class, 'getAvatar']);
         Route::post('self-service/upload-documents', [SelfServiceController::class, 'uploadDocuments']);
+        Route::post('self-service/send-reset-password-mail', [SelfServiceController::class, 'sendResetPasswordEmail']);
         // Route::post('self-service/create-leave-and-absence', [SelfServiceController::class, 'createLeaveAndAbsence']);
 
     });
