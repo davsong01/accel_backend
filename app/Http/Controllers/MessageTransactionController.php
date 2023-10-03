@@ -116,8 +116,21 @@ class MessageTransactionController extends Controller
         ];
     }
 
-    public function sendEmail($data){
-        Mail::to($request->email)->send(new SendCodeResetPassword($codeData->code));
+    public function processMessagesTransaction($pick = 100){
+        $messages = MessageTransaction::where(['status'=>'pending'])->get()->take($pick);
+        foreach($messages as $message){
+            $provider = MessageProvider::where('id', $message->provider_id);
+            if($message->medium == 'sms'){
 
+            }
+
+            if ($message->medium == 'email') {
+                dd('ds');
+                Mail::to($data['email'])->send(new Welcomemail($data, $pdf));
+
+            }
+        }
+        dd($messages);
+        Mail::to($request->email)->send(new SendCodeResetPassword($codeData->code));
     }
 }

@@ -14,7 +14,6 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
-
     /**
      * The attributes that are mass assignable.
      *
@@ -48,8 +47,8 @@ class User extends Authenticatable
 
     protected function avatar(): Attribute
     {
-        return Attribute::make(
-            get: fn (string $value) => url('/') . '/uploads/' . base64_encode($value),
+        return Attribute::make( 
+            get: fn (string $value = null) => !empty($value) ? url('/') . '/uploads/' . base64_encode($value) : '',
         );
     }
 
