@@ -49,6 +49,13 @@ use App\Models\AdvanceAndClaims;
 */
 
 Route::post('/register', [AuthController::class, 'register']);
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('documents/{filename}', function ($filename) {
+        $filename = base64_decode($filename);
+        $realpath = base_path() . '/documents' . '/' . $filename;
+        return response()->download($realpath);
+    });
+});
 
 Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
     Route::post('/login', [AuthController::class, 'login']);
