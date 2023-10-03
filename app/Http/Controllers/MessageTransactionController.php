@@ -8,7 +8,9 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
 use App\Models\MessageProvider;
 use App\Models\MessageTransaction;
+use App\Mail\MessageTransactionMail;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\RedirectResponse;
 
 class MessageTransactionController extends Controller
@@ -119,18 +121,38 @@ class MessageTransactionController extends Controller
     public function processMessagesTransaction($pick = 100){
         $messages = MessageTransaction::where(['status'=>'pending'])->get()->take($pick);
         foreach($messages as $message){
-            $provider = MessageProvider::where('id', $message->provider_id);
+            $provider = MessageProvider::where('id', $message->provider_id)->first();
             if($message->medium == 'sms'){
 
             }
-
+         
             if ($message->medium == 'email') {
-                dd('ds');
-                Mail::to($data['email'])->send(new Welcomemail($data, $pdf));
+                $providerX = [
+                    'mail.driver' => $provider->credentials['MAIL_DRIVER'],
+                    'mail.host' => $provider->credentials['MAIL_HOST'],
+                    'mail.port' => $provider->credentials['MAIL_PORT'],
+                    'mail.encryption' => $provider->credentials['MAIL_ENCRYPTION'],
+                    'mail.username' => $provider->credentials['MAIL_USERNAME'],
+                    'mail.password' => $provider->credentials['MAIL_PASSWORD'],
+                    'mail.replyToName' => $provider->credentials['MAIL_REPLY_TO_NAME'] ?? $this->sessionDetails('company_name'),
+                    'mail.replyToAddress' => $provider->credentials['MAIL_REPLY_TO_ADDRESS'] ?? 'no-reply@mail.com',
+                    'mail.from' => [
+                        'address' => $provider->credentials['MAIL_REPLY_FROM_ADDRESS'],
+                        'name' => $provider->credentials['MAIL_REPLY_FROM_NAME'] ?? $message->from,
+                    ],
+                ];
+                config($providerX);
+                try {
+                    Mail::to($message->recipient)->send(new MessageTransactionMail($message->toArray(), $providerX));
+
+                    $message->update(['status' => 'sent']);
+                }catch(\Exception $e) {
+                    $message->update(['errors' => $e->getMessage()]);
+                }
 
             }
         }
-        dd($messages);
-        Mail::to($request->email)->send(new SendCodeResetPassword($codeData->code));
+        
+        return response()->json('All done');
     }
 }

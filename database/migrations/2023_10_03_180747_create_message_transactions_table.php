@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('recipient');
             $table->string('from')->nullable();
             $table->text('message');
+            $table->text('errors')->nullable();
             $table->string('status')->default('pending');
             $table->string('medium');
             $table->string('subject')->nullable();

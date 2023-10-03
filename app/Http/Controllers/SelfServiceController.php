@@ -227,17 +227,51 @@ class SelfServiceController extends Controller
         // Delete all old code that user send before.
         ResetCodePassword::where('email', Auth::user()->email)->delete();
         // Generate random code
-        $data['token'] = base64_encode((mt_rand(100000000000, 999999999999)));
+        $rand = mt_rand(100000000000, 999999999999);
+        $data['token'] = base64_encode($rand);
         $data['email'] = Auth::user()->email;
         
         // Create a new code
         $codeData = ResetCodePassword::create($data);
         $data['type'] = 'password-reset';
+        $data['token'] = $rand;
+
         // Log email only
         $mes = new MessageTransactionController();
         $mes->logEmailTransaction($data);
 
         return response()->json(['message' => 'Password reset link has been sent to registered email', 'data' => null], 200);
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'token' => 'required',
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+
+        $encodeToken = base64_encode($request->token);
+        $passwordReset = ResetCodePassword::firstWhere('token', $encodeToken);
+        if(!$passwordReset){
+            return response(['error' => 'Invalid Token', 'data' => null], 422);
+        }
+
+        // check if it does not expired: the time is one hour
+        if ($passwordReset->created_at > now()->addHour()) {
+            $passwordReset->delete();
+            return response(['error' => 'Token has expired', 'data' => null], 422);
+        }
+        // find user's email 
+        $user = User::firstWhere('email', $passwordReset->email);
+        $password = Hash::make($request->password);
+        // update user password
+        $user->update(['password'=> $password]);
+
+        // delete current token 
+   
+        $passwordReset->delete();
+
+        return response(['message' => 'Password successfully reset', 'data' => null], 200);
     }
 
 }

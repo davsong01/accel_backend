@@ -36,9 +36,15 @@ class MessageProvidersSeeder extends Seeder
                     'MAIL_PASSWORD' => 'geswvrqjrwxzrzyi',
                     'MAIL_ENCRYPTION' => 'ssl',
                     'MAIL_FROM_ADDRESS' => 'training.employme@gmail.com',
+                    'MAIL_REPLY_TO_NAME' => 'Consode',
+                    'MAIL_REPLY_FROM_NAME' => 'Consode',
+                    'MAIL_REPLY_FROM_ADDRESS' => 'training.employme@gmail.com',
+                    'MAIL_REPLY_TO_ADDRESS' => 'training.employme@gmail.com',
                 ]),
                 'company_id' => 1,
+        
             ]
+
         ];
         \DB::table('message_providers')->insert($insert);
     

@@ -17,6 +17,7 @@ class MessageTransaction extends Model
        'subject',
        'schedule_date',
        'company_id',
-       'provider_id'
+       'provider_id',
+        'status'
     ];
 }
