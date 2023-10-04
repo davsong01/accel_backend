@@ -175,7 +175,7 @@ class SelfServiceController extends Controller
 
     }
 
-    public function uploadDocuments(Request $request){
+    public function uploadDocuments(Request $request, $self = true){
         $validator = Validator::make($request->all(), [
             'id' => 'required|exists:staff_document_settings,id,company_id,' . $this->sessionDetails('company_id'),
             'staff_id' => 'required|exists:staff,id,company_id,' . $this->sessionDetails('company_id'),
@@ -183,16 +183,31 @@ class SelfServiceController extends Controller
         ]);
 
         if ($validator->fails()) {
+            if ($self == false) {
+                return [
+                    'error' => $validator->messages()->first(),
+                    'data' => null,
+                ];
+            }
             return response()->json([
                 'error' => $validator->messages()->first(),
                 'data' => null,
             ], 412);
         }
 
+        $staff_id = $self == true ? Auth::user()->staff->id : $request->staff_id;
+
         $setting = DB::table('staff_document_settings')->where(['company_id' => $this->sessionDetails('company_id'), 'id'=>$request->id])->first();
-        $count = StaffUploadedDocument::where('staff_document_id', $setting->id)->count();
+        $count = StaffUploadedDocument::where(['staff_document_id' => $setting->id, 'staff_id' => $staff_id])->count();
        
         if ($count >= $setting->required) {
+            if($self == false){
+                return [
+                    'code' => 422,
+                    'error' => 'You have already uploaded maximum number of required files for ' . $setting->name,
+                    'data' => null,
+                ];
+            }
             return response()->json([
                 'error' => 'You have already uploaded maximum number of required files for '.$setting->name,
                 'data' => null,
@@ -202,15 +217,22 @@ class SelfServiceController extends Controller
         $fileX = $this->uploadProtectedFile($request->file, $this->sessionDetails('company_slug'));
 
         $upload = StaffUploadedDocument::create([
-            'staff_id' => $request->staff_id,
+            'staff_id' => $staff_id,
             'staff_document_id' => $setting->id,
             'name' => $setting->name,
             'file' => $fileX,
             'uploaded' => $count++,
             'required' => $setting->required,
-            'company_id' =>  $this->sessionDetails('company_id')
+            'company_id' => $this->sessionDetails('company_id')
         ]);
 
+        if ($self == false) {
+            return [   
+                'code' => 200,
+                'message' => 'Upload succesful', 
+                'data' => $upload->file
+            ];
+        }
         return response()->json(['message' => 'Upload succesful', 'data' => $upload->file], 200);
 
     }

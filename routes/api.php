@@ -121,6 +121,8 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         
         Route::get('staff-identification-settings/{id?}', [StaffController::class, 'staffIdentificationSetting']);
         Route::post('update-staff-identification-settings', [StaffController::class, 'updateStaffIdentificationSetting']);
+        Route::post('upload-staff-documents', [staffController::class, 'uploadDocuments']);
+
         Route::get('staff-document-settings/{id?}', [StaffController::class, 'staffDocumentSetting']);
         Route::post('staff-document-setting', [StaffController::class, 'addStaffDocumentSetting']);
         Route::post('staff-document-setting/{id}', [StaffController::class, 'updateStaffDocumentSetting']);
@@ -177,7 +179,6 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('get-currencies', [GeneralController::class, 'getCurrencies']);
 
         // Self Service
-        // Route::get('self-service/my-profile', [SelfServiceController::class, 'myProfile']);
         Route::get('self-service/dashboard', [SelfServiceController::class, 'dashboard']);
         Route::get('self-service/my-profile', [SelfServiceController::class, 'myWorkProfile']);
         Route::post('self-service/update-my-profile', [SelfServiceController::class, 'updateMyWorkProfile']);
