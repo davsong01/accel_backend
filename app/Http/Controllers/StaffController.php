@@ -37,18 +37,22 @@ class StaffController extends Controller
             ->where(['type' => 'staff'])
             ->join("departments", "staff.department_id", "=", "departments.id")
             ->leftjoin("job_roles", "staff.jobrole_id", "=", "job_roles.id")
-            ->leftjoin("job_types", "staff.jobtype_id", "=", "job_types.id");
-            
-        if ($request->has('name') && !is_null($request->status)) {
-            $staff = $staff->where('users.first_name', 'LIKE', "%{$request->name}%")
-                ->orWhere('users.last_name', 'LIKE', "%{$request->name}%");
+            ->leftjoin("job_types", "staff.jobtype_id", "=", "job_types.id")
+             ->select("staff.id AS staff_id", "users.id As user_id", "users.status", "staff.created_at", "users.first_name","users.middle_name","users.last_name", "users.email", "users.type", "users.company_id", "job_roles.name AS job_role", "job_types.name AS job_type", "departments.name AS department","users.type", "users.phone_number", "users.gender","staff.jobtype_id AS jobtype_id", "staff.jobrole_id AS jobrole_id", "staff.department_id AS department_id")->orderBy("staff.created_at", "desc");
+
+        if (!empty($request->name)) {
+            $staff = $staff->where('first_name', 'LIKE', "%{$request->name}%")
+                ->orWhere(function ($staff) use ($request) {
+                    $staff->where('last_name', 'LIKE', "%{$request->name}%")
+                        ->orWhere('middle_name', 'LIKE', "%{$request->name}%");
+                });
         }
 
-        if ($request->has('status') && !is_null($request->status)) {
+        if (!empty($request->status)) {
             $staff = $staff->where('users.status', $request->status);
         }
 
-        if ($request->has('job_type') && !is_null($request->job_type)) {
+        if (!empty($request->job_type)) {
             $staff = $staff->where('staff.jobtype_id', $request->job_type);
         }
 
@@ -60,7 +64,7 @@ class StaffController extends Controller
             $staff = $staff->where('staff.department_id', $request->department);
         }
 
-        $staff = $staff->select("staff.id AS staff_id", "users.id As user_id", "users.status", "staff.created_at", "users.first_name", "users.last_name", "users.email","users.staff_id AS user_staff_id", "staff.id AS staff_id", "users.type", "users.company_id","job_roles.name AS job_role","job_types.name AS job_type", "departments.name AS department", "users.middle_name", "users.email", "users.type", "users.phone_number", "users.gender")->orderBy("staff.created_at", "desc")->paginate(20);
+        $staff = $staff->paginate(20);
 
         return response()->json(['message' => 'success', 'data' => $staff], 200);
     }
