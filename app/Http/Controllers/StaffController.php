@@ -290,6 +290,7 @@ class StaffController extends Controller
         $user = $staff->user->update([
             'email' => $data['email'],
             'first_name' => $data['first_name'],
+            'middle_name' => $data['middle_name'] ?? '',
             'type' => 'staff',
             'middle_name' => $data['middle_name'] ?? '',
             'last_name' => $data['last_name'] ?? '',
@@ -389,6 +390,7 @@ class StaffController extends Controller
             'first_name' => $data['first_name'],
             'type' => 'staff',
             'middle_name' => $data['middle_name'] ?? '',
+            'middle_name' => $data['residential_address'] ?? '',
             'last_name' => $data['last_name'] ?? '',
             'username' => $data['username'] ?? '',
             'phone_number' => $data['phone_number'] ?? '',

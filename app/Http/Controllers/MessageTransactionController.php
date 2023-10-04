@@ -120,6 +120,10 @@ class MessageTransactionController extends Controller
 
     public function processMessagesTransaction($pick = 100){
         $messages = MessageTransaction::where(['status'=>'pending'])->get()->take($pick);
+        if(!$messages){
+            return response()->json('No pending messages');
+
+        }
         foreach($messages as $message){
             $provider = MessageProvider::where('id', $message->provider_id)->first();
             if($message->medium == 'sms'){
