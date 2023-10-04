@@ -2,15 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Lga;
+use App\Models\Staff;
 use App\Models\Estate;
 use App\Models\States;
 use App\Models\Country;
 use App\Models\EstateSettings;
 use App\Models\CustomerContract;
-use App\Models\Lga;
 use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
+use App\Notifications\StaffNotification;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -261,6 +263,13 @@ class Controller extends BaseController
         return $lga;
     }
 
+    public function notify($data){
+        $staff = Staff::where('id', $data['staff_id'])->first();
+        $user = $staff->user;
+        $data['user_id'] = $user->id;
+       
+        $user->notify(new StaffNotification($data));
+    }
    
 }
 

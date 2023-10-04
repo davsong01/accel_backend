@@ -6,7 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CityController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\RoleController;
-use App\Models\LeaveAndAbenceManagement;
+use App\Models\LeaveAndAbsenceManagement;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\BranchController;
 use App\Http\Controllers\EstateController;
@@ -32,10 +32,11 @@ use App\Http\Controllers\AdvanceAndClaimsController;
 use App\Http\Controllers\CustomerContractController;
 use App\Http\Controllers\PropertyTypeDetailsController;
 use App\Http\Controllers\AccountClassificationController;
-use App\Http\Controllers\LeaveAndAbenceManagementController;
+use App\Http\Controllers\LeaveAndAbsenceManagementController;
 use App\Http\Controllers\EstateConstructionSettingController;
 use App\Http\Controllers\TransactionTypeDefinitionController;
 use App\Models\AdvanceAndClaims;
+use App\Models\LeaveAndAbsenceSetting;
 
 /*
 |--------------------------------------------------------------------------
@@ -112,13 +113,13 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::post('staff/store', [StaffController::class, 'storeStaff']);
         Route::post('update-staff', [StaffController::class, 'updateStaff']);
         Route::post('update-staff-personal-information', [StaffController::class, 'updateStaffPersonalInfo']);
-        
+
         Route::get('get-active-staff', [StaffController::class, 'getActiveStaff']);
         Route::get('get-single-staff-profile/{staff_id}', [StaffController::class, 'getSingleStaffProfile']);
         Route::get('get-active-staff-in-role/{staff_id}', [StaffController::class, 'getActiveStaffInRole']);
         Route::post('assign-role-to-staff', [StaffController::class, 'assignRoleToStaff']);
         Route::get('staff-roles/{staff_id}', [StaffController::class, 'getSingleStaffRoles']);
-        
+
         Route::get('staff-identification-settings/{id?}', [StaffController::class, 'staffIdentificationSetting']);
         Route::post('update-staff-identification-settings', [StaffController::class, 'updateStaffIdentificationSetting']);
         Route::post('upload-staff-documents', [staffController::class, 'uploadDocuments']);
@@ -133,11 +134,11 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('sample-bulk-department-import', [DepartmentController::class, 'sampleBulkDepartment']);
         Route::post('import-bulk-department', [DepartmentController::class, 'importBulkDepartment']);
 
-        Route::get('leave-and-absence/{id?}', [LeaveAndAbenceManagementController::class, 'index']);
-        Route::get('single-staff-leave-and-absence/{staff_id}', [LeaveAndAbenceManagementController::class, 'staffLeaveAndAbsence']);
-        Route::post('create-leave-and-absence', [LeaveAndAbenceManagementController::class, 'store']);
-        Route::get('approve-leave-and-absence/{id}', [LeaveAndAbenceManagementController::class, 'approveLeaveAndAbsence']);
-        Route::get('decline-leave-and-absence/{id}', [LeaveAndAbenceManagementController::class, 'declineLeaveAndAbsence']);
+        Route::get('leave-and-absence/{id?}', [LeaveAndAbsenceManagementController::class, 'index']);
+        Route::get('single-staff-leave-and-absence/{staff_id}', [LeaveAndAbsenceManagementController::class, 'staffLeaveAndAbsence']);
+        Route::post('create-leave-and-absence', [LeaveAndAbsenceManagementController::class, 'store']);
+        Route::get('approve-leave-and-absence/{id}', [LeaveAndAbsenceManagementController::class, 'approveLeaveAndAbsence']);
+        Route::get('decline-leave-and-absence/{id}', [LeaveAndAbsenceManagementController::class, 'declineLeaveAndAbsence']);
 
         Route::get('advance-and-claims/{id?}', [AdvanceAndClaimsController::class, 'index']);
         Route::get('single-staff-advance-and-claims/{staff_id}', [AdvanceAndClaimsController::class, 'staffAdvanceAndClaims']);
@@ -156,7 +157,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
 
         Route::get('customercontract/{contract_id}', [CustomerContractController::class, 'show']);
         Route::get('estate-property-type', [PropertyTypeDetailsController::class, 'index']);
-        
+
         Route::get('get-leads', [CustomerController::class, 'getLeads']);
         Route::get('get-prospects', [CustomerController::class, 'getProspects']);
         Route::get('get-subscribers', [CustomerController::class, 'getSubscribers']);
@@ -188,6 +189,13 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::post('self-service/upload-documents', [SelfServiceController::class, 'uploadDocuments']);
         Route::post('self-service/send-reset-password-mail', [SelfServiceController::class, 'sendResetPasswordEmail']);
         Route::post('self-service/reset-password', [SelfServiceController::class, 'resetPassword']);
+        Route::get('self-service/unread-notifications/{staff_id}', [SelfServiceController::class, 'fetchUnreadNotifications']);
+        Route::get('self-service/read-notification/{staff_id}', [SelfServiceController::class, 'markNotificationsAsRead']);
+        
+
+        Route::post('update-leave-and-absence-setting', [LeaveAndAbsenceManagementController::class, 'updateLeaveAndAbsenceSetting']);
+        Route::get('get-leave-and-absence-setting', [LeaveAndAbsenceManagementController::class, 'getLeaveAndAbsenceSetting']);
+
         // Route::post('self-service/create-leave-and-absence', [SelfServiceController::class, 'createLeaveAndAbsence']);
 
     });
