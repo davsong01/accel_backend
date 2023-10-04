@@ -263,7 +263,7 @@ class StaffController extends Controller
             ->leftjoin("job_roles", "staff.jobrole_id", "=", "job_roles.id")
             ->leftjoin("branches", "users.branch_id", "=", "branches.id")
             ->leftjoin("departments", "staff.department_id", "=", "departments.id")
-            ->select("staff.id AS staff_id", "users.status", "staff.created_at", "users.first_name", "users.username", "users.last_name", "users.email", "staff.id AS staff_id", "users.type", "users.company_id", "staff.jobtype_id", "users.id AS user_id", "staff.date_of_employment", "branches.id AS branch_id", "branches.name AS branch_name", "departments.id AS department_id", "departments.name AS department_name", "job_roles.id AS job_role_id", "job_roles.name AS job_role_name", "job_types.id AS job_type_id", "job_types.name AS job_type_name", "users.residential_address AS staff_residential_address", "users.additional_details", "users.next_of_kin", "users.date_of_birth")
+            ->select("staff.id AS staff_id", "users.status", "staff.created_at", "users.first_name", "users.username", "users.last_name", "users.email", "staff.id AS staff_id", "users.type", "users.company_id", "staff.jobtype_id", "users.id AS user_id", "staff.date_of_employment", "branches.id AS branch_id", "branches.name AS branch_name", "departments.id AS department_id", "departments.name AS department_name", "job_roles.id AS job_role_id", "job_roles.name AS job_role_name", "job_types.id AS job_type_id", "job_types.name AS job_type_name", "users.additional_details", "users.next_of_kin", "users.date_of_birth")
             ->first();
 
         $a_details = !empty($staff->additional_details) ? json_decode($staff->additional_details, true) : [];
@@ -555,7 +555,7 @@ class StaffController extends Controller
             ->leftjoin("job_roles", "staff.jobrole_id", "=", "job_roles.id")
             ->leftjoin("branches", "users.branch_id", "=", "branches.id")
             ->leftjoin("departments", "staff.department_id", "=", "departments.id")
-            ->select("staff.id AS staff_id", "users.status", "users.staff_id as employee_id", "staff.created_at", "users.first_name","users.username", "users.last_name", "users.middle_name", "users.avatar", "users.phone_number", "users.email", "staff.id AS staff_id", "users.type", "users.company_id","staff.jobtype_id","users.id AS user_id", "staff.date_of_employment","branches.id AS branch_id","branches.name AS branch_name","departments.id AS department_id","departments.name AS department_name","job_roles.id AS job_role_id","job_roles.name AS job_role_name", "job_types.id AS job_type_id", "job_types.name AS job_type_name","users.residential_address AS staff_residential_address", "users.additional_details","users.next_of_kin","users.date_of_birth AS date_of_birth")
+            ->select("staff.id AS staff_id", "users.status", "users.staff_id as employee_id", "staff.created_at", "users.first_name","users.username", "users.last_name", "users.middle_name", "users.avatar", "users.phone_number", "users.email", "staff.id AS staff_id", "users.type", "users.company_id","staff.jobtype_id","users.id AS user_id", "staff.date_of_employment","branches.id AS branch_id","branches.name AS branch_name","departments.id AS department_id","departments.name AS department_name","job_roles.id AS job_role_id","job_roles.name AS job_role_name", "job_types.id AS job_type_id", "job_types.name AS job_type_name", "users.additional_details","users.next_of_kin","users.date_of_birth AS date_of_birth")
             ->first();
         $additional_details = !empty($staff->additional_details) ? json_decode($staff->additional_details, true) : [];
         $next_of_kin = !empty($staff->next_of_kin) ? json_decode($staff->next_of_kin, true) : [];
@@ -606,7 +606,7 @@ class StaffController extends Controller
         ];
       
         $data['contact_and_additional_information'] = [
-            'residential_address' => $staff->staff_residential_address ?? '',
+            'residential_address' => $additional_details['residential_address'] ?? '',
             'alternate_email' => $additional_details['alternate_email'] ?? '',
             'alternate_number' => $additional_details['alternate_number'] ?? '',
             'state' => !empty($additional_details['state']) ? $this->getStateDetails($additional_details['state']) : '',
