@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\City;
 use App\Models\Estate;
 use App\Models\PlotSize;
 use App\Models\BuildingType;
@@ -46,6 +47,11 @@ class CustomerContract extends Model
     public function plot_size_details()
     {
         return $this->belongsTo(PlotSize::class, 'plot_size');
+    }
+
+    public function city()
+    {
+        return $this->belongsTo(City::class);
     }
 
 }

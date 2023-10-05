@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Models\CustomerContract;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\EstatePropertyTypeDetails;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -21,4 +23,14 @@ class PlotSize extends Model
             get: fn (string $value) => date("M jS, Y", strtotime($value)),
         );
     }
+
+    public function customerContract(){
+        return $this->hasMany(CustomerContract::class, 'plot_size');
+    }
+
+    public function estatePropertyType()
+    {
+        return $this->hasMany(EstatePropertyTypeDetails::class, 'plot_size');
+    }
+
 }

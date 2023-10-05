@@ -123,6 +123,11 @@ class PlotSizeController extends Controller
     public function destroy(PlotSize $plotsize)
     {
         $count = EstatePropertyTypeDetails::where(['plot_size' => $plotsize->size, 'company_id' => $plotsize->company_id])->count();
+        dd($this->definedRelations());
+        if($plotsize->customerContract()->exists() || $plotsize->estatePropertyType()->exists()){
+            return response()->json(['message' => 'Unable to delete, resource in use', 'data' => null], 412);
+        }
+        // dd($plotsize->customerContract);
         if ($count > 0) {
             return response()->json(['message' => 'Unable to delete, resource in use', 'data' => null], 412);
         }

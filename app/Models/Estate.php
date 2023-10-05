@@ -46,6 +46,4 @@ class Estate extends Model
         return $this->hasMany(CustomerContract::class)->select('id')->where('customer_id',$customer_id)->pluck('id')->toArray();
     }
 
-    
-
 }

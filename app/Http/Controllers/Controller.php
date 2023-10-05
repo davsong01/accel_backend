@@ -270,6 +270,22 @@ class Controller extends BaseController
        
         $user->notify(new StaffNotification($data));
     }
+
+    public static function definedRelations(): array
+    {
+        $reflector = new \ReflectionClass('App\Models\User');
+        dd($reflector->getMethods());
+        return collect($reflector->getMethods())
+            ->filter(
+                fn ($method) => !empty($method->getReturnType()) &&
+                    str_contains(
+                        $method->getReturnType(),
+                        'Illuminate\Database\Eloquent\Relations'
+                    )
+            )
+            ->pluck('name')
+            ->all();
+    }
    
 }
 
