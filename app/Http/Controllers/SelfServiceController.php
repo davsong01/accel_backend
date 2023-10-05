@@ -302,7 +302,7 @@ class SelfServiceController extends Controller
         $user = User::find($staff->user->id);
 
         $notifications = [];
-        foreach ($user->unreadNotifications as $notification) {
+        foreach ($user->unreadNotifications->where('company_id', $this->sessionDetails('company_id')) as $notification) {
             $notifications[] = $notification;
         }
 
@@ -310,9 +310,17 @@ class SelfServiceController extends Controller
 
     }
 
-    public function markNotificationsAsRead($staff_id){
+    public function markNotificationsAsRead($notification){
         $staff = Staff::where('id', $staff_id)->first();
         $user = User::find($staff->user->id);
+
+        $userUnreadNotification = $user->unreadNotifications
+                                        ->where('id', $id)
+                                        ->first();
+    
+        if($userUnreadNotification) {
+            $userUnreadNotification->markAsRead();
+        }
 
         foreach ($user->unreadNotifications as $notification) {
             $notification->markAsRead();

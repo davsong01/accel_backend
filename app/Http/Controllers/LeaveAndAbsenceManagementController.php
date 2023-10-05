@@ -116,8 +116,8 @@ class LeaveAndAbsenceManagementController extends Controller
     {
         $lam = LeaveAndAbsenceManagement::find($id);
         
-        if($lam->status == 'approved'){
-            return response()->json(['message' => 'Already Approved', 'data' => $lam], 200);
+        if($lam->status == 'Approved'){
+            return response()->json(['message' => 'Already Approved', 'data' => null], 200);
         }
 
         $lamb = $lam;

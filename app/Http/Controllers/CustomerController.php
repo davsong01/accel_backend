@@ -20,7 +20,7 @@ class CustomerController extends Controller
     public function index(Request $request)
     {
         $customers = Customer::with(['user:id,first_name,last_name,status,gender,phone_number,residential_address', 'contracts:id,status,customer_id'])->withCount('contracts')
-            ->where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at','DESC')
+            ->where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'DESC')
             // ->where('branch_id', auth()->user()->staff->branch_id)
             ->paginate(20);
 
@@ -32,7 +32,8 @@ class CustomerController extends Controller
         return response()->json(['message' => 'success', 'data' => $customers], 200);
     }
 
-    public function getLeads(){
+    public function getLeads()
+    {
         $leads = Customer::with(['user:id,first_name,last_name,status,gender,phone_number,residential_address'])->whereHas('contracts', function ($query) {
             $query->where('status', 'lead');
         })->withCount('contracts')->where('company_id', $this->sessionDetails('company_id'))->paginate(20);
@@ -44,7 +45,8 @@ class CustomerController extends Controller
         return response()->json(['message' => 'success', 'data' => $leads], 200);
     }
 
-    public function getSubscribers(){
+    public function getSubscribers()
+    {
         $subscriber = Customer::with(['user:id,first_name,last_name,status,gender,phone_number,residential_address'])->whereHas('contracts', function ($query) {
             $query->where('status', 'subscriber');
         })->withCount('contracts')->where('company_id', $this->sessionDetails('company_id'))->paginate(20);
@@ -52,13 +54,13 @@ class CustomerController extends Controller
         return response()->json(['message' => 'success', 'data' => $subscriber], 200);
     }
 
-    public function getProspects(){
+    public function getProspects()
+    {
         $prospect = Customer::with(['user:id,first_name,last_name,status,gender,phone_number,residential_address'])->whereHas('contracts', function ($query) {
             $query->where('status', 'prospect');
         })->withCount('contracts')->where('company_id', $this->sessionDetails('company_id'))->paginate(20);
 
         return response()->json(['message' => 'success', 'data' => $prospect], 200);
-
     }
 
 
@@ -66,7 +68,7 @@ class CustomerController extends Controller
     {
         // $all = CustomerContract::where('company_id', $this->sessionDetails('company_id'))->count();
         $all = Customer::count();
-        $leads = Customer::whereHas('contracts', function($query){
+        $leads = Customer::whereHas('contracts', function ($query) {
             $query->where('status', 'lead');
         })->where('company_id', $this->sessionDetails('company_id'))->count();
 
@@ -77,7 +79,7 @@ class CustomerController extends Controller
         $prospect = Customer::whereHas('contracts', function ($query) {
             $query->where('status', 'prospect');
         })->where('company_id', $this->sessionDetails('company_id'))->count();
-        
+
         $contract = [
             'all' => $all,
             'lead' => $leads,
@@ -159,9 +161,9 @@ class CustomerController extends Controller
      */
     public function show($id)
     {
-        $user = Customer::where('customers.id',$id)->join('users','users.id','=','customers.user_id')
-        ->select('users.status', 'users.type', 'users.first_name', 'users.last_name', 'users.middle_name', 'users.phone_number', 'users.residential_address', 'users.gender', 'users.email', 'users.contact_information', 'users.next_of_kin', 'users.additional_information', 'job_information','customers.id AS customer_id')
-        ->first();
+        $user = Customer::where('customers.id', $id)->join('users', 'users.id', '=', 'customers.user_id')
+            ->select('users.status', 'users.type', 'users.first_name', 'users.last_name', 'users.middle_name', 'users.phone_number', 'users.residential_address', 'users.gender', 'users.email', 'users.contact_information', 'users.next_of_kin', 'users.additional_information', 'job_information', 'customers.id AS customer_id')
+            ->first();
         // $user = User::select('customers.id','users.*')->where('id', $customer->user_id)->first();
         return response()->json(['message' => 'success', 'data' => $user], 200);
     }
@@ -203,10 +205,11 @@ class CustomerController extends Controller
         //
     }
 
-    public function singleCustomerContractCount($customer_id){
-        $customer = Customer::withCount(['singleContract', 'joinContract', 'contracts'])->where('id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->first();
+    public function singleCustomerContractCount($customer_id)
+    {
+        $customer = Customer::withCount(['singleContract', 'jointContract', 'contracts'])->where('id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->first();
 
-        if(!$customer){
+        if (!$customer) {
             return response()->json(['message' => 'No record found', 'data' => null], 404);
         }
 
@@ -217,6 +220,5 @@ class CustomerController extends Controller
         ];
 
         return response()->json(['message' => 'success', 'data' => $data], 200);
-
     }
 }
