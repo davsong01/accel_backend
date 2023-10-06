@@ -77,7 +77,7 @@ class SelfServiceController extends Controller
         }
 
         $time = Carbon::parse(Auth::user()->staff->date_of_employment)->diff(Carbon::now());
-        $time_in_company = $time->y.($time->y > 1 ? 'years, ':'year, ').$time->m. ($time->m > 1 ? 'months' : 'month');
+        $time_in_company = ($time->y > 0 ? $time->y . ($time->y > 1 ? 'years, ' : 'year, ') : '') .  ($time->m > 0 ? ($time->m > 1 ? $time->m . ' months' : $time->m . ' month') : 'Less than a month');
         $my_anniversary = Carbon::parse(Auth::user()->staff->date_of_employment)->format('jS\\, F');
 
         foreach ($col as $b) {
