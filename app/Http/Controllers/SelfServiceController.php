@@ -106,38 +106,6 @@ class SelfServiceController extends Controller
         ], 200);
     }
 
-    public function profileCompletenes(){
-        $additional_details = !empty(Auth::user()->additional_details) ? json_decode(Auth::user()->additional_details, true) : [];
-        $nok_details = !empty(Auth::user()->next_of_kin) ? json_decode(Auth::user()->next_of_kin, true) : [];
-
-        $expectedProfile = [
-            'first_name' => !empty(Auth::user()->first_name) ? 1 : 0,
-            'middle_name' => !empty(Auth::user()->middle_name) ? 1 : 0,
-            'last_name' => !empty(Auth::user()->last_name) ? 1 : 0,
-            'email_address' => !empty(Auth::user()->email) ? 1 : 0,
-            'phone_number' => !empty(Auth::user()->phone) ? 1 : 0,
-            'alternate_email_address' => !empty($additional_details['alternate_email']) ? 1 : 0,
-            'username' => !empty(Auth::user()->username) ? 1 : 0,
-            'gender' => !empty(Auth::user()->gender) ? 1 : 0,
-            'date_of_birth' => !empty(Auth::user()->date_of_birth) ? 1 : 0,
-            'marital_status' => !empty($additional_details['marital_status']) ? 1 : 0,
-            'alternate_number' => !empty($additional_details['alternate_number']) ? 1 : 0,
-            'nationality' => !empty($additional_details['nationality']) ? 1 : 0,
-            'state' => !empty($additional_details['state']) ? 1 : 0,
-            'lga' => !empty($additional_details['lga']) ? 1 : 0,
-            'residential_address' => !empty($additional_details['residential_address']) ? 1 : 0,
-            'nok_first_name' => !empty($nok_details['nok_first_name']) ? 1 : 0,
-            'nok_last_name' => !empty($nok_details['nok_last_name']) ? 1 : 0,
-            'nok_phone_number' => !empty($nok_details['nok_phone_number']) ? 1 : 0,
-            'nok_house_address' => !empty($nok_details['nok_house_address']) ? 1 : 0,
-            'nok_email_address' => !empty($nok_details['nok_email_address']) ? 1 : 0,
-            'nok_relationship' => !empty($nok_details['nok_relationship']) ? 1 : 0
-        ];
-
-        return array_sum($expectedProfile) / count($expectedProfile) * 100;
-
-    }
-
     public function myWorkProfile()
     {
         $sController = new StaffController();
