@@ -563,7 +563,8 @@ class StaffController extends Controller
             ->first();
         $additional_details = !empty($staff->additional_details) ? json_decode($staff->additional_details, true) : [];
         $next_of_kin = !empty($staff->next_of_kin) ? json_decode($staff->next_of_kin, true) : [];
-      
+        // $profile_completenes = $this->profileCompletenes($additional_details, $next_of_kin);
+        
         $time = Carbon::parse($staff->date_of_employment)->diff(Carbon::now());
         $time_in_company = $time->y . ($time->y > 1 ? 'years, ' : 'year, ') . $time->m . ($time->m > 1 ? 'months' : 'month');
         $my_anniversary = Carbon::parse($staff->date_of_employment)->format('jS\\, F');
