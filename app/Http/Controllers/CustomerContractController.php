@@ -20,7 +20,7 @@ class CustomerContractController extends Controller
      */
     public function index($customer_id)
     {
-        $contracts = CustomerContract::with('location:name,id', 'building_type:id,name')->where('customer_id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->select(['id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'contract_type', 'property_type'])
+        $contracts = CustomerContract::with('propertyType:name,id','location:name,id', 'building_type:id,name')->where('customer_id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->select(['id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'contract_type', 'property_type'])
             // ->groupBy('estate_id')
             ->orderBy('created_at', 'DESC')
             ->get();
@@ -79,9 +79,14 @@ class CustomerContractController extends Controller
                 'city_id' => 'required|exists:cities,id,company_id,' . $this->sessionDetails('company_id'),
                 'location_id' => 'required|exists:locations,id,company_id,' . $this->sessionDetails('company_id'),
                 'estate_id' => 'required|exists:estates,id,company_id,' . $this->sessionDetails('company_id'),
-                'property_type' => 'required|in:land,building,both',
+                'property_type_id' => [
+                    'required', Rule::exists('estate_property_type_details', 'id')->where(function ($query) use ($request) {
+                        $query->where('company_id', $this->sessionDetails('company_id'))->where('estate_id', $request->estate_id)->where('type', $request->property_type);
+                    })
+                ],
+                'property_type' => 'required|in:land,building',
                 'plot_size' => 'nullable|exists:plot_sizes,id',
-                'building_type' => 'nullable|exists:building_types,id',
+                'building_type' => 'nullable|exists:building_types,id,company_id,' . $this->sessionDetails('company_id'),
                 'no_of_units' => 'required',
                 'contract_type' => 'required',
                 'customer_id' => 'required|exists:customers,id,company_id,' . $this->sessionDetails('company_id'),
@@ -112,7 +117,12 @@ class CustomerContractController extends Controller
                 'city_id' => 'required|exists:cities,id,company_id,' . $this->sessionDetails('company_id'),
                 'location_id' => 'required|exists:locations,id,company_id,' . $this->sessionDetails('company_id'),
                 'estate_id' => 'required|exists:estates,id,company_id,' . $this->sessionDetails('company_id'),
-                'property_type' => 'required|in:land,building,both',
+                'property_type' => 'nullable',
+                'property_type_id' => [
+                    'required', Rule::exists('estate_property_type_details', 'id')->where(function ($query) use ($request) {
+                        $query->where('company_id', $this->sessionDetails('company_id'))->where('estate_id', $request->estate_id);
+                    })
+                ],
                 'plot_size' => 'nullable|exists:plot_sizes,id',
                 'building_type' => 'nullable|exists:building_types,id',
                 'no_of_units' => 'required',
@@ -213,6 +223,7 @@ class CustomerContractController extends Controller
             'plot_size' => $data['plot_size'] ?? null,
             'building_type' => $data['building_type'] ?? null,
             'property_type' => $data['property_type'],
+            'property_type_id' => $data['property_type_id'],
             'subscribers' => $data['subscribers'],
             'status' => 'lead',
             'contract_type' => $data['contract_type'],
@@ -227,11 +238,15 @@ class CustomerContractController extends Controller
      */
     public function show($contract_id)
     {
-        $contract = CustomerContract::with('city:name,id', 'estate:name,id', 'location:name,id', 'building_type:id,name', 'plot_size:id,size')->where('id', $contract_id)->select(['id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'subscribers','building_type', 'contract_type', 'property_type'])->orderBy('created_at', 'DESC')->where('company_id', $this->sessionDetails('company_id'))->first();
+        $contract = CustomerContract::with('property_type_details:type,id,estate_price,settings_and_excavation,infrastructural_fee','city:name,id', 'estate:name,id', 'location:name,id', 'building_type:id,name', 'plot_size:id,size')->where('id', $contract_id)->select(['id', 'property_type_id','customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'subscribers','building_type', 'contract_type', 'property_type'])->orderBy('created_at', 'DESC')->where('company_id', $this->sessionDetails('company_id'))->first();
 
-        $contract->subscribers = !empty($contract->subscribers) ? json_decode($contract->subscribers) : '';
-     
-        return response()->json(['message' => 'success', 'data' => $contract], 200);
+        if($contract){
+            $contract->subscribers = !empty($contract->subscribers) ? json_decode($contract->subscribers) : '';
+            return response()->json(['message' => 'success', 'data' => $contract], 200);
+        }
+
+        return response()->json(['message' => 'No record found', 'data' => null], 200);
+        
     }
 
     public function makeFormPayment(Request $request)

@@ -7,6 +7,7 @@ use App\Models\Estate;
 use App\Models\PlotSize;
 use App\Models\BuildingType;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\EstatePropertyTypeDetails;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class CustomerContract extends Model
@@ -52,6 +53,11 @@ class CustomerContract extends Model
     public function city()
     {
         return $this->belongsTo(City::class);
+    }
+
+    public function property_type_details()
+    {
+        return $this->belongsTo(EstatePropertyTypeDetails::class, 'property_type_id');
     }
 
 }
