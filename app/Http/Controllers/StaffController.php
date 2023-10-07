@@ -290,9 +290,19 @@ class StaffController extends Controller
             'nok_email_address' => $request->nok_email_address ?? $t_next_of_kin['nok_email_address'] ?? '',
             'nok_relationship' => $request->nok_relationship ?? $t_next_of_kin['nok_relationship'] ?? '',
         ];
-        
+
+        $staff->update([
+            'jobtype_id' => $data['jobtype_id'] ?? $staff->job_type_id,
+            'date_of_employment' => $data['date_of_employment'] ?? $staff->data_of_employment,
+            'department_id' => $data['department_id'] ?? $staff->department_id,
+            'jobrole_id' => $data['jobrole_id'] ?? $staff->job_role_id,
+            'commision_percentage' => $data['commision_percentage'] ?? $staff->commision_percentage,
+            'company_id' => $this->sessionDetails('company_id'),
+        ]);
+
+        // dd(json_encode($next_of_kin));
         $user = $staff->user->update([
-            'email' => $data['email'] ?? $staff->user->email,
+            // 'email' => $data['email'] ?? $staff->user->email,
             'first_name' => $data['first_name'] ?? $staff->user->first_name,
             'middle_name' => $data['middle_name'] ?? $staff->user->middle_name,
             'type' => 'staff',
@@ -305,15 +315,6 @@ class StaffController extends Controller
             'branch_id' => $data['branch_id'] ?? $staff->user->branch_id,
             'date_of_birth' => $data['date_of_birth'] ?? $staff->user->date_of_birth,
             'company_id' => $this->sessionDetails('company_id')
-        ]);
-
-        $staff->update([
-            'jobtype_id' => $data['jobtype_id'] ?? $staff->job_type_id,
-            'date_of_employment' => $data['date_of_employment'] ?? $staff->data_of_employment,
-            'department_id' => $data['department_id'] ?? $staff->department_id,
-            'jobrole_id' => $data['jobrole_id'] ?? $staff->job_role_id,
-            'commision_percentage' => $data['commision_percentage'] ?? $staff->commision_percentage,
-            'company_id' => $this->sessionDetails('company_id'),
         ]);
         
         // Create staff documents
@@ -563,7 +564,9 @@ class StaffController extends Controller
             ->first();
         
         $profile_completenes = $this->profileCompletenes($staff);
-        
+        $additional_details = !empty($staff->additional_details) ? json_decode($staff->additional_details, true) : [];
+        $next_of_kin = !empty($staff->next_of_kin) ? json_decode($staff->next_of_kin, true) : [];
+      
         $time = Carbon::parse($staff->date_of_employment)->diff(Carbon::now());
         $time_in_company = ($time->y > 0 ? $time->y . ($time->y > 1 ? 'years, ' : 'year, ') :'' ).  ($time->m > 0 ? ($time->m > 1 ? $time->m .' months' : $time->m.' month') : 'Less than a month');
         $my_anniversary = Carbon::parse($staff->date_of_employment)->format('jS\\, F');

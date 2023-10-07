@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Validation\Rule;
 use App\Models\AccountClassification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Validator;
@@ -33,7 +34,11 @@ class AccountClassificationController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'class' => 'required',
+            'class' => [
+                'required', Rule::unique('account_classifications')->where(function ($query) {      
+                    $query->where('company_id', $this->sessionDetails('company_id'));
+                })
+            ],
         ]);
 
         if ($validator->fails()) {

@@ -6,6 +6,7 @@ use App\Models\PlotSize;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Imports\PlotSizeImport;
+use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\RedirectResponse;
 use App\Models\EstatePropertyTypeDetails;
@@ -38,7 +39,11 @@ class PlotSizeController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'size' => 'required',
+            'size' => [
+                'required', Rule::unique('plot_sizes')->where(function ($query) {
+                    $query->where('company_id', $this->sessionDetails('company_id'));
+                })
+            ],
         ]);
 
         if ($validator->fails()) {
@@ -116,21 +121,18 @@ class PlotSizeController extends Controller
 
         return response()->json(['message' => 'Updated Successfully.', 'data' => $plotsize], 200);
     }
-
+    
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(PlotSize $plotsize)
     {
-        $count = EstatePropertyTypeDetails::where(['plot_size' => $plotsize->size, 'company_id' => $plotsize->company_id])->count();
-        dd($this->definedRelations());
-        if($plotsize->customerContract()->exists() || $plotsize->estatePropertyType()->exists()){
+        EstatePropertyTypeDetails::where(['plot_size' => $plotsize->size, 'company_id' => $plotsize->company_id])->count();
+        
+        if($this->definedRelations('PlotSize') > 0){
             return response()->json(['message' => 'Unable to delete, resource in use', 'data' => null], 412);
         }
-        // dd($plotsize->customerContract);
-        if ($count > 0) {
-            return response()->json(['message' => 'Unable to delete, resource in use', 'data' => null], 412);
-        }
+        
         $plotsize->delete();
         return response()->json(['message' => 'Deleted Successfully.', 'data' => null], 200);
     }

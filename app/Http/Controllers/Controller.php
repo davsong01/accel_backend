@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Lga;
 use App\Models\Staff;
+use ReflectionMethod;
 use App\Models\Estate;
 use App\Models\States;
 use App\Models\Country;
@@ -272,20 +273,15 @@ class Controller extends BaseController
         $user->notify(new StaffNotification($data));
     }
 
-    public static function definedRelations(): array
+    public static function definedRelations($class)
     {
-        $reflector = new \ReflectionClass('App\Models\User');
-        dd($reflector->getMethods());
-        return collect($reflector->getMethods())
-            ->filter(
-                fn ($method) => !empty($method->getReturnType()) &&
-                    str_contains(
-                        $method->getReturnType(),
-                        'Illuminate\Database\Eloquent\Relations'
-                    )
-            )
-            ->pluck('name')
-            ->all();
+        $reflector = new \ReflectionClass('App\Models\\'.$class);
+
+        $methods = array_filter($reflector->getMethods(), function($methods) use ($class) {
+            return str_contains($methods, $class) && $methods->getModifiers() == ReflectionMethod::IS_PUBLIC;
+        });
+
+        return count($methods);
     }
 
     public function profileCompletenes($staff=null)

@@ -37,8 +37,12 @@ class BranchController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required',
             'location' => 'sometimes',
+            'name' => [
+                'required', Rule::unique('branches')->where(function ($query) {
+                    $query->where('company_id', $this->sessionDetails('company_id'));
+                })
+            ],
         ]);
 
         if ($validator->fails()) {

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Account;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Validation\Rule;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Validator;
 
@@ -35,7 +36,11 @@ class AccountController extends Controller
         $validator = Validator::make($request->all(), [
             'accounttype_id' => 'required|exists:account_types,id,company_id,' . $this->sessionDetails('company_id'),
             'accountclassification_id' => 'required|exists:account_classifications,id,company_id,' . $this->sessionDetails('company_id'),
-            'name' => 'required',
+            'name' => [
+                'required', Rule::unique('accounts')->where(function ($query) {
+                    $query->where('company_id', $this->sessionDetails('company_id'));
+                })
+            ],
             'number' => 'required',
         ]);
 

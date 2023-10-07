@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\BuildingType;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Validation\Rule;
 use App\Imports\BuildingTypeImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\RedirectResponse;
@@ -37,7 +38,11 @@ class BuildingTypeController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required',
+            'name' => [
+                'required', Rule::unique('building_types')->where(function ($query) {
+                    $query->where('company_id', $this->sessionDetails('company_id'));
+                })
+            ],
         ]);
 
         if ($validator->fails()) {

@@ -41,7 +41,11 @@ class JobRoleController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required',
+            'name' => [
+                'required', Rule::unique('job_roles')->where(function ($query) {      
+                    $query->where('company_id', $this->sessionDetails('company_id'));
+                })
+            ],
             'department_id' => 'required|exists:departments,id,company_id,' . $this->sessionDetails('company_id'),
         ]);
 

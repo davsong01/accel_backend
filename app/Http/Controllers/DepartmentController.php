@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Department;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Validation\Rule;
 use App\Imports\DepartmentImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\RedirectResponse;
@@ -35,7 +36,11 @@ class DepartmentController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required',
+            'name' => [
+                'required', Rule::unique('departments')->where(function ($query) {      
+                    $query->where('company_id', $this->sessionDetails('company_id'));
+                })
+            ],
             'description' => 'sometimes',
             'status' => 'required|in:0,1',
         ]);
@@ -47,7 +52,7 @@ class DepartmentController extends Controller
             ], 412);
         }
 
-        $department = Department::updateOrcreate([
+        $department = Department::updateOrcreate(['name'=>$request->name, 'company_id' => $this->sessionDetails('company_id')],[
             'name' => $request->name,
             'description' => $request->description,
             'status' => $request->status,
