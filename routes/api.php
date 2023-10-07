@@ -154,6 +154,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('change-special-request-status', [MenuController::class, 'changeSpecialRequestStatus']);
         Route::post('add-new-contract', [CustomerContractController::class, 'store']);
         Route::get('single-customer-contract/{customer_id}', [CustomerContractController::class, 'index']);
+        Route::get('delete-customer-contract/{contract_id}', [CustomerContractController::class, 'destroy']);
 
         Route::get('customercontract/{contract_id}', [CustomerContractController::class, 'show']);
         Route::get('estate-property-type', [PropertyTypeDetailsController::class, 'index']);

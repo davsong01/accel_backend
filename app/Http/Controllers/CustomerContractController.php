@@ -20,7 +20,7 @@ class CustomerContractController extends Controller
      */
     public function index($customer_id)
     {
-        $contracts = CustomerContract::with('propertyType:name,id','location:name,id', 'building_type:id,name')->where('customer_id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->select(['id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'contract_type', 'property_type'])
+        $contracts = CustomerContract::with('property_type_details:name,id','location:name,id', 'building_type:id,name')->where('customer_id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->select(['id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'contract_type', 'property_type'])
             // ->groupBy('estate_id')
             ->orderBy('created_at', 'DESC')
             ->get();
@@ -322,9 +322,16 @@ class CustomerContractController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(CustomerContract $CustomerContract)
+    public function destroy(CustomerContract $CustomerContract, $id)
     {
-        //
+        $contract = CustomerContract::where('id', $id)->first();
+        
+        if(!$contract){
+            return response()->json(['message' => 'No records found', 'data' => null], 200);
+        }
+        $contract->delete();
+        return response()->json(['message' => 'Succesfully deleted', 'data' => null], 200);
+        
     }
 
     public function singleCustomerFormDetails($customer_id)
@@ -408,4 +415,5 @@ class CustomerContractController extends Controller
 
         return response()->json(['message' => 'success', 'data' => $data], 200);
     }
+
 }
