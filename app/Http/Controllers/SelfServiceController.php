@@ -350,7 +350,6 @@ class SelfServiceController extends Controller
 
         }
         
-        
         return response(['message' => 'Successfully retrieved', 'data' => $notifications], 200);
     }
 }

@@ -25,7 +25,7 @@ class DatabaseSeeder extends Seeder
             // CountriesTableSeeder::class,
             // StatesTableSeeder::class,
             // LgasTableSeeder::class,
-            MessageProvidersSeeder::class
+            // MessageProvidersSeeder::class
         ]);
       
     }
