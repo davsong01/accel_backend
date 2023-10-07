@@ -153,6 +153,8 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::post('form-expiry-status', [EstateController::class, 'changeFormExpiry']);
         Route::get('change-special-request-status', [MenuController::class, 'changeSpecialRequestStatus']);
         Route::post('add-new-contract', [CustomerContractController::class, 'store']);
+        Route::post('update-single-contract/{CustomerContract}', [CustomerContractController::class, 'update']);
+
         Route::get('single-customer-contract/{customer_id}', [CustomerContractController::class, 'index']);
         Route::get('delete-customer-contract/{contract_id}', [CustomerContractController::class, 'destroy']);
 
@@ -185,7 +187,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('self-service/my-profile', [SelfServiceController::class, 'myWorkProfile']);
         Route::post('self-service/update-my-profile', [SelfServiceController::class, 'updateMyWorkProfile']);
         Route::post('self-service/add-avatar', [SelfServiceController::class, 'addAvatar']);
-        Route::post('self-service/delete-avatar', [SelfServiceController::class, 'deleteAvatar']);
+        Route::get('self-service/delete-avatar', [SelfServiceController::class, 'deleteAvatar']);
         Route::get('self-service/get-avatar/{staff_id}', [SelfServiceController::class, 'getAvatar']);
         Route::post('self-service/upload-documents', [SelfServiceController::class, 'uploadDocuments']);
         Route::post('self-service/send-reset-password-mail', [SelfServiceController::class, 'sendResetPasswordEmail']);

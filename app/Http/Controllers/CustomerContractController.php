@@ -316,7 +316,48 @@ class CustomerContractController extends Controller
      */
     public function update(Request $request, CustomerContract $CustomerContract)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'city_id' => 'required|exists:cities,id,company_id,' . $this->sessionDetails('company_id'),
+            'location_id' => 'required|exists:locations,id,company_id,' . $this->sessionDetails('company_id'),
+            'estate_id' => 'required|exists:estates,id,company_id,' . $this->sessionDetails('company_id'),
+            'property_type_id' => [
+                'required', Rule::exists('estate_property_type_details', 'id')->where(function ($query) use ($request) {
+                    $query->where('company_id', $this->sessionDetails('company_id'))->where('estate_id', $request->estate_id)->where('type', $request->property_type);
+                })
+            ],
+            'property_type' => 'required|in:land,building',
+            'plot_size' => 'nullable|exists:plot_sizes,id',
+            'building_type' => 'nullable|exists:building_types,id,company_id,' . $this->sessionDetails('company_id'),
+            'contract_type' => 'required',
+            'customer_id' => 'required|exists:customers,id,company_id,' . $this->sessionDetails('company_id'),
+            'subscribers' => 'nullable',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->messages()->first(),
+                'data' => null,
+            ], 412);
+        }
+
+
+        $CustomerContract->update([
+            'customer_id' => $request->customer_id,
+            'city_id' => $request->city_id,
+            'location_id' => $request->location_id,
+            'estate_id' => $request->estate_id,
+            'plot_size' => $request->plot_size,
+            'building_type' => $request->building_type,
+            'property_type' => $request->property_type,
+            'property_type_id' => $request->property_type_id,
+            'subscribers' => $request->has('subscribers') ? $request->subscribers : $CustomerContract->subscribers,
+            'status' => 'lead',
+            'contract_type' => $request->contract_type,
+            'company_id' => $this->sessionDetails('company_id'),
+        ]);
+
+        return response()->json(['message' => 'Succesfully updated', 'data' => null], 200);
+
     }
 
     /**
@@ -331,7 +372,7 @@ class CustomerContractController extends Controller
         }
         $contract->delete();
         return response()->json(['message' => 'Succesfully deleted', 'data' => null], 200);
-        
+
     }
 
     public function singleCustomerFormDetails($customer_id)
