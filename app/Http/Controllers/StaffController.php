@@ -275,26 +275,25 @@ class StaffController extends Controller
 
         $data = $request->all();
         
-
         $a_details = !empty($staff->additional_details) ? json_decode($staff->additional_details, true) : [];
         $additional_details = [
-            'alternate_number' => $request->alternate_number ?? $a_details['alternate_number'] ?? '',
-            'alternate_email' => $request->alternate_email ?? $a_details['alternate_email'] ?? '',
-            'state' => $request->state ?? $a_details['state'] ?? '',
-            'residential_address' => $request->residential_address ?? $a_details['residential_address'] ?? '',
-            'marital_status' => $request->marital_status ?? $a_details['marital_status'] ?? '',
-            'nationality' => $request->nationality ?? $a_details['nationality'] ?? '',
-            'lga' => $request->lga ?? $a_details['lga'] ?? '',
+            'alternate_number' => $request->has('alternate_number') ? $request->alternate_number : $a_details['alternate_number'],
+            'alternate_email' => $request->has('alternate_email') ? $request->alternate_email : $a_details['alternate_email'],
+            'state' => $request->has('state') ? $request->state : $a_details['state'],
+            'residential_address' => $request->has('residential_address') ? $request->residential_address : $a_details['residential_address'],
+            'marital_status' => $request->has('marital_status') ? $request->marital_status : $a_details['marital_status'],
+            'nationality' => $request->has('nationality') ? $request->nationality : $a_details['nationality'],
+            'lga' => $request->has('lga') ? $request->lga : $a_details['lga'],
         ];
         
         $t_next_of_kin = !empty($staff->next_of_kin) ? json_decode($staff->next_of_kin, true) : [];
         $next_of_kin = [
-            'nok_first_name' => $request->nok_first_name ?? $t_next_of_kin['nok_first_name'] ?? '',
-            'nok_last_name' => $request->nok_last_name ?? $t_next_of_kin['nok_last_name'] ?? '',
-            'nok_phone_number' => $request->nok_phone_number ?? $t_next_of_kin['nok_phone_number'] ?? '',
-            'nok_house_address' => $request->nok_house_address ?? $t_next_of_kin['nok_house_address'] ?? '',
-            'nok_email_address' => $request->nok_email_address ?? $t_next_of_kin['nok_email_address'] ?? '',
-            'nok_relationship' => $request->nok_relationship ?? $t_next_of_kin['nok_relationship'] ?? '',
+            'nok_first_name' => $request->has('nok_first_name') ? $request->nok_first_name : $t_next_of_kin['nok_first_name'],
+            'nok_last_name' => $request->has('nok_last_name') ? $request->nok_last_name : $t_next_of_kin['nok_last_name'],
+            'nok_phone_number' => $request->has('nok_phone_number')  ? $request->nok_phone_number : $t_next_of_kin['nok_phone_number'],
+            'nok_house_address' => $request->has('nok_house_address')  ? $request->nok_house_address : $t_next_of_kin['nok_house_address'],
+            'nok_email_address' => $request->has('nok_email_address')  ? $request->nok_email_address : $t_next_of_kin['nok_email_address'],
+            'nok_relationship' => $request->has('nok_relationship')  ? $request->nok_relationship : $t_next_of_kin['nok_relationship'],
         ];
 
         $staff->update([
@@ -335,108 +334,11 @@ class StaffController extends Controller
         //         ]);
         //     }
         // }
-
+        
         return response()->json(['message' => 'Successfully updated!', 'data' => ['staff_id' => $request->staff_id]], 200);
     }
 
-    // public function updateStaffPersonalInfo(Request $request, $internal = null)
-    // {
-    //     $validator = Validator::make($request->all(), [
-    //         'first_name' => 'required',
-    //         'middle_name' => 'nullable',
-    //         'last_name' => 'nullable',
-    //         'username' => 'nullable',
-    //         'phone_number' => 'nullable',
-    //         'gender' => 'nullable',
-    //         'marital_status' => 'nullable',
-    //         'date_of_birth' => 'nullable',
-
-    //         'residential_address' => 'nullable',
-    //         'email' => 'nullable',
-    //         'additional_email' => 'nullable',
-    //         'phone_number' => 'nullable',
-    //         'additional_number' => 'nullable',
-    //         'state' => 'required|exists:states,id',
-    //         'country' => 'required|exists:countries,id',
-    //         'lga' => 'required|exists:lgas,id',
-
-    //     ]);
-
-    //     if ($validator->fails()) {
-    //         return response()->json([
-    //             'error' => $validator->messages()->first(),
-    //             'data' => null,
-    //         ], 412);
-    //     }
-
-    //     $data = $request->all();
-    //     $staff = Staff::with('roles')->where(['staff.id' => $request->staff_id])
-    //         ->join("users", "staff.user_id", "=", "users.id")->where(['users.status' => 'active', 'type' => 'staff'])
-    //         ->leftjoin("job_types", "staff.jobtype_id", "=", "job_types.id")
-    //         ->leftjoin("job_roles", "staff.jobrole_id", "=", "job_roles.id")
-    //         ->leftjoin("branches", "users.branch_id", "=", "branches.id")
-    //         ->leftjoin("departments", "staff.department_id", "=", "departments.id")
-    //         ->select("staff.id AS staff_id", "users.status", "staff.created_at", "users.first_name", "users.username", "users.last_name", "users.email", "staff.id AS staff_id", "users.type", "users.company_id", "staff.jobtype_id", "users.id AS user_id", "staff.date_of_employment", "branches.id AS branch_id", "branches.name AS branch_name", "departments.id AS department_id", "departments.name AS department_name", "job_roles.id AS job_role_id", "job_roles.name AS job_role_name", "job_types.id AS job_type_id", "job_types.name AS job_type_name", "users.residential_address AS staff_residential_address", "users.additional_details", "users.next_of_kin")
-    //         ->first();
-
-    //     $a_details = !empty($staff->additional_details) ? json_decode($staff->additional_details) : collect([]);
-
-    //     foreach ($a_details as $key => $details) {
-    //         $a_details->$key = !empty($request->$key) ? $request->$key : $a_details->$key;
-    //     }
-    //     $additional_details = $a_details;
-
-    //     $t_next_of_kin = !empty($staff->next_of_kin) ? json_decode($staff->next_of_kin) : collect([]);
-
-    //     foreach ($t_next_of_kin as $key => $details) {
-    //         $t_next_of_kin->$key = !empty($request->$key) ? $request->$key : $t_next_of_kin->$key;
-    //     }
-
-    //     $next_of_kin = $t_next_of_kin;
-    //     $user = $staff->user->update([
-    //         'email' => $data['email'] ?? $staff->user,
-    //         'first_name' => $data['first_name'],
-    //         'type' => 'staff',
-    //         'middle_name' => $data['middle_name'] ?? '',
-    //         'middle_name' => $data['residential_address'] ?? '',
-    //         'last_name' => $data['last_name'] ?? '',
-    //         'username' => $data['username'] ?? '',
-    //         'phone_number' => $data['phone_number'] ?? '',
-    //         'gender' => $data['gender'] ?? '',
-    //         'additional_details' => json_encode($additional_details),
-    //         'next_of_kin' => json_encode($next_of_kin),
-    //         'branch_id' => $data['branch_id'] ?? '',
-    //         'date_of_birth' => $data['date_of_birth'] ?? '',
-    //         'company_id' => $this->sessionDetails('company_id'),
-    //     ]);
-
-    //     if ($user) {
-    //         $staff->update([
-    //             'jobtype_id' => $data['jobtype_id'] ?? '',
-    //             'date_of_employment' => $data['date_of_employment'] ?? '',
-    //             'department_id' => $data['department_id'] ?? '',
-    //             'jobrole_id' => $data['jobrole_id'] ?? '',
-    //             'commision_percentage' => $data['commision_percentage'] ?? '',
-    //             'company_id' => $this->sessionDetails('company_id'),
-    //         ]);
-    //     }
-
-    //     // Create staff documents
-    //     if ($request->staff_documents) {
-    //         foreach ($request->staff_documents as $document) {
-    //             \DB::table('staff_uploaded_documents')->insert([
-    //                 'staff_document_id' => $document->id,
-    //                 'name' =>  $document->name,
-    //                 'uploaded' =>  $document->uploaded ?? '',
-    //                 'required' =>  $document->required ?? '',
-    //                 'company_id' => $this->sessionDetails('company_id'),
-    //             ]);
-    //         }
-    //     }
-
-    //     return response()->json(['message' => 'Successfully updated!', 'data' => ['staff_id' => $request->staff_id]], 200);
-    // }
-
+    
     public function getSingleStaffRoles($staff_id)
     {
         $staff = Staff::where(['id' => $staff_id])->first();
