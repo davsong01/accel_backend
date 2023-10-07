@@ -284,7 +284,6 @@ class SelfServiceController extends Controller
                 'title' => $notification->data['title'],
                 'content' => $notification->data['content'],
                 'link' => $notification->data['link'],
-                // Carbon::createFromFormat('m/d/Y', $myDate)->diffForHumans()
                 'date' => $notification->created_at->diffForHumans(), 
             ]; 
         }
@@ -312,6 +311,22 @@ class SelfServiceController extends Controller
         }
        
         return response(['message' => 'Successfully read', 'data' => null], 200);
+    }
+
+    public function viewSingleNotification($notification_id){
+        $notification = Auth::user()->notifications
+            ->where('id', $notification_id)
+            ->first();
+       
+        $data = [
+            'id' => $notification->id,
+            'title' => $notification->data['title'],
+            'content' => $notification->data['content'],
+            'link' => $notification->data['link'],
+            'date' => $notification->created_at->diffForHumans(),
+        ]; 
+        return response(['message' => 'Successfully retrieved', 'data' => $data], 200);
+        
     }
 
 
