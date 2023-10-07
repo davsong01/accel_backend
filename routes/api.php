@@ -192,6 +192,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('self-service/unread-notifications/{staff_id}', [SelfServiceController::class, 'fetchUnreadNotifications']);
         Route::get('self-service/read-notification/{notification_id?}', [SelfServiceController::class, 'markNotificationsAsRead']);
         Route::get('self-service/view-single-notification/{notification_id}', [SelfServiceController::class, 'viewSingleNotification']);
+        Route::get('self-service/all-notifications', [SelfServiceController::class, 'fetchAllNotifications']);
         
 
         Route::post('update-leave-and-absence-setting', [LeaveAndAbsenceManagementController::class, 'updateLeaveAndAbsenceSetting']);
