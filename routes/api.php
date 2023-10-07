@@ -190,7 +190,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::post('self-service/send-reset-password-mail', [SelfServiceController::class, 'sendResetPasswordEmail']);
         Route::post('self-service/reset-password', [SelfServiceController::class, 'resetPassword']);
         Route::get('self-service/unread-notifications/{staff_id}', [SelfServiceController::class, 'fetchUnreadNotifications']);
-        Route::get('self-service/read-notification/{staff_id}', [SelfServiceController::class, 'markNotificationsAsRead']);
+        Route::get('self-service/read-notification/{notification_id?}', [SelfServiceController::class, 'markNotificationsAsRead']);
         
 
         Route::post('update-leave-and-absence-setting', [LeaveAndAbsenceManagementController::class, 'updateLeaveAndAbsenceSetting']);

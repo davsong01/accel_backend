@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\JobType;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Validation\Rule;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Validator;
 
@@ -33,7 +34,11 @@ class JobTypeController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required',
+            'name' => [
+                'required', Rule::unique('job_roles')->where(function ($query) {
+                    $query->where('company_id', $this->sessionDetails('company_id'));
+                })
+            ],
         ]);
 
         if ($validator->fails()) {

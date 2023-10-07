@@ -96,7 +96,7 @@ class LeaveAndAbsenceManagementController extends Controller
         }
 
         $period = $end->diffInDays($start);
-
+        
         $lam = LeaveAndAbsenceManagement::updateOrcreate([
             'staff_id' => isset($internal) ? $request['staff_id'] : $this->sessionDetails('staff_id'),
             'start_date' => $request->start_date,

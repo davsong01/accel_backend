@@ -276,34 +276,42 @@ class SelfServiceController extends Controller
     {
         $staff = Staff::where('id', $staff_id)->first();
         $user = User::find($staff->user->id);
-
+        // dd($user->unreadNotifications->where('company_id', $this->sessionDetails('company_id')));
         $notifications = [];
         foreach ($user->unreadNotifications->where('company_id', $this->sessionDetails('company_id')) as $notification) {
-            $notifications[] = $notification;
+            $notifications[] = [
+                'id' => $notification->id,
+                'title' => $notification->data['title'],
+                'content' => $notification->data['content'],
+                'link' => $notification->data['link'],
+                // Carbon::createFromFormat('m/d/Y', $myDate)->diffForHumans()
+                'date' => $notification->created_at->diffForHumans(), 
+            ]; 
         }
 
         return response(['message' => 'Successfully retrievd', 'data' => $notifications], 200);
 
     }
 
-    public function markNotificationsAsRead($notification){
-        $staff = Staff::where('id', $staff_id)->first();
-        $user = User::find($staff->user->id);
+    public function markNotificationsAsRead($notification_id = null){
+        // $staff = Staff::where('id', $staff_id)->first();
+        // $user = User::find($staff->user->id);
+        $user = Auth::user();
+        if($notification_id){
+            $notification = $user->unreadNotifications
+                ->where('id', $notification_id)
+                ->first();
 
-        $userUnreadNotification = $user->unreadNotifications
-                                        ->where('id', $id)
-                                        ->first();
-    
-        if($userUnreadNotification) {
-            $userUnreadNotification->markAsRead();
-        }
-
-        foreach ($user->unreadNotifications as $notification) {
             $notification->markAsRead();
+        }else{
+            $userUnreadNotification = $user->unreadNotifications->where('company_id', $this->sessionDetails('company_id'));
+
+            foreach ($userUnreadNotification as $notification) {
+                $notification->markAsRead();
+            }
         }
-
+       
         return response(['message' => 'Successfully read', 'data' => null], 200);
-
     }
 
 
