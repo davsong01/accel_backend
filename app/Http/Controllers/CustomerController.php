@@ -19,7 +19,7 @@ class CustomerController extends Controller
 
     public function index(Request $request)
     {
-        $customers = Customer::with(['user:id,first_name,last_name,status,gender,phone_number,residential_address', 'contracts:id,status,customer_id'])->withCount('contracts')
+        $customers = Customer::with(['user:id,avatar,first_name,last_name,status,gender,phone_number', 'contracts:id,status,customer_id'])->withCount('contracts')
             ->where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'DESC')
             // ->where('branch_id', auth()->user()->staff->branch_id)
             ->paginate(20);
@@ -34,7 +34,7 @@ class CustomerController extends Controller
 
     public function getLeads()
     {
-        $leads = Customer::with(['user:id,first_name,last_name,status,gender,phone_number,residential_address'])->whereHas('contracts', function ($query) {
+        $leads = Customer::with(['user:id,avatar,first_name,last_name,status,gender,phone_number'])->whereHas('contracts', function ($query) {
             $query->where('status', 'lead');
         })->withCount('contracts')->where('company_id', $this->sessionDetails('company_id'))->paginate(20);
 
@@ -47,7 +47,7 @@ class CustomerController extends Controller
 
     public function getSubscribers()
     {
-        $subscriber = Customer::with(['user:id,first_name,last_name,status,gender,phone_number,residential_address'])->whereHas('contracts', function ($query) {
+        $subscriber = Customer::with(['user:id,avatar,first_name,last_name,status,gender,phone_number,residential_address'])->whereHas('contracts', function ($query) {
             $query->where('status', 'subscriber');
         })->withCount('contracts')->where('company_id', $this->sessionDetails('company_id'))->paginate(20);
 
@@ -56,7 +56,7 @@ class CustomerController extends Controller
 
     public function getProspects()
     {
-        $prospect = Customer::with(['user:id,first_name,last_name,status,gender,phone_number,residential_address'])->whereHas('contracts', function ($query) {
+        $prospect = Customer::with(['user:id,avatar,first_name,last_name,status,gender,phone_number,residential_address'])->whereHas('contracts', function ($query) {
             $query->where('status', 'prospect');
         })->withCount('contracts')->where('company_id', $this->sessionDetails('company_id'))->paginate(20);
 

@@ -22,14 +22,16 @@ class SelfServiceController extends Controller
     public function dashboard()
     {
         $staffs = Staff::where('staff.company_id', $this->sessionDetails('company_id'))
+            ->where('staff.id', '!=', Auth::user()->staff->id)
             ->join('users', 'users.id', '=', 'staff.user_id')
             ->whereNotNull('users.date_of_birth')
             ->orderBy('users.date_of_birth', 'ASC')
             ->select('staff.id AS staff_id', 'users.id AS user_id', 'staff.created_at', 'user_id', 'users.date_of_birth AS date_of_birth', 'users.first_name', 'users.last_name', 'users.avatar', 'staff.company_id')
             ->take(10)
             ->get();
-
+      
         $staffsX = Staff::where('staff.company_id', $this->sessionDetails('company_id'))
+            ->where('staff.id', '!=', Auth::user()->staff->id)
             ->join('users', 'users.id', '=', 'staff.user_id')
             ->whereNotNull('staff.date_of_employment')
             ->orderBy('users.date_of_birth', 'ASC')
@@ -39,6 +41,7 @@ class SelfServiceController extends Controller
 
 
         $col = Staff::where('staff.company_id', $this->sessionDetails('company_id'))
+            ->where('staff.id', '!=', Auth::user()->staff->id)
             ->join('users', 'users.id', '=', 'staff.user_id')
             ->orderBy('staff.created_at', 'ASC')
             ->select('staff.id AS staff_id', 'users.id AS user_id', 'staff.created_at', 'user_id', 'users.first_name', 'users.last_name', 'users.avatar', 'staff.company_id')
@@ -61,7 +64,7 @@ class SelfServiceController extends Controller
                 'id' => $b->user_id,
                 'first_name' => $b->first_name,
                 'last_name' => $b->last_name,
-                'avatar' => !empty($b->avatar) ? url('/') . $b->avatar : '',
+                'avatar' => !empty($b->avatar) ? $this->encodeUploadedFile($b->avatar) : '',
                 'date_of_birth' => Carbon::parse($b->date_of_birth)->format('jS \\of F'),
             ];
         }
@@ -71,7 +74,7 @@ class SelfServiceController extends Controller
                 'id' => $b->staff_id,
                 'first_name' => $b->first_name,
                 'last_name' => $b->last_name,
-                'avatar' => !empty($b->avatar) ? url('/') . $b->avatar : '',
+                'avatar' => !empty($b->avatar) ? $this->encodeUploadedFile($b->avatar) : '',
                 'date_of_employment' => Carbon::parse($b->date_of_employment)->format('jS \\of F'),
             ];
         }
@@ -83,14 +86,16 @@ class SelfServiceController extends Controller
         foreach ($col as $b) {
             $colleagues[] = [
                 'id' => $b->staff_id,
+                'user_id' => $b->user_id,
                 'first_name' => $b->first_name,
                 'last_name' => $b->last_name,
-                'avatar' => !empty($b->avatar) ? $b->avatar : '',
+                'avatar' => !empty($b->avatar) ? $this->encodeUploadedFile($b->avatar) : '',
                 'created_at' => Carbon::parse($b->created_at)->format('jS \\of F'),
             ];
         }
-      
+        
         return response()->json([
+            'user_id' => Auth::user()->id ?? '',
             'first_name' => Auth::user()->first_name ?? '',
             'middle_name'=> Auth::user()->middle_name ?? '',
             'last_name' => Auth::user()->last_name ?? '',
@@ -144,9 +149,14 @@ class SelfServiceController extends Controller
     }
 
     public function deleteAvatar(){
-        $file = DB::table('users')->where('id',Auth::user()->id)->value('avatar');
         
-        $this->deleteFile($file);
+        $file = User::where('id',Auth::user()->id);
+        if(!empty($file->avatar)){
+            $this->deleteFile($file);
+        }
+
+        $file->update(['avatar' => null]);
+
         return response()->json(['message' => 'Delete succesful', 'data' => null], 200);
 
     }
@@ -272,13 +282,15 @@ class SelfServiceController extends Controller
         return response(['message' => 'Password successfully reset', 'data' => null], 200);
     }
 
-    public function fetchUnreadNotifications($staff_id)
+    public function fetchUnreadNotifications(Request $request, $staff_id)
     {
         $staff = Staff::where('id', $staff_id)->first();
         $user = User::find($staff->user->id);
-        // dd($user->unreadNotifications->where('company_id', $this->sessionDetails('company_id')));
+        
         $notifications = [];
-        foreach ($user->unreadNotifications->where('company_id', $this->sessionDetails('company_id')) as $notification) {
+        $unread = $user->unreadNotifications->where('company_id', $this->sessionDetails('company_id'));
+        
+        foreach ($unread as $notification) {
             $notifications[] = [
                 'id' => $notification->id,
                 'title' => $notification->data['title'],
@@ -292,6 +304,29 @@ class SelfServiceController extends Controller
 
     }
 
+    public function fetchViewedNotifications(Request $request)
+    {
+        // $staff = Staff::where('id', $staff_id)->first();
+        // $user = User::find($staff->user->id);
+        $user = Auth::user();
+        $notifications = [];
+        $read = $user->readNotifications->where('company_id', $this->sessionDetails('company_id'));
+       
+        foreach ($read as $notification) {
+            $notifications[] = [
+                'id' => $notification->id,
+                'title' => $notification->data['title'],
+                'content' => $notification->data['content'],
+                'link' => $notification->data['link'],
+                'date' => $notification->created_at->diffForHumans(), 
+            ]; 
+        }
+
+        return response(['message' => 'Successfully retrievd', 'data' => $notifications], 200);
+
+    }
+
+    
     public function markNotificationsAsRead($notification_id = null){
         // $staff = Staff::where('id', $staff_id)->first();
         // $user = User::find($staff->user->id);

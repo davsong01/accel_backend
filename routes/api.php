@@ -172,7 +172,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::resource('transaction-type-definition', TransactionTypeDefinitionController::class);
         Route::resource('account', AccountController::class);
 
-        Route::get('single-customer-form-payment-details/{customer_id}', [CustomerContractController::class, 'singleCustomerFormDetails']);
+        Route::get('single-customer-form-payment-details/{customer_id}', [CustomerContractController::class, 'singleCustomerFormDetails']); // real
 
         Route::get('form-payment-history/{customer_id}', [CustomerContractController::class, 'formPaymentHistory']);
         Route::post('make-form-payment', [CustomerContractController::class, 'makeFormPayment']);
@@ -193,11 +193,11 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::post('self-service/send-reset-password-mail', [SelfServiceController::class, 'sendResetPasswordEmail']);
         Route::post('self-service/reset-password', [SelfServiceController::class, 'resetPassword']);
         Route::get('self-service/unread-notifications/{staff_id}', [SelfServiceController::class, 'fetchUnreadNotifications']);
+        Route::get('self-service/viewed-notifications', [SelfServiceController::class, 'fetchViewedNotifications']);
         Route::get('self-service/read-notification/{notification_id?}', [SelfServiceController::class, 'markNotificationsAsRead']);
         Route::get('self-service/view-single-notification/{notification_id}', [SelfServiceController::class, 'viewSingleNotification']);
         Route::get('self-service/all-notifications', [SelfServiceController::class, 'fetchAllNotifications']);
         
-
         Route::post('update-leave-and-absence-setting', [LeaveAndAbsenceManagementController::class, 'updateLeaveAndAbsenceSetting']);
         Route::get('get-leave-and-absence-setting', [LeaveAndAbsenceManagementController::class, 'getLeaveAndAbsenceSetting']);
 

@@ -321,6 +321,10 @@ class Controller extends BaseController
         
         return number_format(array_sum($expectedProfile) / count($expectedProfile) * 100) . '%';
     }
+
+    public function encodeUploadedFile($file){
+        return !empty($file) ? url('/') . '/uploads/' . base64_encode($file) : '';
+    }
    
 }
 

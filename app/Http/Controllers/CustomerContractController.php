@@ -378,9 +378,9 @@ class CustomerContractController extends Controller
     public function singleCustomerFormDetails($customer_id)
     {
         $estates = CustomerContract::distinct('estate_id')->with('estate:id,name,form_amount')->select('estate_id')->where('customer_id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->get();
-
+        
         $contracts = CustomerContract::with('location:name,id')->where('customer_id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->select(['id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'contract_type', 'property_type'])->orderBy('created_at', 'DESC');
-
+        
         $estates = $estates->map(function ($query) {
             $query['estate_name'] = $query->estate->name;
             $query['form_amount'] = $query->estate->form_amount;
@@ -405,16 +405,21 @@ class CustomerContractController extends Controller
                 // foreach ($contracts as $key => $contract) {
                 $details = CustomerContract::with('location:name,id', 'building_type:id,name', 'plot_size:id,size')->where('estate_id', $estate->estate_id)->where('customer_id', $customer_id)->select(['id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'contract_type', 'property_type'])->orderBy('created_at', 'DESC')->where('company_id', $this->sessionDetails('company_id'))->get();
 
-                foreach ($details as $detail) {
-                    $allContracts[$estate->estate_id]['estate_id'] = $estate->estate_id;
-                    $allContracts[$estate->estate_id]['estate_id'] = $estate->estate_id;
-                    $detail['form_amount'] = $estate->form_amount;
-                    $allContracts[$estate->estate_id]['estate_name'] = $estate->estate_name;
-                    $allContracts[$estate->estate_id]['contracts'][] = $detail;
-                }
-            }
-            $data['all_contracts'] = $allContracts;
+                $allContracts[] = [
+                    'estate_id' => $estate->estate_id,
+                    'estate_name' => $estate->estate_name,
+                    'form_amount' => $estate->form_amount,
+                    'estate_name' => $estate->estate_name,
+                    'contracts' => $details,
+                ];
 
+                // foreach ($details as $detail) {
+                    
+                // }
+            }
+       
+
+            $data['all_contracts'] = $allContracts;
 
             return response()->json(['message' => 'success', 'data' => $data], 200);
         } else {
