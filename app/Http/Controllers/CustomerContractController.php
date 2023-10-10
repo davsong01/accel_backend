@@ -356,7 +356,7 @@ class CustomerContractController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
-        return response()->json(['message' => 'Succesfully updated', 'data' => null], 200);
+        return response()->json(['message' => 'Succesfully updated', 'data' => ['contract_id' => $CustomerContract->id, 'customer_id' => $request->customer_id]], 200);
 
     }
 
