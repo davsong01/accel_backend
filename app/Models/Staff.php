@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\User;
 use App\Models\JobType;
+use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\LeaveAndAbsenceManagement;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -46,6 +47,12 @@ class Staff extends Model
 
     public function leave(){
         return $this->hasMany(LeaveAndAbsenceManagement::class);
+    }
+
+    public function current_approved_leave()
+    {
+        return $this->hasMany(LeaveAndAbsenceManagement::class)->where('status', 'approved')->where('end_date', '>=', Carbon::now()->toDateTimeString());
+
     }
     
 }

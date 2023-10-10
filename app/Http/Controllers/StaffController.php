@@ -74,18 +74,17 @@ class StaffController extends Controller
         return response()->json(['message' => 'success', 'data' => $staff], 200);
     }
 
-    public function delegateDuty($staff_id = null){
+    public function isNotOnLeave($staff_id = null){
         $staff_id = !empty($staff_id) ? $staff_id : Auth::user()->staff->id;
         
-//         products = Product::doesntHave('categories', 'or', function($q){
-//     $q->where('active', false);
-// })->doesntHave('countries', 'or
-
-        $staff = Staff::with('user:id,first_name,middle_name,last_name','leave')->whereDoesntHave('leave', function($query){
-            $query->where('status', 'Approved')->whereDate('end_date', '<', Carbon::now());
-        })->where(['staff.company_id' => $this->sessionDetails('company_id')])->where('id', '!=', $staff_id)
-       
-        ->get();
+        $staff = Staff::with('current_approved_leave','user:id,first_name,middle_name,last_name')->where(['staff.company_id' => $this->sessionDetails('company_id')])->where('id', '!=', $staff_id)->get();
+        
+        $staff = $staff->filter(function ($q){
+            if(count($q->current_approved_leave) < 1){
+                return $q;
+            }
+        });
+        
         return response()->json(['message' => 'Successfully retrieved', 'data' => $staff], 200);
         
     }

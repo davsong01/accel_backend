@@ -85,8 +85,8 @@ class LeaveAndAbsenceManagementController extends Controller
             ], 412);
         }
 
-        $start = Carbon::parse($request->start_date);
-        $end = Carbon::parse($request->end_date);
+        $start = Carbon::parse($request->start_date . ' 00:00:00');
+        $end = Carbon::parse($request->end_date . ' 23:59:00');
 
         if ($start > $end) {
             return response()->json([
@@ -94,7 +94,7 @@ class LeaveAndAbsenceManagementController extends Controller
                 'data' => null,
             ], 412);
         }
-
+        
         $period = $end->diffInDays($start);
         
         $lam = LeaveAndAbsenceManagement::updateOrcreate([

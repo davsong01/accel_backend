@@ -370,8 +370,10 @@ class CustomerContractController extends Controller
         if(!$contract){
             return response()->json(['message' => 'No records found', 'data' => null], 200);
         }
+
+        $customer_id = $contract->customer_id;
         $contract->delete();
-        return response()->json(['message' => 'Succesfully deleted', 'data' => null], 200);
+        return response()->json(['message' => 'Succesfully deleted', 'data' => ['customer_id' => $customer_id]], 200);
 
     }
 
