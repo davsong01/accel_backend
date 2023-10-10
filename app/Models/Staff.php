@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\User;
 use App\Models\JobType;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\LeaveAndAbsenceManagement;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Staff extends Model
@@ -41,6 +42,10 @@ class Staff extends Model
     public function job_role()
     {
         return $this->belongsTo(JobRole::class, 'jobrole_id');
+    }
+
+    public function leave(){
+        return $this->hasMany(LeaveAndAbsenceManagement::class);
     }
     
 }

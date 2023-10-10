@@ -132,7 +132,7 @@ class EstateController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => [
-                'required', 'name', Rule::unique('estates')->where(function ($query) {
+                'required', Rule::unique('estates')->where(function ($query) {
                     $query->where('company_id', $this->sessionDetails('company_id'));
                 })
             ],

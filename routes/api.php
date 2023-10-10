@@ -110,6 +110,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::resource('roles', RoleController::class);
 
         Route::get('get-all-staff', [StaffController::class, 'getAllStaff']);
+        Route::get('delegate-duty', [StaffController::class, 'delegateDuty']);
         Route::post('staff/store', [StaffController::class, 'storeStaff']);
         Route::post('update-staff', [StaffController::class, 'updateStaff']);
         Route::post('update-staff-personal-information', [StaffController::class, 'updateStaffPersonalInfo']);

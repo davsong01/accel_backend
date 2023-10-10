@@ -11,6 +11,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Validator;
 
@@ -63,10 +64,30 @@ class StaffController extends Controller
         if ($request->has('department') && !is_null($request->department)) {
             $staff = $staff->where('staff.department_id', $request->department);
         }
-
-        $staff = $staff->paginate(20);
+       
+        if(!empty($request->paginate) && $request->paginate == 'false'){
+            $staff = $staff->get();
+        }else{
+            $staff = $staff->paginate(20);
+        }
 
         return response()->json(['message' => 'success', 'data' => $staff], 200);
+    }
+
+    public function delegateDuty($staff_id = null){
+        $staff_id = !empty($staff_id) ? $staff_id : Auth::user()->staff->id;
+        
+//         products = Product::doesntHave('categories', 'or', function($q){
+//     $q->where('active', false);
+// })->doesntHave('countries', 'or
+
+        $staff = Staff::with('user:id,first_name,middle_name,last_name','leave')->whereDoesntHave('leave', function($query){
+            $query->where('status', 'Approved')->whereDate('end_date', '<', Carbon::now());
+        })->where(['staff.company_id' => $this->sessionDetails('company_id')])->where('id', '!=', $staff_id)
+       
+        ->get();
+        return response()->json(['message' => 'Successfully retrieved', 'data' => $staff], 200);
+        
     }
 
     public function getActiveStaff()
