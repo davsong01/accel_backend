@@ -20,7 +20,7 @@ class CustomerContractController extends Controller
      */
     public function index($customer_id)
     {
-        $contracts = CustomerContract::with('property_type_details:name,id','location:name,id', 'building_type:id,name')->where('customer_id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->select(['id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'contract_type', 'property_type'])
+        $contracts = CustomerContract::with('property_type_details:id,estate_price,settings_and_excavation,infrastructural_fee','location:name,id', 'building_type_details:id,name', 'plot_size_details:id,size')->where('customer_id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->select(['id','property_type_id', 'customer_id', 'city_id', 'location_id', 'estate_id','status', 'plot_size', 'building_type', 'contract_type', 'property_type'])
             // ->groupBy('estate_id')
             ->orderBy('created_at', 'DESC')
             ->get();
