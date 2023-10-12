@@ -193,7 +193,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::post('self-service/upload-documents', [SelfServiceController::class, 'uploadDocuments']);
         Route::post('self-service/send-reset-password-mail', [SelfServiceController::class, 'sendResetPasswordEmail']);
         Route::post('self-service/reset-password', [SelfServiceController::class, 'resetPassword']);
-        Route::get('self-service/unread-notifications/{staff_id}', [SelfServiceController::class, 'fetchUnreadNotifications']);
+        Route::get('self-service/unread-notifications/{staff_id?}', [SelfServiceController::class, 'fetchUnreadNotifications']);
         Route::get('self-service/viewed-notifications', [SelfServiceController::class, 'fetchViewedNotifications']);
         Route::get('self-service/read-notification/{notification_id?}', [SelfServiceController::class, 'markNotificationsAsRead']);
         Route::get('self-service/view-single-notification/{notification_id}', [SelfServiceController::class, 'viewSingleNotification']);

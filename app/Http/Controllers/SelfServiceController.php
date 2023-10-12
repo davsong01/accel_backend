@@ -282,8 +282,9 @@ class SelfServiceController extends Controller
         return response(['message' => 'Password successfully reset', 'data' => null], 200);
     }
 
-    public function fetchUnreadNotifications(Request $request, $staff_id)
+    public function fetchUnreadNotifications(Request $request, $staff_id=null)
     {
+        $staff_id = $staff_id ?? Auth::user()->staff->id;
         $staff = Staff::where('id', $staff_id)->first();
         $user = User::find($staff->user->id);
         
