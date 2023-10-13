@@ -15,9 +15,13 @@ return new class extends Migration
             $table->id();
             $table->string('staff_id');
             $table->integer('period')->nullable();
+            $table->timestamp('date')->nullable();
             $table->string('amount')->nullable();
             $table->enum('type', ['advance','claims']);
             $table->string('status')->default('pending');
+            $table->string('time_sensitivity')->nullable();
+            $table->text('proof')->nullable();
+            $table->text('purpose')->nullable();
             $table->integer('company_id');
             $table->timestamps();
         });

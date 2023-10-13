@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AdvanceAndClaims;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Carbon;
+use App\Models\AdvanceAndClaims;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Validator;
 
 class AdvanceAndClaimsController extends Controller
 {
@@ -74,7 +77,57 @@ class AdvanceAndClaimsController extends Controller
      */
     public function store(Request $request)
     {
-        
+        $validator = Validator::make($request->all(), [
+            'type' => 'required|in:advance,claims',
+            'purpose' => 'required'
+        ]);
+
+        if($request->type == 'advance'){
+            $validator = Validator::make($request->all(), [
+                'amount' => 'required',
+                'time_sensitivity' => 'required',
+            ]);
+        }
+
+        if ($request->type == 'claims') {
+            $validator = Validator::make($request->all(), [
+                'amount' => 'required',
+                'time' => 'required',
+                'date' => 'required|unique:advance_and_claims,date',
+                'proof' => 'nullable',
+            ]);
+        }
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->messages()->first(),
+                'data' => null,
+            ], 412);
+        }
+
+        $request['date'] = !empty($request->date) ? Carbon::parse($request->start_date . ' 00:00:00') : null;
+        $proof = [];
+        if(!empty($request->proof)){
+            foreach($request->proof as $p){
+                $proof[] = $this->uploadFile($p, 'advance_claims');
+            }
+        }
+
+        AdvanceAndClaims::create([
+            'type' => $request->type,
+            'purpose' => $request->purpose,
+            'staff_id' => Auth::user()->staff->id, 
+            'period' => $request->period ?? null,
+            'date' => $request->date ?? null,
+            'amount' => $request->amount,
+            'purpose' => $request->purpose,
+            'time_sensitivity' => $request->amount,
+            'proof' => json_encode($proof),
+            'company_id' => $this->sessionDetails('company_id')
+        ]);
+
+        return response()->json(['message' => 'Created successfully', 'data' => null], 200);
+
     }
 
     /**
