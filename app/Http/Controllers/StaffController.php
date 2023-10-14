@@ -428,7 +428,11 @@ class StaffController extends Controller
 
     public function addStaffDocumentSetting(Request $request){
         $validator = Validator::make($request->all(), [
-            'name' => 'required',
+            'name' => [
+                'required', Rule::unique('staff_document_settings')->where(function ($query) {
+                    $query->where('company_id', $this->sessionDetails('company_id'));
+                })
+            ],
             'description' => 'nullable',
             'required' => 'nullable',
         ]);

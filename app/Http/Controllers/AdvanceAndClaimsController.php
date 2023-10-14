@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
+use Illuminate\Validation\Rule;
 use App\Models\AdvanceAndClaims;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\RedirectResponse;
@@ -93,7 +94,11 @@ class AdvanceAndClaimsController extends Controller
             $validator = Validator::make($request->all(), [
                 'amount' => 'required',
                 'time' => 'required',
-                'date' => 'required|unique:advance_and_claims,date',
+                'date' => [
+                    'required',Rule::unique('advance_and_claims')->where(function ($query) {
+                        $query->where('company_id', $this->sessionDetails('company_id'));
+                    })
+                ],
                 'proof' => 'nullable',
             ]);
         }
