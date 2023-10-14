@@ -340,6 +340,7 @@ class SelfServiceController extends Controller
             unset($notification['updated_at']);
         }
 
+        
         return response(['message' => 'Successfully retrievd', 'data' => $read], 200);
 
     }
