@@ -288,20 +288,28 @@ class SelfServiceController extends Controller
         $staff = Staff::where('id', $staff_id)->first();
         $user = User::find($staff->user->id);
         
-        $notifications = [];
-        $unread = $user->unreadNotifications->where('company_id', $this->sessionDetails('company_id'));
+        $unread = Auth::user()->unreadnotifications()->where('company_id', $this->sessionDetails('company_id'))->paginate(20);
         
         foreach ($unread as $notification) {
-            $notifications[] = [
-                'id' => $notification->id,
-                'title' => $notification->data['title'],
-                'content' => $notification->data['content'],
-                'link' => $notification->data['link'],
-                'date' => $notification->created_at->diffForHumans(), 
-            ]; 
+            $notification['id'] = $notification->id;
+            $notification['title'] = $notification->data['title'];
+            $notification['content'] = $notification->data['content'];
+            $notification['link'] = $notification->data['link'];
+            $notification['date'] = $notification->created_at->diffForHumans(); 
+           
+            unset($notification['type']);
+            unset($notification['company_id']);
+            unset($notification['user_type']);
+            unset($notification['notifiable_type']);
+            unset($notification['notifiable']);
+            unset($notification['data']);
+            unset($notification['notifiable_id']);
+            unset($notification['read_at']);
+            unset($notification['created_at']);
+            unset($notification['updated_at']);
         }
 
-        return response(['message' => 'Successfully retrievd', 'data' => $notifications], 200);
+        return response(['message' => 'Successfully retrievd', 'data' => $unread], 200);
 
     }
 
@@ -311,19 +319,28 @@ class SelfServiceController extends Controller
         // $user = User::find($staff->user->id);
         $user = Auth::user();
         $notifications = [];
-        $read = $user->readNotifications->where('company_id', $this->sessionDetails('company_id'));
+        $read = $user->readNotifications()->where('company_id', $this->sessionDetails('company_id'))->paginate(20);
        
         foreach ($read as $notification) {
-            $notifications[] = [
-                'id' => $notification->id,
-                'title' => $notification->data['title'],
-                'content' => $notification->data['content'],
-                'link' => $notification->data['link'],
-                'date' => $notification->created_at->diffForHumans(), 
-            ]; 
+            $notification['id'] = $notification->id;
+            $notification['title'] = $notification->data['title'];
+            $notification['content'] = $notification->data['content'];
+            $notification['link'] = $notification->data['link'];
+            $notification['date'] = $notification->created_at->diffForHumans();
+
+            unset($notification['type']);
+            unset($notification['company_id']);
+            unset($notification['user_type']);
+            unset($notification['notifiable_type']);
+            unset($notification['notifiable']);
+            unset($notification['data']);
+            unset($notification['notifiable_id']);
+            unset($notification['read_at']);
+            unset($notification['created_at']);
+            unset($notification['updated_at']);
         }
 
-        return response(['message' => 'Successfully retrievd', 'data' => $notifications], 200);
+        return response(['message' => 'Successfully retrievd', 'data' => $read], 200);
 
     }
 
@@ -365,7 +382,7 @@ class SelfServiceController extends Controller
     }
 
     public function fetchAllNotifications(){
-        $notifications = Auth::user()->notifications()->paginate(3);
+        $notifications = Auth::user()->notifications()->paginate(20);
         foreach($notifications as $notification){
             $notification['title'] = $notification->data['title'];
             $notification['title'] = $notification->data['title'];
