@@ -451,7 +451,7 @@ class StaffController extends Controller
 
         $settings = DB::table('staff_document_settings')->updateOrInsert($data);
 
-        return response()->json(['message' => 'successfull', 'data' => $settings], 200);
+        return response()->json(['message' => 'Operation Successfull', 'data' => $settings], 200);
     }
 
     public function updateStaffDocumentSetting(Request $request, $id){

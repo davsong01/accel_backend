@@ -70,6 +70,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
         // Staff Module Routes
+        Route::post('filter-customers', [CustomerController::class, 'index']);
         Route::resource('customers', CustomerController::class);
         Route::get('customers-count', [CustomerController::class, 'CustomerCount']);
 

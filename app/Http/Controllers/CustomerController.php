@@ -20,9 +20,34 @@ class CustomerController extends Controller
     public function index(Request $request)
     {
         $customers = Customer::with(['user:id,avatar,first_name,last_name,status,gender,phone_number', 'contracts:id,status,customer_id'])->withCount('contracts')
-            ->where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'DESC')
-            // ->where('branch_id', auth()->user()->staff->branch_id)
-            ->paginate(20);
+        ->where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'DESC');
+
+        if(!empty($request->name)){
+            $customers = $customers->whereHas('user', function ($query) use ($request) {
+                $query->where('first_name', 'LIKE', "%{$request->name}%")
+                ->orWhere(function ($query) use ($request) {
+                    $query->where('last_name', 'LIKE', "%{$request->name}%")
+                        ->orWhere('middle_name', 'LIKE', "%{$request->name}%");
+                });
+            })->with(['user:id,avatar,first_name,last_name,status,gender,phone_number', 'contracts:id,status,customer_id'])
+                ->withCount('contracts')
+                ->where('company_id', $this->sessionDetails('company_id'))
+                ->orderBy('customers.created_at', 'DESC');
+        }
+
+        if(!empty($request->status)){
+            $customers = $customers->whereHas('contracts', function($query) use ($request) {
+                $query->whereIn('status', $request->status);
+            });
+        }
+
+        if (!empty($request->estate)) {
+            $customers = $customers->whereHas('contracts', function ($query) use ($request) {
+                $query->whereIn('estate_id', $request->estate);
+            });
+        }
+       
+        $customers = $customers->paginate(20);
 
         foreach ($customers as $customer) {
             $statuses = $customer->contracts->pluck('status')->toArray();
@@ -32,33 +57,68 @@ class CustomerController extends Controller
         return response()->json(['message' => 'success', 'data' => $customers], 200);
     }
 
-    public function getLeads()
+    public function getLeads(Request $request)
     {
         $leads = Customer::with(['user:id,avatar,first_name,last_name,status,gender,phone_number'])->whereHas('contracts', function ($query) {
             $query->where('status', 'lead');
-        })->withCount('contracts')->where('company_id', $this->sessionDetails('company_id'))->paginate(20);
+        })->withCount('contracts')->where('company_id', $this->sessionDetails('company_id'))
+            ->orderBy('customers.created_at', 'DESC');
+        
+        if (!empty($request->name)) {
+            $leads = $leads->whereHas('user', function ($query) use ($request) {
+                $query->where('first_name', 'LIKE', "%{$request->name}%")
+                ->orWhere(function ($query) use ($request) {
+                    $query->where('last_name', 'LIKE', "%{$request->name}%")
+                    ->orWhere('middle_name', 'LIKE', "%{$request->name}%");
+                });
+            });
+        }
 
-        // $leads = Customer::with(['user:id,first_name,last_name,status,gender,phone_number,residential_address', 'contracts:id,status,customer_id'])->whereHas('contracts', function ($query) {
-        //     $query->where('status', 'lead');
-        // })->withCount('contracts')->where('company_id', $this->sessionDetails('company_id'))->paginate(20);
+        $leads = $leads->paginate(20);
 
         return response()->json(['message' => 'success', 'data' => $leads], 200);
     }
 
-    public function getSubscribers()
+    public function getSubscribers(Request $request)
     {
-        $subscriber = Customer::with(['user:id,avatar,first_name,last_name,status,gender,phone_number,residential_address'])->whereHas('contracts', function ($query) {
+        $subscriber = Customer::with(['user:id,avatar,first_name,last_name,status,gender,phone_number'])->whereHas('contracts', function ($query) {
             $query->where('status', 'subscriber');
-        })->withCount('contracts')->where('company_id', $this->sessionDetails('company_id'))->paginate(20);
+        })->withCount('contracts')->where('company_id', $this->sessionDetails('company_id'))
+        ->orderBy('customers.created_at', 'DESC');
+
+        if (!empty($request->name)) {
+            $subscriber = $subscriber->whereHas('user', function ($query) use ($request) {
+                $query->where('first_name', 'LIKE', "%{$request->name}%")
+                ->orWhere(function ($query) use ($request) {
+                    $query->where('last_name', 'LIKE', "%{$request->name}%")
+                    ->orWhere('middle_name', 'LIKE', "%{$request->name}%");
+                });
+            });
+        }
+
+        $subscriber = $subscriber->paginate(20);
 
         return response()->json(['message' => 'success', 'data' => $subscriber], 200);
     }
 
-    public function getProspects()
+    public function getProspects(Request $request)
     {
         $prospect = Customer::with(['user:id,avatar,first_name,last_name,status,gender,phone_number,residential_address'])->whereHas('contracts', function ($query) {
             $query->where('status', 'prospect');
-        })->withCount('contracts')->where('company_id', $this->sessionDetails('company_id'))->paginate(20);
+        })->withCount('contracts')->where('company_id', $this->sessionDetails('company_id'))
+            ->orderBy('customers.created_at', 'DESC');
+
+        if (!empty($request->name)) {
+            $prospect = $prospect->whereHas('user', function ($query) use ($request) {
+                $query->where('first_name', 'LIKE', "%{$request->name}%")
+                ->orWhere(function ($query) use ($request) {
+                    $query->where('last_name', 'LIKE', "%{$request->name}%")
+                    ->orWhere('middle_name', 'LIKE', "%{$request->name}%");
+                });
+            });
+        }
+
+        $prospect = $prospect->paginate(20);
 
         return response()->json(['message' => 'success', 'data' => $prospect], 200);
     }
