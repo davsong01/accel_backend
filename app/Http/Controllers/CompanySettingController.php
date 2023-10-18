@@ -16,6 +16,9 @@ class CompanySettingController extends Controller
     public function index()
     {
         $companySetting = CompanySetting::where('company_id', $this->sessionDetails('company_id'))->first();
+        $companySetting->company_logo = !empty($companySetting->company_logo) ? url('/') . '/uploads/' . base64_encode($companySetting->company_logo) : '';
+        $companySetting->company_secondary_logo = !empty($companySetting->company_secondary_logo) ? url('/') . '/uploads/' . base64_encode($companySetting->company_secondary_logo) : '';
+
         return response()->json(['message' => 'success', 'data' => $companySetting], 200);
         
     }
@@ -59,6 +62,7 @@ class CompanySettingController extends Controller
     {
         $validator = Validator::make($request->all(), [
            'company_logo' => 'sometimes',
+           'company_secondary_logo' => 'sometimes',
            'main_color' => 'sometimes',
            'primary_color' => 'sometimes',
            'secondary_color' => 'sometimes',
@@ -101,7 +105,11 @@ class CompanySettingController extends Controller
         ];
 
         if ($request->has('company_logo') && !is_null($request->company_logo)) {
-            $data['company_logo'] = '/images/brands/logos/' . $this->uploadImage($request->company_logo, 'images/brands/logos');
+            $data['company_logo'] = '/images/brands/logos/' . $this->uploadFile($request->company_logo, 'images/brands/logos');
+        }
+
+        if ($request->has('company_secondary_logo') && !is_null($request->company_secondary_logo)) {
+            $data['company_secondary_logo'] = '/images/brands/logos/' . $this->uploadFile($request->company_secondary_logo, 'images/brands/logos');
         }
        
         if (!$companySetting) {

@@ -16,6 +16,7 @@ return new class extends Migration
             $table->id();
             $table->integer('company_id');
             $table->string('company_logo')->nullable();
+            $table->string('company_secondary_logo')->nullable();
             $table->string('main_color')->nullable();
             $table->string('primary_color')->nullable();
             $table->string('secondary_color')->nullable();

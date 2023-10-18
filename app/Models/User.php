@@ -51,5 +51,4 @@ class User extends Authenticatable
             get: fn (string $value = null) => !empty($value) ? url('/') . '/uploads/' . base64_encode($value) : '',
         );
     }
-
 }
