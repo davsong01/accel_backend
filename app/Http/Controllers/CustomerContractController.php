@@ -379,6 +379,8 @@ class CustomerContractController extends Controller
     public function singleCustomerFormDetails($customer_id)
     {
         $estates = CustomerContract::distinct('estate_id')->with('estate:id,name,form_amount')->select('estate_id')->where('customer_id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->get();
+        $customer = Customer::with('user:id,first_name,last_name,middle_name')->where('id', $customer_id)->first();
+        $customer_details = $customer->user ?? null;
         
         $contracts = CustomerContract::with('location:name,id')->where('customer_id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->select(['id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'contract_type', 'property_type'])->orderBy('created_at', 'DESC');
         
@@ -420,8 +422,8 @@ class CustomerContractController extends Controller
             }
        
 
+            $data['customer_details'] = $customer_details;
             $data['all_contracts'] = $allContracts;
-
             return response()->json(['message' => 'success', 'data' => $data], 200);
         } else {
             return response()->json(['message' => 'No records found', 'data' => null], 200);

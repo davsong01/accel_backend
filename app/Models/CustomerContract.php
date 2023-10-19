@@ -3,7 +3,9 @@
 namespace App\Models;
 
 use App\Models\City;
+use App\Models\User;
 use App\Models\Estate;
+use App\Models\Customer;
 use App\Models\PlotSize;
 use App\Models\BuildingType;
 use Illuminate\Database\Eloquent\Model;
@@ -59,5 +61,4 @@ class CustomerContract extends Model
     {
         return $this->belongsTo(EstatePropertyTypeDetails::class, 'property_type_id');
     }
-
 }
