@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Models\Role;
 use App\Models\User;
 use App\Models\JobType;
+use App\Models\StaffRole;
 use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\LeaveAndAbsenceManagement;
@@ -14,11 +16,9 @@ class Staff extends Model
     use HasFactory;
     protected $guarded = [];
     
-    public function adminRoles()
+    public function staffRoles()
     {
         return $this->hasMany(StaffRole::class);
-        // $staff_roles = StaffRole::whereAdminId($this->id);
-        // dd('dsd', $staff_roles);
     }
 
     public function roles()
@@ -52,7 +52,22 @@ class Staff extends Model
     public function current_approved_leave()
     {
         return $this->hasMany(LeaveAndAbsenceManagement::class)->where('status', 'approved')->where('end_date', '>=', Carbon::now()->toDateTimeString());
+    }
+
+    public function scopeRolesList($query){
+        $rolesX = [];
+        $roles = StaffRole::with('role')->where('staff_id', $this->id)->get();
+        foreach($roles as $r){
+            $rolesX[] =  [
+                            'id' => $r->role->id,
+                            'name' => $r->role->name,
+                            'description' => $r->role->description,
+                            'type' => $r->role->type
+                        ];
+        }
+       
+        return $rolesX;
 
     }
-    
+
 }

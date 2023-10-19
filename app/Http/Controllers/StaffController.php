@@ -6,12 +6,14 @@ use App\Models\Role;
 use App\Models\User;
 use App\Models\Staff;
 use App\Models\StaffRole;
+use App\Imports\StaffImport;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Validator;
 
@@ -40,7 +42,7 @@ class StaffController extends Controller
             ->leftjoin("job_roles", "staff.jobrole_id", "=", "job_roles.id")
             ->leftjoin("job_types", "staff.jobtype_id", "=", "job_types.id")
              ->select("staff.id AS staff_id", "users.id As user_id", "users.status", "staff.created_at", "users.first_name","users.middle_name","users.last_name", "users.email", "users.type", "users.company_id", "job_roles.name AS job_role", "job_types.name AS job_type", "departments.name AS department","users.type", "users.phone_number", "users.gender","staff.jobtype_id AS jobtype_id", "staff.jobrole_id AS jobrole_id", "staff.department_id AS department_id")->orderBy("staff.created_at", "desc");
-
+        
         if (!empty($request->name)) {
             $staff = $staff->where('first_name', 'LIKE', "%{$request->name}%")
                 ->orWhere(function ($staff) use ($request) {
@@ -223,27 +225,11 @@ class StaffController extends Controller
                 'commision_percentage' => $data['commision_percentage'] ?? '',
                 'company_id' => $this->sessionDetails('company_id'), 
             ]);
-
-
                 
         }else{
             $staff = Staff::where('id', $request->staff_id)->where('company_id', $this->sessionDetails('company_id'));
             $user = $staff->user();
         }
-
-        // Create staff documents
-        // if($request->staff_documents){
-        //     foreach($request->staff_documents as $document){
-        //         \DB::table('staff_uploaded_documents')->insert([
-        //             'staff_document_id' => $document->id,
-        //             'name' =>  $document->name,
-        //             'uploaded' =>  $document->uploaded ?? '',
-        //             'required' =>  $document->required ?? '',
-        //             'company_id' => $this->sessionDetails('company_id'),
-        //         ]);
-        //     }
-           
-        // }
 
         return response()->json(['message' => 'Successfully created!', 'data' => ['staff_id' => $staff->id]], 200);
     }
@@ -577,5 +563,31 @@ class StaffController extends Controller
         }
     }
 
+    public function sampleBulkStaff()
+    {
+        $realpath = base_path() . '/sampleimports/sample_bulkstaff.xlsx';
+        return response()->download($realpath);
+    }
+
+    public function importBulkStaff(Request $request)
+    {
+        $this->validate(request(), [
+            'file' => 'required|
+				mimetypes:xlsv,xlsx,xls,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,
+				application/excel,application/x-excel,application/x-msexcel,text/comma-seperated-values, text/csv'
+        ], [
+            'file.mimetypes' => 'The file must be a file of type: xlsx',
+            'file.required' => 'File is required'
+        ]);
+
+        try {
+            //code...
+            Excel::import(new StaffImport(), request()->file('file'));
+        } catch (\Throwable $th) {
+            return response()->json(['errors' => $th->getMessage()], 412);
+        }
+
+        return response()->json(['message' => 'Staff Added Succesfully', 'data' => null], 200);
+    }
     
 }

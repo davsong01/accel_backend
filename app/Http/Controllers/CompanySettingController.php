@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Staff;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Models\CompanySetting;
@@ -125,6 +126,32 @@ class CompanySettingController extends Controller
     /**
      * Remove the specified resource from storage.
      */
+    public function staffAndRoles(Request $request, $staff_id = null){
+        $staff = Staff::with(['user:id,first_name,middle_name,last_name'])->where(['staff.company_id' => $this->sessionDetails('company_id')])->orderBy('created_at','DESC');
+        
+        if(!empty($staff_id)){
+            $staff = $staff->where('id', $staff_id)->first();
+            $staff->roles = $staff->RolesList();
+
+            return response()->json(['message' => 'Retrieved successfully', 'data' => $staff], 200);
+        }
+        
+        
+        if (!empty($request->paginate) && $request->paginate == 'false') {
+            $staff = $staff->get();
+        } else {
+            $staff = $staff->paginate(20);
+        }
+
+        foreach($staff as $s){
+            $s['roles'] = $s->RolesList();
+        }
+        
+        return response()->json(['message' => 'Retrieved successfully', 'data' => $staff], 200);
+    }
+    
+
+    
     public function destroy(CompanySetting $companySetting)
     {
         //

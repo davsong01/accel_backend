@@ -42,7 +42,7 @@ class EstateImport implements ToCollection, WithHeadingRow
                     'location.required' => 'Undefined location in one or more rows, please check and try again',
                     'project_supervisor_staff_id.required' => 'Project Supervisor staff Id is invalid in one or more rows',
                     // 'bypass_approval.required' => 'Bypass Approval is not defined in one or more rows',
-                    'property_type.required' => 'Property Typel is not defined in one or more rows'
+                    'property_type.required' => 'Property Type is not defined in one or more rows'
                 ]
             )->validate();
 

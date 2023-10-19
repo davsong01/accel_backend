@@ -104,6 +104,8 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::resource('estate-construction-setting', EstateConstructionSettingController::class);
 
         Route::post('update-company-profile', [CompanySettingController::class, 'updateCompanyProfile']);
+        Route::get('all-staff-and-role/{staff_id?}', [CompanySettingController::class, 'staffAndRoles']);
+        
         Route::resource('company-document', CompanyDocumentController::class);
         Route::get('company-settings', [CompanySettingController::class, 'index']);
         // Route::get('get-countries-currencies/{country_id?}', [CompanySettingController::class, 'countryAnCurrencies']);
@@ -202,6 +204,10 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         
         Route::post('update-leave-and-absence-setting', [LeaveAndAbsenceManagementController::class, 'updateLeaveAndAbsenceSetting']);
         Route::get('get-leave-and-absence-setting', [LeaveAndAbsenceManagementController::class, 'getLeaveAndAbsenceSetting']);
+
+        Route::get('sample-bulk-staff-import', [StaffController::class, 'sampleBulkStaff']);
+        Route::post('import-bulk-staff', [StaffController::class, 'importBulkStaff']);
+
 
         // Route::post('self-service/create-leave-and-absence', [SelfServiceController::class, 'createLeaveAndAbsence']);
 
