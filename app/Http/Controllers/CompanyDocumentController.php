@@ -54,7 +54,7 @@ class CompanyDocumentController extends Controller
         ];
 
         if ($request->has('file') && !is_null($request->file)) {
-            $data['file'] = '/uploads/brands/documents/' . $this->uploadPrivateFile($request->file, 'uploads/brands/documents');
+            $data['file'] = '/uploads/brands/documents/' . $this->uploadProtectedFile($request->file, 'uploads/brands/documents');
         }
         
         $document = CompanyDocument::create($data);
@@ -105,7 +105,7 @@ class CompanyDocumentController extends Controller
         ];
 
         if ($request->has('file') && !is_null($request->file)) {
-            $data['file'] = '/uploads/brands/documents/' . $this->uploadPrivateFile($request->file, 'uploads/brands/documents');
+            $data['file'] = '/uploads/brands/documents/' . $this->uploadProtectedFile($request->file, 'uploads/brands/documents');
         }
 
         $companyDocument->update($data);
