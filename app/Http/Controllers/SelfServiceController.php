@@ -125,7 +125,7 @@ class SelfServiceController extends Controller
         return $s_con->updateStaff($r, 'internal');
     }
 
-    public function addAvatar(Request $request){
+    public function addAvatar(Request $request, $staff_id = null){
         $validator = Validator::make($request->all(), [
             'avatar' => 'required|image',
         ]);
@@ -136,8 +136,17 @@ class SelfServiceController extends Controller
                 'data' => null,
             ], 412);
         }
+
         $avatar = $this->uploadFile($request->avatar, 'avatars',500,500);
-        Auth::user()->update(['avatar'=>$avatar]);
+
+        if(isset($staff_id)){
+            $staff = Staff::where('id', $staff_id)->first();
+            $user = $staff->user;
+        }else{
+            $user = Auth::user();
+        }
+
+        $user->update(['avatar'=>$avatar]);
 
         return response()->json(['message' => 'success', 'data' => Auth::user()->avatar], 200);
     }
@@ -148,14 +157,19 @@ class SelfServiceController extends Controller
         return response()->json(['message' => 'success', 'data' => $avatar], 200);
     }
 
-    public function deleteAvatar(){
-        
-        $file = User::where('id',Auth::user()->id);
-        if(!empty($file->avatar)){
-            $this->deleteFile($file);
+    public function deleteAvatar($staff_id=null){
+        if (isset($staff_id)) {
+            $staff = Staff::where('id', $staff_id)->first();
+            $user = $staff->user;
+        } else {
+            $user = Auth::user();
+        }
+        // $user = User::where('id',Auth::user()->id);
+        if(!empty($user->avatar)){
+            $this->deleteFile($user->avatar);
         }
 
-        $file->update(['avatar' => null]);
+        $user->update(['avatar' => null]);
 
         return response()->json(['message' => 'Delete succesful', 'data' => null], 200);
 
