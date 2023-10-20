@@ -93,7 +93,6 @@ class AdvanceAndClaimsController extends Controller
         if ($request->type == 'claims') {
             $validator = Validator::make($request->all(), [
                 'amount' => 'required',
-                'time' => 'required',
                 'date' => [
                     'required',Rule::unique('advance_and_claims')->where(function ($query) {
                         $query->where('company_id', $this->sessionDetails('company_id'));

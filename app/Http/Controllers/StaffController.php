@@ -530,7 +530,7 @@ class StaffController extends Controller
             'dob' => $staff->date_of_birth,
             'avatar' => !empty($staff->avatar) ? url('/') . '/uploads/' . base64_encode($staff->avatar) : '',
         ];
-      
+        
         $data['contact_and_additional_information'] = [
             'residential_address' => $additional_details['residential_address'] ?? '',
             'alternate_email' => $additional_details['alternate_email'] ?? '',
