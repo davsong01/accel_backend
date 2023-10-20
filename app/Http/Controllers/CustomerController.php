@@ -36,14 +36,25 @@ class CustomerController extends Controller
         }
 
         if(!empty($request->status)){
+            $request->status = explode(',',$request->status);
+           
             $customers = $customers->whereHas('contracts', function($query) use ($request) {
                 $query->whereIn('status', $request->status);
             });
         }
 
         if (!empty($request->estate)) {
+            $request->estate = explode(',', $request->estate);
             $customers = $customers->whereHas('contracts', function ($query) use ($request) {
                 $query->whereIn('estate_id', $request->estate);
+            });
+        }
+
+        if (!empty($request->property_type)) {
+            $request->property_type = explode(',', $request->property_type);
+            
+            $customers = $customers->whereHas('contracts', function ($query) use ($request) {
+                $query->whereIn('property_type_id', $request->property_type);
             });
         }
        
