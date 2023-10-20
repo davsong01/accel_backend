@@ -47,8 +47,15 @@ class EstateController extends Controller
         if ($request->has('project_supervisor') && !is_null($request->project_supervisor)) {
             $estates = $estates->where('project_supervisor', $request->project_supervisor);
         }
-        $estates = $estates->orderBy('created_at', 'DESC')->paginate(20);
 
+       
+        $estates = $estates->orderBy('created_at', 'DESC');
+        if (!empty($request->paginate) && $request->paginate == 'false') {
+            $estates = $estates->get();
+        } else {
+            $estates = $estates->paginate(20);
+        }
+       
         return response()->json(['message' => 'success', 'data' => $estates], 200);
     }
 
