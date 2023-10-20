@@ -51,10 +51,31 @@ class CustomerController extends Controller
         }
 
         if (!empty($request->property_type)) {
-            $request->property_type = explode(',', $request->property_type);
+            $type = explode(',', $request->property_type);
+            $propertyType = [];
+            
+            if(in_array('land', $type)){
+                $propertyType[] = 'land';
+            }
+
+            if (in_array('building', $type)) {
+                $propertyType[] = 'building';
+            }
+
+            if (in_array('both', $type)) {
+                $propertyType = ['building','land'];
+            }
+            
+            $customers = $customers->whereHas('contracts', function ($query) use ($propertyType) {
+                $query->whereIn('property_type', $propertyType);
+            });
+        }
+
+        if (!empty($request->property_type_id)) {
+            $request->property_type_id = explode(',', $request->property_type_id);
             
             $customers = $customers->whereHas('contracts', function ($query) use ($request) {
-                $query->whereIn('property_type_id', $request->property_type);
+                $query->whereIn('property_type_id', $request->property_type_id);
             });
         }
        
