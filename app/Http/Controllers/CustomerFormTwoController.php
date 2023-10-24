@@ -95,7 +95,8 @@ class CustomerFormTwoController extends Controller
             'state_id' => 'required|exists:states,id',
             'location_id' => 'required|exists:locations,id,company_id,' . $this->sessionDetails('company_id'),
             'customer_id' => 'required|exists:customers,id,company_id,' . $this->sessionDetails('company_id'),
-            'customer_contract_id' => 'required|exists:customer_contracts,id,company_id,' . $this->sessionDetails('company_id'),        
+            'customer_contract_id' => 'required|exists:customer_contracts,id,company_id,' . $this->sessionDetails('company_id'),
+
         ]);
 
         if ($validator->fails()) {
@@ -151,13 +152,22 @@ class CustomerFormTwoController extends Controller
             'discount' => $data['discount'] ?? null,
             'description' => $data['description'] ?? null,
         ]);
-
+        $data['company_id'] = $this->sessionDetails('company_id');
+        
         $data = Arr::except($data, [
             'next_of_kin_firstname','next_of_kin_lastname','next_of_kin_house_address','next_of_kin_phone_number','next_of_kin_email_address','next_of_kin_relationship','phone_number','house_address','alternate_phone_number','occupation','place_of_work','id_card_type','passport_photo','id_card','signature','property_price','infrastuctural_fee','net_property_fee','setting_and_excavation_fee','discount','description'
         ]);
 
-        CustomerFormTwo::create($data);
-        
+        CustomerFormTwo::updateOrCreate(
+            [
+                'customer_id' => $data['customer_id'],
+                'customer_contract_id' => $data['customer_contract_id'],
+                'company_id' => $data['company_id']
+            ],
+            $data
+        );
+
+
         return response()->json(['message' => 'success', 'data' => null], 200);
 
     }

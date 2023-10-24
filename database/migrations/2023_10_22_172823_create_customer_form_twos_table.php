@@ -44,6 +44,7 @@ return new class extends Migration
             $table->timestamp('transaction_date')->nullable();
             $table->text('marketers')->nullable();
             $table->integer('bypass_approval')->nullable();
+            $table->integer('company_id');
             $table->timestamps();
         });
     }
