@@ -16,6 +16,8 @@ return new class extends Migration
             $table->integer('customer_contract_id')->nullable();
             $table->integer('customer_id');
             $table->string('title')->nullable();
+            $table->string('status')->default('pending');
+            $table->string('no_of_contract')->nullable();
             $table->string('surname')->nullable();
             $table->string('first_name')->nullable();
             $table->string('middle_name')->nullable();

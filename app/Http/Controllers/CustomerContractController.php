@@ -269,8 +269,16 @@ class CustomerContractController extends Controller
         }
 
         $data = $validator->valid();
-        $form_payment = $this->generateFormPayment($request['contract_ids'], $request->customer_id);
+        $contract_ids = array_column($request['contract_ids'], 'contract_id');
 
+        $ids = [];
+        array_walk_recursive($contract_ids, function ($a) use (&$ids) {
+            $ids[] = $a;
+        });
+
+    
+        $form_payment = $this->generateFormPayment($ids, $request->customer_id);
+        
         if ($request->amount != $form_payment['form_payment']) {
             return response()->json([
                 'error' => 'Amount does not correspond with selected contract. Amount should be exactly ' . $form_payment['form_payment'],
@@ -281,7 +289,7 @@ class CustomerContractController extends Controller
         if (!empty($request->payment_slip)) {
             $filename = $this->uploadFile($request->payment_slip, 'payments');
         }
-
+       
         if ($form_payment) {
             foreach ($form_payment['explanation'] as $key => $form) {
                 $customer_contract_ids = implode(',', $form['contracts']);

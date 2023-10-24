@@ -17,9 +17,31 @@ class CustomerFormTwoController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request, $id=null, $paginate = true)
     {
-        //
+        $forms = CustomerFormTwo::where('company_id', $this->sessionDetails('company_id'));
+        
+        if(!empty($id)){
+            $forms->where('id', $id)->first();
+        }
+
+        if (!empty($request->status)) {
+            $forms->where('status', $request->status);
+        }
+
+        if($paginate && $paginate == false){
+            $forms = $forms->paginate(20);
+        }else{
+            $forms = $forms->get();
+        }
+
+        if(!empty($forms)){
+            return response()->json(['message' => 'Successfully retrieved', 'data' => $forms], 200);
+        }else{
+            return response()->json(['message' => 'No records found', 'data' => null], 200);
+
+        }
+
     }
 
     /**

@@ -80,6 +80,7 @@ class Controller extends BaseController
         $contracts = [];
         $ids = [];
         $estates = [];
+       
         foreach($contract_ids as $contract_id){
             // Get estates
             $est = CustomerContract::select('estate_id')->where('id', $contract_id)
