@@ -167,7 +167,6 @@ class CustomerFormTwoController extends Controller
             $data
         );
 
-
         return response()->json(['message' => 'success', 'data' => null], 200);
 
     }

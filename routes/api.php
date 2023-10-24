@@ -176,7 +176,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::resource('chart-of-account', ChartOfAccountController::class);
         Route::resource('transaction-type-definition', TransactionTypeDefinitionController::class);
         Route::resource('account', AccountController::class);
-
+        
         Route::get('single-customer-form-payment-details/{customer_id}', [CustomerContractController::class, 'singleCustomerFormDetails']); // real
         Route::post('customer-form-two', [CustomerFormTwoController::class, 'store']); // real
 
