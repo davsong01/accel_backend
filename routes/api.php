@@ -1,13 +1,15 @@
 <?php
 
 use App\Models\SpecialRequest;
+use App\Models\AdvanceAndClaims;
 use Illuminate\Support\Facades\Route;
+use App\Models\LeaveAndAbsenceSetting;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CityController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\RoleController;
-use App\Models\LeaveAndAbsenceManagement;
 use App\Http\Controllers\StaffController;
+use App\Models\LeaveAndAbsenceManagement;
 use App\Http\Controllers\BranchController;
 use App\Http\Controllers\EstateController;
 use App\Http\Controllers\AccountController;
@@ -28,15 +30,14 @@ use App\Http\Controllers\ChartOfAccountController;
 use App\Http\Controllers\CompanySettingController;
 use App\Http\Controllers\SpecialRequestController;
 use App\Http\Controllers\CompanyDocumentController;
+use App\Http\Controllers\CustomerFormTwoController;
 use App\Http\Controllers\AdvanceAndClaimsController;
 use App\Http\Controllers\CustomerContractController;
 use App\Http\Controllers\PropertyTypeDetailsController;
 use App\Http\Controllers\AccountClassificationController;
-use App\Http\Controllers\LeaveAndAbsenceManagementController;
 use App\Http\Controllers\EstateConstructionSettingController;
+use App\Http\Controllers\LeaveAndAbsenceManagementController;
 use App\Http\Controllers\TransactionTypeDefinitionController;
-use App\Models\AdvanceAndClaims;
-use App\Models\LeaveAndAbsenceSetting;
 
 /*
 |--------------------------------------------------------------------------
@@ -177,6 +178,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::resource('account', AccountController::class);
 
         Route::get('single-customer-form-payment-details/{customer_id}', [CustomerContractController::class, 'singleCustomerFormDetails']); // real
+        Route::post('customer-form-two', [CustomerFormTwoController::class, 'store']); // real
 
         Route::get('form-payment-history/{customer_id}', [CustomerContractController::class, 'formPaymentHistory']);
         Route::post('make-form-payment', [CustomerContractController::class, 'makeFormPayment']);
