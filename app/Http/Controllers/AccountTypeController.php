@@ -63,7 +63,7 @@ class AccountTypeController extends Controller
         if($account_type){
             return response()->json(['message' => 'Retrieved successfully', 'data' => $account_type], 200);
         }else{
-            return response()->json(['message' => 'No records found', 'data' => null], 200);
+            return response()->json(['message' => 'No records found', 'data' => $account_type], 200);
         }
     }
 

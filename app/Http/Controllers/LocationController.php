@@ -25,7 +25,7 @@ class LocationController extends Controller
         $locations = Location::where(['company_id' => $this->sessionDetails('company_id'), 'city_id' => $city_id])->get();
 
         if (($locations->count() <= 0)) {
-            return response()->json(['message' => 'No records found', 'data' => null], 200);
+            return response()->json(['message' => 'No records found', 'data' => $locations], 200);
         }
 
         return response()->json(['message' => 'success', 'data' => $locations], 200);

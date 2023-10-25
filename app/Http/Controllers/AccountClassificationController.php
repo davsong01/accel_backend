@@ -64,7 +64,7 @@ class AccountClassificationController extends Controller
         if($accountClassification){
             return response()->json(['message' => 'Retrieved successfully', 'data' => $accountClassification], 200);
         }else{
-            return response()->json(['message' => 'No records found', 'data' => null], 200);
+            return response()->json(['message' => 'No records found', 'data' => $accountClassification], 200);
         }
     }
 

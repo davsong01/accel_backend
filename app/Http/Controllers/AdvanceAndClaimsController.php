@@ -33,7 +33,7 @@ class AdvanceAndClaimsController extends Controller
             if ($lam) {
                 return response()->json(['message' => 'Retrieved Successfully', 'data' => $lam], 200);
             } else {
-                return response()->json(['message' => 'No records found', 'data' => null], 200);
+                return response()->json(['message' => 'No records found', 'data' => $lam], 200);
             }
         }
 
@@ -42,7 +42,7 @@ class AdvanceAndClaimsController extends Controller
         if ($lam->count() > 0) {
             return response()->json(['message' => 'Retrieved Successfully', 'data' => $lam], 200);
         } else {
-            return response()->json(['message' => 'No records found', 'data' => null], 200);
+            return response()->json(['message' => 'No records found', 'data' => $lam], 200);
         }
     }
 
@@ -57,7 +57,7 @@ class AdvanceAndClaimsController extends Controller
             if ($lam) {
                 return response()->json(['message' => 'Retrieved Successfully', 'data' => $lam], 200);
             } else {
-                return response()->json(['message' => 'No records found', 'data' => null], 200);
+                return response()->json(['message' => 'No records found', 'data' => $lam], 200);
             }
         }
 
@@ -66,7 +66,7 @@ class AdvanceAndClaimsController extends Controller
         if ($lam->count() > 0) {
             return response()->json(['message' => 'Retrieved Successfully', 'data' => $lam], 200);
         } else {
-            return response()->json(['message' => 'No records found', 'data' => null], 200);
+            return response()->json(['message' => 'No records found', 'data' => $lam], 200);
         }
     }
 

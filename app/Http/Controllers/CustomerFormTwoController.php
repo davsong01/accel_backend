@@ -38,7 +38,7 @@ class CustomerFormTwoController extends Controller
         if (!empty($forms)) {
             return response()->json(['message' => 'Successfully retrieved', 'data' => $forms], 200);
         } else {
-            return response()->json(['message' => 'No records found', 'data' => null], 200);
+            return response()->json(['message' => 'No records found', 'data' => $forms], 200);
         }
     }
 

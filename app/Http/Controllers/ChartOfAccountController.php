@@ -63,7 +63,7 @@ class ChartOfAccountController extends Controller
         if ($chartOfAccount) {
             return response()->json(['message' => 'Retrieved successfully', 'data' => $chartOfAccount], 200);
         } else {
-            return response()->json(['message' => 'No records found', 'data' => null], 200);
+            return response()->json(['message' => 'No records found', 'data' => $chartOfAccount], 200);
         }
     }
 
@@ -109,6 +109,6 @@ class ChartOfAccountController extends Controller
     public function destroy(ChartOfAccount $chartOfAccount)
     {
         $chartOfAccount->delete();
-        return response()->json(['message' => 'Deleted Successfully.', 'data' => null], 200);
+        return response()->json(['message' => 'Deleted Successfully.', 'data' => $chartOfAccount], 200);
     }
 }

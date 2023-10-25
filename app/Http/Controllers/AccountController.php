@@ -71,7 +71,7 @@ class AccountController extends Controller
         if ($account) {
             return response()->json(['message' => 'Retrieved successfully', 'data' => $account], 200);
         } else {
-            return response()->json(['message' => 'No records found', 'data' => null], 200);
+            return response()->json(['message' => 'No records found', 'data' => $account], 200);
         }
     }
 

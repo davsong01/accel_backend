@@ -57,7 +57,7 @@ class CustomerContractController extends Controller
 
             return response()->json(['message' => 'success', 'data' => $data], 200);
         } else {
-            return response()->json(['message' => 'No records found', 'data' => null], 200);
+            return response()->json(['message' => 'No records found', 'data' => $data], 200);
         }
     }
 
@@ -434,7 +434,7 @@ class CustomerContractController extends Controller
             $data['all_contracts'] = $allContracts;
             return response()->json(['message' => 'success', 'data' => $data], 200);
         } else {
-            return response()->json(['message' => 'No records found', 'data' => null], 200);
+            return response()->json(['message' => 'No records found', 'data' => []], 200);
         }
     }
 

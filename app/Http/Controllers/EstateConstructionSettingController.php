@@ -19,7 +19,7 @@ class EstateConstructionSettingController extends Controller
         if ($branches->count() > 0) {
             return response()->json(['message' => 'Retrieved Successfully', 'data' => $branches], 200);
         } else {
-            return response()->json(['message' => 'No records found', 'data' => null], 200);
+            return response()->json(['message' => 'No records found', 'data' => $branches], 200);
         }
     }
 
