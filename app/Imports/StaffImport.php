@@ -126,7 +126,7 @@ class StaffImport implements ToCollection, WithHeadingRow
                     'next_of_kin' => $data['next_of_kin'],
                     'branch_id' => $row['branch_id'] ?? '',
                     'date_of_birth' => $row['date_of_birth'] ?? null,
-                    'company_id' => $this->company_id,
+                    'company_id' => $this->company_id,'staff_id' =>  $this->session->generateStaffId($data['date_of_employment'])->getData()->data,
                 ]);
     
                 // Create staff

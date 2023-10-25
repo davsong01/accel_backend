@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\Lga;
+use App\Models\User;
 use App\Models\Staff;
 use ReflectionMethod;
 use App\Models\Estate;
@@ -15,9 +17,11 @@ use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 use App\Notifications\StaffNotification;
+use App\Models\StaffIdentificationSetting;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Validation\Rules\Unique;
 
 class Controller extends BaseController
 {
@@ -131,6 +135,55 @@ class Controller extends BaseController
             'form_payment' => $amount,
             'explanation' => $form_payment
         ];
+    }
+
+    public function generateStaffId($date_of_employment = null, $create = false){
+        $date_of_employment = !empty($date_of_employment) ? Carbon::parse($date_of_employment) : Carbon::today();
+
+        $settings = StaffIdentificationSetting::where('id',$this->sessionDetails('company_id'))->first();
+        $lastUser = User::where('company_id', $this->sessionDetails('company_id'))->where('type', 'staff')->latest()->first();
+        $lastUserId = $lastUser->id + 1;
+        $lastStaffId = $lastUser->staff_id;
+       
+        if(!$settings) return;
+
+        $id = '';
+
+        if($settings->use_id_generator == 1){
+            if($settings->id_generator_type == 'employment_year'){
+                $id = $date_of_employment->format('Y'). sprintf('%06d', $lastUserId);
+            }
+
+            if ($settings->id_generator_type == 'employment_month') {
+                $id = $date_of_employment->format('m') . sprintf('%06d', $lastUserId);
+            }
+
+            if ($settings->id_generator_type == 'employment_day') {
+                $id = $date_of_employment->format('d') . sprintf('%06d', $lastUserId);
+            }
+
+            if ($settings->id_generator_type == 'auto_increment_number') {
+                // $id = $date_of_employment->format('d');
+                $digits = $settings->auto_increment_number_digit;
+                $id = $lastUserId + $digits;
+
+                return sprintf('%06d', $id);
+            }
+
+            if ($settings->id_generator_type == 'random_number') {
+                $count = strlen($lastStaffId);
+                $min = pow(10, $count-1);
+                $id = mt_rand($min, $min*9);
+            }
+
+        }else{
+            $count = strlen($lastStaffId);
+            $min = pow(10, $count - 1);
+            $id = mt_rand($min, $min * 9);
+        }
+
+        return response()->json(['message' => 'Successful', 'data' => $id], 200);
+
     }
 
     public function deleteUploadsFile($imagePath)

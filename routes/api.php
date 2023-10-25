@@ -2,6 +2,7 @@
 
 use App\Models\SpecialRequest;
 use App\Models\AdvanceAndClaims;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Route;
 use App\Models\LeaveAndAbsenceSetting;
 use App\Http\Controllers\AuthController;
@@ -210,7 +211,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
 
         Route::get('sample-bulk-staff-import', [StaffController::class, 'sampleBulkStaff']);
         Route::post('import-bulk-staff', [StaffController::class, 'importBulkStaff']);
-
+        Route::get('generate-staff-id', [Controller::class, 'generateStaffId']);
 
         // Route::post('self-service/create-leave-and-absence', [SelfServiceController::class, 'createLeaveAndAbsence']);
 
