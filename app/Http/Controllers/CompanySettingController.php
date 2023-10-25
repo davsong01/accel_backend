@@ -21,7 +21,6 @@ class CompanySettingController extends Controller
         $companySetting->company_secondary_logo = !empty($companySetting->company_secondary_logo) ? url('/') . '/uploads/' . base64_encode($companySetting->company_secondary_logo) : '';
 
         return response()->json(['message' => 'success', 'data' => $companySetting], 200);
-        
     }
 
     /**
@@ -62,21 +61,21 @@ class CompanySettingController extends Controller
     public function updateCompanyProfile(Request $request)
     {
         $validator = Validator::make($request->all(), [
-           'company_logo' => 'sometimes',
-           'company_secondary_logo' => 'sometimes',
-           'main_color' => 'sometimes',
-           'primary_color' => 'sometimes',
-           'secondary_color' => 'sometimes',
-           'company_name' => 'sometimes',
-           'company_email' => 'sometimes',
-           'country' => 'sometimes',
-           'currency' => 'sometimes',
-           'address' => 'sometimes',
+            'company_logo' => 'sometimes',
+            'company_secondary_logo' => 'sometimes',
+            'main_color' => 'sometimes',
+            'primary_color' => 'sometimes',
+            'secondary_color' => 'sometimes',
+            'company_name' => 'sometimes',
+            'company_email' => 'sometimes',
+            'country' => 'sometimes',
+            'currency' => 'sometimes',
+            'address' => 'sometimes',
             'about' => 'sometimes',
-           'website' => 'sometimes|url',
-           'twitter' => 'sometimes|url',
-           'facebook' => 'sometimes|url',
-           'linkedin' => 'sometimes|url',
+            'website' => 'sometimes|url',
+            'twitter' => 'sometimes|url',
+            'facebook' => 'sometimes|url',
+            'linkedin' => 'sometimes|url',
         ]);
 
         if ($validator->fails()) {
@@ -87,7 +86,7 @@ class CompanySettingController extends Controller
         }
 
         $companySetting = CompanySetting::where('company_id', $this->sessionDetails('company_id'))->first();
-        
+
         $data = [
             'main_color' => $request->main_color,
             'primary_color' => $request->primary_color,
@@ -112,7 +111,7 @@ class CompanySettingController extends Controller
         if ($request->has('company_secondary_logo') && !is_null($request->company_secondary_logo)) {
             $data['company_secondary_logo'] = '/images/brands/logos/' . $this->uploadFile($request->company_secondary_logo, 'images/brands/logos');
         }
-       
+
         if (!$companySetting) {
             CompanySetting::create($data);
         } else {
@@ -120,38 +119,38 @@ class CompanySettingController extends Controller
         }
 
         return response()->json(['message' => 'Company settings updated succesfully', 'data' => null], 200);
-        
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function staffAndRoles(Request $request, $staff_id = null){
-        $staff = Staff::with(['user:id,first_name,middle_name,last_name'])->where(['staff.company_id' => $this->sessionDetails('company_id')])->orderBy('created_at','DESC');
-        
-        if(!empty($staff_id)){
+    public function staffAndRoles(Request $request, $staff_id = null)
+    {
+        $staff = Staff::with(['user:id,first_name,middle_name,last_name'])->where(['staff.company_id' => $this->sessionDetails('company_id')])->orderBy('created_at', 'DESC');
+
+        if (!empty($staff_id)) {
             $staff = $staff->where('id', $staff_id)->first();
             $staff->roles = $staff->RolesList();
 
             return response()->json(['message' => 'Retrieved successfully', 'data' => $staff], 200);
         }
-        
-        
+
+
         if (!empty($request->paginate) && $request->paginate == 'false') {
             $staff = $staff->get();
         } else {
-            $staff = $staff->paginate(20);
+            $staff = $staff->paginate(20)->withQueryString();
         }
 
-        foreach($staff as $s){
+        foreach ($staff as $s) {
             $s['roles'] = $s->RolesList();
         }
-        
+
         return response()->json(['message' => 'Retrieved successfully', 'data' => $staff], 200);
     }
-    
 
-    
+
+
     public function destroy(CompanySetting $companySetting)
     {
         //
@@ -329,14 +328,13 @@ class CompanySettingController extends Controller
             array("name" => "Zambian Kwacha", "code" => "ZMK", "symbol" => "ZK", "id" => 167),
             array("name" => "Zimbabwean dollar", "code" => "ZWL", "symbol" => "$", "id" => 168)
         );
-        if(isset($country_id) && !is_null($country_id)){
+        if (isset($country_id) && !is_null($country_id)) {
             foreach ($currency_list as $k => $v) {
-                
+
                 if ($v["id"] == $country_id) {
-                    return response()->json(['message'=>'success', 'data'=> $currency_list[$k]], 200);
+                    return response()->json(['message' => 'success', 'data' => $currency_list[$k]], 200);
                 }
             }
-
         }
         return response()->json(['message' => 'success', 'data' => $currency_list], 200);
     }

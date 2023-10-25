@@ -23,6 +23,11 @@ class AdvanceAndClaimsController extends Controller
         if (isset($request->type) && !empty($request->type)) {
             $lam = $lam->where('type', $request->type);
         }
+
+        if (isset($request->status) && !empty($request->status)) {
+            $lam = $lam->where('status', $request->status);
+        }
+
         if (isset($id) && !empty($id)) {
             $lam = $lam->where('id', $id)->first();
             if ($lam) {
@@ -32,7 +37,7 @@ class AdvanceAndClaimsController extends Controller
             }
         }
 
-        $lam = $lam->orderBy('created_at', 'DESC')->paginate(20);
+        $lam = $lam->orderBy('created_at', 'DESC')->paginate(20)->withQueryString();
 
         if ($lam->count() > 0) {
             return response()->json(['message' => 'Retrieved Successfully', 'data' => $lam], 200);

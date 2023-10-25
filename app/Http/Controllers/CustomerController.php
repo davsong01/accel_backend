@@ -20,25 +20,25 @@ class CustomerController extends Controller
     public function index(Request $request)
     {
         $customers = Customer::with(['user:id,avatar,first_name,last_name,status,gender,phone_number', 'contracts:id,status,customer_id'])->withCount('contracts')
-        ->where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'DESC');
+            ->where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'DESC');
 
-        if(!empty($request->name)){
+        if (!empty($request->name)) {
             $customers = $customers->whereHas('user', function ($query) use ($request) {
                 $query->where('first_name', 'LIKE', "%{$request->name}%")
-                ->orWhere(function ($query) use ($request) {
-                    $query->where('last_name', 'LIKE', "%{$request->name}%")
-                        ->orWhere('middle_name', 'LIKE', "%{$request->name}%");
-                });
+                    ->orWhere(function ($query) use ($request) {
+                        $query->where('last_name', 'LIKE', "%{$request->name}%")
+                            ->orWhere('middle_name', 'LIKE', "%{$request->name}%");
+                    });
             })->with(['user:id,avatar,first_name,last_name,status,gender,phone_number', 'contracts:id,status,customer_id'])
                 ->withCount('contracts')
                 ->where('company_id', $this->sessionDetails('company_id'))
                 ->orderBy('customers.created_at', 'DESC');
         }
 
-        if(!empty($request->status)){
-            $request->status = explode(',',$request->status);
-           
-            $customers = $customers->whereHas('contracts', function($query) use ($request) {
+        if (!empty($request->status)) {
+            $request->status = explode(',', $request->status);
+
+            $customers = $customers->whereHas('contracts', function ($query) use ($request) {
                 $query->whereIn('status', $request->status);
             });
         }
@@ -53,8 +53,8 @@ class CustomerController extends Controller
         if (!empty($request->property_type)) {
             $type = explode(',', $request->property_type);
             $propertyType = [];
-            
-            if(in_array('land', $type)){
+
+            if (in_array('land', $type)) {
                 $propertyType[] = 'land';
             }
 
@@ -63,9 +63,9 @@ class CustomerController extends Controller
             }
 
             if (in_array('both', $type)) {
-                $propertyType = ['building','land'];
+                $propertyType = ['building', 'land'];
             }
-            
+
             $customers = $customers->whereHas('contracts', function ($query) use ($propertyType) {
                 $query->whereIn('property_type', $propertyType);
             });
@@ -73,13 +73,13 @@ class CustomerController extends Controller
 
         if (!empty($request->property_type_id)) {
             $request->property_type_id = explode(',', $request->property_type_id);
-            
+
             $customers = $customers->whereHas('contracts', function ($query) use ($request) {
                 $query->whereIn('property_type_id', $request->property_type_id);
             });
         }
-       
-        $customers = $customers->paginate(20);
+
+        $customers = $customers->paginate(20)->withQueryString();
 
         foreach ($customers as $customer) {
             $statuses = $customer->contracts->pluck('status')->toArray();
@@ -95,18 +95,18 @@ class CustomerController extends Controller
             $query->where('status', 'lead');
         })->withCount('contracts')->where('company_id', $this->sessionDetails('company_id'))
             ->orderBy('customers.created_at', 'DESC');
-        
+
         if (!empty($request->name)) {
             $leads = $leads->whereHas('user', function ($query) use ($request) {
                 $query->where('first_name', 'LIKE', "%{$request->name}%")
-                ->orWhere(function ($query) use ($request) {
-                    $query->where('last_name', 'LIKE', "%{$request->name}%")
-                    ->orWhere('middle_name', 'LIKE', "%{$request->name}%");
-                });
+                    ->orWhere(function ($query) use ($request) {
+                        $query->where('last_name', 'LIKE', "%{$request->name}%")
+                            ->orWhere('middle_name', 'LIKE', "%{$request->name}%");
+                    });
             });
         }
 
-        $leads = $leads->paginate(20);
+        $leads = $leads->paginate(20)->withQueryString();
 
         return response()->json(['message' => 'success', 'data' => $leads], 200);
     }
@@ -116,19 +116,19 @@ class CustomerController extends Controller
         $subscriber = Customer::with(['user:id,avatar,first_name,last_name,status,gender,phone_number'])->whereHas('contracts', function ($query) {
             $query->where('status', 'subscriber');
         })->withCount('contracts')->where('company_id', $this->sessionDetails('company_id'))
-        ->orderBy('customers.created_at', 'DESC');
+            ->orderBy('customers.created_at', 'DESC');
 
         if (!empty($request->name)) {
             $subscriber = $subscriber->whereHas('user', function ($query) use ($request) {
                 $query->where('first_name', 'LIKE', "%{$request->name}%")
-                ->orWhere(function ($query) use ($request) {
-                    $query->where('last_name', 'LIKE', "%{$request->name}%")
-                    ->orWhere('middle_name', 'LIKE', "%{$request->name}%");
-                });
+                    ->orWhere(function ($query) use ($request) {
+                        $query->where('last_name', 'LIKE', "%{$request->name}%")
+                            ->orWhere('middle_name', 'LIKE', "%{$request->name}%");
+                    });
             });
         }
 
-        $subscriber = $subscriber->paginate(20);
+        $subscriber = $subscriber->paginate(20)->withQueryString();
 
         return response()->json(['message' => 'success', 'data' => $subscriber], 200);
     }
@@ -143,14 +143,14 @@ class CustomerController extends Controller
         if (!empty($request->name)) {
             $prospect = $prospect->whereHas('user', function ($query) use ($request) {
                 $query->where('first_name', 'LIKE', "%{$request->name}%")
-                ->orWhere(function ($query) use ($request) {
-                    $query->where('last_name', 'LIKE', "%{$request->name}%")
-                    ->orWhere('middle_name', 'LIKE', "%{$request->name}%");
-                });
+                    ->orWhere(function ($query) use ($request) {
+                        $query->where('last_name', 'LIKE', "%{$request->name}%")
+                            ->orWhere('middle_name', 'LIKE', "%{$request->name}%");
+                    });
             });
         }
 
-        $prospect = $prospect->paginate(20);
+        $prospect = $prospect->paginate(20)->withQueryString();
 
         return response()->json(['message' => 'success', 'data' => $prospect], 200);
     }

@@ -17,11 +17,11 @@ class CustomerFormTwoController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request, $id=null, $paginate = true)
+    public function index(Request $request, $id = null, $paginate = true)
     {
         $forms = CustomerFormTwo::where('company_id', $this->sessionDetails('company_id'));
-        
-        if(!empty($id)){
+
+        if (!empty($id)) {
             $forms->where('id', $id)->first();
         }
 
@@ -29,19 +29,17 @@ class CustomerFormTwoController extends Controller
             $forms->where('status', $request->status);
         }
 
-        if($paginate && $paginate == false){
-            $forms = $forms->paginate(20);
-        }else{
+        if ($paginate && $paginate == false) {
+            $forms = $forms->paginate(20)->withQueryString();
+        } else {
             $forms = $forms->get();
         }
 
-        if(!empty($forms)){
+        if (!empty($forms)) {
             return response()->json(['message' => 'Successfully retrieved', 'data' => $forms], 200);
-        }else{
+        } else {
             return response()->json(['message' => 'No records found', 'data' => null], 200);
-
         }
-
     }
 
     /**
@@ -56,7 +54,7 @@ class CustomerFormTwoController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {        
+    {
         $validator = Validator::make($request->all(), [
             'title' => 'nullable',
             'surname' => 'nullable',
@@ -68,7 +66,7 @@ class CustomerFormTwoController extends Controller
             'email_address' => 'required',
 
             // Contact details
-            'phone_number' => 'nullable', 
+            'phone_number' => 'nullable',
             'house_address' => 'nullable',
             'alternate_phone_number' => 'nullable',
 
@@ -95,11 +93,11 @@ class CustomerFormTwoController extends Controller
             'setting_and_excavation_fee' => 'nullable',
             'discount' => 'nullable',
             'description' => 'nullable',
-            
+
             // Marketer
             'marketers' => 'nullable',
             'transaction_date' => 'nullable',
-            'bypass_approval' => 'nullable',
+            // 'bypass_approval' => 'nullable',
             'marital_status' => 'nullable',
             'estate_id' => 'required|exists:estates,id,company_id,' . $this->sessionDetails('company_id'),
             'property_type_id' => [
@@ -129,8 +127,8 @@ class CustomerFormTwoController extends Controller
         }
         $data = $validator->valid();
         $data['date_of_birth'] = !empty($data['date_of_birth']) ? Carbon::parse($data['date_of_birth']) : '';
-        
-        if(!empty($request->passport_photo)){
+
+        if (!empty($request->passport_photo)) {
             $data['passport_photo'] = $this->uploadFile($request->passport_photo, 'avatars');
         }
 
@@ -156,7 +154,7 @@ class CustomerFormTwoController extends Controller
             'next_of_kin_email_address' => $data['next_of_kin_email_address'] ?? null,
             'next_of_kin_relationship' => $data['next_of_kin_relationship'] ?? null,
         ]);
-        
+
         $data['means_of_identification'] = json_encode([
             'occupation' => $data['nullable'] ?? null,
             'place_of_work' => $data['place_of_work'] ?? null,
@@ -175,9 +173,9 @@ class CustomerFormTwoController extends Controller
             'description' => $data['description'] ?? null,
         ]);
         $data['company_id'] = $this->sessionDetails('company_id');
-        
+
         $data = Arr::except($data, [
-            'next_of_kin_firstname','next_of_kin_lastname','next_of_kin_house_address','next_of_kin_phone_number','next_of_kin_email_address','next_of_kin_relationship','phone_number','house_address','alternate_phone_number','occupation','place_of_work','id_card_type','passport_photo','id_card','signature','property_price','infrastuctural_fee','net_property_fee','setting_and_excavation_fee','discount','description'
+            'next_of_kin_firstname', 'next_of_kin_lastname', 'next_of_kin_house_address', 'next_of_kin_phone_number', 'next_of_kin_email_address', 'next_of_kin_relationship', 'phone_number', 'house_address', 'alternate_phone_number', 'occupation', 'place_of_work', 'id_card_type', 'passport_photo', 'id_card', 'signature', 'property_price', 'infrastuctural_fee', 'net_property_fee', 'setting_and_excavation_fee', 'discount', 'description'
         ]);
 
         CustomerFormTwo::updateOrCreate(
@@ -190,7 +188,6 @@ class CustomerFormTwoController extends Controller
         );
 
         return response()->json(['message' => 'success', 'data' => null], 200);
-
     }
 
     /**

@@ -29,7 +29,7 @@ class SelfServiceController extends Controller
             ->select('staff.id AS staff_id', 'users.id AS user_id', 'staff.created_at', 'user_id', 'users.date_of_birth AS date_of_birth', 'users.first_name', 'users.last_name', 'users.avatar', 'staff.company_id')
             ->take(10)
             ->get();
-      
+
         $staffsX = Staff::where('staff.company_id', $this->sessionDetails('company_id'))
             ->where('staff.id', '!=', Auth::user()->staff->id)
             ->join('users', 'users.id', '=', 'staff.user_id')
@@ -93,20 +93,20 @@ class SelfServiceController extends Controller
                 'created_at' => Carbon::parse($b->created_at)->format('jS \\of F'),
             ];
         }
-        
+
         return response()->json([
             'user_id' => Auth::user()->id ?? '',
             'first_name' => Auth::user()->first_name ?? '',
-            'middle_name'=> Auth::user()->middle_name ?? '',
+            'middle_name' => Auth::user()->middle_name ?? '',
             'last_name' => Auth::user()->last_name ?? '',
             'work_id' => Auth::user()->staff_id ?? '',
-            'job_role'=> Auth::user()->staff->job_role->name ?? '',
+            'job_role' => Auth::user()->staff->job_role->name ?? '',
             'avatar' => !empty(Auth::user()->avatar) ? Auth::user()->avatar : '',
-            'time_in_company'=>$time_in_company,
-            'profile_completeness'=> (int) $profile_completenes.'%',
-            'my_anniversary'=> $my_anniversary, 
-            'birthdays' => $birthdays, 
-            'work_anniversary' => $work_anniversary, 
+            'time_in_company' => $time_in_company,
+            'profile_completeness' => (int) $profile_completenes . '%',
+            'my_anniversary' => $my_anniversary,
+            'birthdays' => $birthdays,
+            'work_anniversary' => $work_anniversary,
             'colleagues' => $colleagues
         ], 200);
     }
@@ -117,15 +117,17 @@ class SelfServiceController extends Controller
         return $sController->getSingleStaffProfile(Auth::user()->staff->id, 'internal');
     }
 
-    public function updateMyWorkProfile(Request $request){
+    public function updateMyWorkProfile(Request $request)
+    {
         $request['staff_id'] = Auth::user()->staff->id;
         $s_con = new StaffController();
-       
+
         $r = new \Illuminate\Http\Request($request->all());
         return $s_con->updateStaff($r, 'internal');
     }
 
-    public function addAvatar(Request $request, $staff_id = null){
+    public function addAvatar(Request $request, $staff_id = null)
+    {
         $validator = Validator::make($request->all(), [
             'avatar' => 'required|image',
         ]);
@@ -137,16 +139,16 @@ class SelfServiceController extends Controller
             ], 412);
         }
 
-        $avatar = $this->uploadFile($request->avatar, 'avatars',500,500);
+        $avatar = $this->uploadFile($request->avatar, 'avatars', 500, 500);
 
-        if(isset($staff_id)){
+        if (isset($staff_id)) {
             $staff = Staff::where('id', $staff_id)->first();
             $user = $staff->user;
-        }else{
+        } else {
             $user = Auth::user();
         }
 
-        $user->update(['avatar'=>$avatar]);
+        $user->update(['avatar' => $avatar]);
 
         return response()->json(['message' => 'success', 'data' => Auth::user()->avatar], 200);
     }
@@ -157,7 +159,8 @@ class SelfServiceController extends Controller
         return response()->json(['message' => 'success', 'data' => $avatar], 200);
     }
 
-    public function deleteAvatar($staff_id=null){
+    public function deleteAvatar($staff_id = null)
+    {
         if (isset($staff_id)) {
             $staff = Staff::where('id', $staff_id)->first();
             $user = $staff->user;
@@ -165,17 +168,17 @@ class SelfServiceController extends Controller
             $user = Auth::user();
         }
         // $user = User::where('id',Auth::user()->id);
-        if(!empty($user->avatar)){
+        if (!empty($user->avatar)) {
             $this->deleteFile($user->avatar);
         }
 
         $user->update(['avatar' => null]);
 
         return response()->json(['message' => 'Delete succesful', 'data' => null], 200);
-
     }
 
-    public function uploadDocuments(Request $request, $self = true){
+    public function uploadDocuments(Request $request, $self = true)
+    {
         $validator = Validator::make($request->all(), [
             'id' => 'required|exists:staff_document_settings,id,company_id,' . $this->sessionDetails('company_id'),
             'staff_id' => 'required|exists:staff,id,company_id,' . $this->sessionDetails('company_id'),
@@ -197,11 +200,11 @@ class SelfServiceController extends Controller
 
         $staff_id = $self == true ? Auth::user()->staff->id : $request->staff_id;
 
-        $setting = DB::table('staff_document_settings')->where(['company_id' => $this->sessionDetails('company_id'), 'id'=>$request->id])->first();
+        $setting = DB::table('staff_document_settings')->where(['company_id' => $this->sessionDetails('company_id'), 'id' => $request->id])->first();
         $count = StaffUploadedDocument::where(['staff_document_id' => $setting->id, 'staff_id' => $staff_id])->count();
-       
+
         if ($count >= $setting->required) {
-            if($self == false){
+            if ($self == false) {
                 return [
                     'code' => 422,
                     'error' => 'You have already uploaded maximum number of required files for ' . $setting->name,
@@ -209,11 +212,11 @@ class SelfServiceController extends Controller
                 ];
             }
             return response()->json([
-                'error' => 'You have already uploaded maximum number of required files for '.$setting->name,
+                'error' => 'You have already uploaded maximum number of required files for ' . $setting->name,
                 'data' => null,
             ], 422);
         }
-      
+
         $fileX = $this->uploadProtectedFile($request->file, $this->sessionDetails('company_slug'));
 
         $upload = StaffUploadedDocument::create([
@@ -227,17 +230,17 @@ class SelfServiceController extends Controller
         ]);
 
         if ($self == false) {
-            return [   
+            return [
                 'code' => 200,
-                'message' => 'Upload succesful', 
+                'message' => 'Upload succesful',
                 'data' => $upload->file
             ];
         }
         return response()->json(['message' => 'Upload succesful', 'data' => $upload->file], 200);
-
     }
 
-    public function sendResetPasswordEmail(Request $request){
+    public function sendResetPasswordEmail(Request $request)
+    {
         $request->validate([
             'password' => 'required',
         ]);
@@ -252,7 +255,7 @@ class SelfServiceController extends Controller
         $rand = mt_rand(100000000000, 999999999999);
         $data['token'] = base64_encode($rand);
         $data['email'] = Auth::user()->email;
-        
+
         // Create a new code
         $codeData = ResetCodePassword::create($data);
         $data['type'] = 'password-reset';
@@ -274,7 +277,7 @@ class SelfServiceController extends Controller
 
         $encodeToken = base64_encode($request->token);
         $passwordReset = ResetCodePassword::firstWhere('token', $encodeToken);
-        if(!$passwordReset){
+        if (!$passwordReset) {
             return response(['error' => 'Invalid Token', 'data' => null], 422);
         }
 
@@ -287,30 +290,30 @@ class SelfServiceController extends Controller
         $user = User::firstWhere('email', $passwordReset->email);
         $password = Hash::make($request->password);
         // update user password
-        $user->update(['password'=> $password]);
+        $user->update(['password' => $password]);
 
         // delete current token 
-   
+
         $passwordReset->delete();
 
         return response(['message' => 'Password successfully reset', 'data' => null], 200);
     }
 
-    public function fetchUnreadNotifications(Request $request, $staff_id=null)
+    public function fetchUnreadNotifications(Request $request, $staff_id = null)
     {
         $staff_id = $staff_id ?? Auth::user()->staff->id;
         $staff = Staff::where('id', $staff_id)->first();
         $user = User::find($staff->user->id);
-        
-        $unread = Auth::user()->unreadnotifications()->where('company_id', $this->sessionDetails('company_id'))->paginate(20);
-        
+
+        $unread = Auth::user()->unreadnotifications()->where('company_id', $this->sessionDetails('company_id'))->paginate(20)->withQueryString();
+
         foreach ($unread as $notification) {
             $notification['id'] = $notification->id;
             $notification['title'] = $notification->data['title'];
             $notification['content'] = $notification->data['content'];
             $notification['link'] = $notification->data['link'];
-            $notification['date'] = $notification->created_at->diffForHumans(); 
-           
+            $notification['date'] = $notification->created_at->diffForHumans();
+
             unset($notification['type']);
             unset($notification['company_id']);
             unset($notification['user_type']);
@@ -324,7 +327,6 @@ class SelfServiceController extends Controller
         }
 
         return response(['message' => 'Successfully retrievd', 'data' => $unread], 200);
-
     }
 
     public function fetchViewedNotifications(Request $request)
@@ -333,8 +335,8 @@ class SelfServiceController extends Controller
         // $user = User::find($staff->user->id);
         $user = Auth::user();
         $notifications = [];
-        $read = $user->readNotifications()->where('company_id', $this->sessionDetails('company_id'))->paginate(20);
-       
+        $read = $user->readNotifications()->where('company_id', $this->sessionDetails('company_id'))->paginate(20)->withQueryString();
+
         foreach ($read as $notification) {
             $notification['id'] = $notification->id;
             $notification['title'] = $notification->data['title'];
@@ -354,51 +356,53 @@ class SelfServiceController extends Controller
             unset($notification['updated_at']);
         }
 
-        
-        return response(['message' => 'Successfully retrievd', 'data' => $read], 200);
 
+        return response(['message' => 'Successfully retrievd', 'data' => $read], 200);
     }
 
-    
-    public function markNotificationsAsRead($notification_id = null){
+
+    public function markNotificationsAsRead($notification_id = null)
+    {
         // $staff = Staff::where('id', $staff_id)->first();
         // $user = User::find($staff->user->id);
         $user = Auth::user();
-        if($notification_id){
+        if ($notification_id) {
             $notification = $user->unreadNotifications
                 ->where('id', $notification_id)
                 ->first();
 
             $notification->markAsRead();
-        }else{
+        } else {
             $userUnreadNotification = $user->unreadNotifications->where('company_id', $this->sessionDetails('company_id'));
 
             foreach ($userUnreadNotification as $notification) {
                 $notification->markAsRead();
             }
         }
-       
+
         return response(['message' => 'Successfully read', 'data' => null], 200);
     }
 
-    public function viewSingleNotification($notification_id){
+    public function viewSingleNotification($notification_id)
+    {
         $notification = Auth::user()->notifications
             ->where('id', $notification_id)
             ->first();
-       
+
         $data = [
             'id' => $notification->id,
             'title' => $notification->data['title'],
             'content' => $notification->data['content'],
             'link' => $notification->data['link'],
             'date' => $notification->created_at->diffForHumans(),
-        ]; 
+        ];
         return response(['message' => 'Successfully retrieved', 'data' => $data], 200);
     }
 
-    public function fetchAllNotifications(){
-        $notifications = Auth::user()->notifications()->paginate(20);
-        foreach($notifications as $notification){
+    public function fetchAllNotifications()
+    {
+        $notifications = Auth::user()->notifications()->paginate(20)->withQueryString();
+        foreach ($notifications as $notification) {
             $notification['title'] = $notification->data['title'];
             $notification['title'] = $notification->data['title'];
             $notification['content'] = $notification->data['content'];
@@ -415,9 +419,8 @@ class SelfServiceController extends Controller
             unset($notification['read_at']);
             unset($notification['created_at']);
             unset($notification['updated_at']);
-
         }
-        
+
         return response(['message' => 'Successfully retrieved', 'data' => $notifications], 200);
     }
 }

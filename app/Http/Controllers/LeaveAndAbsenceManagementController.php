@@ -33,7 +33,7 @@ class LeaveAndAbsenceManagementController extends Controller
             }
         }
 
-        $lam = $lam->orderBy('created_at', 'DESC')->paginate(20);
+        $lam = $lam->orderBy('created_at', 'DESC')->paginate(20)->withQueryString();
 
         if ($lam->count() > 0) {
             return response()->json(['message' => 'Retrieved Successfully', 'data' => $lam], 200);
@@ -59,7 +59,7 @@ class LeaveAndAbsenceManagementController extends Controller
             }
         }
 
-        $lam = $lam->orderBy('created_at', 'DESC')->paginate(20);
+        $lam = $lam->orderBy('created_at', 'DESC')->paginate(20)->withQueryString();
 
         if ($lam->count() > 0) {
             return response()->json(['message' => 'Retrieved Successfully', 'data' => $lam], 200);
@@ -94,9 +94,9 @@ class LeaveAndAbsenceManagementController extends Controller
                 'data' => null,
             ], 412);
         }
-        
+
         $period = $end->diffInDays($start);
-        
+
         $lam = LeaveAndAbsenceManagement::updateOrcreate([
             'staff_id' => isset($internal) ? $request['staff_id'] : $this->sessionDetails('staff_id'),
             'start_date' => $request->start_date,
@@ -115,8 +115,8 @@ class LeaveAndAbsenceManagementController extends Controller
     public function approveLeaveAndAbsence($id)
     {
         $lam = LeaveAndAbsenceManagement::find($id);
-        
-        if($lam->status == 'Approved'){
+
+        if ($lam->status == 'Approved') {
             return response()->json(['message' => 'Already Approved', 'data' => null], 200);
         }
 
@@ -125,12 +125,12 @@ class LeaveAndAbsenceManagementController extends Controller
         $data = [
             'title' => 'Leave Approved',
             'content' => 'Your leaved has been approved by ' . Auth::user()->first_name . ' ' . Auth::user()->last_name,
-            'link' => url('/').'/single-staff-leave-and-absence/api/admin/'.$lam->staff_id.'?type=leave',
+            'link' => url('/') . '/single-staff-leave-and-absence/api/admin/' . $lam->staff_id . '?type=leave',
             'user_type' => 'staff',
             'staff_id' => $lam->staff_id,
             'company_id' => $this->sessionDetails('company_id')
         ];
-        
+
         $this->notify($data);
         return response()->json(['message' => 'Approved successfully', 'data' => $lam], 200);
     }
@@ -167,7 +167,7 @@ class LeaveAndAbsenceManagementController extends Controller
 
         $company_id = $this->sessionDetails('company_id');
 
-        $setting = LeaveAndAbsenceSetting::updateOrCreate(['company_id' => $company_id, 'type'=>$request->type], [
+        $setting = LeaveAndAbsenceSetting::updateOrCreate(['company_id' => $company_id, 'type' => $request->type], [
             'type' => $request->type,
             'period' => $request->period
         ]);
@@ -175,14 +175,14 @@ class LeaveAndAbsenceManagementController extends Controller
         return response()->json(['message' => 'Updated successfully', 'data' => null], 200);
     }
 
-    public function getLeaveAndAbsenceSetting(Request $request){
+    public function getLeaveAndAbsenceSetting(Request $request)
+    {
         $settings = LeaveAndAbsenceSetting::where('company_id', $this->sessionDetails('company_id'));
 
-        if(!empty($request->type)){
+        if (!empty($request->type)) {
             $settings->where('type', $request->type);
         }
 
         return response()->json(['message' => 'Retrieved successfully', 'data' => $settings->get()], 200);
-
     }
 }

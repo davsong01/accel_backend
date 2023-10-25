@@ -49,13 +49,13 @@ class EstateController extends Controller
         }
 
         $estates = $estates->orderBy('created_at', 'DESC');
-        
+
         if (!empty($request->paginate) && $request->paginate == 'false') {
             $estates = $estates->get();
         } else {
-            $estates = $estates->paginate(20);
+            $estates = $estates->paginate(20)->withQueryString();
         }
-        
+
         return response()->json(['message' => 'success', 'data' => $estates], 200);
     }
 
@@ -92,7 +92,7 @@ class EstateController extends Controller
         }
 
         // dd($estates->get(), $request->status);
-        $estates = $estates->orderBy('created_at', 'DESC')->paginate(20);
+        $estates = $estates->orderBy('created_at', 'DESC')->paginate(20)->withQueryString();
 
         return response()->json(['message' => 'success', 'data' => $estates], 200);
     }
@@ -169,7 +169,7 @@ class EstateController extends Controller
                         'data' => null,
                     ], 412);
                 }
-            }   
+            }
         }
 
         if ($request->has('land_details') && !empty($request->land_details)) {
@@ -186,7 +186,7 @@ class EstateController extends Controller
                 }
             }
         }
-        
+
         $estate = Estate::updateOrcreate([
             'name' => $request->name,
             'city_id' => $request->city,
@@ -374,7 +374,7 @@ class EstateController extends Controller
         }
 
         $property_type = EstatePropertyTypeDetails::find($id);
-       
+
         $property_type->update([
             "plot_size" => $request->plot_size,
             "building_type" => $request->building_type,
