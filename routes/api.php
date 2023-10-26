@@ -31,7 +31,7 @@ use App\Http\Controllers\ChartOfAccountController;
 use App\Http\Controllers\CompanySettingController;
 use App\Http\Controllers\SpecialRequestController;
 use App\Http\Controllers\CompanyDocumentController;
-use App\Http\Controllers\CustomerFormTwoController;
+use App\Http\Controllers\CustomerFormController;
 use App\Http\Controllers\AdvanceAndClaimsController;
 use App\Http\Controllers\CustomerContractController;
 use App\Http\Controllers\PropertyTypeDetailsController;
@@ -107,7 +107,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
 
         Route::post('update-company-profile', [CompanySettingController::class, 'updateCompanyProfile']);
         Route::get('all-staff-and-role/{staff_id?}', [CompanySettingController::class, 'staffAndRoles']);
-        
+
         Route::resource('company-document', CompanyDocumentController::class);
         Route::get('company-settings', [CompanySettingController::class, 'index']);
         // Route::get('get-countries-currencies/{country_id?}', [CompanySettingController::class, 'countryAnCurrencies']);
@@ -177,10 +177,10 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::resource('chart-of-account', ChartOfAccountController::class);
         Route::resource('transaction-type-definition', TransactionTypeDefinitionController::class);
         Route::resource('account', AccountController::class);
-        
+
         Route::get('single-customer-form-payment-details/{customer_id}', [CustomerContractController::class, 'singleCustomerFormDetails']); // real
-        Route::post('customer-form-two', [CustomerFormTwoController::class, 'store']); // real
-        Route::get('customer-form-two/{id?}', [CustomerFormTwoController::class, 'index']); // real
+        Route::post('customer-form-response', [CustomerFormController::class, 'store']); // real
+        Route::get('customer-form-response/{id?}', [CustomerFormController::class, 'index']); // real
 
         Route::get('form-payment-history/{customer_id}', [CustomerContractController::class, 'formPaymentHistory']);
         Route::post('make-form-payment', [CustomerContractController::class, 'makeFormPayment']);
@@ -205,7 +205,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('self-service/read-notification/{notification_id?}', [SelfServiceController::class, 'markNotificationsAsRead']);
         Route::get('self-service/view-single-notification/{notification_id}', [SelfServiceController::class, 'viewSingleNotification']);
         Route::get('self-service/all-notifications', [SelfServiceController::class, 'fetchAllNotifications']);
-        
+
         Route::post('update-leave-and-absence-setting', [LeaveAndAbsenceManagementController::class, 'updateLeaveAndAbsenceSetting']);
         Route::get('get-leave-and-absence-setting', [LeaveAndAbsenceManagementController::class, 'getLeaveAndAbsenceSetting']);
 
@@ -215,5 +215,15 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
 
         // Route::post('self-service/create-leave-and-absence', [SelfServiceController::class, 'createLeaveAndAbsence']);
 
+    });
+});
+
+
+Route::group(['prefix' => 'customer', 'before' => 'customer'], function () {
+    Route::post('/validate', [AuthController::class, 'validateCustomer']);
+
+    Route::middleware(['auth:sanctum', 'company_check', 'user_roles', 'otherchecks'])->group(function () {
+        Route::post('form-response', [CustomerFormController::class, 'store']); // real
+        Route::get('form-response/{id}', [CustomerFormController::class, 'index']); // real
     });
 });

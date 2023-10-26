@@ -11,11 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('customer_form_twos', function (Blueprint $table) {
+        Schema::create('customer_forms', function (Blueprint $table) {
             $table->id();
             $table->integer('customer_contract_id')->nullable();
             $table->integer('customer_id');
             $table->string('title')->nullable();
+            $table->string('type')->default('response_form');
             $table->string('status')->default('pending');
             $table->string('no_of_contract')->nullable();
             $table->string('surname')->nullable();

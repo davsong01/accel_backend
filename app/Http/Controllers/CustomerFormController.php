@@ -6,30 +6,35 @@ use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
-use App\Models\CustomerFormTwo;
+use App\Models\CustomerForm;
 use Illuminate\Validation\Rule;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Validation\Rules\File;
 use Illuminate\Support\Facades\Validator;
 
-class CustomerFormTwoController extends Controller
+class CustomerFormController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request, $id = null, $paginate = true)
     {
-        $forms = CustomerFormTwo::where('company_id', $this->sessionDetails('company_id'));
-
         if (!empty($id)) {
-            $forms->where('id', $id)->first();
+            $forms = CustomerForm::where('company_id', $this->sessionDetails('company_id'))->first();
+            return response()->json(['message' => 'Successfully retrieved', 'data' => $forms], 200);
+        }
+
+        $forms = CustomerForm::where('company_id', $this->sessionDetails('company_id'))->where('type', $request->type);
+        
+        if (\Request::route()->getPrefix() == 'api/customer'){
+            $forms = $forms->where('customer_id', auth::user()->customer->id);
         }
 
         if (!empty($request->status)) {
-            $forms->where('status', $request->status);
+            $forms = $forms->where('status', $request->status);
         }
 
-        if ($paginate && $paginate == false) {
+        if ($paginate && $paginate == true) {
             $forms = $forms->paginate(20)->withQueryString();
         } else {
             $forms = $forms->get();
@@ -53,7 +58,7 @@ class CustomerFormTwoController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, $admin=false)
     {
         $validator = Validator::make($request->all(), [
             'title' => 'nullable',
@@ -178,7 +183,13 @@ class CustomerFormTwoController extends Controller
             'next_of_kin_firstname', 'next_of_kin_lastname', 'next_of_kin_house_address', 'next_of_kin_phone_number', 'next_of_kin_email_address', 'next_of_kin_relationship', 'phone_number', 'house_address', 'alternate_phone_number', 'occupation', 'place_of_work', 'id_card_type', 'passport_photo', 'id_card', 'signature', 'property_price', 'infrastuctural_fee', 'net_property_fee', 'setting_and_excavation_fee', 'discount', 'description'
         ]);
 
-        CustomerFormTwo::updateOrCreate(
+        if (\Request::route()->getPrefix() == 'api/customer') {
+            $data['type'] = 'customer-response';
+        }else{
+            $data['type'] = 'form2-request'; 
+        }
+        
+        CustomerForm::updateOrCreate(
             [
                 'customer_id' => $data['customer_id'],
                 'customer_contract_id' => $data['customer_contract_id'],
@@ -193,7 +204,7 @@ class CustomerFormTwoController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(CustomerFormTwo $customerFormTwo)
+    public function show(CustomerForm $CustomerForm)
     {
         //
     }
@@ -201,7 +212,7 @@ class CustomerFormTwoController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(CustomerFormTwo $customerFormTwo)
+    public function edit(CustomerForm $CustomerForm)
     {
         //
     }
@@ -209,7 +220,7 @@ class CustomerFormTwoController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, CustomerFormTwo $customerFormTwo)
+    public function update(Request $request, CustomerForm $CustomerForm)
     {
         //
     }
@@ -217,61 +228,8 @@ class CustomerFormTwoController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(CustomerFormTwo $customerFormTwo)
+    public function destroy(CustomerForm $CustomerForm)
     {
         //
     }
 }
-
-// title: nullable
-// surname : ''
-// first_name : kjkkk
-// middle_name : kjkkk
-// last_name : kjkkk
-// gender : female
-// data_of_birth : 2002/10/12
-// email_address : test2@gmail.com
-
-// // Contact details:
-// phone_number : kjkkk
-// house_address : kjkkk
-// alternate_phone_number : kjkkk
-// // Next of kin information:
-// next_of_kin_firstname : kjkkk
-// next_of_kin_lastname : kjkkk
-// next_of_kin_house_address : kjkkk
-// next_of_kin_phone_number : kjkkk
-// next_of_kin_email_address : kjkkk
-// next_of_kin_relationship : kjkkk
-// // Means of identification:
-// occupation : kjkkk
-// place_of_work : kjkkk
-// id_card_type : nullable // multiple:
-// passport_photo : kjkkk
-// id_card : kjkkk
-// signature : kjkkk
-// // Other details:
-// property_price : kjkkk
-// infrastuctural_fee : kjkkk
-// net_property_fee : kjkkk
-// setting_and_excavation_fee : kjkkk
-// discount : kjkkk
-// description : kjkkk
-// // Marketer:
-// marketers : kjkkk
-// transaction_date : kjkkk
-// bypass_approval : kjkkk
-// date_of_birth : kjkkk
-// marital_status : kjkkk
-// property_type_id : ''
-// property_type : ''
-// building_type_id : ''
-// plot_size_id : ''
-// branch_id : ''
-// contract_type: ''
-// lga_id:''
-// country_id:''
-// state_id:''
-// location_id:''
-// customer_id:508
-// customer_contract_id:''
