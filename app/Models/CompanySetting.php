@@ -10,6 +10,5 @@ class CompanySetting extends Model
 {
     protected $guarded = [];
     use HasFactory;
-
     
 }
