@@ -66,8 +66,8 @@ class CompanySettingController extends Controller
     public function updateCompanyProfile(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'company_logo' => 'sometimes',
-            'company_secondary_logo' => 'sometimes',
+            'company_logo' => 'sometimes|image',
+            'company_secondary_logo' => 'sometimes|image',
             'main_color' => 'sometimes',
             'primary_color' => 'sometimes',
             'secondary_color' => 'sometimes',
@@ -109,12 +109,13 @@ class CompanySettingController extends Controller
             'company_id' => $this->sessionDetails('company_id')
         ];
 
+        
         if ($request->has('company_logo') && !is_null($request->company_logo)) {
-            $data['company_logo'] = '/images/brands/logos/' . $this->uploadFile($request->company_logo, 'images/brands/logos');
+            $data['company_logo'] = $this->uploadFile($request->company_logo, 'images/brands/logos');
         }
 
         if ($request->has('company_secondary_logo') && !is_null($request->company_secondary_logo)) {
-            $data['company_secondary_logo'] = '/images/brands/logos/' . $this->uploadFile($request->company_secondary_logo, 'images/brands/logos');
+            $data['company_secondary_logo'] = $this->uploadFile($request->company_secondary_logo, 'images/brands/logos');
         }
 
         if (!$companySetting) {
