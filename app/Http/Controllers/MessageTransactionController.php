@@ -111,7 +111,19 @@ class MessageTransactionController extends Controller
                 <p style="text-align:justify !important">You asked for a password RESET mail on '.$this->sessionDetails('company_name'). '. Please click the button below to reset your password. Thank you <br><br><a href="' . url('/') . '/reset-password?token=' . $data['token'] . '"><button style="background: green;text-decoration: none;padding: 10px;color: white;">RESET PASSWORD</button></a></p>
                 </div>';
             }
-        } 
+        }
+        if ($data['type'] == 'staff.store') {
+            if (isset($data['medium']) && $data['medium'] == 'sms') {
+               
+            } else {
+                $subject = '';
+                $content .= '<strong>Dear ' . $data['name'] . '</strong><br><br>
+                <div>
+                <p style="text-align:justify !important">You asked for a password RESET mail on ' . $this->sessionDetails('company_name') . '. Please click the button below to reset your password. Thank you <br><br><a href="' . url('/') . '/reset-password?token="><button style="background: green;text-decoration: none;padding: 10px;color: white;">RESET PASSWORD</button></a></p>
+                </div>';
+            }
+        }
+        
         return [
             'subject' => $subject,
             'content' => $content,

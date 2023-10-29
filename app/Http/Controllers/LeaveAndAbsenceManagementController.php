@@ -81,6 +81,7 @@ class LeaveAndAbsenceManagementController extends Controller
             'reason' => 'required',
             'start_date' => 'required',
             'end_date' => 'required',
+            'bypass_approval' => 'sometimes',
             'delegate_duty' => 'required|exists:staff,id,company_id,' . $this->sessionDetails('company_id'),
         ]);
 
@@ -102,7 +103,9 @@ class LeaveAndAbsenceManagementController extends Controller
         }
 
         $period = $end->diffInDays($start);
-
+        if(!empty($request->bypass_approval) && $request->bypass_approval == 'Yes'){
+            $status = 'approved';
+        }
         $lam = LeaveAndAbsenceManagement::updateOrcreate([
             'staff_id' => isset($internal) ? $request['staff_id'] : $this->sessionDetails('staff_id'),
             'start_date' => $request->start_date,
@@ -111,7 +114,7 @@ class LeaveAndAbsenceManagementController extends Controller
             'reason' => $request->reason,
             'type' => $request->type ?? 'leave',
             'delegate_duty' => $request->delegate_duty,
-            'status' => 'pending',
+            'status' => $status ?? 'pending',
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 

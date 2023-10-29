@@ -379,6 +379,13 @@ class Controller extends BaseController
     public function encodeUploadedFile($file){
         return !empty($file) ? url('/') . '/uploads/' . base64_encode($file) : '';
     }
+
+    public function logEmail($data){
+        $mes = new MessageTransactionController();
+        $mes->logEmailTransaction($data);
+
+        return;
+    }
    
 }
 

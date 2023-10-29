@@ -19,7 +19,7 @@ class AdvanceAndClaimsController extends Controller
     public function index(Request $request, $id = null)
     {
         $lam = AdvanceAndClaims::where('company_id', $this->sessionDetails('company_id'));
-
+        
         if (isset($request->type) && !empty($request->type)) {
             $lam = $lam->where('type', $request->type);
         }
@@ -48,7 +48,7 @@ class AdvanceAndClaimsController extends Controller
 
     public function staffAdvanceAndClaims(Request $request, $staff_id){
         $lam = AdvanceAndClaims::where('company_id', $this->sessionDetails('company_id'))->where('staff_id',$staff_id);
-
+       
         if (isset($request->type) && !empty($request->type)) {
             $lam = $lam->where('type', $request->type);
         }
@@ -85,6 +85,7 @@ class AdvanceAndClaimsController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'type' => 'required|in:advance,claims',
+            'bypass_approval' => 'sometimes',
             'purpose' => 'required'
         ]);
 
@@ -122,6 +123,10 @@ class AdvanceAndClaimsController extends Controller
             }
         }
 
+        if (!empty($request->bypass_approval) && $request->bypass_approval == 'Yes') {
+            $status = 'approved';
+        }
+
         AdvanceAndClaims::create([
             'type' => $request->type,
             'purpose' => $request->purpose,
@@ -132,6 +137,7 @@ class AdvanceAndClaimsController extends Controller
             'purpose' => $request->purpose,
             'time_sensitivity' => $request->amount,
             'proof' => json_encode($proof),
+            'status' => $status ?? 'pending',
             'company_id' => $this->sessionDetails('company_id')
         ]);
 

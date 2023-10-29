@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('type')->nullable(); // Absence, Leave
             $table->string('status')->default('pending');
             $table->string('delegate_duty')->default('pending');
+            $table->enum('bypass_approval', ['Yes', 'No'])->default('Yes');
             $table->integer('company_id');
             $table->timestamps();
         });

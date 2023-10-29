@@ -145,6 +145,7 @@ class StaffController extends Controller
 
     public function storeStaff(Request $request)
     {
+        
         if (!isset($request->staff_id) && empty($request->staff_id)) {
             $validator = Validator::make($request->all(), [
                 'email' => [
@@ -227,6 +228,12 @@ class StaffController extends Controller
                 'commision_percentage' => $data['commision_percentage'] ?? '',
                 'company_id' => $this->sessionDetails('company_id'),
             ]);
+
+            $data['type'] = 'staff.store';
+            $data['medium'] = 'email';
+            $data['name'] = $data['name'] ?? Auth::user()->first_name;
+            $data['recipient'] = $user->first_name;
+            $this->logEmail($data);
         } else {
             $staff = Staff::where('id', $request->staff_id)->where('company_id', $this->sessionDetails('company_id'));
             $user = $staff->user();

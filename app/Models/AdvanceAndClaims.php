@@ -13,9 +13,39 @@ class AdvanceAndClaims extends Model
 
     protected function proof(): Attribute
     {
+        
+
+        // if ($this->type == 'claims') {
+        //     dd('sdds', $this->proof);
+        //     if (!empty($this->proof)) {
+        //         foreach ($this->proof as $p) {
+        //             $proofs[] = '/uploads/' . base64_encode($p);
+        //         }
+        //     }
+        // }
+
         return Attribute::make(
-            get: fn (string $value = null) => !empty($value) ? url('/') . '/uploads/' . base64_encode($value) : '',
+           
+            get: fn (mixed $value, array $attributes) => new AdvanceAndClaims(
+                $r = $this->getProofs($value, $this),
+                $r
+            ),
         );
+    }
+
+    public function getProofs($value, $all){
+        $proofs = [];
+
+        if ($all->type == 'claims') {
+            if (!empty($value)) {
+                $value = json_decode($value, true);
+                foreach ($value as $p) {
+                    $proofs[] = url('/').'/uploads/' . base64_encode($p);
+                }
+            }
+        }
+
+        return $proofs;
     }
 
 }
