@@ -20,7 +20,7 @@ class CustomerContractController extends Controller
      */
     public function index($customer_id)
     {
-        $contracts = CustomerContract::with('property_type_details:id,estate_price,settings_and_excavation,infrastructural_fee','location:name,id', 'building_type_details:id,name', 'plot_size_details:id,size')->where('customer_id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->select(['id','property_type_id', 'customer_id', 'city_id', 'location_id', 'estate_id','status', 'plot_size', 'building_type', 'contract_type', 'property_type'])
+        $contracts = CustomerContract::with('property_type_details:type,id,estate_price,settings_and_excavation,infrastructural_fee', 'city:name,id', 'estate:name,id', 'location:name,id', 'building_type:id,name', 'plot_size:id,size')->where('customer_id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->select(['id', 'property_type_id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'subscribers', 'contract_type', 'property_type'])
             // ->groupBy('estate_id')
             ->orderBy('created_at', 'DESC')
             ->get();
@@ -40,15 +40,10 @@ class CustomerContractController extends Controller
                 'single_contracts' => $customerY->single_contract_count
             ];
             $data['contract_count'] = $dataX;
-            // $dataX = [
-            //     'all_contracts' => $customer->contracts_count,
-            //     'joint_contracts' => $customer->single_contract_count,
-            //     'single_contracts' => $customer->join_contract_count
-            // ];
-            // $data['contract_count'] = $dataX;
-
+      
             foreach ($contracts as $key => $contract) {
                 // $estate->load('city', 'location', 'estate_property_type')
+                $contract->subscribers = !empty($contract->subscribers) ? json_decode($contract->subscribers) : '';
                 $contract['location'] = $contract->location->name;
                 $allContracts[$key] = $contract;
                 $allContracts[$key]['form_amount'] = $this->getContractFormAmount($contract, 'single');
@@ -57,7 +52,7 @@ class CustomerContractController extends Controller
 
             return response()->json(['message' => 'success', 'data' => $data], 200);
         } else {
-            return response()->json(['message' => 'No records found', 'data' => $data], 200);
+            return response()->json(['message' => 'No records found', 'data' => []], 200);
         }
     }
 
