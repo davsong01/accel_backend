@@ -130,7 +130,7 @@ class AdvanceAndClaimsController extends Controller
         AdvanceAndClaims::create([
             'type' => $request->type,
             'purpose' => $request->purpose,
-            'staff_id' => Auth::user()->staff->id, 
+            'staff_id' => $request->staff_id ?? Auth::user()->staff->id, 
             'period' => $request->period ?? null,
             'date' => $request->date ?? null,
             'amount' => $request->amount,
