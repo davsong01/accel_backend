@@ -107,7 +107,7 @@ class LeaveAndAbsenceManagementController extends Controller
             $status = 'approved';
         }
         $lam = LeaveAndAbsenceManagement::updateOrcreate([
-            'staff_id' => isset($internal) ? $request['staff_id'] : $this->sessionDetails('staff_id'),
+            'staff_id' => $request->staff_id ?? Auth::user()->staff->id, 
             'start_date' => $request->start_date,
             'end_date' => $request->end_date,
             'period' => $period,
