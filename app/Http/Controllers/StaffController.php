@@ -311,28 +311,28 @@ class StaffController extends Controller
         ];
 
         $staff->update([
-            'jobtype_id' => $data['jobtype_id'] ?? $staff->job_type_id,
-            'date_of_employment' => $data['date_of_employment'] ?? $staff->data_of_employment,
-            'department_id' => $data['department_id'] ?? $staff->department_id,
-            'jobrole_id' => $data['jobrole_id'] ?? $staff->job_role_id,
-            'commision_percentage' => $data['commision_percentage'] ?? $staff->commision_percentage,
+            'jobtype_id' => $request->has('jobtype_id') ? $data['jobtype_id'] :$staff->job_type_id,
+            'date_of_employment' => $request->has('date_of_employment') ? $data['date_of_employment'] : $staff->data_of_employment,
+            'department_id' => $request->has('department_id') ? $data['department_id'] :$staff->department_id,
+            'jobrole_id' => $request->has('jobrole_id') ? $data['jobrole_id'] :$staff->job_role_id,
+            'commision_percentage' => $request->has('commision_percentage') ? $data['commision_percentage'] : $staff->commision_percentage,
             'company_id' => $this->sessionDetails('company_id'),
         ]);
-
+       
         // dd(json_encode($next_of_kin));
         $user = $staff->user->update([
-            'email' => $data['email'] ?? $staff->user->email,
-            'first_name' => $data['first_name'] ?? $staff->user->first_name,
-            'middle_name' => $data['middle_name'] ?? $staff->user->middle_name,
+            'email' => $request->has('email') ? $data['email'] : $staff->user->email,
+            'first_name' => $request->has('first_name') ? $data['first_name'] : $staff->user->first_name,
+            'middle_name' => $request->has('middle_name') ? $data['middle_name'] : $staff->user->middle_name,
             'type' => 'staff',
-            'last_name' => $data['last_name'] ?? $staff->user->middle_name,
-            'username' => $data['username'] ?? $staff->user->username,
-            'phone_number' => $data['phone_number'] ?? $staff->user->phone,
-            'gender' => $data['gender'] ?? $staff->user->gender,
+            'last_name' => $request->has('last_name') ? $data['last_name'] : $staff->user->middle_name,
+            'username' => $request->has('username') ? $data['username'] : $staff->user->username,
+            'phone_number' => $request->has('phone_number') ? $data['phone_number'] : $staff->user->phone,
+            'gender' => $request->has('gender')  ? $data['gender'] : $staff->user->gender,
             'additional_details' => json_encode($additional_details),
             'next_of_kin' => json_encode($next_of_kin),
-            'branch_id' => $data['branch_id'] ?? $staff->user->branch_id,
-            'date_of_birth' => $data['date_of_birth'] ?? $staff->user->date_of_birth,
+            'branch_id' => $request->has('branch_id')  ? $data['branch_id'] : $staff->user->branch_id,
+            'date_of_birth' => $request->has('date_of_birth')  ? $data['date_of_birth'] : $staff->user->date_of_birth,
             'company_id' => $this->sessionDetails('company_id')
         ]);
 
