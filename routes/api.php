@@ -215,8 +215,9 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::post('import-bulk-staff', [StaffController::class, 'importBulkStaff']);
         Route::get('generate-staff-id', [Controller::class, 'generateStaffId']);
 
-        Route::post('update-advance-and-claims-setting', [AdvanceAndClaimsController::class, 'updateAdvanceAndClaimsSetting']);
-        Route::get('get-advance-and-claims-setting', [AdvanceAndClaimsController::class, 'getAdvanceAndClaimSetting']);
+        // Route::post('update-advance-and-claims-setting', [AdvanceAndClaimsController::class, 'updateAdvanceAndClaimsSetting']);
+        // Route::get('get-advance-and-claims-setting', [AdvanceAndClaimsController::class, 'getAdvanceAndClaimSetting']);
+        Route::get('get-staff-leave-remnant/{staff_id}/{type}', [AdvanceAndClaimsController::class, 'getLeaveAndAbsencePeriodLeft']);
 
         // Route::post('self-service/create-leave-and-absence', [SelfServiceController::class, 'createLeaveAndAbsence']);
 

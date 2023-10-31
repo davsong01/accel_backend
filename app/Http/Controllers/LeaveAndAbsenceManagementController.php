@@ -115,7 +115,7 @@ class LeaveAndAbsenceManagementController extends Controller
         if(!empty($request->bypass_approval) && $request->bypass_approval == 'Yes'){
             $status = 'approved';
         }
-        $lam = LeaveAndAbsenceManagement::updateOrcreate([
+        $lam = LeaveAndAbsenceManagement::create([
             'staff_id' => $request->staff_id ?? Auth::user()->staff->id, 
             'start_date' => $request->start_date,
             'end_date' => $request->end_date,

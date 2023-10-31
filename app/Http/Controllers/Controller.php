@@ -396,19 +396,19 @@ class Controller extends BaseController
    
     public function getLeaveAndAbsencePeriodLeft($staff_id, $type, $internal=false){
         $allowedPeriod = LeaveAndAbsenceSetting::where('company_id', $this->sessionDetails('company_id'))->where('type', $type)->first();
-        $allapproved = LeaveAndAbsenceManagement::where(['company_id' => $this->sessionDetails('company_id'), 'type' => $type, 'staff_id' => $staff_id ?? Auth::user()->staff->id, 'status' => 'approved'])->sum('period');
+        $allapproved = LeaveAndAbsenceManagement::where(['company_id' => $this->sessionDetails('company_id'), 'type' => $type, 'staff_id' => $staff_id, 'status' => 'approved'])->sum('period');
         // ->count('period');
         if ($allowedPeriod) {
             $left = $allowedPeriod->period - $allapproved;
         } else {
             $left = 0;
         }
-
-        if($internal){
-            return $left;
+        
+        if(!$internal){
+            return response()->json(['message' => 'Retrieved successfully', 'data' => $left], 200);
         }
-
-        return response()->json(['message' => 'Retrieved successfully', 'data' => $left], 200);
+        
+        return $left;
  
     }
 
