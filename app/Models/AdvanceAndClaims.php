@@ -13,16 +13,6 @@ class AdvanceAndClaims extends Model
 
     protected function proof(): Attribute
     {
-        
-
-        // if ($this->type == 'claims') {
-        //     dd('sdds', $this->proof);
-        //     if (!empty($this->proof)) {
-        //         foreach ($this->proof as $p) {
-        //             $proofs[] = '/uploads/' . base64_encode($p);
-        //         }
-        //     }
-        // }
 
         return Attribute::make(
            

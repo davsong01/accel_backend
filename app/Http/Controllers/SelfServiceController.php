@@ -402,6 +402,7 @@ class SelfServiceController extends Controller
     public function fetchAllNotifications()
     {
         $notifications = Auth::user()->notifications()->paginate(20)->withQueryString();
+        
         foreach ($notifications as $notification) {
             $notification['title'] = $notification->data['title'];
             $notification['title'] = $notification->data['title'];
@@ -416,7 +417,6 @@ class SelfServiceController extends Controller
             unset($notification['notifiable']);
             unset($notification['data']);
             unset($notification['notifiable_id']);
-            unset($notification['read_at']);
             unset($notification['created_at']);
             unset($notification['updated_at']);
         }

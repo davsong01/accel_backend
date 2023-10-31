@@ -149,6 +149,8 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('advance-and-claims/{id?}', [AdvanceAndClaimsController::class, 'index']);
         Route::get('single-staff-advance-and-claims/{staff_id}', [AdvanceAndClaimsController::class, 'staffAdvanceAndClaims']);
         Route::post('create-advance-and-claims', [AdvanceAndClaimsController::class, 'store']);
+        Route::get('approve-advance-and-claims/{id}', [AdvanceAndClaimsController::class, 'approveAdvanceAndClaims']);
+        Route::get('decline-advance-and-claims/{id}', [AdvanceAndClaimsController::class, 'declineAdvanceAndClaims']);
 
         Route::resource('branch', BranchController::class);
         Route::resource('jobrole', JobRoleController::class);
@@ -212,6 +214,9 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('sample-bulk-staff-import', [StaffController::class, 'sampleBulkStaff']);
         Route::post('import-bulk-staff', [StaffController::class, 'importBulkStaff']);
         Route::get('generate-staff-id', [Controller::class, 'generateStaffId']);
+
+        Route::post('update-advance-and-claims-setting', [AdvanceAndClaimsController::class, 'updateAdvanceAndClaimsSetting']);
+        Route::get('get-advance-and-claims-setting', [AdvanceAndClaimsController::class, 'getAdvanceAndClaimSetting']);
 
         // Route::post('self-service/create-leave-and-absence', [SelfServiceController::class, 'createLeaveAndAbsence']);
 

@@ -9,6 +9,7 @@ use Illuminate\Validation\Rule;
 use App\Models\AdvanceAndClaims;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\RedirectResponse;
+use App\Models\AdvanceAndClaimsSetting;
 use Illuminate\Support\Facades\Validator;
 
 class AdvanceAndClaimsController extends Controller
@@ -143,6 +144,91 @@ class AdvanceAndClaimsController extends Controller
 
         return response()->json(['message' => 'Created successfully', 'data' => null], 200);
 
+    }
+
+    public function approveAdvanceAndClaims($id)
+    {
+        $lam = AdvanceAndClaims::find($id);
+        
+        if ($lam->status == 'approved') {
+            return response()->json(['message' => 'Already Approved', 'data' => null], 200);
+        }
+
+        // $left = $this->getAdvanceAndClaimsPeriodLeft($lam->staff_id ?? Auth::user()->staff->id, $lam->type, true);
+        // dd($left, $lam->type, $lam->staff_id);
+        // if ($lam->period > $left) {
+        //     return response()->json([
+        //         'error' => 'You only have ' . $left . ' days left for ' . ucfirst($lam->type),
+        //         'data' => null,
+        //     ], 412);
+        // }
+
+        $lam->update(['status' => 'approved']);
+
+        $data = [
+            'title' => ucfirst($lam->type).' Request Approved',
+            'content' => 'Your '. ucfirst($lam->type).' has been approved by ' . Auth::user()->first_name . ' ' . Auth::user()->last_name,
+            'link' => url('/') . '/api/admin/advance-and-claims/' . $lam->id,
+            'user_type' => 'staff',
+            'staff_id' => $lam->staff_id,
+            'company_id' => $this->sessionDetails('company_id')
+        ];
+        
+        $this->notify($data);
+        return response()->json(['message' => 'Approved successfully', 'data' => $lam], 200);
+    }
+
+    public function declineAdvanceAndClaims($id)
+    {
+        $lam = AdvanceAndClaims::find($id);
+        $lam->update(['status' => 'declined']);
+        $data = [
+            'title' => ucfirst($lam->type) . ' Request Declined!',
+            'content' => 'Your ' . ucfirst($lam->type) . ' has been declined by ' . Auth::user()->first_name . ' ' . Auth::user()->last_name,
+            'link' => url('/') . '/api/admin/advance-and-claims/' . $lam->id,
+            'user_type' => 'staff',
+            'staff_id' => $lam->staff_id,
+            'company_id' => $this->sessionDetails('company_id')
+        ];
+
+        $this->notify($data);
+
+        return response()->json(['message' => 'Declined successfully', 'data' => $lam], 200);
+    }
+
+    public function updateAdvanceAndClaimsSetting(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'type' => 'required|in:leave,absence',
+            'period' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->messages()->first(),
+                'data' => null,
+            ], 412);
+        }
+
+        $company_id = $this->sessionDetails('company_id');
+
+        $setting = AdvanceAndClaimsSetting::updateOrCreate(['company_id' => $company_id, 'type' => $request->type], [
+            'type' => $request->type,
+            'period' => $request->period
+        ]);
+
+        return response()->json(['message' => 'Updated successfully', 'data' => null], 200);
+    }
+
+    public function getLeaveAndAbsenceSetting(Request $request)
+    {
+        $settings = LeaveAndAbsenceSetting::where('company_id', $this->sessionDetails('company_id'));
+
+        if (!empty($request->type)) {
+            $settings->where('type', $request->type);
+        }
+
+        return response()->json(['message' => 'Retrieved successfully', 'data' => $settings->get()], 200);
     }
 
     /**

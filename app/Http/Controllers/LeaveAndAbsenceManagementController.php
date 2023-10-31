@@ -103,6 +103,15 @@ class LeaveAndAbsenceManagementController extends Controller
         }
 
         $period = $end->diffInDays($start);
+        $left = $this->getLeaveAndAbsencePeriodLeft($request->staff_id ?? Auth::user()->staff->id, $request->type, true);
+        
+        if($period > $left){
+            return response()->json([
+                'error' => 'You only have '.$left .' days left for '.ucfirst($request->type),
+                'data' => null,
+            ], 412);
+        }
+
         if(!empty($request->bypass_approval) && $request->bypass_approval == 'Yes'){
             $status = 'approved';
         }
@@ -125,11 +134,19 @@ class LeaveAndAbsenceManagementController extends Controller
     {
         $lam = LeaveAndAbsenceManagement::find($id);
 
-        if ($lam->status == 'Approved') {
+        if ($lam->status == 'approved') {
             return response()->json(['message' => 'Already Approved', 'data' => null], 200);
         }
 
-        $lamb = $lam;
+        $left = $this->getLeaveAndAbsencePeriodLeft($lam->staff_id ?? Auth::user()->staff->id, $lam->type, true);
+
+        if ($lam->period > $left) {
+            return response()->json([
+                'error' => 'You only have ' . $left . ' days left for ' . ucfirst($lam->type),
+                'data' => null,
+            ], 412);
+        }
+
         $lam->update(['status' => 'approved']);
         $data = [
             'title' => 'Leave Approved',
@@ -148,6 +165,17 @@ class LeaveAndAbsenceManagementController extends Controller
     {
         $lam = LeaveAndAbsenceManagement::find($id);
         $lam->update(['status' => 'declined']);
+
+        $data = [
+            'title' => ucfirst($lam->type) . ' Request Declined!',
+            'content' => 'Your ' . ucfirst($lam->type) . ' has been declined by ' . Auth::user()->first_name . ' ' . Auth::user()->last_name,
+            'link' => url('/') . '/api/admin/leave-and-absence/' . $lam->id,
+            'user_type' => 'staff',
+            'staff_id' => $lam->staff_id,
+            'company_id' => $this->sessionDetails('company_id')
+        ];
+
+        $this->notify($data);
 
         return response()->json(['message' => 'Declined successfully', 'data' => $lam], 200);
     }

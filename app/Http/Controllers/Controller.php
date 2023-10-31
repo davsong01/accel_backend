@@ -11,17 +11,20 @@ use App\Models\Estate;
 use App\Models\States;
 use App\Models\Country;
 use App\Models\EstateSettings;
+use App\Models\AdvanceAndClaims;
 use App\Models\CustomerContract;
 use Illuminate\Support\Facades\Auth;
 use Intervention\Image\Facades\Image;
+use App\Models\LeaveAndAbsenceSetting;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rules\Unique;
 use App\Notifications\StaffNotification;
+use App\Models\LeaveAndAbsenceManagement;
 use App\Models\StaffIdentificationSetting;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Validation\Rules\Unique;
 
 class Controller extends BaseController
 {
@@ -137,7 +140,7 @@ class Controller extends BaseController
         ];
     }
 
-    public function generateStaffId($date_of_employment = null, $create = false){
+    public function generateStaffId($date_of_employment = null, $internal = false){
         $date_of_employment = !empty($date_of_employment) ? Carbon::parse($date_of_employment) : Carbon::today();
 
         $settings = StaffIdentificationSetting::where('id',$this->sessionDetails('company_id'))->first();
@@ -180,6 +183,10 @@ class Controller extends BaseController
             $count = strlen($lastStaffId);
             $min = pow(10, $count - 1);
             $id = mt_rand($min, $min * 9);
+        }
+
+        if($internal){
+            return $id;
         }
 
         return response()->json(['message' => 'Successful', 'data' => $id], 200);
@@ -387,5 +394,42 @@ class Controller extends BaseController
         return;
     }
    
+    public function getLeaveAndAbsencePeriodLeft($staff_id, $type, $internal=false){
+        $allowedPeriod = LeaveAndAbsenceSetting::where('company_id', $this->sessionDetails('company_id'))->where('type', $type)->first();
+        $allapproved = LeaveAndAbsenceManagement::where(['company_id' => $this->sessionDetails('company_id'), 'type' => $type, 'staff_id' => $staff_id ?? Auth::user()->staff->id, 'status' => 'approved'])->sum('period');
+        // ->count('period');
+        if ($allowedPeriod) {
+            $left = $allowedPeriod->period - $allapproved;
+        } else {
+            $left = 0;
+        }
+
+        if($internal){
+            return $left;
+        }
+
+        return response()->json(['message' => 'Retrieved successfully', 'data' => $left], 200);
+ 
+    }
+
+    public function getAdvanceAndClaimsPeriodLeft($staff_id, $type, $internal = false)
+    {   
+        $allowedPeriod = LeaveAndAbsenceSetting::where('company_id', $this->sessionDetails('company_id'))->where('type', $type)->first();
+        
+        $allapproved = AdvanceAndClaims::where(['company_id' => $this->sessionDetails('company_id'), 'type' => $type, 'staff_id' => $staff_id ?? Auth::user()->staff->id, 'status' => 'approved'])->sum('period');
+        
+       
+        if ($allowedPeriod) {
+            $left = $allowedPeriod->period - $allapproved;
+        } else {
+            $left = 0;
+        }
+        dd($type);
+        if ($internal) {
+            return $left;
+        }
+
+        return response()->json(['message' => 'Retrieved successfully', 'data' => $left], 200);
+    }
 }
 

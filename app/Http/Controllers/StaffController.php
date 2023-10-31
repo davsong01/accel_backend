@@ -215,7 +215,7 @@ class StaffController extends Controller
                 'branch_id' => $data['branch_id'] ?? '',
                 'date_of_birth' => $request->date_of_birth ?? null,
                 'company_id' => $this->sessionDetails('company_id'),
-                'staff_id' => $this->generateStaffId($data['date_of_employment'])->getData()->data,
+                'staff_id' => $this->generateStaffId($data['date_of_employment'], true),
             ]);
 
             // Create staff

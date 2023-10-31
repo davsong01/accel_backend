@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('advance_settings', function (Blueprint $table) {
+        Schema::create('advance_and_claims_settings', function (Blueprint $table) {
             $table->id();
             $table->integer('company_id');
             $table->timestamps();
@@ -23,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('advance_settings');
+        Schema::dropIfExists('advance_and_claims_settings');
     }
 };
