@@ -36,7 +36,7 @@ class StaffImport implements ToCollection, WithHeadingRow
     {
 
         foreach ($rows as $row) {
-           
+          
             Validator::make(
                 $row->toArray(),
                 [
@@ -56,7 +56,7 @@ class StaffImport implements ToCollection, WithHeadingRow
                     'jobrole' => 'nullable',
                     'date_of_employment' => 'nullable',
                     'department' => 'nullable',
-                    'commision_percentage' => 'nullable',
+                    // 'commission_percentage' => 'nullable',
                     'nationality' => 'nullable',
                     'state' => 'nullable',
                     'lga' => 'nullable',
@@ -111,7 +111,7 @@ class StaffImport implements ToCollection, WithHeadingRow
                 'nok_email_address' => trim($row['nok_email_address']) ?? '',
                 'nok_relationship' => trim($row['nok_relationship']) ?? '',
             ]);
-
+           
             try {
                 $user = User::create([
                     'email' => $row['email'],
@@ -126,7 +126,7 @@ class StaffImport implements ToCollection, WithHeadingRow
                     'next_of_kin' => $data['next_of_kin'],
                     'branch_id' => $row['branch_id'] ?? '',
                     'date_of_birth' => $row['date_of_birth'] ?? null,
-                    'company_id' => $this->company_id,'staff_id' =>  $this->session->generateStaffId($data['date_of_employment'])->getData()->data,
+                    'company_id' => $this->company_id,'staff_id' =>  $this->session->generateStaffId($date_of_employment, true),
                 ]);
     
                 // Create staff
@@ -136,11 +136,12 @@ class StaffImport implements ToCollection, WithHeadingRow
                     'user_id' => $user->id ?? '',
                     'department_id' => $department_id ?? '',
                     'jobrole_id' => $job_role_id ?? '',
-                    'commision_percentage' => $row['commision_percentage'] ?? '',
+                    // 'commision_percentage' => $row['commision_percentage'] ?? '',
                     'company_id' => $this->company_id,
                 ]);
                 //code...
             } catch (\Throwable $th) {
+                dd($th->getMessage(), $th->getLine());
                 throw new \Exception($th->getMessage());
 
             }
