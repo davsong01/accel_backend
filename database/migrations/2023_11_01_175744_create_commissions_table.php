@@ -11,9 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('advance_and_claims_settings', function (Blueprint $table) {
+        Schema::create('commissions', function (Blueprint $table) {
             $table->id();
+            $table->string('name');
+            $table->double('percentage', 11);
             $table->integer('company_id');
+            
             $table->timestamps();
         });
     }
@@ -23,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('advance_and_claims_settings');
+        Schema::dropIfExists('commissions');
     }
 };

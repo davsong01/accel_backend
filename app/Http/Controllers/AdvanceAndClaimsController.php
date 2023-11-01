@@ -225,16 +225,18 @@ class AdvanceAndClaimsController extends Controller
         return response()->json(['message' => 'Updated successfully', 'data' => null], 200);
     }
 
-    public function getLeaveAndAbsenceSetting(Request $request)
-    {
-        $settings = LeaveAndAbsenceSetting::where('company_id', $this->sessionDetails('company_id'));
+    // public function getLeaveAndAbsenceSetting(Request $request)
+    // {
+    //     $settings = LeaveAndAbsenceSetting::where('company_id', $this->sessionDetails('company_id'));
 
-        if (!empty($request->type)) {
-            $settings->where('type', $request->type);
-        }
+    //     if (!empty($request->type)) {
+    //         $settings = $settings->where('type', $request->type)->first();
+    //     return response()->json(['message' => 'Retrieved successfully', 'data' => $settings], 200);
 
-        return response()->json(['message' => 'Retrieved successfully', 'data' => $settings->get()], 200);
-    }
+    //     }
+
+    //     return response()->json(['message' => 'Retrieved successfully', 'data' => $settings->get()], 200);
+    // }
 
     /**
      * Display the specified resource.

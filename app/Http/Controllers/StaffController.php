@@ -145,7 +145,6 @@ class StaffController extends Controller
 
     public function storeStaff(Request $request)
     {
-        
         if (!isset($request->staff_id) && empty($request->staff_id)) {
             $validator = Validator::make($request->all(), [
                 'email' => [
@@ -164,7 +163,7 @@ class StaffController extends Controller
                 'jobrole_id' => 'required|exists:job_roles,id,company_id,' . $this->sessionDetails('company_id'),
                 'date_of_employment' => 'nullable',
                 'department_id' => 'required|exists:departments,id,company_id,' . $this->sessionDetails('company_id'),
-                'commision_percentage' => 'nullable',
+                'commision_id' => 'nullable',
                 'nationality' => 'sometimes|integer',
                 'state' => 'sometimes|integer',
                 'lga' => 'sometimes|integer'

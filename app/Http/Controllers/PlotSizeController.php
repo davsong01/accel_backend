@@ -129,7 +129,7 @@ class PlotSizeController extends Controller
     {
         EstatePropertyTypeDetails::where(['plot_size' => $plotsize->size, 'company_id' => $plotsize->company_id])->count();
         
-        if($this->definedRelations('PlotSize') > 0){
+        if($this->definedRelations('PlotSize', $plotsize) > 0){
             return response()->json(['message' => 'Unable to delete, resource in use', 'data' => null], 412);
         }
         

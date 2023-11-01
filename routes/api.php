@@ -22,16 +22,17 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\PlotSizeController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\CommissionController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\AccountTypeController;
 use App\Http\Controllers\SelfServiceController;
 use App\Http\Controllers\BuildingTypeController;
+use App\Http\Controllers\CustomerFormController;
 use App\Http\Controllers\EstateSettingController;
 use App\Http\Controllers\ChartOfAccountController;
 use App\Http\Controllers\CompanySettingController;
 use App\Http\Controllers\SpecialRequestController;
 use App\Http\Controllers\CompanyDocumentController;
-use App\Http\Controllers\CustomerFormController;
 use App\Http\Controllers\AdvanceAndClaimsController;
 use App\Http\Controllers\CustomerContractController;
 use App\Http\Controllers\PropertyTypeDetailsController;
@@ -221,6 +222,8 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         // Route::resource('account-category', AccountTypeController::class);
 
         // Route::post('self-service/create-leave-and-absence', [SelfServiceController::class, 'createLeaveAndAbsence']);
+        Route::resource('commission', CommissionController::class);
+
 
     });
 });

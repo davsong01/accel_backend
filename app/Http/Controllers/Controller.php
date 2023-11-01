@@ -334,15 +334,24 @@ class Controller extends BaseController
         $user->notify(new StaffNotification($data));
     }
 
-    public static function definedRelations($class)
+    public static function definedRelations($class, $resource)
     {
         $reflector = new \ReflectionClass('App\Models\\'.$class);
-
+       
         $methods = array_filter($reflector->getMethods(), function($methods) use ($class) {
             return str_contains($methods, $class) && $methods->getModifiers() == ReflectionMethod::IS_PUBLIC;
         });
 
-        return count($methods);
+        $counter = 0;
+        foreach($methods as $meth){
+            $first = 'App\Models';
+            $rest = ['where',['id' =>$resource->id]];
+            $r = (string) $meth->name;
+            $re = call_user_func($first . '\\' . $class . '::' . $rest[0], ...array_slice($rest, 1))->first()->$r->count();
+            $counter = $counter + $re;
+        }
+
+        return $counter;
     }
 
     public function profileCompletenes($staff=null)

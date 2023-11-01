@@ -111,6 +111,10 @@ class DepartmentController extends Controller
      */
     public function destroy(Department $department)
     {
+        if ($this->definedRelations('Department', $department) > 0) {
+            return response()->json(['message' => 'Unable to delete, resource in use', 'data' => []], 412);
+        }
+
         $department->delete();
         return response()->json(['message' => 'Deleted Successfully.', 'data' => null], 200);
     }

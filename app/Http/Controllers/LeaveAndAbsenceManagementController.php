@@ -221,7 +221,9 @@ class LeaveAndAbsenceManagementController extends Controller
         $settings = LeaveAndAbsenceSetting::where('company_id', $this->sessionDetails('company_id'));
 
         if (!empty($request->type)) {
-            $settings->where('type', $request->type);
+            $settings = $settings->where('type', $request->type)->first();
+
+            return response()->json(['message' => 'Retrieved successfully', 'data' => $settings], 200);
         }
 
         return response()->json(['message' => 'Retrieved successfully', 'data' => $settings->get()], 200);
