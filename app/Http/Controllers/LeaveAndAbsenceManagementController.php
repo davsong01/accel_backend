@@ -56,6 +56,10 @@ class LeaveAndAbsenceManagementController extends Controller
             $lam = $lam->where('type', $request->type);
         }
 
+        if (isset($request->status) && !empty($request->status)) {
+            $lam = $lam->where('status', $request->status);
+        }
+
         if (isset($id) && !empty($id)) {
             $lam = $lam->where('id', $id)->first();
             if ($lam) {

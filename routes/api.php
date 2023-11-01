@@ -218,6 +218,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         // Route::post('update-advance-and-claims-setting', [AdvanceAndClaimsController::class, 'updateAdvanceAndClaimsSetting']);
         // Route::get('get-advance-and-claims-setting', [AdvanceAndClaimsController::class, 'getAdvanceAndClaimSetting']);
         Route::get('get-staff-leave-remnant/{staff_id}/{type}', [AdvanceAndClaimsController::class, 'getLeaveAndAbsencePeriodLeft']);
+        // Route::resource('account-category', AccountTypeController::class);
 
         // Route::post('self-service/create-leave-and-absence', [SelfServiceController::class, 'createLeaveAndAbsence']);
 

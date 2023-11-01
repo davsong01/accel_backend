@@ -399,7 +399,7 @@ class SelfServiceController extends Controller
         return response(['message' => 'Successfully retrieved', 'data' => $data], 200);
     }
 
-    public function fetchAllNotifications()
+    public function fetchAllNotifications(Request $request)
     {
         $notifications = Auth::user()->notifications()->paginate(20)->withQueryString();
         
