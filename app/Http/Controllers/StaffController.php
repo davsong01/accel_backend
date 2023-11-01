@@ -161,9 +161,9 @@ class StaffController extends Controller
                 'branch_id' => 'nullable',
                 'jobtype_id' => 'required|exists:job_types,id,company_id,' . $this->sessionDetails('company_id'),
                 'jobrole_id' => 'required|exists:job_roles,id,company_id,' . $this->sessionDetails('company_id'),
+                'commission_id' => 'nullable|exists:commissions,id,company_id,' . $this->sessionDetails('company_id'),
                 'date_of_employment' => 'nullable',
                 'department_id' => 'required|exists:departments,id,company_id,' . $this->sessionDetails('company_id'),
-                'commision_id' => 'nullable',
                 'nationality' => 'sometimes|integer',
                 'state' => 'sometimes|integer',
                 'lga' => 'sometimes|integer'
@@ -224,7 +224,7 @@ class StaffController extends Controller
                 'user_id' => $user->id ?? '',
                 'department_id' => $data['department_id'] ?? '',
                 'jobrole_id' => $data['jobrole_id'] ?? '',
-                'commision_percentage' => $data['commision_percentage'] ?? '',
+                'commission_id' => $data['commission_id'] ?? '',
                 'company_id' => $this->sessionDetails('company_id'),
             ]);
 
@@ -276,7 +276,7 @@ class StaffController extends Controller
             'lga' => 'nullable|exists:lgas,id',
             'date_of_employment' => 'nullable',
             'department_id' => 'nullable|exists:departments,id,company_id,' . $this->sessionDetails('company_id'),
-            'commision_percentage' => 'nullable'
+            'commission_id' => 'nullable|exists:commissions,id,company_id,' . $this->sessionDetails('company_id'),
         ]);
 
         if ($validator->fails()) {
@@ -314,7 +314,7 @@ class StaffController extends Controller
             'date_of_employment' => $request->has('date_of_employment') ? $data['date_of_employment'] : $staff->data_of_employment,
             'department_id' => $request->has('department_id') ? $data['department_id'] :$staff->department_id,
             'jobrole_id' => $request->has('jobrole_id') ? $data['jobrole_id'] :$staff->job_role_id,
-            'commision_percentage' => $request->has('commision_percentage') ? $data['commision_percentage'] : $staff->commision_percentage,
+            'commission_id' => $request->has('commission_id') ? $data['commission_id'] : $staff->commision_percentage,
             'company_id' => $this->sessionDetails('company_id'),
         ]);
        

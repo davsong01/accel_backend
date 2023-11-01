@@ -59,6 +59,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('customer_form_twos');
+        Schema::dropIfExists('customer_forms');
     }
 };
