@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\AccountType;
 use App\Models\SpecialRequest;
 use App\Models\AdvanceAndClaims;
 use App\Http\Controllers\Controller;
@@ -26,6 +27,7 @@ use App\Http\Controllers\CommissionController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\AccountTypeController;
 use App\Http\Controllers\SelfServiceController;
+use App\Http\Controllers\AccountGroupController;
 use App\Http\Controllers\BuildingTypeController;
 use App\Http\Controllers\CustomerFormController;
 use App\Http\Controllers\EmployeeExitController;
@@ -33,6 +35,7 @@ use App\Http\Controllers\EstateSettingController;
 use App\Http\Controllers\ChartOfAccountController;
 use App\Http\Controllers\CompanySettingController;
 use App\Http\Controllers\SpecialRequestController;
+use App\Http\Controllers\AccountCategoryController;
 use App\Http\Controllers\CompanyDocumentController;
 use App\Http\Controllers\AdvanceAndClaimsController;
 use App\Http\Controllers\CustomerContractController;
@@ -225,13 +228,10 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('get-staff-leave-remnant/{staff_id}/{type}', [AdvanceAndClaimsController::class, 'getLeaveAndAbsencePeriodLeft']);
        
         Route::resource('commission', CommissionController::class);
-        Route::get('get-staff-leave-remnant/{staff_id}/{type}', [AdvanceAndClaimsController::class, 'getLeaveAndAbsencePeriodLeft']);
-
-
-
+        Route::resource('account-category', AccountCategoryController::class);
+        Route::resource('account-group', AccountGroupController::class);
     });
 });
-
 
 Route::group(['prefix' => 'customer', 'before' => 'customer'], function () {
     Route::post('/validate', [AuthController::class, 'validateCustomer']);

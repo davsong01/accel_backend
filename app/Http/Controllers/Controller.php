@@ -347,6 +347,7 @@ class Controller extends BaseController
             $first = 'App\Models';
             $rest = ['where',['id' =>$resource->id]];
             $r = (string) $meth->name;
+            
             $re = call_user_func($first . '\\' . $class . '::' . $rest[0], ...array_slice($rest, 1))->first()->$r->count();
             $counter = $counter + $re;
         }
