@@ -28,6 +28,7 @@ use App\Http\Controllers\AccountTypeController;
 use App\Http\Controllers\SelfServiceController;
 use App\Http\Controllers\BuildingTypeController;
 use App\Http\Controllers\CustomerFormController;
+use App\Http\Controllers\EmployeeExitController;
 use App\Http\Controllers\EstateSettingController;
 use App\Http\Controllers\ChartOfAccountController;
 use App\Http\Controllers\CompanySettingController;
@@ -193,21 +194,26 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('get-banks', [GeneralController::class, 'getBanks']);
         Route::get('get-currencies', [GeneralController::class, 'getCurrencies']);
 
-        // Self Service
-        Route::get('self-service/dashboard', [SelfServiceController::class, 'dashboard']);
-        Route::get('self-service/my-profile', [SelfServiceController::class, 'myWorkProfile']);
-        Route::post('self-service/update-my-profile', [SelfServiceController::class, 'updateMyWorkProfile']);
-        Route::post('self-service/add-avatar/{staff_id?}', [SelfServiceController::class, 'addAvatar']);
-        Route::get('self-service/delete-avatar/{staff_id?}', [SelfServiceController::class, 'deleteAvatar']);
-        Route::get('self-service/get-avatar/{staff_id}', [SelfServiceController::class, 'getAvatar']);
-        Route::post('self-service/upload-documents', [SelfServiceController::class, 'uploadDocuments']);
-        Route::post('self-service/send-reset-password-mail', [SelfServiceController::class, 'sendResetPasswordEmail']);
-        Route::post('self-service/reset-password', [SelfServiceController::class, 'resetPassword']);
-        Route::get('self-service/unread-notifications/{staff_id?}', [SelfServiceController::class, 'fetchUnreadNotifications']);
-        Route::get('self-service/viewed-notifications', [SelfServiceController::class, 'fetchViewedNotifications']);
-        Route::get('self-service/read-notification/{notification_id?}', [SelfServiceController::class, 'markNotificationsAsRead']);
-        Route::get('self-service/view-single-notification/{notification_id}', [SelfServiceController::class, 'viewSingleNotification']);
-        Route::get('self-service/all-notifications', [SelfServiceController::class, 'fetchAllNotifications']);
+            // Self Service
+        Route::group(['prefix' => 'self-service', 'before' => 'self-service'], function () {
+            Route::get('dashboard', [SelfServiceController::class, 'dashboard']);
+            Route::get('my-profile', [SelfServiceController::class, 'myWorkProfile']);
+            Route::post('update-my-profile', [SelfServiceController::class, 'updateMyWorkProfile']);
+            Route::post('add-avatar/{staff_id?}', [SelfServiceController::class, 'addAvatar']);
+            Route::get('delete-avatar/{staff_id?}', [SelfServiceController::class, 'deleteAvatar']);
+            Route::get('get-avatar/{staff_id}', [SelfServiceController::class, 'getAvatar']);
+            Route::post('upload-documents', [SelfServiceController::class, 'uploadDocuments']);
+            Route::post('send-reset-password-mail', [SelfServiceController::class, 'sendResetPasswordEmail']);
+            Route::post('reset-password', [SelfServiceController::class, 'resetPassword']);
+            Route::get('unread-notifications/{staff_id?}', [SelfServiceController::class, 'fetchUnreadNotifications']);
+            Route::get('viewed-notifications', [SelfServiceController::class, 'fetchViewedNotifications']);
+            Route::get('read-notification/{notification_id?}', [SelfServiceController::class, 'markNotificationsAsRead']);
+            Route::get('view-single-notification/{notification_id}', [SelfServiceController::class, 'viewSingleNotification']);
+            Route::get('all-notifications', [SelfServiceController::class, 'fetchAllNotifications']);
+            Route::get('{staff_id}/{type}', [EmployeeExitController::class, 'getLeaveAndAbsencePeriodLeft']);
+            Route::post('create-exit', [EmployeeExitController::class, 'store']);
+
+        });
 
         Route::post('update-leave-and-absence-setting', [LeaveAndAbsenceManagementController::class, 'updateLeaveAndAbsenceSetting']);
         Route::get('get-leave-and-absence-setting', [LeaveAndAbsenceManagementController::class, 'getLeaveAndAbsenceSetting']);
@@ -216,13 +222,11 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::post('import-bulk-staff', [StaffController::class, 'importBulkStaff']);
         Route::get('generate-staff-id', [Controller::class, 'generateStaffId']);
 
-        // Route::post('update-advance-and-claims-setting', [AdvanceAndClaimsController::class, 'updateAdvanceAndClaimsSetting']);
-        // Route::get('get-advance-and-claims-setting', [AdvanceAndClaimsController::class, 'getAdvanceAndClaimSetting']);
         Route::get('get-staff-leave-remnant/{staff_id}/{type}', [AdvanceAndClaimsController::class, 'getLeaveAndAbsencePeriodLeft']);
-        // Route::resource('account-category', AccountTypeController::class);
-
-        // Route::post('self-service/create-leave-and-absence', [SelfServiceController::class, 'createLeaveAndAbsence']);
+       
         Route::resource('commission', CommissionController::class);
+        Route::get('get-staff-leave-remnant/{staff_id}/{type}', [AdvanceAndClaimsController::class, 'getLeaveAndAbsencePeriodLeft']);
+
 
 
     });

@@ -500,13 +500,15 @@ class StaffController extends Controller
         $data['staff_id'] = $staff->staff_id;
         $data['employee_id'] = $staff->employee_id;
         $data['profile_completenes'] = $profile_completenes;
-
+        
+        $employment_date = $staff->date_of_employment ? date("jS\\, F Y", strtotime($staff->date_of_employment)) : '';
+        
         $data['job_information'] = [
             'job_type' => [
                 'id' => $staff->job_type_id ?? '',
                 'name' => $staff->job_type_name ?? '',
             ],
-            'employment_date' => $staff->date_of_employment ?? '',
+            'employment_date' => $employment_date,
             'time_in_company' => $time_in_company,
             'work_anniversary' => $my_anniversary,
             'department' => [

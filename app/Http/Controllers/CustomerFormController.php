@@ -100,8 +100,10 @@ class CustomerFormController extends Controller
             'description' => 'nullable',
 
             // Marketer
-            'marketers' => 'nullable',
+            'primary_marketer' => 'nullable|exists:staff,id,company_id,' . $this->sessionDetails('company_id'),
+            'secondary_marketers' => 'nullable',
             'transaction_date' => 'nullable',
+
             // 'bypass_approval' => 'nullable',
             'marital_status' => 'nullable',
             'estate_id' => 'required|exists:estates,id,company_id,' . $this->sessionDetails('company_id'),
@@ -145,6 +147,10 @@ class CustomerFormController extends Controller
             $data['signature'] = $this->uploadFile($request->signature, 'signatures');
         }
 
+        if (!empty($request->secondary_marketers)) {
+            $data['secondary_marketers'] = json_encode($request->secondary_marketers);
+        }
+        
         $data['contact_details'] = json_encode([
             'phone_number' => $data['phone_number'] ?? null,
             'house_address' => $data['house_address'] ?? null,
@@ -186,7 +192,8 @@ class CustomerFormController extends Controller
         if (\Request::route()->getPrefix() == 'api/customer') {
             $data['type'] = 'customer-response';
         }else{
-            $data['type'] = 'form2-request'; 
+            $data['type'] = 'form2-request';
+            $data['status'] = 'completed'; 
         }
         
         CustomerForm::updateOrCreate(
