@@ -24,10 +24,4 @@ class LeaveAndAbsenceManagement extends Model
         );
     }
 
-    // protected function status(): Attribute
-    // {
-    //     return Attribute::make(
-    //         get: fn (string $value) => ucfirst($value),
-    //     );
-    // }
 }

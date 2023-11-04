@@ -215,7 +215,6 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
             Route::get('all-notifications', [SelfServiceController::class, 'fetchAllNotifications']);
             Route::get('{staff_id}/{type}', [EmployeeExitController::class, 'getLeaveAndAbsencePeriodLeft']);
             Route::post('create-exit', [EmployeeExitController::class, 'store']);
-
         });
 
         Route::post('update-leave-and-absence-setting', [LeaveAndAbsenceManagementController::class, 'updateLeaveAndAbsenceSetting']);
@@ -230,6 +229,8 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::resource('commission', CommissionController::class);
         Route::resource('account-category', AccountCategoryController::class);
         Route::resource('account-group', AccountGroupController::class);
+        Route::post('create-exit', [EmployeeExitController::class, 'store']);
+
     });
 });
 
