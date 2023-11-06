@@ -305,7 +305,16 @@ class SelfServiceController extends Controller
         $staff = Staff::where('id', $staff_id)->first();
         $user = User::find($staff->user->id);
 
-        $unread = Auth::user()->unreadnotifications()->where('company_id', $this->sessionDetails('company_id'))->paginate(20)->withQueryString();
+        $unread = Auth::user()->unreadnotifications()->where('company_id', $this->sessionDetails('company_id'));
+
+        if (!empty($request->to) && !empty($request->from)) {
+            $from = Carbon::parse($request->from . ' 00:00:00');
+            $to = Carbon::parse($request->to . ' 23:59:00');
+
+            $unread = $unread->whereBetween('created_at', [$from, $to]);
+        }
+
+        $unread = $unread->paginate(20)->withQueryString();
 
         foreach ($unread as $notification) {
             $notification['id'] = $notification->id;
@@ -331,11 +340,19 @@ class SelfServiceController extends Controller
 
     public function fetchViewedNotifications(Request $request)
     {
-        // $staff = Staff::where('id', $staff_id)->first();
-        // $user = User::find($staff->user->id);
+        
         $user = Auth::user();
         $notifications = [];
-        $read = $user->readNotifications()->where('company_id', $this->sessionDetails('company_id'))->paginate(20)->withQueryString();
+        $read = $user->readNotifications()->where('company_id', $this->sessionDetails('company_id'));
+
+        if (!empty($request->to) && !empty($request->from)) {
+            $from = Carbon::parse($request->from . ' 00:00:00');
+            $to = Carbon::parse($request->to . ' 23:59:00');
+
+            $read = $read->whereBetween('created_at', [$from, $to]);
+        }
+
+        $read = $read->paginate(20)->withQueryString();
 
         foreach ($read as $notification) {
             $notification['id'] = $notification->id;
@@ -401,7 +418,15 @@ class SelfServiceController extends Controller
 
     public function fetchAllNotifications(Request $request)
     {
-        $notifications = Auth::user()->notifications()->paginate(20)->withQueryString();
+        $notifications = Auth::user()->notifications();
+
+        if(!empty($request->to) && !empty($request->from)){
+            $from = Carbon::parse($request->from . ' 00:00:00');
+            $to = Carbon::parse($request->to . ' 23:59:00');
+
+            $notifications = $notifications->whereBetween('created_at',[$from, $to]);
+        }
+        $notifications = $notifications->paginate(20)->withQueryString();
         
         foreach ($notifications as $notification) {
             $notification['title'] = $notification->data['title'];
