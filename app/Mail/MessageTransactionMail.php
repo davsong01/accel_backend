@@ -6,6 +6,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
+use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
@@ -29,7 +30,11 @@ class MessageTransactionMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            from: $this->provider['mail.from']['address'],
+            from: new Address($this->provider['mail.from']['address'], $this->provider['mail.from']['name']),
+            replyTo: [
+                new Address($this->provider['mail.replyToAddress'], $this->provider['mail.replyToName']),
+            ],
+            
             subject: $this->data['subject'],
         );
     }

@@ -119,8 +119,11 @@ class LeaveAndAbsenceManagementController extends Controller
         if(!empty($request->bypass_approval) && $request->bypass_approval == 'Yes'){
             $status = 'approved';
         }
+
+        $staff_id = $request->staff_id ?? Auth::user()->staff->id;
+
         $lam = LeaveAndAbsenceManagement::create([
-            'staff_id' => $request->staff_id ?? Auth::user()->staff->id, 
+            'staff_id' => $staff_id, 
             'start_date' => $request->start_date,
             'end_date' => $request->end_date,
             'period' => $period,
@@ -130,6 +133,18 @@ class LeaveAndAbsenceManagementController extends Controller
             'status' => $status ?? 'pending',
             'company_id' => $this->sessionDetails('company_id'),
         ]);
+
+        $user = Staff::where('id', $staff_id)->first()->user;
+        $data = [
+            'title' => 'Leave Request',
+            'content' => 'Your leave request has been received and it is pending approval',
+            'link' => url('/') . '/single-staff-leave-and-absence/api/admin/' . $lam->staff_id . '?type=leave',
+            'user_type' => 'staff',
+            'staff_id' => $lam->staff_id,
+            'company_id' => $this->sessionDetails('company_id')
+        ];
+
+        $this->notify($data);
 
         return response()->json(['message' => 'Created successfully', 'data' => $lam], 200);
     }
@@ -154,7 +169,7 @@ class LeaveAndAbsenceManagementController extends Controller
         $lam->update(['status' => 'approved']);
         $data = [
             'title' => 'Leave Approved',
-            'content' => 'Your leaved has been approved by ' . Auth::user()->first_name . ' ' . Auth::user()->last_name,
+            'content' => 'Your leave request has been approved by ' . Auth::user()->first_name . ' ' . Auth::user()->last_name,
             'link' => url('/') . '/single-staff-leave-and-absence/api/admin/' . $lam->staff_id . '?type=leave',
             'user_type' => 'staff',
             'staff_id' => $lam->staff_id,

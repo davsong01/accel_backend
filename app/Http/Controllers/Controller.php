@@ -327,11 +327,14 @@ class Controller extends BaseController
     }
 
     public function notify($data){
-        $staff = Staff::where('id', $data['staff_id'])->first();
-        $user = $staff->user;
-        $data['user_id'] = $user->id;
-       
-        $user->notify(new StaffNotification($data));
+        try {
+            $staff = Staff::where('id', $data['staff_id'])->first();
+            $user = $staff->user;
+            $data['user_id'] = $user->id;
+            
+            $user->notify(new StaffNotification($data));
+          
+        } catch (\Throwable $th) {}
     }
 
     public static function definedRelations($class, $resource)

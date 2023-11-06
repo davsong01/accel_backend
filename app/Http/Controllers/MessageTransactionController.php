@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use App\Models\CompanySetting;
 use Illuminate\Support\Carbon;
 use App\Models\MessageProvider;
 use App\Models\MessageTransaction;
@@ -98,6 +99,9 @@ class MessageTransactionController extends Controller
     }
 
     public function getMessageContent($data){
+        $company_setting = CompanySetting::where('company_id', $this->sessionDetails('company_id'))->first();
+
+        $button_style = "background: ".$company_setting->primary_color. ";text-decoration: none; padding: 10px;color: white;border: none;color: white;border-radius: 5px;";
         $all = [];
         $content = "";
         $subject = "";
@@ -116,7 +120,7 @@ class MessageTransactionController extends Controller
             if (isset($data['medium']) && $data['medium'] == 'sms') {
                
             } else {
-                $subject = '';
+                $subject = 'Welcome to '.$this->sessionDetails('company_name');
                 $content .= '<strong>Dear ' . $data['name'] . '</strong><br><br>
                 <div>
                 <p style="text-align:justify !important">Your new staff details have been created. Please find details below: <br><br>
@@ -124,7 +128,7 @@ class MessageTransactionController extends Controller
                 Last Name: ' . $data['user']['last_name'] . '<br>
                 Email: ' . $data['user']['email'] . '<br>
                 Staff Id: ' . $data['user']['staff_id'] . '<br>
-                Password: ' . '123456789' . '<br><br> Please click the login button below to login to your personalized dashboard using your email/staff Id and password above. Thank you <br><br><a href="' . url('/') . '"><button style="background: green;text-decoration: none;padding: 10px;color: white;">LOGIN</button></a></p>
+                Password: ' . '123456789' . '<br><br> Please click the login button below to login to your personalized dashboard using your email/staff Id and password above. Thank you <br><br><a href="' . url('/') . '"><button style="'.$button_style.'">LOGIN</button></a></p>
                 </div>';
             }
         }
@@ -162,6 +166,7 @@ class MessageTransactionController extends Controller
                         'name' => $provider->credentials['MAIL_REPLY_FROM_NAME'] ?? $message->from,
                     ],
                 ];
+                
                 config($providerX);
                 try {
                     Mail::to($message->recipient)->send(new MessageTransactionMail($message->toArray(), $providerX));
