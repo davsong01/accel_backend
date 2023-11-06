@@ -119,11 +119,16 @@ class MessageTransactionController extends Controller
                 $subject = '';
                 $content .= '<strong>Dear ' . $data['name'] . '</strong><br><br>
                 <div>
-                <p style="text-align:justify !important">You asked for a password RESET mail on ' . $this->sessionDetails('company_name') . '. Please click the button below to reset your password. Thank you <br><br><a href="' . url('/') . '/reset-password?token="><button style="background: green;text-decoration: none;padding: 10px;color: white;">RESET PASSWORD</button></a></p>
+                <p style="text-align:justify !important">Your new staff details have been created. Please find details below: <br><br>
+                First Name: '.$data['user']['first_name']. '<br>
+                Last Name: ' . $data['user']['last_name'] . '<br>
+                Email: ' . $data['user']['email'] . '<br>
+                Staff Id: ' . $data['user']['staff_id'] . '<br>
+                Password: ' . '123456789' . '<br><br> Please click the login button below to login to your personalized dashboard using your email/staff Id and password above. Thank you <br><br><a href="' . url('/') . '"><button style="background: green;text-decoration: none;padding: 10px;color: white;">LOGIN</button></a></p>
                 </div>';
             }
         }
-        
+       
         return [
             'subject' => $subject,
             'content' => $content,

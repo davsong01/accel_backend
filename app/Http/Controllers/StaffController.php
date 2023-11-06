@@ -13,6 +13,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Validator;
@@ -204,6 +205,7 @@ class StaffController extends Controller
                 'email' => $data['email'],
                 'first_name' => $data['first_name'],
                 'type' => 'staff',
+                'password' => Hash::make('123456789'),
                 'middle_name' => $data['middle_name'] ?? '',
                 'last_name' => $data['last_name'] ?? '',
                 'username' => $data['username'] ?? '',
@@ -230,6 +232,7 @@ class StaffController extends Controller
 
             $data['type'] = 'staff.store';
             $data['medium'] = 'email';
+            $data['user'] = $user;
             $data['name'] = $data['name'] ?? Auth::user()->first_name;
             $data['recipient'] = $user->first_name;
             $this->logEmail($data);
