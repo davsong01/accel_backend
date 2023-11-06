@@ -76,13 +76,14 @@ class AuthController extends Controller
         // $user->token = $token;
         $cookie = cookie('token', $token, 60 * 24); // 1 day
         $datax = [
-                'token' => $token,
+            'token' => $token,
+            'userInfo' => [
                 'first_name' => $user->first_name,
                 'last_name' => $user->last_name,
                 'avatar' => $user->avatar,
                 'job_role' => $user->staff->job_role->name ?? '',
-            ];
-
+            ],
+        ];
         return response()->json(['data' => $datax, 'message' => Session::all()], 200);
     }
 
@@ -103,4 +104,5 @@ class AuthController extends Controller
     {
         return new UserResource($request->user());
     }
+
 }

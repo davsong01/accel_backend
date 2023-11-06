@@ -89,7 +89,7 @@ class CompanyDocumentController extends Controller
     public function update(Request $request, CompanyDocument $companyDocument)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required',
+            'name' => 'sometimes',
             'description' => 'sometimes',
             'file' => 'sometimes',
             'visible_to_staff' => 'sometimes',
@@ -103,7 +103,7 @@ class CompanyDocumentController extends Controller
         }
 
         $data = [
-            'name' => $request->name,
+            'name' => $request->name ?? null,
             'description' => $request->description,
             'visible_to_staff' => $request->visible_to_staff,
             'company_id' => $this->sessionDetails('company_id'),

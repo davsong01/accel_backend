@@ -64,6 +64,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         return response()->download($realpath);
     });
 });
+Route::get('domain-details/{slug}', [CompanySettingController::class, 'domainDetails']);
 
 Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
     Route::post('/login', [AuthController::class, 'login']);

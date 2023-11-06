@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Staff;
+use App\Models\Company;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Models\CompanySetting;
@@ -22,6 +23,33 @@ class CompanySettingController extends Controller
                 'company_id' =>  $this->sessionDetails('company_id'),
             ]);
         }
+        $companySetting->company_logo = !empty($companySetting->company_logo) ? url('/') . '/uploads/' . base64_encode($companySetting->company_logo) : '';
+        $companySetting->company_secondary_logo = !empty($companySetting->company_secondary_logo) ? url('/') . '/uploads/' . base64_encode($companySetting->company_secondary_logo) : '';
+
+        return response()->json(['message' => 'success', 'data' => $companySetting], 200);
+    }
+
+    public function domainDetails($slug)
+    {
+        $company = Company::where('slug', $slug)->first();
+        
+        if(!$company){
+            return response()->json(['message' => 'Company not found', 'data' => []], 200);
+        }
+        $companySetting = CompanySetting::where('company_id', $company->id)->first();
+        
+        if (!$companySetting) {
+            $companySetting = CompanySetting::create([
+                'company_id' =>  $this->sessionDetails('company_id'),
+                'company_logo' => 'images/brands/logos/default.png',
+                'company_secondary_logo' => 'images/brands/logos/default.png',
+                'main_color' => '#149954',
+                'company_id' => $company->id,
+                'primary_color' => 'red',
+                'secondary_color' => '#faaa2c'
+            ]);
+        }
+
         $companySetting->company_logo = !empty($companySetting->company_logo) ? url('/') . '/uploads/' . base64_encode($companySetting->company_logo) : '';
         $companySetting->company_secondary_logo = !empty($companySetting->company_secondary_logo) ? url('/') . '/uploads/' . base64_encode($companySetting->company_secondary_logo) : '';
 
