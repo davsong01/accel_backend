@@ -231,6 +231,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::resource('account-category', AccountCategoryController::class);
         Route::resource('account-group', AccountGroupController::class);
         Route::post('create-exit', [EmployeeExitController::class, 'store']);
+        Route::get('exits/{staff_id?}', [EmployeeExitController::class, 'index']);
 
     });
 });

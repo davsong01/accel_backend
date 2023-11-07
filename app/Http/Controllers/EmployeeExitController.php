@@ -15,9 +15,23 @@ class EmployeeExitController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request, $staff_id=null)
     {
-        //
+
+        $exit = EmployeeExit::where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'DESC');
+
+        if (!empty($staff_id)) {
+            $exit = $exit->where('staff_id', $staff_id);
+        } 
+        
+        if (!empty($request->paginate) && $request->paginate == 'false') {
+            $exit = $exit->get();
+        } else {
+            $exit = $exit->paginate(20)->withQueryString();
+        }
+
+        return response()->json(['message' => 'success', 'data' => $exit], 200);
+
     }
 
     /**
