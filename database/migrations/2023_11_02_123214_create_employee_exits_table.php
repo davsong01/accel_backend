@@ -16,6 +16,7 @@ return new class extends Migration
             $table->integer('staff_id');
             $table->timestamp('last_day_work')->nullable(); 
             $table->string('type')->nullable(); 
+            $table->string('file')->nullable(); 
             $table->string('reason')->nullable(); 
             $table->string('comment')->nullable();
             $table->integer('company_id');

@@ -36,7 +36,7 @@ class EmployeeExitController extends Controller
         $validator = Validator::make($request->all(), [
             'type' => 'required|in:Voluntary Resignation,Requested Resignation,Termination,Demise,Retirement,Dismissal',
             'last_day_work' => 'required',
-            'reason' => 'required|in:Better Renumeration,Career Advancement,Relocation,Performance', 
+            'reason' => 'required|in:Better Remuneration,Career Advancement,Relocation,Performance', 
             'comment' => 'nullable'
         ]);
 
@@ -46,22 +46,31 @@ class EmployeeExitController extends Controller
             ]);
         }
        
-        if ($request->type == 'advance') {
+        if ($request->type == 'Voluntary Resignation') {
             $validator = Validator::make($request->all(), [
-                'amount' => 'required',
-                'time_sensitivity' => 'required',
+                'resignation_letter' => 'required',
             ]);
+
         }
-        
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->messages()->first(),
+                'data' => null,
+            ], 412);
+        }
+
         if (\Request::route()->getPrefix() == 'api/admin/self-service') {
             $staff_id = Auth::user()->staff->id;
         }
 
         $last_day = Carbon::parse($request->last_day_of_work);
+        $resignation_letter = !empty($request->resignation_letter) ? $this->uploadFile($request->resignation_letter, 'exits', 500, 500) : null;
         
         EmployeeExit::updateOrCreate(['staff_id' => $request->staff_id ?? $staff_id, 'type' => $request->type],[
             'last_day_work' => $last_day,
             'reason' => $request->reason,
+            'file' => $resignation_letter,
             'comment' => $request->comment,
             'company_id' => $this->sessionDetails('company_id')
         ]);
