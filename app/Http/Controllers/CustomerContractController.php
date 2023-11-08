@@ -250,8 +250,8 @@ class CustomerContractController extends Controller
         $validator = Validator::make($request->all(), [
             'contract_ids' => 'required',
             'account_id' => 'required|exists:accounts,id',
-            'payment_slip' => 'required',
-            'description' => 'required',
+            'payment_slip' => 'nullable',
+            'description' => 'nullable',
             'amount' => 'required',
             'customer_id' => 'required'
         ]);
@@ -302,7 +302,7 @@ class CustomerContractController extends Controller
                 ]);
             }
         }
-
+        // change contract to prospect
         return response()->json(['message' => 'success', 'data' => null], 200);
     }
 
