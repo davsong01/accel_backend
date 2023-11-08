@@ -9,4 +9,13 @@ class RolePermission extends Model
 {
     use HasFactory;
     protected $guarded = [];
+
+    public function parentMenu(){
+        return $this->belongsTo(RolePermission::class, 'parent');
+    }
+
+    public function children()
+    {
+        return $this->hasMany(RolePermission::class, 'parent');
+    }
 }

@@ -232,13 +232,13 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::resource('account-group', AccountGroupController::class);
         Route::post('create-exit', [EmployeeExitController::class, 'store']);
         Route::get('exits/{staff_id?}', [EmployeeExitController::class, 'index']);
-
+        Route::get('access-control-list', [MenuController::class, 'adminAccessControls']);
     });
 });
 
 Route::group(['prefix' => 'customer', 'before' => 'customer'], function () {
     Route::post('/validate', [AuthController::class, 'validateCustomer']);
-
+    
     Route::middleware(['auth:sanctum', 'company_check', 'user_roles', 'otherchecks'])->group(function () {
         Route::post('form-response', [CustomerFormController::class, 'store']); // real
         Route::get('form-response/{id}', [CustomerFormController::class, 'index']); // real
