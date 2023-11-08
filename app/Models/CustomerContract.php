@@ -10,6 +10,7 @@ use App\Models\PlotSize;
 use App\Models\BuildingType;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\EstatePropertyTypeDetails;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class CustomerContract extends Model
@@ -60,5 +61,12 @@ class CustomerContract extends Model
     public function property_type_details()
     {
         return $this->belongsTo(EstatePropertyTypeDetails::class, 'property_type_id');
+    }
+
+    protected function createdAt(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string $value) => date("Y-m-d", strtotime($value)),
+        );
     }
 }
