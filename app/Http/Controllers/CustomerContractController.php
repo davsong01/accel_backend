@@ -385,14 +385,26 @@ class CustomerContractController extends Controller
 
     }
 
-    public function singleCustomerFormDetails($customer_id)
+    public function singleCustomerFormDetails(Request $request, $customer_id)
     {
-        $estates = CustomerContract::distinct('estate_id')->with('estate:id,name,form_amount')->select('estate_id')->where('customer_id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->get();
+        
+        $estates = CustomerContract::distinct('estate_id')->with('estate:id,name,form_amount')->select('estate_id')->where('customer_id', $customer_id)->where('company_id', $this->sessionDetails('company_id'));
+
+        if(!empty($request->status)){
+            $estates = $estates->where('status',$request->status);
+        }
+
+        $estates = $estates->get();
+
         $customer = Customer::with('user:id,first_name,last_name,middle_name')->where('id', $customer_id)->first();
         $customerDetails = $customer->user ?? null;
         
         $contracts = CustomerContract::with('location:name,id')->where('customer_id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->select(['id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'contract_type', 'property_type'])->orderBy('created_at', 'DESC');
-        
+
+        if (!empty($request->status)) {
+            $contracts = $contracts->where('status', $request->status);
+        }
+
         $estates = $estates->map(function ($query) {
             $query['estate_name'] = $query->estate->name;
             $query['form_amount'] = $query->estate->form_amount;
@@ -415,7 +427,13 @@ class CustomerContractController extends Controller
 
             foreach ($estates as $estate) {
                 // foreach ($contracts as $key => $contract) {
-                $details = CustomerContract::with('location:name,id', 'building_type:id,name', 'plot_size:id,size')->where('estate_id', $estate->estate_id)->where('customer_id', $customer_id)->select(['id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'contract_type', 'property_type'])->orderBy('created_at', 'DESC')->where('company_id', $this->sessionDetails('company_id'))->get();
+                $details = CustomerContract::with('location:name,id', 'building_type:id,name', 'plot_size:id,size')->where('estate_id', $estate->estate_id)->where('customer_id', $customer_id)->select(['id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'contract_type', 'property_type'])->orderBy('created_at', 'DESC')->where('company_id', $this->sessionDetails('company_id'));
+
+                if (!empty($request->status)) {
+                    $details = $details->where('status', $request->status);
+                }
+
+                $details = $details->get();
 
                 $allContracts[] = [
                     'estate_id' => $estate->estate_id,
