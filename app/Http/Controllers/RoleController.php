@@ -13,16 +13,17 @@ class RoleController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index($type=null)
     {
         $type = \Request::get('type');
+        
         if (!$type) {
             return response()->json(['error' => 'The role type is required as a query param!'], 412);
         }
         $roles = Role::where('type', $type)
             ->where('company_id', $this->sessionDetails('company_id'))
             ->get();
-
+      
         return response()->json(['message' => 'success', 'data' => $roles], 200);
     }
 
@@ -41,6 +42,8 @@ class RoleController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required',
+            'access' => 'required',
+            'description' => 'nullable',
             'type' => 'required|in:customer,staff',
         ]);
 
@@ -51,13 +54,30 @@ class RoleController extends Controller
             ], 412);
         }
 
-        $role = Role::updateOrcreate([
-            'name' => $request->name,
-            'type' => $request->type,
-            'department_id' => $request->department_id,
-        ]);
+        if (!empty($request->access)) {
+            $allAccess = getPackageAccess();
+            $access = explode(',', $request->access);
 
-        return response()->json(['message' => 'Created successfully', 'data' => $role], 200);
+            $allowed = [];
+            // check if the request access exists in all access, if no remove it
+            foreach ($access as $key => $value) {
+                if (!in_array($value, $allAccess)) {
+                    unset($access[$key]);
+                }
+                $allowed = $access;
+            }
+
+            $access_control = implode(',', $allowed);
+        }
+
+        Role::updateOrcreate(['name' => $request->name, 'company_id' => $this->sessionDetails('company_id'), 'type' => $request->type, 'department_id' => $request->department_id],
+            [
+                'access' => $access_control,
+                'description' => $request->description
+            ]
+        );
+
+        return response()->json(['message' => 'Created successfully', 'data' => []], 200);
     }
 
     /**
@@ -85,6 +105,8 @@ class RoleController extends Controller
 
         $validator = Validator::make($request->all(), [
             'name' => 'required',
+            'access' => 'required',
+            'description' => 'nullable',
             'type' => 'required|in:customer,staff',
         ]);
 
@@ -95,8 +117,26 @@ class RoleController extends Controller
             ], 412);
         }
 
+        if (!empty($request->access)) {
+            $allAccess = getPackageAccess();
+            $access = explode(',', $request->access);
+
+            $allowed = [];
+            // check if the request access exists in all access, if no remove it
+            foreach ($access as $key => $value) {
+                if (!in_array($value, $allAccess)) {
+                    unset($access[$key]);
+                }
+                $allowed = $access;
+            }
+
+            $access_control = implode(',', $allowed);
+        }
+
         $role->update([
             'name' => $request->name,
+            'access' => $access_control,
+            'description' => $request->description,
             'type' => $request->type,
         ]);
 
@@ -108,5 +148,7 @@ class RoleController extends Controller
      */
     public function destroy(Role $role)
     {
+        $role->delete();
+        return response()->json(['message' => 'Deleted Successfully.', 'data' => null], 200);
     }
 }

@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('role_permissions', function (Blueprint $table) {
             $table->id();
             $table->string('role_ids')->nullable();
+            $table->string('category')->nullable();
             $table->enum('status', ['active', 'inactive']);
             $table->enum('type', ['staff', 'customer']);
             $table->enum('is_menu', ['yes', 'no']);

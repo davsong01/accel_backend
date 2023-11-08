@@ -46,7 +46,7 @@ class UserRoleMiddleware
                         $individual_permissions = explode(',', $individual_permissions);
                         Session::put('individual_permissions', $individual_permissions);
                     }
-
+                    
                     Session::put('staff_id',  auth()->user()->staff->id);
                     Session::put('staff_roles',  $user_roles);
                 }

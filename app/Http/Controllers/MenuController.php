@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\Staff;
+use App\Models\Package;
+use App\Models\StaffRole;
 use Illuminate\Http\Request;
 use App\Models\RolePermission;
 use Illuminate\Support\Facades\Route;
@@ -37,9 +39,9 @@ class MenuController extends Controller
 
         $parents = RolePermission::where(['parent' => 0])->orderBy('order', 'ASC')->get();
         $menus = RolePermission::orderBy('parent', 'asc')->orderBy('order', 'asc')->get();
-        dd(Session::all(), 'asas');
+       
         $user_roles = auth()->user()->roles; // You can 
-        dd($user_roles);
+       
         foreach ($menus as $parent) {
             $rolex = [];
             $roleIds = [];
@@ -63,31 +65,15 @@ class MenuController extends Controller
 
     public function generateLinks($linkid, $link_name, $link_route, $link_slug, $link_icon, $description, $parent_id)
     {
-        $individual_permissions = Session::get('individual_permissions') ?? [];
-        $user_role_ids = Session::get('staff_roles');
-        $links = [];
-
         if (Session::has('staff_id')) {
-            $getChildren = RolePermission::where(['status' => 'active', 'is_menu' => 'yes', 'parent' => $linkid, 'type' => 'staff', 'company_id' => $this->sessionDetails('company_id')])->orderBy('order', 'ASC')->get();
+            $access = getRoleAccess();
 
-            $getChildren = $getChildren->filter(function ($query) use ($user_role_ids, $individual_permissions) {
-                $query->role_ids = (isset($query->role_ids) && !empty($query->role_ids)) ? explode(',', $query->role_ids) : [];
-                foreach ($user_role_ids as $role) {
-                    if (in_array($role, $query->role_ids) || in_array($query->id, $individual_permissions)) {
-                        return $query;
-                    }
-                }
-            });
+            $getChildren = RolePermission::whereIn('id', $access)->where(['status' => 'active', 'is_menu' => 'yes', 'parent' => $linkid, 'type' => 'staff'])->orderBy('order', 'ASC')->get();
         }
 
         if (count($getChildren) > 0) {
             foreach ($getChildren as $key => $value) {
-                $perms = $this->checkUserHasRightToPage($value->slug, $user_role_ids);
-                if ($perms === true) {
-                    $linko[] = $this->generateLinks($value->id, $value->menu_name, $value->route, $value->slug, $value->icon, $value->description, $value->parent);
-                } else {
-                    $linko[] = '';
-                }
+                $linko[] = $this->generateLinks($value->id, $value->menu_name, $value->route, $value->slug, $value->icon, $value->description, $value->parent);  
             }
 
             $sub_links = $linko;
@@ -130,54 +116,36 @@ class MenuController extends Controller
     public function linkGenerator()
     {
         $links = [];
-        $individual_permissions = Session::get('individual_permissions') ?? [];
-        $staff_roles = Session::get('staff_roles');
 
+        // Get permissions from staff roles
         if (Session::has('staff_id')) {
-            $links = RolePermission::where(['status' => 'active', 'is_menu' => 'yes', 'parent' => NULL, 'type' => 'staff', 'company_id' => $this->sessionDetails('company_id')])->orderBy('order', 'ASC')->get();
-            $links = $links->filter(function ($query) use ($staff_roles, $individual_permissions) {
-                $query->role_ids = (isset($query->role_ids) && !empty($query->role_ids)) ? explode(',', $query->role_ids) : [];
-
-                foreach ($staff_roles as $role) {
-                    if (in_array($role, $query->role_ids) || in_array($query->id, $individual_permissions)) {
-                        return $query;
-                    }
-                }
-            });
+            $access = getRoleAccess();
+            
+            $links = RolePermission::whereIn('id', $access)->where(['status' => 'active', 'is_menu' => 'yes', 'parent' => NULL, 'type' => 'staff', 'company_id' => $this->sessionDetails('company_id')])->orderBy('order', 'ASC')->get();
+            
         }
 
         $lo = [];
 
         foreach ($links as $key => $value) {
-            $perms = $this->checkUserHasRightToPage($value->slug, $staff_roles);
-
-            if ($perms === TRUE) {
-                // if ($perms === TRUE && $perm_status === TRUE) {
-                $lox[] = $value->link_name;
-                $lo[] = $this->generateLinks($value->id, $value->menu_name, $value->route, $value->slug, $value->icon, $value->description, $value->parent);
-            }
+            $lox[] = $value->link_name;
+            $lo[] = $this->generateLinks($value->id, $value->menu_name, $value->route, $value->slug, $value->icon, $value->description, $value->parent);
         }
-
+        
         return response()->json(['message' => 'success', 'data' => $lo], 200);
     }
 
     public function singleLinkGenerator($parent_id)
     {
         $links = [];
-        $individual_permissions = Session::get('individual_permissions') ?? [];
-        $staff_roles = Session::get('staff_roles');
-        $all_roles = array_unique(array_merge($individual_permissions, $staff_roles));
+
         if (Session::has('staff_id')) {
-            $links = RolePermission::where(['status' => 'active', 'is_menu' => 'yes', 'id' => $parent_id, 'type' => 'staff'])->orderBy('order', 'ASC')->first();
+            $access = getRoleAccess();
+
+            $links = RolePermission::whereIn('id', $access)->where(['status' => 'active', 'is_menu' => 'yes', 'id' => $parent_id, 'type' => 'staff'])->orderBy('order', 'ASC')->first();
+
             if (!$links) {
-                return;
-            }
-
-            $link_role_ids = (isset($links->role_ids) && !empty($links->role_ids)) ? explode(',', $links->role_ids) : [];
-            $allowed = array_intersect($link_role_ids, $all_roles);
-
-            if (!$allowed && count($allowed) <= 0) {
-                return response()->json(['error' => 'You do not have access to this resource'], 403);
+                return response()->json(['message' => 'success', 'data' => []], 200);
             }
         }
 
@@ -187,10 +155,6 @@ class MenuController extends Controller
         return response()->json(['message' => 'success', 'data' => $lo], 200);
     }
 
-    public function checkUserHasRightToPage($code, $user_class)
-    {
-        return true;
-    }
     /**
      * Show the form for creating a new resource.
      *
@@ -301,5 +265,33 @@ class MenuController extends Controller
 
     public function destroy($id)
     {
+    }
+
+    public function adminAccessControls($access=null){
+        if(!empty($access)){
+            $packageAccess = $access;
+        }else{
+            $packageAccess = getPackageAccess($access);
+        }
+        
+        $accessControls = RolePermission::with(['children' => function($query) use ($packageAccess){
+            return $query->where(['status' => 'active', 'type' => 'staff'])->whereIn('id', $packageAccess)->orderBy('order', 'asc')->select('id', 'category', 'status', 'type', 'is_menu', 'menu_name', 'description', 'order', 'parent');
+        }])->where(['status'=>'active', 'type'=>'staff'])
+            ->orderBy('parent', 'asc')
+            ->orderBy('order', 'asc')
+            ->whereIn('id', $packageAccess)
+            ->select('id','category', 'status', 'type', 'is_menu', 'menu_name', 'description', 'order','parent');
+           
+        $controls = clone $accessControls;
+        $menus = $controls
+            ->where('is_menu', 'yes')->whereNull('parent')
+            ->get();
+        
+        $data = [
+            'menus' => $menus,
+            'others' => $accessControls->where('is_menu', 'no')->get(),
+        ];
+        
+        return response()->json(['message' => 'Retrieved successfully', 'data' => $data], 200);
     }
 }

@@ -31,6 +31,7 @@ class CompanyCheckMiddleware
                 return response()->json(['error' => 'Company with slug: ' . $slug . ' not found', 'data' => null], 412);
             } else {
                 Session::put('company_id', $company->id);
+                Session::put('company_package_ids', $company->package_ids);
                 Session::put('company_name', $company->name);
                 Session::put('company_url', $company->url);
                 Session::put('company_location', $company->location);
