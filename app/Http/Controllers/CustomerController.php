@@ -135,7 +135,7 @@ class CustomerController extends Controller
 
     public function getProspects(Request $request)
     {
-        $prospect = Customer::with(['user:id,avatar,first_name,last_name,status,gender,phone_number,residential_address'])->whereHas('contracts', function ($query) {
+        $prospect = Customer::with(['user:id,avatar,first_name,last_name,status,gender,phone_number'])->whereHas('contracts', function ($query) {
             $query->where('status', 'prospect');
         })->withCount('contracts')->where('company_id', $this->sessionDetails('company_id'))
             ->orderBy('customers.created_at', 'DESC');
