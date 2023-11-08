@@ -264,6 +264,8 @@ class CustomerContractController extends Controller
         }
 
         $data = $validator->valid();
+
+        $request['contract_ids'] = json_decode($request['contract_ids'], true);
         $contract_ids = array_column($request['contract_ids'], 'contract_id');
 
         $ids = [];
@@ -288,7 +290,9 @@ class CustomerContractController extends Controller
         if ($form_payment) {
             foreach ($form_payment['explanation'] as $key => $form) {
                 $customer_contract_ids = implode(',', $form['contracts']);
-
+                foreach($form['contracts'] as $contract){
+                    CustomerContract::where('id', $contract)->update('status', 'prospect');
+                }                
                 Payment::updateOrCreate(['customer_contract_ids' => $customer_contract_ids], [
                     'customer_contract_ids' => $customer_contract_ids,
                     'account_id' => $data['account_id'],
@@ -383,7 +387,7 @@ class CustomerContractController extends Controller
     {
         $estates = CustomerContract::distinct('estate_id')->with('estate:id,name,form_amount')->select('estate_id')->where('customer_id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->get();
         $customer = Customer::with('user:id,first_name,last_name,middle_name')->where('id', $customer_id)->first();
-        $customer_details = $customer->user ?? null;
+        $customer = $customer->user ?? null;
         
         $contracts = CustomerContract::with('location:name,id')->where('customer_id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->select(['id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'contract_type', 'property_type'])->orderBy('created_at', 'DESC');
         
@@ -425,7 +429,13 @@ class CustomerContractController extends Controller
             }
        
 
-            $data['customer_details'] = $customer_details;
+            $data['customer_details'] = [
+                'id' => $customer_id,
+                'first_name' => $customer->first_name,
+                'last_name' => $customer->last_name,
+                'middle_name' => $customer->middle_name
+            ];
+
             $data['all_contracts'] = $allContracts;
             return response()->json(['message' => 'success', 'data' => $data], 200);
         } else {
