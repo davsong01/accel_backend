@@ -434,7 +434,7 @@ class CustomerContractController extends Controller
                 }
 
                 $details = $details->get();
-
+                
                 $allContracts[] = [
                     'estate_id' => $estate->estate_id,
                     'estate_name' => $estate->estate_name,
