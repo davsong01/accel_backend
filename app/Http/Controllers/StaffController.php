@@ -570,11 +570,11 @@ class StaffController extends Controller
     {
         $self_service = new SelfServiceController();
         $res = $self_service->uploadDocuments($request, $self);
-        // dd($res['code']);
-        if ($res['code'] == 200) {
-            return response()->json(['message' => $res['message'], 'data' => $res['data']], $res['code']);
-        } else {
-            return response()->json(['error' => $res['error'], 'data' => $res['data']], $res['code']);
+       
+        if(isset($res['error'])){
+            return response()->json(['error' => $res['error'], 'data' => $res['data']], $res['code'] ?? 412);
+        }else{
+            return response()->json(['message' => $res['message'], 'data' => $res['data']], $res['code'] ?? 200);
         }
     }
 
