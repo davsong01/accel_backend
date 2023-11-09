@@ -288,10 +288,11 @@ class CustomerContractController extends Controller
         }
        
         if ($form_payment) {
+            
             foreach ($form_payment['explanation'] as $key => $form) {
                 $customer_contract_ids = implode(',', $form['contracts']);
                               
-                Payment::updateOrCreate(['customer_contract_ids' => $customer_contract_ids], [
+                $payment = Payment::updateOrCreate(['customer_contract_ids' => $customer_contract_ids], [
                     'customer_contract_ids' => $customer_contract_ids,
                     'account_id' => $data['account_id'],
                     'purpose' => 'form_payment',
@@ -306,9 +307,11 @@ class CustomerContractController extends Controller
                 foreach ($form['contracts'] as $contract) {
                     CustomerContract::where('id', $contract)->update(['status' => 'prospect']);
                 }  
+                
+                Customer::where('id', $data['customer_id'])->update(['form_status' => 'Not Filled']);
+
             }
         }
-        // change contract to prospect
         return response()->json(['message' => 'success', 'data' => null], 200);
     }
 
