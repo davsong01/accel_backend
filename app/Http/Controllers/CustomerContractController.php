@@ -434,7 +434,7 @@ class CustomerContractController extends Controller
                 }
 
                 $details = $details->get();
-                
+
                 $allContracts[] = [
                     'estate_id' => $estate->estate_id,
                     'estate_name' => $estate->estate_name,
@@ -482,8 +482,9 @@ class CustomerContractController extends Controller
                 ];
             }
 
-            $data[$history->estate_id] = [
+            $data[] = [
                 'id' => $history->id,
+                'estate_id' => $history->estate_id,
                 'customer_id' => $history->customer_id,
                 'created_at' => $history->created_at,
                 'amount' => $history->amount,
