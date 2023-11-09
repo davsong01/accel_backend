@@ -134,7 +134,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
 
         Route::get('staff-identification-settings/{id?}', [StaffController::class, 'staffIdentificationSetting']);
         Route::post('update-staff-identification-settings', [StaffController::class, 'updateStaffIdentificationSetting']);
-        Route::post('upload-staff-documents', [staffController::class, 'uploadDocuments']);
+        Route::post('upload-staff-documents', [selfServiceController::class, 'uploadDocuments']);
 
         Route::get('staff-document-settings/{id?}', [StaffController::class, 'staffDocumentSetting']);
         Route::post('staff-document-setting', [StaffController::class, 'addStaffDocumentSetting']);
@@ -206,7 +206,8 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
             Route::post('add-avatar/{staff_id?}', [SelfServiceController::class, 'addAvatar']);
             Route::get('delete-avatar/{staff_id?}', [SelfServiceController::class, 'deleteAvatar']);
             Route::get('get-avatar/{staff_id}', [SelfServiceController::class, 'getAvatar']);
-            Route::post('upload-documents', [SelfServiceController::class, 'uploadDocuments']);
+            Route::post('upload-staff-documents', [SelfServiceController::class, 'uploadDocuments']);
+            Route::post('staff-documents/{staff_id?}', [SelfServiceController::class, 'getStaffDocument']);
             Route::post('send-reset-password-mail', [SelfServiceController::class, 'sendResetPasswordEmail']);
             Route::post('reset-password', [SelfServiceController::class, 'resetPassword']);
             Route::get('unread-notifications/{staff_id?}', [SelfServiceController::class, 'fetchUnreadNotifications']);
@@ -233,6 +234,9 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::post('create-exit', [EmployeeExitController::class, 'store']);
         Route::get('exits/{staff_id?}', [EmployeeExitController::class, 'index']);
         Route::get('access-control-list', [MenuController::class, 'adminAccessControls']);
+
+        Route::get('staff-documents/{staff_id}', [SelfServiceController::class, 'getStaffDocument']);
+
     });
 });
 

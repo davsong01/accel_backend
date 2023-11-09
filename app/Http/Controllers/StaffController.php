@@ -503,8 +503,9 @@ class StaffController extends Controller
         $data['staff_id'] = $staff->staff_id;
         $data['employee_id'] = $staff->employee_id;
         $data['profile_completenes'] = $profile_completenes;
-        
+
         $employment_date = $staff->date_of_employment ? date("jS\\, F Y", strtotime($staff->date_of_employment)) : '';
+        $date_of_birth = $staff->date_of_birth ? date("jS\\, F Y", strtotime($staff->date_of_employment)) : '';
         
         $data['job_information'] = [
             'job_type' => [
@@ -531,7 +532,7 @@ class StaffController extends Controller
                 'name' => $staff->branch_name ?? '',
             ]
         ];
-
+        
         $data['personal_information'] = [
             'first_name' => $staff->first_name ?? '',
             'middle_name' => $staff->middle_name ?? '',
@@ -541,7 +542,7 @@ class StaffController extends Controller
             'phone_number' => $staff->user->phone_number ?? '',
             'gender' => $staff->user->gender ?? '',
             'marital_status' => $additional_details['marital_status'] ?? '',
-            'dob' => $staff->date_of_birth,
+            'dob' => $date_of_birth,
             'avatar' => !empty($staff->avatar) ? url('/') . '/uploads/' . base64_encode($staff->avatar) : '',
         ];
 
@@ -570,7 +571,7 @@ class StaffController extends Controller
     {
         $self_service = new SelfServiceController();
         $res = $self_service->uploadDocuments($request, $self);
-       
+        
         if(isset($res['error'])){
             return response()->json(['error' => $res['error'], 'data' => $res['data']], $res['code'] ?? 412);
         }else{

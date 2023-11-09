@@ -60,6 +60,53 @@ class CustomerFormController extends Controller
      */
     public function store(Request $request, $admin=false)
     {
+    // "contract":[
+    //     {
+    //         "property_price":"kjkkk",
+    //         "infrastuctural_fee":"kjkkk",
+    //         "net_property_fee":"kjkkk",
+    //         "setting_and_excavation_fee":"kjkkk",
+    //         "discount":"kjkkk",
+    //         "transaction_date":"kjkkk",
+    //         "property_type_id":"52",
+    //         "property_type":"land",
+    //         "building_type":2,
+    //         "plot_size":19,
+    //         "branch_id":2,
+    //         "contract_type":"joint", // joint,single
+    //         "contract_id":46,
+    //         "estate_id":144,
+    //         "subscribers":[
+    //             {
+    //                 "s_name":"Subscriber 1",
+    //                 "s_phone":"077236235723",
+    //                 "s_email":"sub1@gmail.com",
+    //                 "s_relationship":"Brother"
+    //             },
+    //             {
+    //                 "s_name":"Subscriber 2",
+    //                 "s_phone":"0918237232332",
+    //                 "s_email":"sub2@gmail.com",
+    //                 "s_relationship":"Mother"
+    //             }
+    //         ],
+    //         "primary_marketer":1,
+    //         "secondary_marketers":[
+    //             {
+    //                 "name":"marketer name",
+    //                 "secondary_marketer_id":2,
+    //                 "percentage":10
+    //             },
+    //             {
+    //                 "name":"Marketer 2 name",
+    //                 "secondary_marketer_id":4,
+    //                 "percentage":4
+    //             }
+    //         ]
+    //     }
+    // ]
+
+
         $validator = Validator::make($request->all(), [
             'title' => 'nullable',
             'surname' => 'nullable',
@@ -74,6 +121,10 @@ class CustomerFormController extends Controller
             'phone_number' => 'nullable',
             'house_address' => 'nullable',
             'alternate_phone_number' => 'nullable',
+
+            'lga_id' => 'required|exists:lgas,id',
+            'country_id' => 'required|exists:countries,id',
+            'state_id' => 'required|exists:states,id',
 
             // Next of kin information
             'next_of_kin_firstname' => 'nullable',
@@ -91,40 +142,50 @@ class CustomerFormController extends Controller
             'id_card' => 'nullable|image|max:2048',
             'signature' => 'nullable|image|max:2048',
 
-            // Other details
-            'property_price' => 'nullable',
-            'infrastuctural_fee' => 'nullable',
-            'net_property_fee' => 'nullable',
-            'setting_and_excavation_fee' => 'nullable',
-            'discount' => 'nullable',
-            'description' => 'nullable',
-
-            // Marketer
-            'primary_marketer' => 'nullable|exists:staff,id,company_id,' . $this->sessionDetails('company_id'),
-            'secondary_marketers' => 'nullable',
-            'transaction_date' => 'nullable',
-
             // 'bypass_approval' => 'nullable',
             'marital_status' => 'nullable',
-            'estate_id' => 'required|exists:estates,id,company_id,' . $this->sessionDetails('company_id'),
-            'property_type_id' => [
-                'required', Rule::exists('estate_property_type_details', 'id')->where(function ($query) use ($request) {
-                    $query->where('company_id', $this->sessionDetails('company_id'))->where('estate_id', $request->estate_id)->where('type', $request->property_type);
-                })
-            ],
-            'property_type' => 'required|in:land,building',
-            'building_type_id' => 'nullable|exists:building_types,id',
-            'plot_size_id' => 'nullable|exists:plot_sizes,id',
-            'branch_id' => 'nullable|exists:branches,id,company_id,' . $this->sessionDetails('company_id'),
-            'contract_type' => 'nullable',
-            'lga_id' => 'required|exists:lgas,id',
-            'country_id' => 'required|exists:countries,id',
-            'state_id' => 'required|exists:states,id',
             'location_id' => 'required|exists:locations,id,company_id,' . $this->sessionDetails('company_id'),
             'customer_id' => 'required|exists:customers,id,company_id,' . $this->sessionDetails('company_id'),
-            'customer_contract_id' => 'required|exists:customer_contracts,id,company_id,' . $this->sessionDetails('company_id'),
 
+            // Contracts
+            'contract' => 'required',
         ]);
+
+        if(!empty($request->contract)){
+            foreach($request->contract as $cont){
+                $validator = Validator::make($cont, [
+                    
+                    'estate_id' => 'required|exists:estates,id,company_id,' . $this->sessionDetails('company_id'),
+                    'property_type_id' => [
+                        'required', Rule::exists('estate_property_type_details', 'id')->where(function ($query) use ($cont) {
+                            $query->where('company_id', $this->sessionDetails('company_id'))->where('estate_id', $cont['estate_id'])->where('type', $cont['property_type']);
+                        })
+                    ],
+                    // Other details
+                    'property_price' => 'nullable',
+                    'infrastuctural_fee' => 'nullable',
+                    'net_property_fee' => 'nullable',
+                    'setting_and_excavation_fee' => 'nullable',
+                    'discount' => 'nullable',
+                    'description' => 'nullable',
+
+                    // Marketer
+                    'primary_marketer' => 'nullable|exists:staff,id,company_id,' . $this->sessionDetails('company_id'),
+                    'secondary_marketers' => 'nullable',
+                    'subscribers' => 'nullable',
+                    'transaction_date' => 'nullable',
+
+                    'property_type' => 'required|in:land,building',
+                    'building_type_id' => 'nullable|exists:building_types,id',
+                    'plot_size_id' => 'nullable|exists:plot_sizes,id',
+                    'branch_id' => 'nullable|exists:branches,id,company_id,' . $this->sessionDetails('company_id'),
+                    'contract_type' => 'nullable',
+                
+                    'contract_id' => 'required|exists:customer_contracts,id,company_id,' . $this->sessionDetails('company_id'),
+                ]);
+            }
+
+        }
 
         if ($validator->fails()) {
             return response()->json([
@@ -133,6 +194,7 @@ class CustomerFormController extends Controller
             ], 412);
         }
         $data = $validator->valid();
+        dd($data);
         $data['date_of_birth'] = !empty($data['date_of_birth']) ? Carbon::parse($data['date_of_birth']) : '';
 
         if (!empty($request->passport_photo)) {

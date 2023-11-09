@@ -17,4 +17,8 @@ class StaffUploadedDocument extends Model
             get: fn (string $value) => url('/') . '/api/documents/' . base64_encode($value),
         );
     }
+
+    public function setting(){
+        return $this->belongsTo(StaffDocumentSetting::class, 'staff_document_id');
+    }
 }

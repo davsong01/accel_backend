@@ -177,12 +177,12 @@ class SelfServiceController extends Controller
         return response()->json(['message' => 'Delete succesful', 'data' => null], 200);
     }
 
-    public function uploadDocuments(Request $request, $self = true)
+    public function uploadDocuments(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'id' => 'required|exists:staff_document_settings,id,company_id,' . $this->sessionDetails('company_id'),
             'staff_id' => 'required|exists:staff,id,company_id,' . $this->sessionDetails('company_id'),
-            'file' => 'required',
+            'files' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -198,45 +198,80 @@ class SelfServiceController extends Controller
             ], 412);
         }
 
-        $staff_id = $self == true ? Auth::user()->staff->id : $request->staff_id;
+        if (\Request::route()->getPrefix() == 'api/self-service') {
+            $staff_id = Auth::user()->staff->id;
+        }else{
+            $staff_id = $request->staff_id;
+        }
 
         $setting = DB::table('staff_document_settings')->where(['company_id' => $this->sessionDetails('company_id'), 'id' => $request->id])->first();
-        $count = StaffUploadedDocument::where(['staff_document_id' => $setting->id, 'staff_id' => $staff_id])->count();
+        $allowed = $setting->required;
+        $uploaded = StaffUploadedDocument::where(['staff_document_id' => $setting->id, 'staff_id' => $staff_id])->count();
+        
+        $allowedfileExtension = ['pdf','jpg', 'png', 'docx', 'jpeg'];
+        $files = $request->file('files');
+        $toUpload = count($files);
+        $newCount = $uploaded + $toUpload;
 
-        if ($count >= $setting->required) {
-            if ($self == false) {
-                return [
-                    'code' => 422,
-                    'error' => 'You have already uploaded maximum number of required files for ' . $setting->name,
-                    'data' => null,
-                ];
-            }
+        if ($newCount > $allowed) {
             return response()->json([
-                'error' => 'You have already uploaded maximum number of required files for ' . $setting->name,
+                'error' => 'Only ' . $setting->required . ' documents are required for ' . $setting->name . '!',
                 'data' => null,
-            ], 422);
+            ], 412);
         }
 
-        $fileX = $this->uploadProtectedFile($request->file, $this->sessionDetails('company_slug'));
+        // $toSave = [];
 
-        $upload = StaffUploadedDocument::create([
-            'staff_id' => $staff_id,
-            'staff_document_id' => $setting->id,
-            'name' => $setting->name,
-            'file' => $fileX,
-            'uploaded' => $count++,
-            'required' => $setting->required,
-            'company_id' => $this->sessionDetails('company_id')
-        ]);
+        foreach ($files as $file) {
+            // $filename = $file->getClientOriginalName();
+            $extension = $file->getClientOriginalExtension();
+            $check = in_array($extension, $allowedfileExtension);
+ 
+            if ($check) {
+                // $toSave[] = $this->uploadProtectedFile($file, $this->sessionDetails('company_slug'));
+                $save = $this->uploadProtectedFile($file, $this->sessionDetails('company_slug'));
+                StaffUploadedDocument::create([
+                    'staff_id' => $staff_id,
+                    'staff_document_id' => $setting->id,
+                    'name' => $setting->name,
+                    'file' => $save,
+                    'company_id' => $this->sessionDetails('company_id')
+                ]);
+            }else{
+                return response()->json([
+                    'error' => 'Allowed files are ' . implode(',', $allowedfileExtension) . ' files',
+                    'data' => null,
+                ], 412);
+            }
+        }
 
-        if ($self == false) {
-            return [
-                'code' => 200,
-                'message' => 'Upload succesful',
-                'data' => $upload->file
+        return response()->json(['message' => 'Upload succesful', 'data' => []], 200);
+
+    }
+
+    public function getStaffDocument($staff_id=null){
+        if (\Request::route()->getPrefix() == 'api/self-service') {
+            $staff_id = Auth::user()->staff->id;
+        }
+        $document = StaffUploadedDocument::with('setting')->where(['staff_id' => $staff_id])->get();
+        $refined = [];
+        foreach($document as $document){
+            $uploaded = StaffUploadedDocument::where(['staff_document_id' => $document->setting->id, 'staff_id' => $staff_id])->count();
+            
+            $refined[] = [
+                'id' => $document->id,
+                'staff_id' => $document->staff_id,
+                'staff_document_id' => $document->setting->id,
+                'name' => $document->name,
+                'required' => $document->setting->required,
+                'uploaded' => $uploaded,
+                'created_at' => $document->created_at,
+                'file' => $document->file,
             ];
         }
-        return response()->json(['message' => 'Upload succesful', 'data' => $upload->file], 200);
+
+        return response()->json(['message' => 'Succesful retrieved', 'data' => $refined], 200);
+
     }
 
     public function sendResetPasswordEmail(Request $request)
