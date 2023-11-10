@@ -186,19 +186,6 @@ class SelfServiceController extends Controller
             'files' => 'required',
         ]);
 
-        // if ($validator->fails()) {
-        //     if ($self == false) {
-        //         return [
-        //             'error' => $validator->messages()->first(),
-        //             'data' => null,
-        //         ];
-        //     }
-        //     return response()->json([
-        //         'error' => $validator->messages()->first(),
-        //         'data' => null,
-        //     ], 412);
-        // }
-
         if (\Request::route()->getPrefix() == 'api/self-service') {
             $staff_id = Auth::user()->staff->id;
         }else{
@@ -218,6 +205,7 @@ class SelfServiceController extends Controller
         
         $allowedfileExtension = ['pdf','jpg', 'png', 'docx', 'jpeg'];
         $files = $request->file('files');
+
         $toUpload = count($files);
         $newCount = $uploaded + $toUpload;
 
@@ -261,20 +249,21 @@ class SelfServiceController extends Controller
         if (\Request::route()->getPrefix() == 'api/admin/self-service') {
             $staff_id = Auth::user()->staff->id;
         }
-        $document = StaffUploadedDocument::with('setting')->where(['staff_id' => $staff_id])->get();
+
+        $document = StaffDocumentSetting::with(['documents' => function ($query) use ($staff_id) {
+            $query->where('staff_id', $staff_id);
+        }])->get();
+
         $refined = [];
-        foreach($document as $document){
-            $uploaded = StaffUploadedDocument::where(['staff_document_id' => $document->setting->id, 'staff_id' => $staff_id])->count();
-            
+        foreach($document as $document){            
             $refined[] = [
-                'id' => $document->id,
-                'staff_id' => $document->staff_id,
-                'staff_document_id' => $document->setting->id,
+                'staff_id' => $staff_id,
+                'staff_document_id' => $document->id,
                 'name' => $document->name,
-                'required' => $document->setting->required,
-                'uploaded' => $uploaded,
-                'created_at' => $document->created_at,
-                'file' => $document->file,
+                'required' => $document->required,
+                'uploaded' => $document->documents->count(),
+                'documents' => $document->documents,
+
             ];
         }
 
