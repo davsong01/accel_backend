@@ -207,7 +207,8 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
             Route::get('delete-avatar/{staff_id?}', [SelfServiceController::class, 'deleteAvatar']);
             Route::get('get-avatar/{staff_id}', [SelfServiceController::class, 'getAvatar']);
             Route::post('upload-staff-documents', [SelfServiceController::class, 'uploadDocuments']);
-            Route::post('staff-documents/{staff_id?}', [SelfServiceController::class, 'getStaffDocument']);
+            Route::get('staff-documents', [SelfServiceController::class, 'getStaffDocument']);
+            Route::get('staff-documents-by-document-setting-id/{id}', [SelfServiceController::class, 'getStaffDocumentBySettingId']);
             Route::post('send-reset-password-mail', [SelfServiceController::class, 'sendResetPasswordEmail']);
             Route::post('reset-password', [SelfServiceController::class, 'resetPassword']);
             Route::get('unread-notifications/{staff_id?}', [SelfServiceController::class, 'fetchUnreadNotifications']);
@@ -227,7 +228,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('generate-staff-id', [Controller::class, 'generateStaffId']);
 
         Route::get('get-staff-leave-remnant/{staff_id}/{type}', [AdvanceAndClaimsController::class, 'getLeaveAndAbsencePeriodLeft']);
-       
+        
         Route::resource('commission', CommissionController::class);
         Route::resource('account-category', AccountCategoryController::class);
         Route::resource('account-group', AccountGroupController::class);
@@ -236,6 +237,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('access-control-list', [MenuController::class, 'adminAccessControls']);
 
         Route::get('staff-documents/{staff_id}', [SelfServiceController::class, 'getStaffDocument']);
+        Route::get('staff-documents-by-document-setting-id/{id}/{staff_id}', [SelfServiceController::class, 'getStaffDocumentBySettingId']);
 
     });
 });

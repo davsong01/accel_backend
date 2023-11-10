@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use App\Models\StaffDocument;
 use App\Models\ResetCodePassword;
 use Illuminate\Support\Facades\DB;
+use App\Models\StaffDocumentSetting;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\StaffUploadedDocument;
@@ -250,7 +251,7 @@ class SelfServiceController extends Controller
     }
 
     public function getStaffDocument($staff_id=null){
-        if (\Request::route()->getPrefix() == 'api/self-service') {
+        if (\Request::route()->getPrefix() == 'api/admin/self-service') {
             $staff_id = Auth::user()->staff->id;
         }
         $document = StaffUploadedDocument::with('setting')->where(['staff_id' => $staff_id])->get();
@@ -272,6 +273,20 @@ class SelfServiceController extends Controller
 
         return response()->json(['message' => 'Succesful retrieved', 'data' => $refined], 200);
 
+    }
+
+    public function getStaffDocumentBySettingId($id, $staff_id=null){
+        if (\Request::route()->getPrefix() == 'api/admin/self-service') {
+            $staff_id = Auth::user()->staff->id;
+        }
+
+        $setting = StaffDocumentSetting::with(['documents' => function($query) use ($staff_id){
+            $query->where('staff_id', $staff_id);
+        }])->where('id', $id)->first();
+        
+        $setting->uploaded = $setting->documents->count();
+        
+        return response()->json(['message' => 'Succesful retrieved', 'data' => $setting], 200);
     }
 
     public function sendResetPasswordEmail(Request $request)
