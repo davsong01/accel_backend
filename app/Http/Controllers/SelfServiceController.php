@@ -263,7 +263,6 @@ class SelfServiceController extends Controller
                 'required' => $document->required,
                 'uploaded' => $document->documents->count(),
                 'documents' => $document->documents,
-
             ];
         }
 

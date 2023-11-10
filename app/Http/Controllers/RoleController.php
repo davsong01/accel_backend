@@ -70,7 +70,7 @@ class RoleController extends Controller
             $access_control = implode(',', $allowed);
         }
 
-        Role::updateOrcreate(['name' => $request->name, 'company_id' => $this->sessionDetails('company_id'), 'type' => $request->type, 'department_id' => $request->department_id],
+        Role::updateOrcreate(['name' => $request->name, 'company_id' => $this->sessionDetails('company_id'), 'type' => $request->type],
             [
                 'access' => $access_control,
                 'description' => $request->description
