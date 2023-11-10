@@ -186,18 +186,18 @@ class SelfServiceController extends Controller
             'files' => 'required',
         ]);
 
-        if ($validator->fails()) {
-            if ($self == false) {
-                return [
-                    'error' => $validator->messages()->first(),
-                    'data' => null,
-                ];
-            }
-            return response()->json([
-                'error' => $validator->messages()->first(),
-                'data' => null,
-            ], 412);
-        }
+        // if ($validator->fails()) {
+        //     if ($self == false) {
+        //         return [
+        //             'error' => $validator->messages()->first(),
+        //             'data' => null,
+        //         ];
+        //     }
+        //     return response()->json([
+        //         'error' => $validator->messages()->first(),
+        //         'data' => null,
+        //     ], 412);
+        // }
 
         if (\Request::route()->getPrefix() == 'api/self-service') {
             $staff_id = Auth::user()->staff->id;
