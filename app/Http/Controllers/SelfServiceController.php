@@ -206,6 +206,13 @@ class SelfServiceController extends Controller
         }
 
         $setting = DB::table('staff_document_settings')->where(['company_id' => $this->sessionDetails('company_id'), 'id' => $request->id])->first();
+
+        if(!$setting){
+            return response()->json([
+                'error' => 'No document setting defined!',
+                'data' => null,
+            ], 412); 
+        }
         $allowed = $setting->required;
         $uploaded = StaffUploadedDocument::where(['staff_document_id' => $setting->id, 'staff_id' => $staff_id])->count();
         
