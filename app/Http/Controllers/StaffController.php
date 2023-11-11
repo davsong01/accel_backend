@@ -150,7 +150,7 @@ class StaffController extends Controller
             $validator = Validator::make($request->all(), [
                 'email' => [
                     'required', 'email', Rule::unique('users')->where(function ($query) {
-                        $query->where('company_id', $this->sessionDetails('company_id'));
+                        $query->where('company_id', $this->sessionDetails('company_id'))->where('type','staff');
                     })
                 ],
                 'first_name' => 'required',
