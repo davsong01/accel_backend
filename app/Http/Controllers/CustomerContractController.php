@@ -20,7 +20,7 @@ class CustomerContractController extends Controller
      */
     public function index($customer_id)
     {
-        $contracts = CustomerContract::with('property_type_details:type,id,estate_price,settings_and_excavation,infrastructural_fee', 'city:name,id', 'estate:name,id', 'location:name,id', 'building_type:id,name', 'plot_size:id,size')->where('customer_id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->select(['id', 'property_type_id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'subscribers', 'contract_type', 'property_type','created_at'])
+        $contracts = CustomerContract::with('property_type_details:type,id,estate_price,settings_and_excavation,infrastructural_fee', 'city:name,id', 'estate:name,id', 'location:name,id', 'building_type:id,name', 'plot_size:id,size')->where('customer_id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->select(['id', 'primary_marketer_id','property_type_id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'subscribers', 'contract_type', 'property_type','created_at'])
             // ->groupBy('estate_id')
             ->orderBy('created_at', 'DESC')
             ->get();
@@ -43,6 +43,7 @@ class CustomerContractController extends Controller
       
             foreach ($contracts as $key => $contract) {
                 // $estate->load('city', 'location', 'estate_property_type')
+                $contract->primary_marketer = $contract->primaryMarketer($contract);
                 $contract->subscribers = !empty($contract->subscribers) ? json_decode($contract->subscribers) : '';
                 $contract['location'] = $contract->location->name;
                 $allContracts[$key] = $contract;
@@ -85,6 +86,7 @@ class CustomerContractController extends Controller
                 'no_of_units' => 'required',
                 'contract_type' => 'required',
                 'customer_id' => 'required|exists:customers,id,company_id,' . $this->sessionDetails('company_id'),
+                'primary_marketer_id' => 'nullable|exists:staff,id,company_id,' . $this->sessionDetails('company_id'),
                 'subscribers' => 'nullable',
             ]);
 
@@ -103,6 +105,8 @@ class CustomerContractController extends Controller
             // Add contract
             foreach ($range as $units) {
                 $data['customer_id'] = $data['customer_id'];
+                $data['primary_marketer_id'] = $data['primary_marketer_id'];
+                
                 $this->createCustomerContract($data);
             }
 
@@ -134,6 +138,7 @@ class CustomerContractController extends Controller
                 ],
                 'phone_number' => 'required',
                 'residential_address' => 'required',
+                'primary_marketer_id' => 'nullable|exists:staff,id,company_id,' . $this->sessionDetails('company_id'),
             ]);
 
             if ($validator->fails()) {
@@ -162,7 +167,7 @@ class CustomerContractController extends Controller
                 // Add contract
                 foreach ($range as $units) {
                     $data['customer_id'] = $customer->id;
-                    $contract = $this->createCustomerContract($data);
+                    $this->createCustomerContract($data);
                 }
             } else {
                 return response()->json(['message' => 'Could not create customer', 'data' => null], 422);
@@ -212,6 +217,7 @@ class CustomerContractController extends Controller
     {
         $contract = CustomerContract::Create([
             'customer_id' => $data['customer_id'],
+            'primary_marketer_id' => $data['primary_marketer_id'] ?? null,
             'city_id' => $data['city_id'],
             'location_id' => $data['location_id'],
             'estate_id' => $data['estate_id'],
@@ -233,10 +239,11 @@ class CustomerContractController extends Controller
      */
     public function show($contract_id)
     {
-        $contract = CustomerContract::with('property_type_details:type,id,estate_price,settings_and_excavation,infrastructural_fee','city:name,id', 'estate:name,id', 'location:name,id', 'building_type:id,name', 'plot_size:id,size')->where('id', $contract_id)->select(['id', 'property_type_id','customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size','building_type', 'subscribers','contract_type', 'property_type'])->orderBy('created_at', 'DESC')->where('company_id', $this->sessionDetails('company_id'))->first();
+        $contract = CustomerContract::with('property_type_details:type,id,estate_price,settings_and_excavation,infrastructural_fee','city:name,id', 'estate:name,id', 'location:name,id', 'building_type:id,name', 'plot_size:id,size')->where('id', $contract_id)->select(['id', 'property_type_id','customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size','building_type', 'subscribers','contract_type', 'property_type','primary_marketer_id'])->orderBy('created_at', 'DESC')->where('company_id', $this->sessionDetails('company_id'))->first();
 
         if($contract){
             $contract->subscribers = !empty($contract->subscribers) ? json_decode($contract->subscribers) : '';
+            $contract->primary_marketer = $contract->primaryMarketer($contract);
             return response()->json(['message' => 'success', 'data' => $contract], 200);
         }
 

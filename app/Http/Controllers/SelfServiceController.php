@@ -205,7 +205,6 @@ class SelfServiceController extends Controller
         
         $allowedfileExtension = ['pdf','jpg', 'png', 'docx', 'jpeg'];
         $files = $request->file('files');
-        \Log::info(['temp'=>$files]);
         
         $toUpload = count($files);
         $newCount = $uploaded + $toUpload;
@@ -223,7 +222,7 @@ class SelfServiceController extends Controller
             // $filename = $file->getClientOriginalName();
             $extension = $file->getClientOriginalExtension();
             $check = in_array($extension, $allowedfileExtension);
- 
+            
             if ($check) {
                 // $toSave[] = $this->uploadProtectedFile($file, $this->sessionDetails('company_slug'));
                 $save = $this->uploadProtectedFile($file, $this->sessionDetails('company_slug'));

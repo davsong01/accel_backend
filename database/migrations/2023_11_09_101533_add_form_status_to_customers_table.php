@@ -27,8 +27,8 @@ class AddFormStatusToCustomersTable extends Migration
      */
     public function down()
     {
-        Schema::table('role_permissions', function (Blueprint $table) {
-            $table->dropColumn("category");
+        Schema::table('customers', function (Blueprint $table) {
+            $table->dropColumn("form_status");
         });        
     }
 }
