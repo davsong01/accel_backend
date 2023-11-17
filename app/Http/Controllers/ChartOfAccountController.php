@@ -15,8 +15,8 @@ class ChartOfAccountController extends Controller
      */
     public function index()
     {
-        $coa = ChartOfAccount::where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'desc')->get();
-        return response()->json(['message' => 'success', 'data' => $coa], 200);
+        $coa = ChartOfAccount::with('account_category:id,name', 'account_type:id,type')->where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'desc')->get();
+        return response()->json(['message' => 'success', 'data' => []], 200);
     }
 
     /**
@@ -34,8 +34,10 @@ class ChartOfAccountController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'accounttype_id' => 'required|exists:account_types,id,company_id,' . $this->sessionDetails('company_id'),
-            'description' => 'required',
-            'account_code' => 'required',
+            'account_category_id' => 'required|exists:account_categories,id,company_id,' . $this->sessionDetails('company_id'),
+            'currency' => 'required',
+            'name' => 'required',
+            'input_method' => 'required|in:direct,manual',
         ]);
 
         if ($validator->fails()) {
@@ -46,9 +48,11 @@ class ChartOfAccountController extends Controller
         }
 
         $account_class = ChartOfAccount::updateOrcreate([
-            'description' => $request->description,
             'accounttype_id' => $request->accounttype_id,
-            'account_code' => $request->account_code,
+            'account_category_id' => $request->account_category_id,
+            'currency' => $request->currency,
+            'name' => 'required',
+            'input_method' => $request->input_method,
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
@@ -61,7 +65,7 @@ class ChartOfAccountController extends Controller
     public function show(ChartOfAccount $chartOfAccount)
     {
         if ($chartOfAccount) {
-            return response()->json(['message' => 'Retrieved successfully', 'data' => $chartOfAccount], 200);
+            return response()->json(['message' => 'Retrieved successfully', 'data' => $chartOfAccount->load('account_category:id,name', 'account_type:id,type')], 200);
         } else {
             return response()->json(['message' => 'No records found', 'data' => $chartOfAccount], 200);
         }
@@ -82,8 +86,10 @@ class ChartOfAccountController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'accounttype_id' => 'required|exists:account_types,id,company_id,' . $this->sessionDetails('company_id'),
-            'description' => 'required',
-            'account_code' => 'required',
+            'account_category_id' => 'required|exists:account_categories,id,company_id,' . $this->sessionDetails('company_id'),
+            'currency' => 'required',
+            'name' => 'required',
+            'input_method' => 'required|in:direct,manual',
         ]);
 
         if ($validator->fails()) {
@@ -95,12 +101,14 @@ class ChartOfAccountController extends Controller
 
         $chartOfAccount->update([
             'accounttype_id' => $request->accounttype_id,
-            'description' => $request->description,
-            'account_code' => $request->account_code,
+            'account_category_id' => $request->account_category_id,
+            'currency' => $request->currency,
+            'name' => $request->name,
+            'input_method' => $request->input_method,
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
-        return response()->json(['message' => 'Updated successfully', 'data' => $chartOfAccount], 200);
+        return response()->json(['message' => 'Updated successfully', 'data' => []], 200);
     }
 
     /**
@@ -109,6 +117,6 @@ class ChartOfAccountController extends Controller
     public function destroy(ChartOfAccount $chartOfAccount)
     {
         $chartOfAccount->delete();
-        return response()->json(['message' => 'Deleted Successfully.', 'data' => $chartOfAccount], 200);
+        return response()->json(['message' => 'Deleted Successfully.', 'data' => []], 200);
     }
 }

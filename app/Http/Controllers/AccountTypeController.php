@@ -15,7 +15,7 @@ class AccountTypeController extends Controller
      */
     public function index()
     {
-        $account_type = AccountType::where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'desc')->get();
+        $account_type = AccountType::with('account_category')->where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'desc')->get();
         return response()->json(['message' => 'success', 'data' => $account_type], 200);
     }
 
@@ -34,8 +34,7 @@ class AccountTypeController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'type' => 'required',
-            'code_from' => 'required',
-            'code_to' => 'required',
+            'account_category_id' => 'required|exists:account_categories,id,company_id,' . $this->sessionDetails('company_id'),
         ]);
 
         if ($validator->fails()) {
@@ -47,8 +46,7 @@ class AccountTypeController extends Controller
 
         $account_type = AccountType::updateOrcreate([
             'type' => $request->type,
-            'code_from' => $request->code_from,
-            'code_to' => $request->code_to,
+            'account_category_id' => $request->account_category_id,
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
@@ -82,8 +80,7 @@ class AccountTypeController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'type' => 'required',
-            'code_from' => 'required',
-            'code_to' => 'required',
+            'account_category_id' => 'required|exists:account_categories,id,company_id,' . $this->sessionDetails('company_id'),
         ]);
 
         if ($validator->fails()) {
@@ -95,8 +92,7 @@ class AccountTypeController extends Controller
 
         $account_type->update([
             'type' => $request->type,
-            'code_from' => $request->code_from,
-            'code_to' => $request->code_to,
+            'account_category_id' => $request->account_category_id
         ]);
 
         return response()->json(['message' => 'Updated Successfully.', 'data' => $account_type], 200);

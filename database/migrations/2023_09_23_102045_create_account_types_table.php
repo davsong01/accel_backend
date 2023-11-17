@@ -14,8 +14,7 @@ return new class extends Migration
         Schema::create('account_types', function (Blueprint $table) {
             $table->id();
             $table->string('type')->nullable();
-            $table->string('code_from')->nullable();
-            $table->string('code_to')->nullable();
+            $table->integer('account_category_id')->nullable();
             $table->integer('company_id');
 
             $table->timestamps();

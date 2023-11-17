@@ -13,9 +13,11 @@ return new class extends Migration
     {
         Schema::create('chart_of_accounts', function (Blueprint $table) {
             $table->id();
+            $table->string('name')->nullable();
             $table->integer('accounttype_id')->nullable();
-            $table->string('description')->nullable();
-            $table->string('account_code')->nullable();
+            $table->integer('account_category_id')->nullable();
+            $table->integer('currency')->nullable();
+            $table->enum('input_method', ['direct', 'manueal'])->nullable();
             $table->integer('company_id');
 
 
