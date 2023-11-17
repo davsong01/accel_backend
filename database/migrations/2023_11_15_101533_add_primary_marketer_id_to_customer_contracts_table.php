@@ -15,9 +15,10 @@ class AddPrimaryMarketerIdToCustomerContractsTable extends Migration
         if (!Schema::hasColumn('customer_contracts', 'primary_marketer_id')) {
             Schema::table('customer_contracts', function (Blueprint $table) {
                 $table->integer('primary_marketer_id')->nullable()->after('customer_id');
+                $table->string('secondary_marketers')->nullable()->after('primary_marketer_id');
             });
         }
-
+        
     }
 
     /**
@@ -29,6 +30,7 @@ class AddPrimaryMarketerIdToCustomerContractsTable extends Migration
     {
         Schema::table('customer_contracts', function (Blueprint $table) {
             $table->dropColumn("primary_marketer_id");
+            $table->dropColumn("secondary_marketers");
         });        
     }
 }

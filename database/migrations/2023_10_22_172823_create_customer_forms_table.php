@@ -45,7 +45,7 @@ return new class extends Migration
                 $table->integer('plot_size_id')->nullable();
                 $table->integer('branch_id')->nullable();
                 $table->text('other_details')->nullable();
-                $table->timestamp('transaction_date')->nullable();
+                $table->datetime('transaction_date')->nullable();
                 $table->text('marketers')->nullable();
                 $table->integer('bypass_approval')->nullable();
                 $table->integer('company_id');

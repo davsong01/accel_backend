@@ -98,6 +98,7 @@ class CustomerContractController extends Controller
                 'contract_type' => 'required',
                 'customer_id' => 'required|exists:customers,id,company_id,' . $this->sessionDetails('company_id'),
                 'primary_marketer_id' => 'nullable|exists:staff,id,company_id,' . $this->sessionDetails('company_id'),
+                'secondary_marketers' => 'nullable',
                 'subscribers' => 'nullable',
             ]);
 
@@ -117,6 +118,7 @@ class CustomerContractController extends Controller
             foreach ($range as $units) {
                 $data['customer_id'] = $data['customer_id'];
                 $data['primary_marketer_id'] = $data['primary_marketer_id'];
+                $data['secondary_marketers'] = isset($data['secondary_marketers']) && !empty($data['secondary_marketers']) ? json_encode($data['secondary_marketers']) : json_encode([]);
                 
                 $this->createCustomerContract($data);
             }
@@ -229,6 +231,7 @@ class CustomerContractController extends Controller
         $contract = CustomerContract::Create([
             'customer_id' => $data['customer_id'],
             'primary_marketer_id' => $data['primary_marketer_id'] ?? null,
+            'secondary_marketers' => $data['secondary_marketers'],
             'city_id' => $data['city_id'],
             'location_id' => $data['location_id'],
             'estate_id' => $data['estate_id'],
@@ -243,6 +246,30 @@ class CustomerContractController extends Controller
         ]);
 
         return $contract;
+    }
+
+    public function updateCustomerContract($data, $contract_id, $customer_id){
+        $contract = CustomerContract::where('id', $contract_id)->where('customer_id', $customer_id)->first();
+
+        if(!$contract){
+            return;
+        }
+
+        $contract->update([
+            'primary_marketer_id' => $data['primary_marketer_id'] ?? $data['primary_marketer'] ?? null,
+            'secondary_marketers' => isset($data['secondary_marketers']) ? json_encode($data['secondary_marketers']) : null,
+            'city_id' => $data['city_id'],
+            'location_id' => $data['location_id'],
+            'estate_id' => $data['estate_id'],
+            'plot_size' => $data['plot_size'] ?? null,
+            'building_type' => $data['building_type'] ?? null,
+            'property_type' => $data['property_type'],
+            'property_type_id' => $data['property_type_id'],
+            'subscribers' => isset($data['subscribers']) ? json_encode($data['subscribers']) : null,
+            'contract_type' => $data['contract_type']
+        ]);
+
+        return;
     }
 
     /**
@@ -360,6 +387,8 @@ class CustomerContractController extends Controller
             'building_type' => 'nullable|exists:building_types,id,company_id,' . $this->sessionDetails('company_id'),
             'contract_type' => 'required',
             'customer_id' => 'required|exists:customers,id,company_id,' . $this->sessionDetails('company_id'),
+            'primary_marketer_id' => 'required|exists:staff,id,company_id,' . $this->sessionDetails('company_id'),
+            
             'subscribers' => 'nullable',
         ]);
 

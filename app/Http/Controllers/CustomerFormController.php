@@ -3,11 +3,12 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Support\Arr;
+use App\Models\CustomerForm;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
-use App\Models\CustomerForm;
 use Illuminate\Validation\Rule;
+use App\Models\CustomerContract;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Validation\Rules\File;
 use Illuminate\Support\Facades\Validator;
@@ -60,53 +61,6 @@ class CustomerFormController extends Controller
      */
     public function store(Request $request, $admin=false)
     {
-    // "contract":[
-    //     {
-    //         "property_price":"kjkkk",
-    //         "infrastuctural_fee":"kjkkk",
-    //         "net_property_fee":"kjkkk",
-    //         "setting_and_excavation_fee":"kjkkk",
-    //         "discount":"kjkkk",
-    //         "transaction_date":"kjkkk",
-    //         "property_type_id":"52",
-    //         "property_type":"land",
-    //         "building_type":2,
-    //         "plot_size":19,
-    //         "branch_id":2,
-    //         "contract_type":"joint", // joint,single
-    //         "contract_id":46,
-    //         "estate_id":144,
-    //         "subscribers":[
-    //             {
-    //                 "s_name":"Subscriber 1",
-    //                 "s_phone":"077236235723",
-    //                 "s_email":"sub1@gmail.com",
-    //                 "s_relationship":"Brother"
-    //             },
-    //             {
-    //                 "s_name":"Subscriber 2",
-    //                 "s_phone":"0918237232332",
-    //                 "s_email":"sub2@gmail.com",
-    //                 "s_relationship":"Mother"
-    //             }
-    //         ],
-    //         "primary_marketer":1,
-    //         "secondary_marketers":[
-    //             {
-    //                 "name":"marketer name",
-    //                 "secondary_marketer_id":2,
-    //                 "percentage":10
-    //             },
-    //             {
-    //                 "name":"Marketer 2 name",
-    //                 "secondary_marketer_id":4,
-    //                 "percentage":4
-    //             }
-    //         ]
-    //     }
-    // ]
-
-
         $validator = Validator::make($request->all(), [
             'title' => 'nullable',
             'surname' => 'nullable',
@@ -146,16 +100,21 @@ class CustomerFormController extends Controller
             'marital_status' => 'nullable',
             'location_id' => 'required|exists:locations,id,company_id,' . $this->sessionDetails('company_id'),
             'customer_id' => 'required|exists:customers,id,company_id,' . $this->sessionDetails('company_id'),
+            'city_id' => 'required|exists:cities,id,company_id,' . $this->sessionDetails('company_id'),
 
             // Contracts
             'contract' => 'required',
         ]);
 
+        $customer_contract_ids = [];
+
         if(!empty($request->contract)){
             foreach($request->contract as $cont){
-                $validator = Validator::make($cont, [
+                $contract_validator = Validator::make($cont, [
                     
                     'estate_id' => 'required|exists:estates,id,company_id,' . $this->sessionDetails('company_id'),
+                    'city_id' => 'required|exists:cities,id,company_id,' . $this->sessionDetails('company_id'),
+                    
                     'property_type_id' => [
                         'required', Rule::exists('estate_property_type_details', 'id')->where(function ($query) use ($cont) {
                             $query->where('company_id', $this->sessionDetails('company_id'))->where('estate_id', $cont['estate_id'])->where('type', $cont['property_type']);
@@ -183,6 +142,12 @@ class CustomerFormController extends Controller
                 
                     'contract_id' => 'required|exists:customer_contracts,id,company_id,' . $this->sessionDetails('company_id'),
                 ]);
+
+                // Update the contract
+                $update = array_merge($validator->valid(), $contract_validator->valid());
+                $customer_contract_ids[] = $cont['contract_id'];
+                app('App\Http\Controllers\CustomerContractController')->updateCustomerContract($update, $cont['contract_id'], $update['customer_id']);
+                
             }
 
         }
@@ -193,8 +158,8 @@ class CustomerFormController extends Controller
                 'data' => null,
             ], 412);
         }
-        $data = $validator->valid();
-        dd($data);
+        $data = array_merge($validator->valid(), $contract_validator->valid());
+       
         $data['date_of_birth'] = !empty($data['date_of_birth']) ? Carbon::parse($data['date_of_birth']) : '';
 
         if (!empty($request->passport_photo)) {
@@ -257,13 +222,15 @@ class CustomerFormController extends Controller
             $data['type'] = 'form2-request';
             $data['status'] = 'completed'; 
         }
+
+
+        $data['plot_size_id'] = $data['plot_size'];
+        $data['transaction_date'] = Carbon::parse($data['transaction_date']);
+        $data['contract_ids'] = json_encode($customer_contract_ids);
+        $data = Arr::except($data, ['contract', 'building_type', 'plot_size', 'contract_id', 'subscribers']);
         
         CustomerForm::updateOrCreate(
-            [
-                'customer_id' => $data['customer_id'],
-                'customer_contract_id' => $data['customer_contract_id'],
-                'company_id' => $data['company_id']
-            ],
+            ['customer_id' => $data['customer_id'],'company_id' => $data['company_id']],
             $data
         );
 
