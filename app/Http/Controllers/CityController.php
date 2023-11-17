@@ -62,7 +62,8 @@ class CityController extends Controller
      */
     public function show(City $city)
     {
-        //
+        return response()->json(['message' => 'success', 'data' => $city], 200);
+        
     }
 
     /**

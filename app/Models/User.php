@@ -45,6 +45,11 @@ class User extends Authenticatable
         return $this->hasOne(Staff::class);
     }
 
+    public function customer()
+    {
+        return $this->hasOne(Customer::class);
+    }
+
     protected function avatar(): Attribute
     {
         return Attribute::make( 

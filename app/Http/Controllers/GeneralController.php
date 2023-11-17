@@ -14,9 +14,8 @@ class GeneralController extends Controller
     //
     public function getCountries(){
         $countries = Country::all();
-
+        
         return response()->json(['message' => 'success', 'data' => $countries], 200);
-
     }
 
     public function getStates(Request $request)

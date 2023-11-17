@@ -38,7 +38,7 @@ class CompanyCheckMiddleware
                 Session::put('company_slug', $company->slug);
             }
         }
-
+        
         return $next($request);
     }
 }

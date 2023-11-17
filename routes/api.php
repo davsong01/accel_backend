@@ -244,11 +244,23 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
 });
 
 Route::group(['prefix' => 'customer', 'before' => 'customer'], function () {
+    Route::post('/login', [AuthController::class, 'login']);
     Route::post('/validate', [AuthController::class, 'validateCustomer']);
     
-    Route::middleware(['auth:sanctum', 'company_check', 'user_roles', 'otherchecks'])->group(function () {
+    Route::middleware(['auth:sanctum', 'company_check'])->group(function () {
         Route::post('form-response', [CustomerFormController::class, 'store']);
         Route::get('form-response/{id}', [CustomerFormController::class, 'index']);
-
+        Route::get('get-countries', [GeneralController::class, 'getCountries']);
+        Route::get('get-states', [GeneralController::class, 'getStates']);
+        Route::get('get-lga', [GeneralController::class, 'getLgas']);
+        Route::get('get-banks', [GeneralController::class, 'getBanks']);
+        Route::get('get-currencies', [GeneralController::class, 'getCurrencies']);
+        Route::get('get-locations', [LocationController::class, 'index']);
+        Route::get('get-cities', [CityController::class, 'index']);
+        Route::get('get-locations-in-city/{city_id}', [LocationController::class, 'cityLocations']);
+        Route::get('get-single-city/{city}', [CityController::class, 'show']);
+        Route::get('get-estates-in-location/{location_id}', [EstateController::class, 'getEstateInLocation']);
+        Route::get('get-estate-property-type', [PropertyTypeDetailsController::class, 'index']);
+        Route::get('get-customer-contract/{customer_id}', [CustomerContractController::class, 'getSingleCustomerContract']);
     });
 });

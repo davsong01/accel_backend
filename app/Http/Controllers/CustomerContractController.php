@@ -57,6 +57,17 @@ class CustomerContractController extends Controller
         }
     }
 
+    public function getSingleCustomerContract($customer_id){
+        
+        if(auth()->user()->customer->id != $customer_id){
+            return response()->json([
+                'error' => 'Invalid customer id',
+                'data' => [],
+            ], 422);
+        }
+
+        return $this->index($customer_id);
+    }
     /**
      * Show the form for creating a new resource.
      */
