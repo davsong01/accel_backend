@@ -68,9 +68,10 @@ class JobRoleController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(JobRole $jobRole)
+    public function show(JobRole $jobrole)
     {
-        //
+        return response()->json(['message' => 'success', 'data' => $jobrole->load('department:id,name')], 200);
+        
     }
 
     /**
@@ -78,7 +79,7 @@ class JobRoleController extends Controller
      */
     public function edit(JobRole $jobRole)
     {
-        return response()->json(['message' => 'success', 'data' => $jobRole], 200);
+        return response()->json(['message' => 'success', 'data' => $jobRole->load('department:id,name')], 200);
     }
 
     /**
