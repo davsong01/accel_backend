@@ -119,6 +119,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         // Route::get('get-countries-currencies/{country_id?}', [CompanySettingController::class, 'countryAnCurrencies']);
 
         Route::resource('roles', RoleController::class);
+        Route::get('roles-by-department-id/{id}', [RoleController::class, 'getRoleByDepartmentId']);
 
         Route::get('get-all-staff', [StaffController::class, 'getAllStaff']);
         Route::get('is-not-on-leave', [StaffController::class, 'isNotOnLeave']);
@@ -246,7 +247,8 @@ Route::group(['prefix' => 'customer', 'before' => 'customer'], function () {
     Route::post('/validate', [AuthController::class, 'validateCustomer']);
     
     Route::middleware(['auth:sanctum', 'company_check', 'user_roles', 'otherchecks'])->group(function () {
-        Route::post('form-response', [CustomerFormController::class, 'store']); // real
-        Route::get('form-response/{id}', [CustomerFormController::class, 'index']); // real
+        Route::post('form-response', [CustomerFormController::class, 'store']);
+        Route::get('form-response/{id}', [CustomerFormController::class, 'index']);
+
     });
 });
