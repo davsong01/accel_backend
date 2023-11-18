@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('roles', function (Blueprint $table) {
             $table->id();
             $table->string('name')->nullable();
-            $table->integer('department_id')->nullable();
+            // $table->integer('department_id')->nullable();
             $table->string('access')->nullable();
             $table->text('description')->nullable();
             $table->enum('type', ['staff', 'customer']);

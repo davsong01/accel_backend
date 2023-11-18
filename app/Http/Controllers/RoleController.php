@@ -27,17 +27,6 @@ class RoleController extends Controller
         return response()->json(['message' => 'success', 'data' => $roles], 200);
     }
 
-    public function getRoleByDepartmentId($id)
-    {
-        $roles = Role::where('department_id', $id)
-            ->where('company_id', $this->sessionDetails('company_id'))
-            ->select('id', 'department_id','name')
-            ->get();
-
-        return response()->json(['message' => 'success', 'data' => $roles], 200);
-    }
-
-
     /**
      * Show the form for creating a new resource.
      */
@@ -55,7 +44,7 @@ class RoleController extends Controller
             'name' => 'required',
             'access' => 'required',
             'description' => 'nullable',
-            'department_id' => 'required|exists:departments,id,company_id,' . $this->sessionDetails('company_id'),
+            // 'department_id' => 'required|exists:departments,id,company_id,' . $this->sessionDetails('company_id'),
             'type' => 'required|in:customer,staff',
         ]);
 
@@ -97,7 +86,7 @@ class RoleController extends Controller
      */
     public function show(Role $role)
     {
-        $role = $role->load('department');
+        // $role = $role->load('department');
         return response()->json(['message' => 'success', 'data' => $role], 200);
     }
 
@@ -121,7 +110,7 @@ class RoleController extends Controller
             'access' => 'required',
             'description' => 'nullable',
             'type' => 'required|in:customer,staff',
-            'department_id' => 'required|exists:departments,id,company_id,' . $this->sessionDetails('company_id'),
+            // 'department_id' => 'required|exists:departments,id,company_id,' . $this->sessionDetails('company_id'),
         ]);
 
         if ($validator->fails()) {

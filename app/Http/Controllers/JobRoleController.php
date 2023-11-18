@@ -65,6 +65,16 @@ class JobRoleController extends Controller
         return response()->json(['message' => 'Created successfully', 'data' => $jobrole], 200);
     }
 
+    public function getJobRoleByDepartmentId($id)
+    {
+        $roles = JobRole::where('department_id', $id)
+            ->where('company_id', $this->sessionDetails('company_id'))
+            ->select('id', 'department_id', 'name')
+            ->get();
+
+        return response()->json(['message' => 'success', 'data' => $roles], 200);
+    }
+
     /**
      * Display the specified resource.
      */

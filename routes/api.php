@@ -119,7 +119,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         // Route::get('get-countries-currencies/{country_id?}', [CompanySettingController::class, 'countryAnCurrencies']);
 
         Route::resource('roles', RoleController::class);
-        Route::get('roles-by-department-id/{id}', [RoleController::class, 'getRoleByDepartmentId']);
+        Route::get('job-roles-by-department-id/{id}', [JobRoleController::class, 'getJobRoleByDepartmentId']);
 
         Route::get('get-all-staff', [StaffController::class, 'getAllStaff']);
         Route::get('is-not-on-leave', [StaffController::class, 'isNotOnLeave']);
