@@ -105,7 +105,7 @@ class CompanySettingController extends Controller
             'currency' => 'sometimes',
             'address' => 'sometimes',
             'about' => 'sometimes',
-            'website' => ['sometimes', 'website'], // website is a custom App\Providers\UrlValidationServiceProvider::class,
+            'website' => 'sometimes', // website is a custom App\Providers\UrlValidationServiceProvider::class,
             'twitter' =>  ['sometimes', 'website'],
             'facebook' =>  ['sometimes', 'website'],
             'linkedin' =>  ['sometimes', 'website'],
