@@ -252,7 +252,7 @@ class Controller extends BaseController
                 }
             }
         }
-
+       
         $file->storeAs($folder, $name, "documents");
 
         return $folder . '/' . $name;

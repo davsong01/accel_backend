@@ -58,8 +58,8 @@ class CompanyDocumentController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ];
 
-        if ($request->has('file') && !is_null($request->file)) {
-            $data['file'] = '/uploads/brands/documents/' . $this->uploadProtectedFile($request->file, 'uploads/brands/documents');
+        if (!empty($request->file)) {
+            $data['file'] = $this->uploadProtectedFile($request->file, $this->sessionDetails('company_slug'));
         }
         
         $document = CompanyDocument::create($data);
@@ -109,10 +109,10 @@ class CompanyDocumentController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ];
 
-        if ($request->has('file') && !is_null($request->file)) {
-            $data['file'] = '/uploads/brands/documents/' . $this->uploadProtectedFile($request->file, 'uploads/brands/documents');
+        if (!empty($request->file)) {
+            $data['file'] = $this->uploadProtectedFile($request->file, $this->sessionDetails('company_slug'));
         }
-
+        
         $companyDocument->update($data);
 
         return response()->json(['message' => 'success', 'data' => null], 200);
