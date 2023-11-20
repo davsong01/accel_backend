@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use App\Channels\DatabaseNotificationChannel;
@@ -25,5 +26,9 @@ class AppServiceProvider extends ServiceProvider
     {
         Schema::defaultStringLength(191);
         $this->app->instance(IlluminateDatabaseChannel::class, new DatabaseNotificationChannel);
+
+        Validator::extend('website', function ($attribute, $value, $parameters, $validator) {
+            return preg_match('/^(https?:\/\/(www\.)?|www\.)[a-zA-Z0-9]+\.[a-zA-Z]{2,}(\/\S*)?$/', $value);
+        });
     }
 }

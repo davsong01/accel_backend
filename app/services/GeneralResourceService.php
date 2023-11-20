@@ -3330,4 +3330,54 @@ class GeneralResourceService
         
         return $bank_keywords[$code];
     }
-}
+
+    public static function timeZones(){
+        $timezones = [
+            'DST' => [
+                "value" => "Dateline Standard Time",
+                "abbr" => "DST",
+                "offset" => -12,
+                "isdst" => false,
+                "text" => "(UTC-12:00) International Date Line West",
+                "utc" => [
+                  "Etc/GMT+12"
+                ]
+            ],
+
+            'U' => [
+                "value" => "UTC-11",
+                "abbr" => "U",
+                "offset" => -11,
+                "isdst" => false,
+                "text" => "(UTC-11:00) Coordinated Universal Time-11",
+                "utc" => [
+                    "Etc/GMT+11",
+                    "Pacific/Midway",
+                    "Pacific/Niue",
+                    "Pacific/Pago_Pago"
+                ],
+            ],
+
+            'HST' => [
+                "value" => "Hawaiian Standard Time",
+                "abbr" => "HST",
+                "offset" => -10,
+                "isdst" => false,
+                "text" => "(UTC-10:00) Hawaii",
+                "utc" => [
+                    "Etc/GMT+10",
+                    "Pacific/Honolulu",
+                    "Pacific/Johnston",
+                    "Pacific/Rarotonga",
+                    "Pacific/Tahiti"
+                ]
+            ],
+
+
+
+
+        ];
+  {
+    
+  },
+  

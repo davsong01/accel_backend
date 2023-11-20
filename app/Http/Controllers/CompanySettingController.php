@@ -18,7 +18,7 @@ class CompanySettingController extends Controller
     public function index()
     {
         $companySetting = CompanySetting::where('company_id', $this->sessionDetails('company_id'))->first();
-        if(!$companySetting){
+        if (!$companySetting) {
             $companySetting = CompanySetting::create([
                 'company_id' =>  $this->sessionDetails('company_id'),
             ]);
@@ -32,12 +32,12 @@ class CompanySettingController extends Controller
     public function domainDetails($slug)
     {
         $company = Company::where('slug', $slug)->first();
-        
-        if(!$company){
+
+        if (!$company) {
             return response()->json(['message' => 'Company not found', 'data' => []], 200);
         }
         $companySetting = CompanySetting::where('company_id', $company->id)->first();
-        
+
         if (!$companySetting) {
             $companySetting = CompanySetting::create([
                 'company_id' =>  $this->sessionDetails('company_id'),
@@ -105,10 +105,10 @@ class CompanySettingController extends Controller
             'currency' => 'sometimes',
             'address' => 'sometimes',
             'about' => 'sometimes',
-            'website' => 'sometimes|url',
-            'twitter' => 'sometimes|url',
-            'facebook' => 'sometimes|url',
-            'linkedin' => 'sometimes|url',
+            'website' => ['sometimes', 'website'], // website is a custom App\Providers\UrlValidationServiceProvider::class,
+            'twitter' =>  ['sometimes', 'website'],
+            'facebook' =>  ['sometimes', 'website'],
+            'linkedin' =>  ['sometimes', 'website'],
         ]);
 
         if ($validator->fails()) {
@@ -137,7 +137,7 @@ class CompanySettingController extends Controller
             'company_id' => $this->sessionDetails('company_id')
         ];
 
-        
+
         if ($request->has('company_logo') && !is_null($request->company_logo)) {
             $data['company_logo'] = $this->uploadFile($request->company_logo, 'images/brands/logos');
         }
