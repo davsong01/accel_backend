@@ -133,14 +133,14 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::post('assign-role-to-staff', [StaffController::class, 'assignRoleToStaff']);
         Route::get('staff-roles/{staff_id}', [StaffController::class, 'getSingleStaffRoles']);
 
-        Route::get('staff-identification-settings/{id?}', [StaffController::class, 'staffIdentificationSetting']);
+        Route::get('staff-identification-settings', [StaffController::class, 'staffIdentificationSetting']);
         Route::post('update-staff-identification-settings', [StaffController::class, 'updateStaffIdentificationSetting']);
         Route::post('upload-staff-documents', [selfServiceController::class, 'uploadDocuments']);
 
         Route::get('staff-document-settings/{id?}', [StaffController::class, 'staffDocumentSetting']);
         Route::post('staff-document-setting', [StaffController::class, 'addStaffDocumentSetting']);
         Route::post('staff-document-setting/{id}', [StaffController::class, 'updateStaffDocumentSetting']);
-        Route::get('delete-staff-identification-settings/{id}', [StaffController::class, 'deleteStaffDocumentSetting']);
+        Route::get('delete-staff-document-settings/{id}', [StaffController::class, 'deleteStaffDocumentSetting']);
 
         Route::resource('special-request', SpecialRequestController::class);
         Route::resource('department', DepartmentController::class);
@@ -240,6 +240,9 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('staff-documents/{staff_id}', [SelfServiceController::class, 'getStaffDocument']);
         Route::get('staff-documents-by-document-setting-id/{id}/{staff_id}', [SelfServiceController::class, 'getStaffDocumentBySettingId']);
 
+        Route::get('generate-customer-id', [Controller::class, 'generateCustomerId']);
+        Route::get('customer-identification-settings', [CustomerController::class, 'customerIdentificationSetting']);
+        Route::post('update-customer-identification-settings', [CustomerController::class, 'updateCustomerIdentificationSetting']);
     });
 });
 

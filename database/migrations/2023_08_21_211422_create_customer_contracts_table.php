@@ -11,21 +11,23 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('customer_contracts', function (Blueprint $table) {
-            $table->id();
-            $table->integer('customer_id');
-            $table->integer('city_id')->nullable();
-            $table->integer('location_id')->nullable();
-            $table->integer('estate_id')->nullable();
-            $table->text('subscribers')->nullable();
-            $table->string('plot_size')->nullable();
-            $table->string('building_type')->nullable();
-            $table->string('property_type')->nullable();
-            $table->enum('status', ['lead', 'prospect', 'subscriber']);
-            $table->integer('company_id');
-            
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('customer_contracts')) {
+            Schema::create('customer_contracts', function (Blueprint $table) {
+                $table->id();
+                $table->integer('customer_id');
+                $table->integer('city_id')->nullable();
+                $table->integer('location_id')->nullable();
+                $table->integer('estate_id')->nullable();
+                $table->text('subscribers')->nullable();
+                $table->string('plot_size')->nullable();
+                $table->string('building_type')->nullable();
+                $table->string('property_type')->nullable();
+                $table->enum('status', ['lead', 'prospect', 'subscriber']);
+                $table->integer('company_id');
+                
+                $table->timestamps();
+            });
+        }
     }
 
     /**

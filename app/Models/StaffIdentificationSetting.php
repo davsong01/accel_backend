@@ -8,6 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class StaffIdentificationSetting extends Model
 {
     use HasFactory;
-
+    protected $guarded = [];
     protected $table = 'staff_identification_settings';
 }

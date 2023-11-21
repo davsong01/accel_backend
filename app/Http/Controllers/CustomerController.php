@@ -10,6 +10,7 @@ use Illuminate\Validation\Rule;
 use App\Models\CustomerContract;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Validator;
+use App\Models\CustomerIdentificationSetting;
 
 class CustomerController extends Controller
 {
@@ -155,7 +156,6 @@ class CustomerController extends Controller
         return response()->json(['message' => 'success', 'data' => $prospect], 200);
     }
 
-
     public function CustomerCount()
     {
         // $all = CustomerContract::where('company_id', $this->sessionDetails('company_id'))->count();
@@ -195,58 +195,72 @@ class CustomerController extends Controller
      */
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'first_name' => 'required',
-            'last_name' => 'required',
-            'gender' => 'required|in:male,female',
-            'email' => [
-                'required', 'email', Rule::unique('users')->where(function ($query) {
-                    $query->where('company_id', $this->sessionDetails('company_id'))->where('type', 'customer');
-                })
-            ],
-            'phone_number' => 'required',
-            // 'city' => 'required|exists:cities,id,company_id,' . $this->sessionDetails('company_id'),
-            // 'location' => 'required|exists:locations,id,company_id,' . $this->sessionDetails('company_id'),
-            // 'estate' => 'required|exists:estates,id,company_id,' . $this->sessionDetails('company_id'),
-            'residential_address' => 'required',
-        ]);
+        // $validator = Validator::make($request->all(), [
+        //     'first_name' => 'required',
+        //     'last_name' => 'required',
+        //     'gender' => 'required|in:male,female',
+        //     'email' => [
+        //         'required', 'email', Rule::unique('users')->where(function ($query) {
+        //             $query->where('company_id', $this->sessionDetails('company_id'))->where('type', 'customer');
+        //         })
+        //     ],
+        //     'phone_number' => 'required',
+        //     // 'city' => 'required|exists:cities,id,company_id,' . $this->sessionDetails('company_id'),
+        //     // 'location' => 'required|exists:locations,id,company_id,' . $this->sessionDetails('company_id'),
+        //     // 'estate' => 'required|exists:estates,id,company_id,' . $this->sessionDetails('company_id'),
+        //     'residential_address' => 'required',
+        // ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'error' => $validator->messages()->first(),
-                'data' => null,
-            ], 412);
-        }
+        // if ($validator->fails()) {
+        //     return response()->json([
+        //         'error' => $validator->messages()->first(),
+        //         'data' => null,
+        //     ], 412);
+        // }
 
-        // Add User
-        $user = User::updateOrCreate([
-            'first_name' => $request->first_name,
-            'email' => $request->email,
-            'gender' => $request->gender,
-            'last_name' => $request->last_name,
-            'phone_number' => $request->phone_number,
-            'residential_address' => $request->residential_address,
-            'company_id' => $this->sessionDetails('company_id'),
-            'branch_id' => $this->sessionDetails('branch_id'),
-            'email_verified_at' => now(),
-            'status' => 'active',
-            'type' => 'customer',
-            'password' => Hash::make('123456'),
-            'company_id' => $this->sessionDetails('company_id'),
-            'branch_id' => $this->sessionDetails('branch_id'),
-        ]);
+        // $data['additional_details'] = json_encode([
+        //     // 'alternate_number' => $data['alternate_number'] ?? '',
+        //     // 'alternate_email' => $data['alternate_email'] ?? '',
+        //     // 'state' => $data['state'] ?? '',
+        //     'residential_address' => $data['residential_address'] ?? '',
+        //     // 'marital_status' => $data['marital_status'] ?? '',
+        //     // 'nationality' => $data['nationality'] ?? '',
+        //     // 'lga' => $data['lga'] ?? '',
+        // ]);
 
-        if ($user) {
-            // Add Customer
-            $customer = Customer::updateOrCreate([
-                'company_id' => $this->sessionDetails('company_id'),
-                'branch_id' => $this->sessionDetails('branch_id'),
-                'user_id' => $user->id,
-                'verified' => 1,
-            ]);
-        }
+        // // Add User
+        // $user = User::updateOrCreate([
+        //     'first_name' => $request->first_name,
+        //     'email' => $request->email,
+        //     'gender' => $request->gender,
+        //     'last_name' => $request->last_name,
+        //     'phone_number' => $request->phone_number,
+        //     'additional_details' => $data['additional_details'],
+        //     'company_id' => $this->sessionDetails('company_id'),
+        //     'branch_id' => $this->sessionDetails('branch_id'),
+        //     'email_verified_at' => now(),
+        //     'status' => 'active',
+        //     'type' => 'customer',
+        //     'password' => Hash::make('123456'),
+        //     'company_id' => $this->sessionDetails('company_id'),
+        //     'branch_id' => $this->sessionDetails('branch_id'),
+        // ]);
 
-        return response()->json(['message' => 'success', 'data' => $customer], 200);
+        // if ($user) {
+        //     // Add Customer
+        //     $customer = Customer::updateOrCreate([
+        //         'company_id' => $this->sessionDetails('company_id'),
+        //         'branch_id' => $this->sessionDetails('branch_id'),
+        //         'user_id' => $user->id,
+        //         'verified' => 1,
+        //     ]);
+
+        //     $user->update([
+        //         'customerId' => $this->generateCustomerId($user, true),
+        //     ]);
+        // }
+
+        // return response()->json(['message' => 'success', 'data' => $customer], 200);
     }
 
     /**
@@ -257,7 +271,6 @@ class CustomerController extends Controller
         $user = Customer::where('customers.id', $id)->join('users', 'users.id', '=', 'customers.user_id')
             ->select('users.status', 'users.type', 'users.first_name', 'users.last_name', 'users.middle_name', 'users.phone_number', 'users.residential_address', 'users.gender', 'users.email', 'users.contact_information', 'users.next_of_kin', 'users.additional_information', 'job_information', 'customers.id AS customer_id')
             ->first();
-        // $user = User::select('customers.id','users.*')->where('id', $customer->user_id)->first();
         return response()->json(['message' => 'success', 'data' => $user], 200);
     }
 
@@ -274,20 +287,6 @@ class CustomerController extends Controller
      */
     public function update(Request $request, Customer $customer)
     {
-        // $request->validate([
-
-        //     'name' => 'required',
-
-        //     'email' => [
-
-        //         'required', 'email', Rule::unique('transporters')->where(function ($query) {
-
-        //             $query->where('deleted', '=', '0')->where('id', '!=', $id);
-        //         })
-
-        //     ],
-
-        // ]);
     }
 
     /**
@@ -313,5 +312,48 @@ class CustomerController extends Controller
         ];
 
         return response()->json(['message' => 'success', 'data' => $data], 200);
+    }
+
+    public function customerIdentificationSetting(){
+        $staff_ientification_settings = CustomerIdentificationSetting::where(['company_id' => $this->sessionDetails('company_id')])->get();
+        return response()->json(['message' => 'successfull', 'data' => $staff_ientification_settings], 200);
+    }
+
+    public function updateCustomerIdentificationSetting(Request $request){
+        $validator = Validator::make($request->all(), [
+            'use_id_generator' => 'in:0,1',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->messages()->first(),
+                'data' => [],
+            ], 412);
+        }
+
+        if ($request->use_id_generator == 1) {
+            $validator = Validator::make($request->all(), [
+                'order_of_appearance' => 'required', // | prefix,registration_year,registration_month,auto_increment_number,random_number
+                'next_auto_increment_number' => 'nullable',
+                'auto_increment_number_digit' => 'nullable',
+                'prefix' => 'nullable',
+                'appearance_format' => 'nullable',
+            ]);
+        }
+        
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->messages()->first(),
+                'data' => null,
+            ], 412);
+        }
+
+        $data = $validator->valid();
+        $data['order_of_appearance'] = json_encode($data['order_of_appearance']);
+        $data['company_id'] = $this->sessionDetails('company_id');
+       
+        CustomerIdentificationSetting::updateOrCreate(['company_id' => $data['company_id']], $data);
+
+        return response()->json(['message' => 'Successful', 'data' => []], 200);
     }
 }

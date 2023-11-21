@@ -195,13 +195,23 @@ class CustomerContractController extends Controller
     public function createUser($request)
     {
         // Add User
+        $additional_details = json_encode([
+            // 'alternate_number' => $data['alternate_number'] ?? '',
+            // 'alternate_email' => $data['alternate_email'] ?? '',
+            // 'state' => $data['state'] ?? '',
+            'residential_address' => $request->residential_address ?? '',
+            // 'marital_status' => $data['marital_status'] ?? '',
+            // 'nationality' => $data['nationality'] ?? '',
+            // 'lga' => $data['lga'] ?? '',
+        ]);
+        
         $user = User::updateOrCreate([
             'first_name' => $request['first_name'],
             'email' => $request['email'],
             'gender' => $request['gender'],
             'last_name' => $request['last_name'],
             'phone_number' => $request['phone_number'],
-            'residential_address' => $request['residential_address'],
+            'additional_details' => $additional_details ?? null,
             'company_id' => $this->sessionDetails('company_id'),
             'branch_id' => $this->sessionDetails('branch_id'),
             'email_verified_at' => now(),
@@ -210,6 +220,8 @@ class CustomerContractController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
             'branch_id' => $this->sessionDetails('branch_id'),
         ]);
+
+        $user->update(['customerId' => $this->generatecustomerId($user)]);
 
         return $user;
     }

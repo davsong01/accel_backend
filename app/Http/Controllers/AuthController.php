@@ -51,16 +51,25 @@ class AuthController extends Controller
             ], 401);
         }
 
-        if (!$request['email']) {
-            return response()->json([
-                'error' => 'Email or staff ID is required!'
-            ], 412);
-        }
+        
 
         if (\Request::route()->getPrefix() == 'api/customer') {
-            $user = User::where('email', $request['email'])->where('type','customer')->orWhere('customerId', $request['email'])->first();
+            if (!$request['email']) {
+                return response()->json([
+                    'error' => 'Email or Customer ID is required!'
+                ], 412);
+            }
+            $user = User::where('type','customer');
+            $user = $user->where('email', $request['email'])->orWhere('customerId', $request['email'])->first();
         }else{
-            $user = User::where('email', $request['email'])->where('type','staff')->orWhere('staff_id', $request['email'])->first();
+            if (!$request['email']) {
+                return response()->json([
+                    'error' => 'Email or staff ID is required!'
+                ], 412);
+            }
+
+            $user = User::where('type', 'staff');
+            $user = $user->where('email', $request['email'])->orWhere('staff_id', $request['email'])->first();
         }
         
         if (!$user || !Hash::check($request['password'], $user->password)) {

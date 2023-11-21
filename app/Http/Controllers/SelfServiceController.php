@@ -192,8 +192,8 @@ class SelfServiceController extends Controller
             $staff_id = $request->staff_id;
         }
 
-        $setting = DB::table('staff_document_settings')->where(['company_id' => $this->sessionDetails('company_id'), 'id' => $request->id])->first();
-
+        $setting = StaffDocumentSetting::where(['company_id' => $this->sessionDetails('company_id'), 'id' => $request->id])->first();
+        
         if(!$setting){
             return response()->json([
                 'error' => 'No document setting defined!',

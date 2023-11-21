@@ -22,6 +22,7 @@ use Illuminate\Validation\Rules\Unique;
 use App\Notifications\StaffNotification;
 use App\Models\LeaveAndAbsenceManagement;
 use App\Models\StaffIdentificationSetting;
+use App\Models\CustomerIdentificationSetting;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -143,10 +144,10 @@ class Controller extends BaseController
     public function generateStaffId($date_of_employment = null, $internal = false){
         $date_of_employment = !empty($date_of_employment) ? Carbon::parse($date_of_employment) : Carbon::today();
 
-        $settings = StaffIdentificationSetting::where('id',$this->sessionDetails('company_id'))->first();
+        $settings = StaffIdentificationSetting::where('company_id',$this->sessionDetails('company_id'))->first();
         $lastUser = User::where('company_id', $this->sessionDetails('company_id'))->where('type', 'staff')->latest()->first();
         $lastUserId = $lastUser->id + 1;
-        $lastStaffId = $lastUser->staff_id;
+        $lastStaffId = $lastUser->staff_id ?? 1;
        
         if(!$settings) return;
 
@@ -191,6 +192,66 @@ class Controller extends BaseController
 
         return response()->json(['message' => 'Successful', 'data' => $id], 200);
 
+    }
+
+    public function generatecustomerId()
+    {
+        $created_at = !empty($created_at) ? Carbon::parse($created_at) : Carbon::today();
+
+        $settings = CustomerIdentificationSetting::where('company_id', $this->sessionDetails('company_id'))->first();
+        $lastUser = User::where('company_id', $this->sessionDetails('company_id'))->where('type', 'customer')->latest()->first();
+        $lastUserId = $lastUser->id + 1;
+        $lastCustomerId = $lastUser->customerId ?? 1;
+        
+    //     dd($settings);
+    //     use_id_generator" => 1
+    // "next_auto_increment_number" => "2"
+    // "auto_increment_number_digit" => "4"
+    // "appearance_format" => "1111"
+    // "prefix" => "ACC"
+    // "order_of_appearance" => "["prefix","registration_year","registration_month"]"
+        if (!$settings) return;
+        $order_of_preference = !empty($settings->order_of_preference) ? json_encode($settings->order_of_preference, true) : [];
+        $id = '';
+
+        if ($settings->use_id_generator == 1) {
+            $format = !empty($settings->appearance_format) ? $settings->appearance_format : NULL;
+            
+            if (in_array('prefix', $order_of_preference)) {
+                $id = $created_at->format('Y') . sprintf('%06d', $lastUserId);
+            }
+            if (in_array('registration_year', $order_of_preference)) {
+                $id = $created_at->format('Y') . sprintf('%06d', $lastUserId);
+            }
+
+            if ($settings->id_generator_type == 'employment_month') {
+                $id = $created_at->format('m') . sprintf('%06d', $lastUserId);
+            }
+
+            if ($settings->id_generator_type == 'employment_day') {
+                $id = $created_at->format('d') . sprintf('%06d', $lastUserId);
+            }
+
+            if ($settings->id_generator_type == 'auto_increment_number') {
+                // $id = $date_of_employment->format('d');
+                $digits = $settings->auto_increment_number_digit;
+                $id = $lastUserId + $digits;
+
+                return sprintf('%06d', $id);
+            }
+
+            if ($settings->id_generator_type == 'random_number') {
+                $count = strlen($lastCustomerId);
+                $min = pow(10, $count - 1);
+                $id = mt_rand($min, $min * 9);
+            }
+        } else {
+            $count = strlen($lastCustomerId);
+            $min = pow(10, $count - 1);
+            $id = mt_rand($min, $min * 9);
+        }
+        
+        return response()->json(['message' => 'Successful', 'data' => $id], 200);
     }
 
     public function deleteUploadsFile($imagePath)
