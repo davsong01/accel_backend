@@ -149,7 +149,9 @@ class Controller extends BaseController
         $lastUserId = $lastUser->id + 1;
         $lastStaffId = $lastUser->staff_id ?? 1;
        
-        if(!$settings) return;
+        if(!$settings){
+            return response()->json(['message' => 'Successful', 'data' => $lastUserId], 200);
+        } 
 
         $id = '';
 
@@ -202,49 +204,51 @@ class Controller extends BaseController
         $lastUser = User::where('company_id', $this->sessionDetails('company_id'))->where('type', 'customer')->latest()->first();
         $lastUserId = $lastUser->id + 1;
         $lastCustomerId = $lastUser->customerId ?? 1;
+
+        //     dd($settings);
+        //     use_id_generator" => 1
+        // "next_auto_increment_number" => "2"
+        // "auto_increment_number_digit" => "4"
+        // "appearance_format" => "1111"
+        // "prefix" => "ACC"
+        // "order_of_appearance" => "["prefix","registration_year","registration_month"]"
+        if (!$settings) {
+            return response()->json(['message' => 'Successful', 'data' => $lastUserId], 200);
+        } 
         
-    //     dd($settings);
-    //     use_id_generator" => 1
-    // "next_auto_increment_number" => "2"
-    // "auto_increment_number_digit" => "4"
-    // "appearance_format" => "1111"
-    // "prefix" => "ACC"
-    // "order_of_appearance" => "["prefix","registration_year","registration_month"]"
-        if (!$settings) return;
-        $order_of_preference = !empty($settings->order_of_preference) ? json_encode($settings->order_of_preference, true) : [];
+        $order_of_appearance = !empty($settings->order_of_appearance) ? json_decode($settings->order_of_appearance, true) : [];
         $id = '';
-
+        
         if ($settings->use_id_generator == 1) {
-            $format = !empty($settings->appearance_format) ? $settings->appearance_format : NULL;
+            $format = !empty($settings->appearance_format) ? $settings->appearance_format : ' ';
             
-            if (in_array('prefix', $order_of_preference)) {
-                $id = $created_at->format('Y') . sprintf('%06d', $lastUserId);
-            }
-            if (in_array('registration_year', $order_of_preference)) {
-                $id = $created_at->format('Y') . sprintf('%06d', $lastUserId);
+            foreach($order_of_appearance as $appearance){
+                $slash = end($order_of_appearance) != $appearance ? '/' : '';
+                if($appearance == 'prefix'){
+                    $id .= $settings->prefix. $slash;
+                }
+
+                if($appearance == 'registration_year'){
+                    $id .= $created_at->format('Y') . $slash;
+                }
+
+                if ($appearance == 'registration_month') {
+                    $id .= $created_at->format('m') . $slash;
+                }
+
+                if ($appearance == 'auto_increment_number') {
+                    $digits = $settings->auto_increment_number_digit;
+                    $id .= $lastUserId + $digits . $slash;
+                }
+                
+                if($appearance == 'random_number'){
+                    $count = strlen($format);
+                    $min = pow(10, $count - 1);
+                    $id .= mt_rand($min, $min * 9) . $slash;
+                }
+
             }
 
-            if ($settings->id_generator_type == 'employment_month') {
-                $id = $created_at->format('m') . sprintf('%06d', $lastUserId);
-            }
-
-            if ($settings->id_generator_type == 'employment_day') {
-                $id = $created_at->format('d') . sprintf('%06d', $lastUserId);
-            }
-
-            if ($settings->id_generator_type == 'auto_increment_number') {
-                // $id = $date_of_employment->format('d');
-                $digits = $settings->auto_increment_number_digit;
-                $id = $lastUserId + $digits;
-
-                return sprintf('%06d', $id);
-            }
-
-            if ($settings->id_generator_type == 'random_number') {
-                $count = strlen($lastCustomerId);
-                $min = pow(10, $count - 1);
-                $id = mt_rand($min, $min * 9);
-            }
         } else {
             $count = strlen($lastCustomerId);
             $min = pow(10, $count - 1);

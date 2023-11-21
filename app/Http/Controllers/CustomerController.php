@@ -351,7 +351,7 @@ class CustomerController extends Controller
         $data = $validator->valid();
         $data['order_of_appearance'] = json_encode($data['order_of_appearance']);
         $data['company_id'] = $this->sessionDetails('company_id');
-       
+      
         CustomerIdentificationSetting::updateOrCreate(['company_id' => $data['company_id']], $data);
 
         return response()->json(['message' => 'Successful', 'data' => []], 200);
