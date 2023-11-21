@@ -110,7 +110,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('estate-in-location/{location_id}', [EstateController::class, 'getEstateInLocation']);
 
         Route::resource('estate-construction-setting', EstateConstructionSettingController::class);
-
+        
         Route::post('update-company-profile', [CompanySettingController::class, 'updateCompanyProfile']);
         Route::get('all-staff-and-role/{staff_id?}', [CompanySettingController::class, 'staffAndRoles']);
 

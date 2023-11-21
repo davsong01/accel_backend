@@ -17,7 +17,6 @@ return new class extends Migration
             $table->integer('period')->nullable();
             $table->timestamp('date')->nullable();
             $table->string('amount')->nullable();
-            $table->string('status')->default('pending');
             $table->enum('type', ['advance','claims']);
             $table->enum('bypass_approval', ['Yes','No'])->default('Yes');
             $table->string('status')->default('pending');

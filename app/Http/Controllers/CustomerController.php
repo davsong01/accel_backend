@@ -231,6 +231,7 @@ class CustomerController extends Controller
             'email_verified_at' => now(),
             'status' => 'active',
             'type' => 'customer',
+            'password' => Hash::make('123456'),
             'company_id' => $this->sessionDetails('company_id'),
             'branch_id' => $this->sessionDetails('branch_id'),
         ]);
