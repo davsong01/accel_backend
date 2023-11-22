@@ -447,33 +447,33 @@ class Controller extends BaseController
             'commission_id' => !empty($staff->commission_id) ? 1 : 0
         ];
 
-        $job_information = array_sum($job_information) / count($job_information) * $job_information_max_percent;
+        $job_information = !empty($job_information) ? array_sum($job_information) / count($job_information) * $job_information_max_percent : 0;
 
         $others = [
-            'first_name' => !empty($user->first_name) ? 1 : 0,
-            'middle_name' => !empty($user->middle_name) ? 1 : 0,
-            'last_name' => !empty($user->last_name) ? 1 : 0,
-            'email_address' => !empty($user->email) ? 1 : 0,
-            'phone_number' => !empty($user->phone) ? 1 : 0,
-            'alternate_email_address' => !empty($additional_details['alternate_email']) ? 1 : 0,
-            'username' => !empty($user->username) ? 1 : 0,
-            'gender' => !empty($user->gender) ? 1 : 0,
-            'date_of_birth' => !empty($user->date_of_birth) ? 1 : 0,
-            'marital_status' => !empty($additional_details['marital_status']) ? 1 : 0,
-            'alternate_number' => !empty($additional_details['alternate_number']) ? 1 : 0,
-            'nationality' => !empty($additional_details['nationality']) ? 1 : 0,
-            'state' => !empty($additional_details['state']) ? 1 : 0,
-            'lga' => !empty($additional_details['lga']) ? 1 : 0,
-            'residential_address' => !empty($additional_details['residential_address']) ? 1 : 0,
-            'nok_first_name' => !empty($nok_details['nok_first_name']) ? 1 : 0,
-            'nok_last_name' => !empty($nok_details['nok_last_name']) ? 1 : 0,
-            'nok_phone_number' => !empty($nok_details['nok_phone_number']) ? 1 : 0,
-            'nok_house_address' => !empty($nok_details['nok_house_address']) ? 1 : 0,
-            'nok_email_address' => !empty($nok_details['nok_email_address']) ? 1 : 0,
-            'nok_relationship' => !empty($nok_details['nok_relationship']) ? 1 : 0
+            // 'first_name' => !empty($user->first_name) ? 1 : 0,
+            // 'middle_name' => !empty($user->middle_name) ? 1 : 0,
+            // 'last_name' => !empty($user->last_name) ? 1 : 0,
+            // 'email_address' => !empty($user->email) ? 1 : 0,
+            // 'phone_number' => !empty($user->phone) ? 1 : 0,
+            // 'alternate_email_address' => !empty($additional_details['alternate_email']) ? 1 : 0,
+            // 'username' => !empty($user->username) ? 1 : 0,
+            // 'gender' => !empty($user->gender) ? 1 : 0,
+            // 'date_of_birth' => !empty($user->date_of_birth) ? 1 : 0,
+            // 'marital_status' => !empty($additional_details['marital_status']) ? 1 : 0,
+            // 'alternate_number' => !empty($additional_details['alternate_number']) ? 1 : 0,
+            // 'nationality' => !empty($additional_details['nationality']) ? 1 : 0,
+            // 'state' => !empty($additional_details['state']) ? 1 : 0,
+            // 'lga' => !empty($additional_details['lga']) ? 1 : 0,
+            // 'residential_address' => !empty($additional_details['residential_address']) ? 1 : 0,
+            // 'nok_first_name' => !empty($nok_details['nok_first_name']) ? 1 : 0,
+            // 'nok_last_name' => !empty($nok_details['nok_last_name']) ? 1 : 0,
+            // 'nok_phone_number' => !empty($nok_details['nok_phone_number']) ? 1 : 0,
+            // 'nok_house_address' => !empty($nok_details['nok_house_address']) ? 1 : 0,
+            // 'nok_email_address' => !empty($nok_details['nok_email_address']) ? 1 : 0,
+            // 'nok_relationship' => !empty($nok_details['nok_relationship']) ? 1 : 0
         ];
         
-        $others = array_sum($others) / count($others) * $others_max_percent;
+        $others = !empty($others) ? array_sum($others) / count($others) * $others_max_percent : 0;
         $total = number_format($job_information + $others);
         return $total . '%';
     }
