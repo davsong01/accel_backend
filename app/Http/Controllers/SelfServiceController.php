@@ -224,13 +224,14 @@ class SelfServiceController extends Controller
             $check = in_array($extension, $allowedfileExtension);
             
             if ($check) {
-                // $toSave[] = $this->uploadProtectedFile($file, $this->sessionDetails('company_slug'));
                 $save = $this->uploadProtectedFile($file, $this->sessionDetails('company_slug'));
+                
                 StaffUploadedDocument::create([
                     'staff_id' => $staff_id,
                     'staff_document_id' => $setting->id,
                     'name' => $setting->name,
-                    'file' => $save,
+                    'file' => $save['filepath'],
+                    'filename' => $save['filename'],
                     'company_id' => $this->sessionDetails('company_id')
                 ]);
             }else{

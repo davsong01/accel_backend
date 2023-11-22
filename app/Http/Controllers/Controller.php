@@ -319,8 +319,11 @@ class Controller extends BaseController
         }
        
         $file->storeAs($folder, $name, "documents");
-
-        return $folder . '/' . $name;
+       
+        return [
+            'filename' => $name,
+            'filepath' => $folder . '/' . $name
+        ];
     }
 
     public function getPathToSaveFile($location = null){
