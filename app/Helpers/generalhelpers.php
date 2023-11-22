@@ -67,4 +67,27 @@ if (!function_exists("getRoleAccess")) {
         return $allAccess;
 
     }
+
+    if (!function_exists("reConstructUploadedFile")) {
+        function reConstructUploadedProtectedDocument($file){
+            $res = [];
+            
+            $file = explode('/', $file);
+            if(!empty($file)){
+                $file = array_slice($file, -1, 1);
+                
+                $full = base64_decode($file[0]);
+               
+                $name = explode('/', $full);
+                $name = array_slice($name, -1, 1);
+                
+                $res = [
+                    'filename' => $name[0],
+                    'filepath' => 'documents/'.$full,
+                ];
+            }
+
+            return $res;
+        }
+    }
 }

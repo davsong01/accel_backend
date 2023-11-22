@@ -136,6 +136,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('staff-identification-settings', [StaffController::class, 'staffIdentificationSetting']);
         Route::post('update-staff-identification-settings', [StaffController::class, 'updateStaffIdentificationSetting']);
         Route::post('upload-staff-documents', [selfServiceController::class, 'uploadDocuments']);
+        Route::get('delete-staff-document/{id}', [SelfServiceController::class, 'deleteDocument']);
 
         Route::get('staff-document-settings/{id?}', [StaffController::class, 'staffDocumentSetting']);
         Route::post('staff-document-setting', [StaffController::class, 'addStaffDocumentSetting']);
@@ -208,6 +209,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
             Route::get('delete-avatar/{staff_id?}', [SelfServiceController::class, 'deleteAvatar']);
             Route::get('get-avatar/{staff_id}', [SelfServiceController::class, 'getAvatar']);
             Route::post('upload-staff-documents', [SelfServiceController::class, 'uploadDocuments']);
+            Route::get('delete-staff-document/{id}', [SelfServiceController::class, 'deleteDocument']);
             Route::get('staff-documents', [SelfServiceController::class, 'getStaffDocument']);
             Route::get('staff-documents-by-document-setting-id/{id}', [SelfServiceController::class, 'getStaffDocumentBySettingId']);
             Route::post('send-reset-password-mail', [SelfServiceController::class, 'sendResetPasswordEmail']);

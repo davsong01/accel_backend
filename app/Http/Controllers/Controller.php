@@ -260,9 +260,8 @@ class Controller extends BaseController
 
     public function deleteUploadsFile($imagePath)
     {
-
-        if (file_exists(base_path() . $imagePath)) {
-            unlink(base_path() . $imagePath);
+        if (file_exists(base_path() . '/'. $imagePath)) {
+            unlink(base_path(). '/' . $imagePath);
         }
 
         return;

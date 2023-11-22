@@ -243,6 +243,25 @@ class SelfServiceController extends Controller
         }
 
         return response()->json(['message' => 'Upload succesful', 'data' => []], 200);
+    }
+
+    public function deleteDocument($id){
+        if (\Request::route()->getPrefix() == 'api/admin/self-service') {
+            $document = StaffUploadedDocument::where(['staff_id' => auth()->user()->staff->id, 'company_id' => $this->sessionDetails('company_id')])->first();
+        }else{
+            $document = StaffUploadedDocument::where(['id' => $id, 'company_id'=> $this->sessionDetails('company_id')])->first();
+        }
+        
+        if($document){
+            $file = reConstructUploadedProtectedDocument($document->file);
+            $this->deleteUploadsFile($file['filepath']);
+           
+            $document->delete();
+            return response()->json(['message' => 'Delete succesful', 'data' => []], 200);
+        }else{
+            return response()->json(['message' => 'No record found', 'data' => []], 200);
+
+        }
 
     }
 
