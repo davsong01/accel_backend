@@ -98,6 +98,15 @@ class AuthController extends Controller
                 'job_role' => $user->staff->job_role->name ?? '',
             ],
         ];
+
+        if($user->type == 'staff'){
+            $datax['userInfo']['staff_id'] = $user->staff_id;
+        }
+
+        if ($user->type == 'customer') {
+            $datax['userInfo']['customer_id'] = $user->customerId;
+        }
+        
         return response()->json(['data' => $datax, 'message' => Session::all()], 200);
     }
 
