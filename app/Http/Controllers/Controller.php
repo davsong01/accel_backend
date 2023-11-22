@@ -150,45 +150,46 @@ class Controller extends BaseController
         $lastStaffId = $lastUser->staff_id ?? 1;
        
         if(!$settings){
-            return response()->json(['message' => 'Successful', 'data' => $lastUserId], 200);
-        } 
+            $id =  sprintf('%06d', $lastUserId);
+           
+        } else{
+            $id = '';
 
-        $id = '';
+            if ($settings->use_id_generator == 1) {
+                if ($settings->id_generator_type == 'employment_year') {
+                    $id = $date_of_employment->format('Y') . sprintf('%06d', $lastUserId);
+                }
 
-        if($settings->use_id_generator == 1){
-            if($settings->id_generator_type == 'employment_year'){
-                $id = $date_of_employment->format('Y'). sprintf('%06d', $lastUserId);
-            }
+                if ($settings->id_generator_type == 'employment_month') {
+                    $id = $date_of_employment->format('m') . sprintf('%06d', $lastUserId);
+                }
 
-            if ($settings->id_generator_type == 'employment_month') {
-                $id = $date_of_employment->format('m') . sprintf('%06d', $lastUserId);
-            }
+                if ($settings->id_generator_type == 'employment_day') {
+                    $id = $date_of_employment->format('d') . sprintf('%06d', $lastUserId);
+                }
 
-            if ($settings->id_generator_type == 'employment_day') {
-                $id = $date_of_employment->format('d') . sprintf('%06d', $lastUserId);
-            }
+                if ($settings->id_generator_type == 'auto_increment_number') {
+                    // $id = $date_of_employment->format('d');
+                    $digits = $settings->auto_increment_number_digit;
+                    $id = $lastUserId + $digits;
 
-            if ($settings->id_generator_type == 'auto_increment_number') {
-                // $id = $date_of_employment->format('d');
-                $digits = $settings->auto_increment_number_digit;
-                $id = $lastUserId + $digits;
+                    return sprintf('%06d', $id);
+                }
 
-                return sprintf('%06d', $id);
-            }
-
-            if ($settings->id_generator_type == 'random_number') {
+                if ($settings->id_generator_type == 'random_number') {
+                    $count = strlen($lastStaffId);
+                    $min = pow(10, $count - 1);
+                    $id = mt_rand($min, $min * 9);
+                }
+            } else {
                 $count = strlen($lastStaffId);
-                $min = pow(10, $count-1);
-                $id = mt_rand($min, $min*9);
+                $min = pow(10, $count - 1);
+                $id = mt_rand($min, $min * 9);
             }
-
-        }else{
-            $count = strlen($lastStaffId);
-            $min = pow(10, $count - 1);
-            $id = mt_rand($min, $min * 9);
         }
 
-        if($internal){
+       
+        if($internal && $internal == true){
             return $id;
         }
 
