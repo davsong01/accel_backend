@@ -531,10 +531,12 @@ class StaffController extends Controller
             ->leftjoin("users", "staff.user_id", "=", "users.id")->where(['users.status' => 'active', 'type' => 'staff'])
             ->leftjoin("job_types", "staff.jobtype_id", "=", "job_types.id")
             ->leftjoin("job_roles", "staff.jobrole_id", "=", "job_roles.id")
-            ->leftjoin("branches", "users.branch_id", "=", "branches.id")
+            ->leftjoin("branches", "staff.branch_id", "=", "branches.id")
             ->leftjoin("departments", "staff.department_id", "=", "departments.id")
-            ->select("staff.id AS staff_id", "users.status", "users.staff_id as employee_id", "staff.created_at", "users.first_name", "users.username", "users.last_name", "users.middle_name", "users.avatar", "users.phone_number", "users.email", "staff.id AS staff_id", "users.type", "users.company_id", "staff.jobtype_id", "users.id AS user_id", "staff.date_of_employment", "branches.id AS branch_id", "branches.name AS branch_name", "departments.id AS department_id", "departments.name AS department_name", "job_roles.id AS job_role_id", "job_roles.name AS job_role_name", "job_types.id AS job_type_id", "job_types.name AS job_type_name", "users.additional_details", "users.next_of_kin", "users.date_of_birth AS date_of_birth", "users.gender")
+            ->leftjoin("commissions", "staff.commission_id", "=", "commissions.id")
+            ->select("staff.id AS staff_id", "users.status", "users.staff_id as employee_id", "staff.created_at", "users.first_name", "users.username", "users.last_name", "users.middle_name", "users.avatar", "users.phone_number", "users.email", "staff.id AS staff_id", "users.type", "users.company_id", "staff.jobtype_id", "users.id AS user_id", "staff.date_of_employment", "staff.branch_id AS branch_id", "branches.name AS branch_name", "departments.id AS department_id", "departments.name AS department_name", "job_roles.id AS job_role_id", "job_roles.name AS job_role_name", "job_types.id AS job_type_id", "job_types.name AS job_type_name", "users.additional_details", "users.next_of_kin", "users.date_of_birth AS date_of_birth", "users.gender", "staff.commission_id AS commission_id", "commissions.name AS commission_name", "commissions.percentage",)
             ->first();
+        
 
         $profile_completenes = $this->profileCompletenes($staff);
         $additional_details = !empty($staff->additional_details) ? json_decode($staff->additional_details, true) : [];

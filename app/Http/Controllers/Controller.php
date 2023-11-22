@@ -432,11 +432,24 @@ class Controller extends BaseController
         }else{
             $user = Auth::user();
         }
+        $job_information_max_percent = 15;
+        $others_max_percent = 85;
         
         $additional_details = !empty($user->additional_details) ? json_decode($user->additional_details, true) : [];
         $nok_details = !empty($user->next_of_kin) ? json_decode(Auth::user()->next_of_kin, true) : [];
+        
+        $job_information = [
+            'jobtype_id' => !empty($staff->jobtype_id) ? 1 : 0,
+            'date_of_employment' => !empty($staff->date_of_employment) ? 1 : 0,
+            'department_id' => !empty($staff->department_id) ? 1 : 0,
+            'job_role_id' => !empty($staff->job_role_id) ? 1 : 0,
+            'branch_id' => !empty($staff->branch_id) ? 1 : 0,
+            'commission_id' => !empty($staff->commission_id) ? 1 : 0
+        ];
 
-        $expectedProfile = [
+        $job_information = array_sum($job_information) / count($job_information) * $job_information_max_percent;
+
+        $others = [
             'first_name' => !empty($user->first_name) ? 1 : 0,
             'middle_name' => !empty($user->middle_name) ? 1 : 0,
             'last_name' => !empty($user->last_name) ? 1 : 0,
@@ -460,7 +473,9 @@ class Controller extends BaseController
             'nok_relationship' => !empty($nok_details['nok_relationship']) ? 1 : 0
         ];
         
-        return number_format(array_sum($expectedProfile) / count($expectedProfile) * 100) . '%';
+        $others = array_sum($others) / count($others) * $others_max_percent;
+        $total = number_format($job_information + $others);
+        return $total . '%';
     }
 
     public function encodeUploadedFile($file){
