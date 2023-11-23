@@ -16,7 +16,7 @@ class ChartOfAccountController extends Controller
     public function index()
     {
         $coa = ChartOfAccount::with('account_category:id,name', 'account_type:id,type')->where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'desc')->get();
-        return response()->json(['message' => 'success', 'data' => []], 200);
+        return response()->json(['message' => 'success', 'data' => $coa], 200);
     }
 
     /**
