@@ -35,9 +35,9 @@ class ChartOfAccountController extends Controller
         $validator = Validator::make($request->all(), [
             'accounttype_id' => 'required|exists:account_types,id,company_id,' . $this->sessionDetails('company_id'),
             'account_category_id' => 'required|exists:account_categories,id,company_id,' . $this->sessionDetails('company_id'),
-            'currency' => 'required',
+            'currency' => 'required|exists:currencies,id',
             'name' => 'required',
-            'input_method' => 'required|in:direct,manual',
+            'input_method' => 'required|in:direct,indirect',
         ]);
 
         if ($validator->fails()) {
