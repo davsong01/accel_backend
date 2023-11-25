@@ -13,9 +13,16 @@ class AccountTypeController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $account_type = AccountType::with('account_category')->where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'desc')->get();
+        $account_type = AccountType::with('account_category')->where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'desc');
+
+        if (!empty($request->status)) {
+            $account_type = $account_type->where('status', $request->status);
+        }
+
+        $account_type = $account_type->get();
+        
         return response()->json(['message' => 'success', 'data' => $account_type], 200);
     }
 

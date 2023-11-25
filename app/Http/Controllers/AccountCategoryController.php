@@ -17,10 +17,16 @@ class AccountCategoryController extends Controller
      */
     public function index(Request $request)
     {
+        $account_category = AccountCategory::where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'desc');
+
+        if (!empty($request->status)) {
+            $account_category = $account_category->where('status', $request->status);
+        }
+
         if (!empty($request->paginate) && $request->paginate == 'false') {
-            $account_category = AccountCategory::where('company_id', $this->sessionDetails('company_id'))->get();
+            $account_category = $account_category->get();
         } else {
-            $account_category = AccountCategory::where('company_id', $this->sessionDetails('company_id'))->paginate(20)->withQueryString();
+            $account_category = $account_category->paginate(20)->withQueryString();
         }
 
         return response()->json(['message' => 'success', 'data' => $account_category], 200);

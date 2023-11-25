@@ -16,6 +16,13 @@ class AccountGroupController extends Controller
      */
     public function index(Request $request)
     {
+
+        $account_group = AccountGroup::where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'desc');
+
+        if (!empty($request->status)) {
+            $account_group = $account_group->where('status', $request->status);
+        }
+
         if (!empty($request->paginate) && $request->paginate == 'false') {
             $account_group = AccountGroup::where('company_id', $this->sessionDetails('company_id'))->get();
         } else {

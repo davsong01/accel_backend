@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Currency;
 use App\Models\AccountType;
 use App\Models\AccountCategory;
 use Illuminate\Database\Eloquent\Model;
@@ -19,5 +20,10 @@ class ChartOfAccount extends Model
     public function account_type()
     {
         return $this->belongsTo(AccountType::class, 'accounttype_id');
+    }
+
+    public function currency()
+    {
+        return $this->belongsTo(Currency::class, 'currency');
     }
 }

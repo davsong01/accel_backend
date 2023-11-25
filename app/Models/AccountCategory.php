@@ -10,4 +10,9 @@ class AccountCategory extends Model
     use HasFactory;
     protected $guarded = [];
 
+    public function account_type()
+    {
+        return $this->hasMany(AccountType::class, 'account_category_id');
+    }
+
 }
