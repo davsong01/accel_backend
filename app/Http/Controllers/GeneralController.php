@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Lga;
+use App\Models\Bank;
 use App\Models\States;
 use App\Models\Country;
+use App\Models\Currency;
 use Illuminate\Http\Request;
 use App\Services\GeneralResourceService;
 use NunoMaduro\Collision\Adapters\Phpunit\State;
@@ -44,14 +46,14 @@ class GeneralController extends Controller
     }
 
     public function getBanks(){
-        $banks = GeneralResourceService::getBanks();
+        $banks = Bank::all();
 
         return response()->json(['message' => 'success', 'data' => $banks], 200);
     }
 
     public function getCurrencies()
     {
-        $currencies = GeneralResourceService::getCurrencies();
+        $currencies = Currency::all();
 
         return response()->json(['message' => 'success', 'data' => $currencies], 200);
     }

@@ -3138,7 +3138,7 @@ class GeneralResourceService
         return $currencies;
     }
 
-    public static function bankKeywords($code){
+    public static function bankKeywords(){
         $bank_keywords = [
             "044" => [
                 "Access",
@@ -3328,7 +3328,7 @@ class GeneralResourceService
             ]
         ];
         
-        return $bank_keywords[$code];
+        return $bank_keywords;
     }
 
     public static function timeZones(){

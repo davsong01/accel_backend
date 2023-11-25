@@ -3,15 +3,21 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+
+use App\Models\Bank;
 use App\Models\Company;
 use Illuminate\Support\Str;
 use Illuminate\Database\Seeder;
+use Database\Seeders\BanksSeeder;
 use Database\Seeders\GeneralSeeder;
+use Database\Seeders\CurrencySeeder;
+use Database\Seeders\TimeZoneSeeder;
 use Illuminate\Support\Facades\Hash;
 use Database\Seeders\LgasTableSeeder;
 use Database\Seeders\StatesTableSeeder;
 use Database\Seeders\CountriesTableSeeder;
 use Database\Seeders\MessageProvidersSeeder;
+use PhpOffice\PhpSpreadsheet\Shared\TimeZone;
 
 class DatabaseSeeder extends Seeder
 {
@@ -26,6 +32,10 @@ class DatabaseSeeder extends Seeder
             // StatesTableSeeder::class,
             // LgasTableSeeder::class,
             // MessageProvidersSeeder::class
+            BanksSeeder::class,
+            CurrencySeeder::class,
+            BankKeywordsSeeder::class,
+            TimeZoneSeeder::class,
         ]);
       
     }
