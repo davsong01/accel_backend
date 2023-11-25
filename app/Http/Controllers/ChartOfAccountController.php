@@ -51,7 +51,7 @@ class ChartOfAccountController extends Controller
             'accounttype_id' => $request->accounttype_id,
             'account_category_id' => $request->account_category_id,
             'currency' => $request->currency,
-            'name' => 'required',
+            'name' => $request->name,
             'input_method' => $request->input_method,
             'company_id' => $this->sessionDetails('company_id'),
         ]);
