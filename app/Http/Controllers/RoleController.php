@@ -20,7 +20,7 @@ class RoleController extends Controller
         if (!$type) {
             return response()->json(['error' => 'The role type is required as a query param!'], 412);
         }
-        $roles = Role::with('department')->where('type', $type)
+        $roles = Role::where('type', $type)
             ->where('company_id', $this->sessionDetails('company_id'))
             ->get();
       

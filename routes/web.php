@@ -13,7 +13,9 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
-
+Route::get('/verifyenc/{slug}', function($slug){
+    return base64_decode($slug);
+});
 Route::get('/cron-process-messages-transaction', [MessageTransactionController::class, 'processMessagesTransaction']);
 Route::get('/', function () {
     // return view('welcome');

@@ -56,7 +56,8 @@ use App\Http\Controllers\TransactionTypeDefinitionController;
 |
 */
 
-Route::post('/register', [AuthController::class, 'register']);
+// Route::post('/register', [AuthController::class, 'register']);
+
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('documents/{filename}', function ($filename) {
         $filename = base64_decode($filename);
