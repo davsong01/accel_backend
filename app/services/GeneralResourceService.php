@@ -3332,7 +3332,7 @@ class GeneralResourceService
     }
 
     public static function timeZones(){
-        $timezones = [
+        $zones = [
             1 => [
                 "value" => "Dateline Standard Time",
                 "abbr" => "DST",
@@ -4821,7 +4821,7 @@ class GeneralResourceService
 
         ];
 
-        return $timezones;
+        return $zones;
     }
 
 }
