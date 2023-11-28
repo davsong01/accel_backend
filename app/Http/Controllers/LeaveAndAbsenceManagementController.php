@@ -19,12 +19,17 @@ class LeaveAndAbsenceManagementController extends Controller
      */
     public function index(Request $request, $id = null)
     {
-        $lam = LeaveAndAbsenceManagement::where('company_id', $this->sessionDetails('company_id'));
+        if (\Request::route()->getPrefix() == 'api/admin/self-service') {
+            $staff_id = Auth::user()->staff->id;
+            $lam = LeaveAndAbsenceManagement::where('company_id', $this->sessionDetails('company_id'))->where('staff_id', $staff_id);
+
+        } else {
+            $lam = LeaveAndAbsenceManagement::where('company_id', $this->sessionDetails('company_id'));
+        }
 
         if (isset($request->type) && !empty($request->type)) {
             $lam = $lam->where('type', $request->type);
         }
-
 
         if (isset($request->status) && !empty($request->status)) {
             $lam = $lam->where('status', $request->status);
@@ -48,8 +53,12 @@ class LeaveAndAbsenceManagementController extends Controller
         }
     }
 
-    public function staffLeaveAndAbsence(Request $request, $staff_id)
+    public function staffLeaveAndAbsence(Request $request, $staff_id = null)
     {
+        if (\Request::route()->getPrefix() == 'api/admin/self-service') {
+            $staff_id = Auth::user()->staff->id;
+        } 
+
         $lam = LeaveAndAbsenceManagement::where('company_id', $this->sessionDetails('company_id'))->where('staff_id', $staff_id);
 
         if (isset($request->type) && !empty($request->type)) {

@@ -34,7 +34,7 @@ class DatabaseSeeder extends Seeder
             // MessageProvidersSeeder::class
             BanksSeeder::class,
             CurrencySeeder::class,
-            BankKeywordsSeeder::class,
+            // BankKeywordsSeeder::class,
             // TimeZoneSeeder::class,
         ]);
       

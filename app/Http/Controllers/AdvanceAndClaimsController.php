@@ -19,35 +19,43 @@ class AdvanceAndClaimsController extends Controller
      */
     public function index(Request $request, $id = null)
     {
-        $lam = AdvanceAndClaims::where('company_id', $this->sessionDetails('company_id'));
-        
+        $aac = AdvanceAndClaims::where('company_id', $this->sessionDetails('company_id'));
+
+        if (\Request::route()->getPrefix() == 'api/admin/self-service') {
+            $staff_id = Auth::user()->staff->id;
+            $aac = $aac->where('staff_id',$staff_id);
+        }
+
         if (isset($request->type) && !empty($request->type)) {
-            $lam = $lam->where('type', $request->type);
+            $aac = $aac->where('type', $request->type);
         }
 
         if (isset($request->status) && !empty($request->status)) {
-            $lam = $lam->where('status', $request->status);
+            $aac = $aac->where('status', $request->status);
         }
 
         if (isset($id) && !empty($id)) {
-            $lam = $lam->where('id', $id)->first();
-            if ($lam) {
-                return response()->json(['message' => 'Retrieved Successfully', 'data' => $lam], 200);
+            $aac = $aac->where('id', $id)->first();
+            if ($aac) {
+                return response()->json(['message' => 'Retrieved Successfully', 'data' => $aac], 200);
             } else {
-                return response()->json(['message' => 'No records found', 'data' => $lam], 200);
+                return response()->json(['message' => 'No records found', 'data' => $aac], 200);
             }
         }
 
-        $lam = $lam->orderBy('created_at', 'DESC')->paginate(20)->withQueryString();
+        $aac = $aac->orderBy('created_at', 'DESC')->paginate(20)->withQueryString();
 
-        if ($lam->count() > 0) {
-            return response()->json(['message' => 'Retrieved Successfully', 'data' => $lam], 200);
+        if ($aac->count() > 0) {
+            return response()->json(['message' => 'Retrieved Successfully', 'data' => $aac], 200);
         } else {
-            return response()->json(['message' => 'No records found', 'data' => $lam], 200);
+            return response()->json(['message' => 'No records found', 'data' => $aac], 200);
         }
     }
 
-    public function staffAdvanceAndClaims(Request $request, $staff_id){
+    public function staffAdvanceAndClaims(Request $request, $staff_id = null){
+        if (\Request::route()->getPrefix() == 'api/admin/self-service') {
+            $staff_id = Auth::user()->staff->id;
+        } 
         $lam = AdvanceAndClaims::where('company_id', $this->sessionDetails('company_id'))->where('staff_id',$staff_id);
        
         if (isset($request->type) && !empty($request->type)) {

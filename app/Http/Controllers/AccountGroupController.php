@@ -35,6 +35,20 @@ class AccountGroupController extends Controller
     /**
      * Show the form for creating a new resource.
      */
+
+    public function modifyAccountGroup($id){
+        $account_group = AccountGroup::where('company_id', $this->sessionDetails('company_id'))->where('id', $id)->first();
+        if($account_group){
+            if($account_group->status == 'active'){
+                $account_group->update(['status' => 'inactive']);
+            }else{
+                $account_group->update(['status' => 'active']);
+            }
+        }
+        return response()->json(['message' => 'Successfully updated', 'data' => []], 200);
+
+    }
+
     public function create()
     {
         //

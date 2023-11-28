@@ -184,8 +184,12 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('get-single-customer-details/{id}', [CustomerController::class, 'show']);
         Route::get('get-single-customer-contract-count/{customer_id}', [CustomerController::class, 'singleCustomerContractCount']);
         Route::resource('account-type', AccountTypeController::class);
+        Route::get('modify-account-type/{id}', [AccountTypeController::class, 'modifyAccountType']);
+
         Route::resource('account-classification', AccountClassificationController::class);
         Route::resource('chart-of-account', ChartOfAccountController::class);
+        Route::get('modify-achart-of-account/{id}', [ChartOfAccountController::class, 'modifyChartOfAccount']);
+
         Route::resource('transaction-type-definition', TransactionTypeDefinitionController::class);
         Route::resource('account', AccountController::class);
 
@@ -222,6 +226,11 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
             Route::get('all-notifications', [SelfServiceController::class, 'fetchAllNotifications']);
             Route::get('{staff_id}/{type}', [EmployeeExitController::class, 'getLeaveAndAbsencePeriodLeft']);
             Route::post('create-exit', [EmployeeExitController::class, 'store']);
+            Route::get('leave-and-absence', [LeaveAndAbsenceManagementController::class, 'index']);
+            Route::get('single-leave-and-absence', [LeaveAndAbsenceManagementController::class, 'staffLeaveAndAbsence']);
+            Route::get('advance-and-claims', [AdvanceAndClaimsController::class, 'index']);
+            Route::get('single-advance-and-claims', [AdvanceAndClaimsController::class, 'staffAdvanceAndClaims']);
+
         });
 
         Route::post('update-leave-and-absence-setting', [LeaveAndAbsenceManagementController::class, 'updateLeaveAndAbsenceSetting']);
@@ -235,7 +244,10 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         
         Route::resource('commission', CommissionController::class);
         Route::resource('account-category', AccountCategoryController::class);
+        Route::get('modify-account-category/{id}', [AccountCategoryController::class, 'modifyAccountCategory']);
+
         Route::resource('account-group', AccountGroupController::class);
+        Route::get('modify-account-group/{id}', [AccountGroupController::class, 'modifyAccountGroup']);
         Route::post('create-exit', [EmployeeExitController::class, 'store']);
         Route::get('exits/{staff_id?}', [EmployeeExitController::class, 'index']);
         Route::get('access-control-list', [MenuController::class, 'adminAccessControls']);

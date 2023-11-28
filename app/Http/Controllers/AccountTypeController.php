@@ -26,6 +26,19 @@ class AccountTypeController extends Controller
         return response()->json(['message' => 'success', 'data' => $account_type], 200);
     }
 
+    public function modifyAccountType($id)
+    {
+        $account_type = AccountType::where('company_id', $this->sessionDetails('company_id'))->where('id', $id)->first();
+        if ($account_type) {
+            if ($account_type->status == 'active') {
+                $account_type->update(['status' => 'inactive']);
+            } else {
+                $account_type->update(['status' => 'active']);
+            }
+        }
+        return response()->json(['message' => 'Successfully updated', 'data' => []], 200);
+    }
+    
     /**
      * Show the form for creating a new resource.
      */

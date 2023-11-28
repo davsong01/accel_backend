@@ -32,6 +32,20 @@ class AccountCategoryController extends Controller
         return response()->json(['message' => 'success', 'data' => $account_category], 200);
     }
 
+    public function modifyAccountCategory($id)
+    {
+        $account_cat = AccountCategory::where('company_id', $this->sessionDetails('company_id'))->where('id', $id)->first();
+        if ($account_cat) {
+            if ($account_cat->status == 'active') {
+                $account_cat->update(['status' => 'inactive']);
+            } else {
+                $account_cat->update(['status' => 'active']);
+            }
+        }
+        return response()->json(['message' => 'Successfully updated', 'data' => []], 200);
+    }
+    
+
     /**
      * Show the form for creating a new resource.
      */

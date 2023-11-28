@@ -25,6 +25,20 @@ class ChartOfAccountController extends Controller
         return response()->json(['message' => 'success', 'data' => $coa], 200);
     }
 
+
+    public function modifyChartOfAccount($id)
+    {
+        $coa = ChartOfAccount::where('company_id', $this->sessionDetails('company_id'))->where('id', $id)->first();
+        if ($coa) {
+            if ($coa->status == 'active') {
+                $coa->update(['status' => 'inactive']);
+            } else {
+                $coa->update(['status' => 'active']);
+            }
+        }
+        return response()->json(['message' => 'Successfully updated', 'data' => []], 200);
+    }
+
     /**
      * Show the form for creating a new resource.
      */

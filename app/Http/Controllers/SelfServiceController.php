@@ -186,7 +186,7 @@ class SelfServiceController extends Controller
             'files' => 'required',
         ]);
 
-        if (\Request::route()->getPrefix() == 'api/self-service') {
+        if (\Request::route()->getPrefix() == 'api/admin/self-service') {
             $staff_id = Auth::user()->staff->id;
         }else{
             $staff_id = $request->staff_id;
