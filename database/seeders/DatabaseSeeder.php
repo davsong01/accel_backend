@@ -7,6 +7,7 @@ namespace Database\Seeders;
 use App\Models\Bank;
 use App\Models\Company;
 use Illuminate\Support\Str;
+use Database\Seeders\PfaSeeder;
 use Illuminate\Database\Seeder;
 use Database\Seeders\BanksSeeder;
 use Database\Seeders\GeneralSeeder;
@@ -14,6 +15,7 @@ use Database\Seeders\CurrencySeeder;
 use Database\Seeders\TimeZoneSeeder;
 use Illuminate\Support\Facades\Hash;
 use Database\Seeders\LgasTableSeeder;
+use Database\Seeders\PfaKeywordsSeeder;
 use Database\Seeders\StatesTableSeeder;
 use Database\Seeders\CountriesTableSeeder;
 use Database\Seeders\MessageProvidersSeeder;
@@ -34,8 +36,10 @@ class DatabaseSeeder extends Seeder
             // MessageProvidersSeeder::class
             BanksSeeder::class,
             CurrencySeeder::class,
-            // BankKeywordsSeeder::class,
-            // TimeZoneSeeder::class,
+            BankKeywordsSeeder::class,
+            TimeZoneSeeder::class,
+            PfaSeeder::class,
+            PfaKeywordsSeeder::class,
         ]);
       
     }

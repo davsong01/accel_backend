@@ -61,6 +61,10 @@ class CustomerFormController extends Controller
      */
     public function store(Request $request, $admin=false)
     {
+        if (\Request::route()->getPrefix() == 'api/customer') {
+            $request->customer_id = auth()->user()->customer->id;
+        }
+       
         $validator = Validator::make($request->all(), [
             'title' => 'nullable',
             'surname' => 'nullable',
@@ -222,7 +226,6 @@ class CustomerFormController extends Controller
             $data['type'] = 'form2-request';
             $data['status'] = 'completed'; 
         }
-
 
         $data['plot_size_id'] = $data['plot_size'];
         $data['transaction_date'] = Carbon::parse($data['transaction_date']);

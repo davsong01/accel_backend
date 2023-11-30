@@ -4,7 +4,7 @@ namespace App\Services;
 
 class GeneralResourceService
 {
-    public function getBanks(){
+    public static function getBanks(){
         $banks = 
         [
             [
