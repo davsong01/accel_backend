@@ -356,4 +356,39 @@ class CustomerController extends Controller
 
         return response()->json(['message' => 'Successful', 'data' => []], 200);
     }
+
+    public function updateUser($data){
+        // Add User
+        $additional_details = json_encode([
+            // 'alternate_number' => $data['alternate_number'] ?? '',
+            // 'alternate_email' => $data['alternate_email'] ?? '',
+            // 'state' => $data['state'] ?? '',
+            'residential_address' => $data['residential_address'] ?? '',
+            // 'marital_status' => $data['marital_status'] ?? '',
+            // 'nationality' => $data['nationality'] ?? '',
+            // 'lga' => $data['lga'] ?? '',
+        ]);
+
+        $update['email'];
+
+        // 'email' => $request->has('email') ? $data['email'] : $staff->user->email
+        // 'first_name' => $request->has('first_name') ? $data['first_name'] : $staff->user->first_name
+        // 'middle_name' => $request->has('middle_name') ? $data['middle_name'] : $staff->user->middle_name
+
+        $user = User::updateOrCreate([
+            'first_name' => $data['first_name'],
+            'email' => $data['email'],
+            'gender' => $data['gender'],
+            'last_name' => $data['last_name'],
+            'phone_number' => $data['phone_number'],
+            'additional_details' => $additional_details ?? null,
+            'company_id' => $this->sessionDetails('company_id'),
+            'branch_id' => $this->sessionDetails('branch_id'),
+            'company_id' => $this->sessionDetails('company_id'),
+            'branch_id' => $this->sessionDetails('branch_id'),
+        ]);
+
+
+        return $user;
+    }
 }

@@ -230,6 +230,7 @@ class CustomerContractController extends Controller
         return $user;
     }
 
+    
     public function createCustomer($user)
     {
         $customer = Customer::updateOrCreate([

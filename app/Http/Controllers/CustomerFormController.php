@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Customer;
 use Illuminate\Support\Arr;
 use App\Models\CustomerForm;
 use Illuminate\Http\Request;
@@ -113,42 +114,44 @@ class CustomerFormController extends Controller
         $customer_contract_ids = [];
 
         if(!empty($request->contract)){
-            foreach($request->contract as $cont){
-                $contract_validator = Validator::make($cont, [
+            $contracts = (array) $request->contract;
+            foreach($contracts as $cont){
+                // Make each contract a request
+                // $contract_validator = Validator::make($cont, [
                     
-                    'estate_id' => 'required|exists:estates,id,company_id,' . $this->sessionDetails('company_id'),
-                    'city_id' => 'required|exists:cities,id,company_id,' . $this->sessionDetails('company_id'),
+                //     'estate_id' => 'required|exists:estates,id,company_id,' . $this->sessionDetails('company_id'),
+                //     'city_id' => 'required|exists:cities,id,company_id,' . $this->sessionDetails('company_id'),
                     
-                    'property_type_id' => [
-                        'required', Rule::exists('estate_property_type_details', 'id')->where(function ($query) use ($cont) {
-                            $query->where('company_id', $this->sessionDetails('company_id'))->where('estate_id', $cont['estate_id'])->where('type', $cont['property_type']);
-                        })
-                    ],
-                    // Other details
-                    'property_price' => 'nullable',
-                    'infrastuctural_fee' => 'nullable',
-                    'net_property_fee' => 'nullable',
-                    'setting_and_excavation_fee' => 'nullable',
-                    'discount' => 'nullable',
-                    'description' => 'nullable',
+                //     'property_type_id' => [
+                //         'required', Rule::exists('estate_property_type_details', 'id')->where(function ($query) use ($cont) {
+                //             $query->where('company_id', $this->sessionDetails('company_id'))->where('estate_id', $cont['estate_id'])->where('type', $cont['property_type']);
+                //         })
+                //     ],
+                //     // Other details
+                //     'property_price' => 'nullable',
+                //     'infrastuctural_fee' => 'nullable',
+                //     'net_property_fee' => 'nullable',
+                //     'setting_and_excavation_fee' => 'nullable',
+                //     'discount' => 'nullable',
+                //     'description' => 'nullable',
 
-                    // Marketer
-                    'primary_marketer' => 'nullable|exists:staff,id,company_id,' . $this->sessionDetails('company_id'),
-                    'secondary_marketers' => 'nullable',
-                    'subscribers' => 'nullable',
-                    'transaction_date' => 'nullable',
+                //     // Marketer
+                //     'primary_marketer' => 'nullable|exists:staff,id,company_id,' . $this->sessionDetails('company_id'),
+                //     'secondary_marketers' => 'nullable',
+                //     'subscribers' => 'nullable',
+                //     'transaction_date' => 'nullable',
 
-                    'property_type' => 'required|in:land,building',
-                    'building_type_id' => 'nullable|exists:building_types,id',
-                    'plot_size_id' => 'nullable|exists:plot_sizes,id',
-                    'branch_id' => 'nullable|exists:branches,id,company_id,' . $this->sessionDetails('company_id'),
-                    'contract_type' => 'nullable',
+                //     'property_type' => 'required|in:land,building',
+                //     'building_type_id' => 'nullable|exists:building_types,id',
+                //     'plot_size_id' => 'nullable|exists:plot_sizes,id',
+                //     'branch_id' => 'nullable|exists:branches,id,company_id,' . $this->sessionDetails('company_id'),
+                //     'contract_type' => 'nullable',
                 
-                    'contract_id' => 'required|exists:customer_contracts,id,company_id,' . $this->sessionDetails('company_id'),
-                ]);
+                //     'contract_id' => 'required|exists:customer_contracts,id,company_id,' . $this->sessionDetails('company_id'),
+                // ]);
 
                 // Update the contract
-                $update = array_merge($validator->valid(), $contract_validator->valid());
+                $update = array_merge($validator->valid(), $cont);
                 $customer_contract_ids[] = $cont['contract_id'];
                 app('App\Http\Controllers\CustomerContractController')->updateCustomerContract($update, $cont['contract_id'], $update['customer_id']);
                 
@@ -162,7 +165,7 @@ class CustomerFormController extends Controller
                 'data' => null,
             ], 412);
         }
-        $data = array_merge($validator->valid(), $contract_validator->valid());
+        $data = array_merge($validator->valid());
        
         $data['date_of_birth'] = !empty($data['date_of_birth']) ? Carbon::parse($data['date_of_birth']) : '';
 
@@ -226,9 +229,19 @@ class CustomerFormController extends Controller
             $data['type'] = 'form2-request';
             $data['status'] = 'completed'; 
         }
+        // take out transaction date
+        // create new cloumn to dump all the contract
+        // ask victor to send transaction date as part of the request
+        // $data['plot_size_id'] = $data['plot_size'];
+        // Update user
+        $customer = Customer::where('id', $data['customer_id'])->first();
+        $user = $customer->user;
 
-        $data['plot_size_id'] = $data['plot_size'];
-        $data['transaction_date'] = Carbon::parse($data['transaction_date']);
+        // Update customer
+        // app('App\Http\Controllers\CustomerController')->updateUser($user, $data);
+        
+        $data['transaction_date'] = Carbon::parse($request->transaction_date);
+        $data['raw'] = json_encode($request->contract);
         $data['contract_ids'] = json_encode($customer_contract_ids);
         $data = Arr::except($data, ['contract', 'building_type', 'plot_size', 'contract_id', 'subscribers']);
         

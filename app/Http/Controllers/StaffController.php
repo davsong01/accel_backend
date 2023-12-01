@@ -137,7 +137,7 @@ class StaffController extends Controller
                 'data' => null,
             ], 412);
         }
-
+        
         $assign = StaffRole::updateOrCreate([
             'role_id' => $request->role_id,
             'staff_id' => $request->staff_id,
@@ -301,7 +301,7 @@ class StaffController extends Controller
             ->leftjoin("departments", "staff.department_id", "=", "departments.id")
             ->select("users.status", "staff.created_at", "users.first_name", "users.username", "users.last_name", "users.email", "staff.id AS staff_id", "users.type", "users.company_id", "staff.jobtype_id", "users.id AS user_id", "staff.date_of_employment", "branches.id AS branch_id", "branches.name AS branch_name", "departments.id AS department_id", "departments.name AS department_name", "job_roles.id AS job_role_id", "job_roles.name AS job_role_name", "job_types.id AS job_type_id", "job_types.name AS job_type_name", "users.additional_details", "users.next_of_kin", "users.date_of_birth")
             ->first();
-
+        
         if (!$staff) {
             return response()->json(['message' => 'Staff not found!', 'data' => null], 200);
         }
@@ -367,7 +367,29 @@ class StaffController extends Controller
             'commission_id' => $request->has('commission_id') ? $data['commission_id'] : $staff->commision_percentage,
             'company_id' => $this->sessionDetails('company_id'),
         ]);
-       
+
+        // Update staff role here
+        if(!empty($request->roles)){
+            $rolesx = explode(',', $request->roles);
+            $newRoles = [];
+            foreach($rolesx as $rlid){
+                $dt = Role::where('id', $rlid)->where('company_id', $this->sessionDetails('company_id'))->where('type', 'staff')->count();
+                if($dt > 0){
+                    $newRoles[] = $rlid;
+                }
+            }
+            
+            StaffRole::where('staff_id', $staff->staff_id)->where('company_id', $this->sessionDetails('company_id'))->delete();
+            foreach($newRoles as $new){
+                StaffRole::Create([
+                    'role_id' => $new,
+                    'staff_id' => $staff->staff_id,
+                    'company_id' => $this->sessionDetails('company_id'),
+                    'branch_id' => $this->sessionDetails('branch_id'),
+                ]);
+            }
+        }
+     
         // dd(json_encode($next_of_kin));
         $user = $staff->user->update([
             'email' => $request->has('email') ? $data['email'] : $staff->user->email,
@@ -384,19 +406,6 @@ class StaffController extends Controller
             'date_of_birth' => $request->has('date_of_birth')  ? $data['date_of_birth'] : $staff->user->date_of_birth,
             'company_id' => $this->sessionDetails('company_id')
         ]);
-
-        // Create staff documents
-        // if ($request->staff_documents) {
-        //     foreach ($request->staff_documents as $document) {
-        //         \DB::table('staff_uploaded_documents')->insert([
-        //             'staff_document_id' => $document->id,
-        //             'name' =>  $document->name,
-        //             'uploaded' =>  $document->uploaded ?? '',
-        //             'required' =>  $document->required ?? '',
-        //             'company_id' => $this->sessionDetails('company_id'),
-        //         ]);
-        //     }
-        // }
 
         return response()->json(['message' => 'Successfully updated!', 'data' => ['staff_id' => $request->staff_id]], 200);
     }

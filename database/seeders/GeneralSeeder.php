@@ -15,6 +15,8 @@ class GeneralSeeder extends Seeder
      */
     public function run()
     {
+        // \DB::table('packages')->truncate();
+
         $package = \App\Models\Package::Create([
             'name' => 'All Packages',
             'access' => '2,3,4,5,6,7,8,9,10,11,12,13,14,15,1,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60',
@@ -47,12 +49,14 @@ class GeneralSeeder extends Seeder
         // Role
         $role1 = \App\Models\Role::Create([
             'name' => 'Super Staff',
-            'type' => 'Staff',
+            'type' => 'staff',
+            'access' => '1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66',
         ]);
 
         $role2 = \App\Models\Role::Create([
             'name' => 'Default',
             'type' => 'customer',
+            'access' => '',
         ]);
 
         // Users
@@ -61,13 +65,18 @@ class GeneralSeeder extends Seeder
             'last_name' => 'Staff',
             'type' => 'Staff',
             'status' => 'active',
+            'gender' => 'Male',
+            'username' => 'Accel Admin',
+            'staff_id' => '12345',
             'email' => 'test@example.com',
+            'user_permissions' => '1,2,4',
             'password' => Hash::make('123456789'),
         ]);
 
         // Staff
         $superAdmin = \App\Models\Staff::Create([
             'user_id' => $superAd->id,
+            'department_id' => 1,
             'status' => 'active'
         ]);
 
@@ -92,28 +101,28 @@ class GeneralSeeder extends Seeder
         ]);
 
         // other Users
-        $range = range(1, 500);
-        foreach ($range as $r) {
-            $use = \App\Models\User::create([
-                'first_name' => Str::random(10),
-                'last_name' => Str::random(10),
-                'status' => 'active',
-                'type' => 'customer',
-                'email' => Str::random(10) . '@gmail.com',
-                'password' => Hash::make('123456789'),
-            ]);
+        // $range = range(1, 500);
+        // foreach ($range as $r) {
+        //     $use = \App\Models\User::create([
+        //         'first_name' => Str::random(10),
+        //         'last_name' => Str::random(10),
+        //         'status' => 'active',
+        //         'type' => 'customer',
+        //         'email' => Str::random(10) . '@gmail.com',
+        //         'password' => Hash::make('123456789'),
+        //     ]);
 
-            \App\Models\Customer::create([
-                'company_id' => $company2->id,
-                'branch_id' => $branch->id,
-                'user_id' => $use->id,
-                'type' => 'lead'
-            ]);
+        //     \App\Models\Customer::create([
+        //         'company_id' => $company2->id,
+        //         'branch_id' => $branch->id,
+        //         'user_id' => $use->id,
+        //         'type' => 'lead'
+        //     ]);
 
-            $roleCustomer = \App\Models\CustomerRole::Create([
-                'customer_id' => $use->id,
-                'role_id' => $role2->id,
-            ]);
-        }
+        //     $roleCustomer = \App\Models\CustomerRole::Create([
+        //         'customer_id' => $use->id,
+        //         'role_id' => $role2->id,
+        //     ]);
+        // }
     }
 }

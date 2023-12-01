@@ -15,11 +15,21 @@ class MessageProvidersSeeder extends Seeder
         $insert = [
             [
                 'type' => 'email',
-                'name' => 'Cpanel Mails',
-                'status' => 'inactive',
-                'service' => 'smtp', // smtp, others
+                'name' => 'Consode Mails',
+                'status' => 'active',
+                'service' => 'gmail', // smtp, others
                 'credentials'=> json_encode([
-                    
+                    'MAIL_DRIVER' => 'smtp',
+                    'MAIL_HOST' => 'smtp.gmail.com',
+                    'MAIL_PORT' => 465,
+                    'MAIL_USERNAME' => 'theconsode@gmail.com',
+                    'MAIL_PASSWORD' => 'hqooulcwzudjoekr',
+                    'MAIL_ENCRYPTION' => 'ssl',
+                    'MAIL_FROM_ADDRESS' => 'theconsode@gmail.com',
+                    'MAIL_REPLY_TO_NAME' => 'The Consode',
+                    'MAIL_REPLY_FROM_NAME' => 'The Consode',
+                    'MAIL_REPLY_FROM_ADDRESS' => 'theconsode@gmail.com',
+                    'MAIL_REPLY_TO_ADDRESS' => 'theconsode@gmail.com',
                 ]),
                 'company_id' => 1,
             ],
@@ -46,6 +56,7 @@ class MessageProvidersSeeder extends Seeder
             ]
 
         ];
+
         \DB::table('message_providers')->insert($insert);
     
     }

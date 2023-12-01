@@ -14,8 +14,9 @@ class Role extends Model
 
     public function staff()
     {
-        return $this->hasMany(StaffRole::class);
+        return $this->belongsToMany(Staff::class,'staff_roles', 'role_id', 'staff_id');
     }
+
 
     // public function department()
     // {

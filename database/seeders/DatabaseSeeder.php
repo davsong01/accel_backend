@@ -30,10 +30,10 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             // GeneralSeeder::class,
-            // CountriesTableSeeder::class,
-            // StatesTableSeeder::class,
-            // LgasTableSeeder::class,
-            // MessageProvidersSeeder::class
+            CountriesTableSeeder::class,
+            StatesTableSeeder::class,
+            LgasTableSeeder::class,
+            MessageProvidersSeeder::class,
             BanksSeeder::class,
             CurrencySeeder::class,
             BankKeywordsSeeder::class,
@@ -41,6 +41,5 @@ class DatabaseSeeder extends Seeder
             PfaSeeder::class,
             PfaKeywordsSeeder::class,
         ]);
-      
     }
 }

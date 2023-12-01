@@ -18,12 +18,12 @@ class Staff extends Model
     
     public function staffRoles()
     {
-        return $this->hasMany(StaffRole::class);
+        return $this->hasMany(StaffRole::class, 'staff_id');
     }
 
     public function roles()
     {
-        return $this->hasMany(StaffRole::class);
+        return $this->belongsToMany(Role::class,'staff_roles', 'staff_id', 'role_id');
     }
 
     public function user()
