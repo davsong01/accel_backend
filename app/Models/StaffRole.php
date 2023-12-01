@@ -11,13 +11,13 @@ class StaffRole extends Model
     protected $fillable = ['role_id', 'staff_id', 'company_id', 'branch_id'];
     protected $table = 'staff_roles';
 
-    // public function staff()
-    // {
-    //     return $this->belongsTo(Staff::class);
-    // }
+    public function staff()
+    {
+        return $this->belongsTo(Staff::class);
+    }
 
-    // public function role()
-    // {
-    //     return $this->belongsTo(Role::class);
-    // }
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
+    }
 }

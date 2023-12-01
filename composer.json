@@ -29,7 +29,7 @@
             "Database\\Seeders\\": "database/seeders/"
         },
         "files": [
-            "app/Helpers/generalhelpers.php"
+            "app/Helpers/eneralhelpers.php"
         ]
     },
     "autoload-dev": {
