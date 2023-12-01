@@ -57,17 +57,21 @@ class Staff extends Model
     public function scopeRolesList($query){
         $rolesX = [];
         $roles = StaffRole::with('role')->where('staff_id', $this->id)->get();
+        
         foreach($roles as $r){
-            $rolesX[] =  [
-                            'id' => $r->role->id,
-                            'name' => $r->role->name,
-                            'description' => $r->role->description,
-                            'type' => $r->role->type
-                        ];
+            if($r->role){
+                $rolesX[] =  [
+                                'id' => $r->role->id,
+                                'name' => $r->role->name,
+                                'description' => $r->role->description,
+                                'type' => $r->role->type
+                            ];
+
+            }
+          
         }
        
         return $rolesX;
-
     }
 
 }

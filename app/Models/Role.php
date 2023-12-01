@@ -17,6 +17,11 @@ class Role extends Model
         return $this->belongsToMany(Staff::class,'staff_roles', 'role_id', 'staff_id');
     }
 
+    public function StaffRole()
+    {
+        return $this->belongsToMany(Staff::class);
+    }
+
 
     // public function department()
     // {

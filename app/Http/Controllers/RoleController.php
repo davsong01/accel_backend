@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Role;
+use App\Models\StaffRole;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Http\RedirectResponse;
@@ -151,6 +152,12 @@ class RoleController extends Controller
      */
     public function destroy(Role $role)
     {
+        $roles = StaffRole::where('role_id', $role->id)->count();
+
+        if ($roles > 0) {
+            return response()->json(['message' => 'Unable to delete, resource in use', 'data' => []], 412);
+        }
+        
         $role->delete();
         return response()->json(['message' => 'Deleted Successfully.', 'data' => null], 200);
     }
