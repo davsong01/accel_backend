@@ -127,7 +127,7 @@ class StaffController extends Controller
     public function assignRoleToStaff(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'role_id' => 'required|exists:roles,id',
+            'roles' => 'required',
             'staff_id' => 'required|exists:staff,id',
         ]);
 
@@ -137,15 +137,21 @@ class StaffController extends Controller
                 'data' => null,
             ], 412);
         }
-        
-        $assign = StaffRole::updateOrCreate([
-            'role_id' => $request->role_id,
-            'staff_id' => $request->staff_id,
-            'company_id' => $this->sessionDetails('company_id'),
-            'branch_id' => $this->sessionDetails('branch_id'),
-        ]);
 
-        return response()->json(['message' => 'Created successfully', 'data' => $assign], 200);
+        $roles = explode(',',$request->roles);
+        if(!empty($roles)){
+            foreach($roles as $role){
+                $assign = StaffRole::updateOrCreate([
+                    'role_id' => $role,
+                    'staff_id' => $request->staff_id,
+                    'company_id' => $this->sessionDetails('company_id'),
+                    'branch_id' => $this->sessionDetails('branch_id'),
+                ]);
+            }
+        }
+        
+
+        return response()->json(['message' => 'Created successfully', 'data' => []], 200);
     }
 
     public function storeStaff(Request $request)
