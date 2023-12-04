@@ -68,7 +68,7 @@ if (!function_exists("getRoleAccess")) {
 
     }
 
-    if (!function_exists("reConstructUploadedFile")) {
+    if (!function_exists("reConstructUploadedProtectedDocument")) {
         function reConstructUploadedProtectedDocument($file){
             $res = [];
             
