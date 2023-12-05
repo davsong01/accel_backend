@@ -614,7 +614,7 @@ class StaffController extends Controller
             'lga' => !empty($additional_details['lga']) ? $this->getLgaDetails($additional_details['lga']) : '',
             'nationality' => !empty($additional_details['nationality']) ? $this->getCountryDetails($additional_details['nationality']) : '',
         ];
-
+        
         $data['next_of_kin_information'] = [
             'first_name' => $next_of_kin['nok_first_name'] ?? '',
             'last_name' => $next_of_kin['nok_last_name'] ?? '',

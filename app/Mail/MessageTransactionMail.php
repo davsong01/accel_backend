@@ -3,12 +3,13 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Content;
+use App\Models\CompanySetting;
 use Illuminate\Mail\Mailables\Address;
-use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Mail\Mailables\Content;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Contracts\Queue\ShouldQueue;
 
 class MessageTransactionMail extends Mailable
 {
@@ -29,6 +30,13 @@ class MessageTransactionMail extends Mailable
      */
     public function envelope(): Envelope
     {
+        $companySettings = CompanySetting::where('company_id', $this->data['company_id'])->first();
+        session()->now('companySetting', $companySettings);
+
+        dispatch(function () {
+            session()->forget(['companySetting']);
+        })->afterResponse();
+        
         return new Envelope(
             from: new Address($this->provider['mail.from']['address'], $this->provider['mail.from']['name']),
             replyTo: [
@@ -46,7 +54,7 @@ class MessageTransactionMail extends Mailable
     {
        
         return new Content(
-            view: 'emails.messages_transaction',
+            markdown: 'emails.messages_transaction',
             with: [
                 'data' => $this->data,
             ],

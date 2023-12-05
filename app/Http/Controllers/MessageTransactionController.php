@@ -175,7 +175,6 @@ class MessageTransactionController extends Controller
                 }catch(\Exception $e) {
                     $message->update(['errors' => $e->getMessage()]);
                 }
-
             }
         }
         

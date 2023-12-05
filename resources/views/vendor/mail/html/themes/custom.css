@@ -1,0 +1,95 @@
+ h5 {
+     font-family: "Roboto";
+     font-style: normal;
+     font-weight: 400;
+     font-size: 20px;
+ }
+
+ p {
+
+     color: #505050;
+     font-family: "Roboto";
+     font-style: normal;
+     font-weight: 400;
+     font-size: 20px;
+
+ }
+
+ .btn {
+     background-color: #04aa6d;
+     padding: 6px;
+     border-radius: none;
+ }
+
+ img {
+     width: 20%;
+ }
+
+ .favorite {
+     align-items: flex-end;
+     background-color: #04aa6d;
+     border-radius: 5px;
+     color: #fff;
+     padding: 10px;
+     width: 200px;
+ }
+
+ .footer .credit {
+     padding: 1rem;
+     padding-top: 2rem;
+     margin-top: 2rem;
+     text-align: center;
+     color: #ffffff;
+     border-top: 0.1rem solid #ffffff;
+ }
+
+ .footer-a {
+     font-family: "Roboto";
+     font-style: normal;
+     font-weight: 400;
+     font-size: 12px;
+     line-height: 20px;
+     display: inline-flex;
+     color: #04aa6d;
+ }
+
+ section {
+     padding: 2rem 3%;
+ }
+
+ .Top-secton-a {
+     font-weight: 400;
+     font-size: 20px;
+     color: #04aa6d;
+ }
+
+ .ancor-tag {
+     font-weight: 400;
+     font-size: 20px;
+     text-decoration: none;
+     color: blue;
+ }
+
+ .Second-section-a {
+     font-weight: 400;
+     font-size: 20px;
+     color: #04aa6d;
+     text-decoration: none;
+ }
+
+ .favorite {
+     border-radius: 6px;
+     width: 200px;
+     outline: none;
+     border: none;
+ }
+
+ .Footer-section-p {
+     text-align: center;
+     color: #a49ca4;
+
+ }
+
+ .Footer-section {
+     background-color: #c8c7c8;
+ }

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\MessageTransactionController;
+use App\Mail\MessageTransactionMail;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -13,9 +14,13 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
-Route::get('/verifyenc/{slug}', function($slug){
-    return base64_decode($slug);
+Route::get('/tests', function(){
+    $data['message'] = 'helllosds';
+    $data['company_id'] = 1;
+    
+    return new App\Mail\OrderShipped($data);
 });
+
 Route::get('/cron-process-messages-transaction', [MessageTransactionController::class, 'processMessagesTransaction']);
 Route::get('/', function () {
     // return view('welcome');
