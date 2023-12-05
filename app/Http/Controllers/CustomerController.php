@@ -317,6 +317,8 @@ class CustomerController extends Controller
         
         $user->update([
             'first_name' => $data['first_name'] ?? $user->first_name,
+            'middle_name' => $data['middle_name'] ?? $user->middle_name,
+            'branch_id' => $data['branch_id'] ?? $user->branch_id,
             'email' => $data['email'] ?? $user->email,
             'date_of_birth' => $data['date_of_birth'] ?? $user->date_of_birth,
             'gender' => $data['gender'] ?? $user->gender,

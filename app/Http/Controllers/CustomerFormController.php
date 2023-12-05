@@ -105,6 +105,7 @@ class CustomerFormController extends Controller
             // 'bypass_approval' => 'nullable',
             'marital_status' => 'nullable',
             'customer_id' => 'required|exists:customers,id,company_id,' . $this->sessionDetails('company_id'),
+            'branch_id' => 'required|exists:branches,id,company_id,' . $this->sessionDetails('company_id'),
             'transaction_date' => 'nullable',
 
             // Contracts
