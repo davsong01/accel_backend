@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\Schema;
 
 class AddAccessControlsToRolesTable extends Migration
 {
@@ -14,7 +15,7 @@ class AddAccessControlsToRolesTable extends Migration
     {
         if (!Schema::hasColumn('roles', 'access_controls')) {
             Schema::table('roles', function (Blueprint $table) {
-                $table->string('access')->nullable()->after('id');
+                $table->string('access_controls')->nullable()->after('id');
             });
         }
 
