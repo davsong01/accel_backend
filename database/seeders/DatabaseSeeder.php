@@ -40,6 +40,10 @@ class DatabaseSeeder extends Seeder
             TimeZoneSeeder::class,
             PfaSeeder::class,
             PfaKeywordsSeeder::class,
+            PropertyTypeSeeder::class,
+            LegalDocumentTypeSeeder::class,
+            // LegalDocumentTemplateSeeder::class,
+            // GeneratedLegalDocumentSeeder::class,
         ]);
     }
 }
