@@ -23,6 +23,7 @@ class CustomerFormController extends Controller
     {
         if (!empty($id)) {
             $forms = CustomerForm::where('company_id', $this->sessionDetails('company_id'))->first();
+            
             return response()->json(['message' => 'Successfully retrieved', 'data' => $forms], 200);
         }
 
@@ -86,8 +87,8 @@ class CustomerFormController extends Controller
             'state_id' => 'required|exists:states,id',
 
             // Next of kin information
-            'nok_first_name' => 'nullable',
-            'nok_last_name' => 'nullable',
+            'nok_firstname' => 'nullable',
+            'nok_lastname' => 'nullable',
             'nok_house_address' => 'nullable',
             'nok_phone_number' => 'nullable',
             'nok_email_address' => 'nullable',
@@ -103,9 +104,8 @@ class CustomerFormController extends Controller
 
             // 'bypass_approval' => 'nullable',
             'marital_status' => 'nullable',
-            'location_id' => 'required|exists:locations,id,company_id,' . $this->sessionDetails('company_id'),
             'customer_id' => 'required|exists:customers,id,company_id,' . $this->sessionDetails('company_id'),
-            'city_id' => 'required|exists:cities,id,company_id,' . $this->sessionDetails('company_id'),
+            'transaction_date' => 'nullable',
 
             // Contracts
             'contract' => 'required',
@@ -147,7 +147,6 @@ class CustomerFormController extends Controller
                     'primary_marketer' => 'nullable|exists:staff,id,company_id,' . $this->sessionDetails('company_id'),
                     'secondary_marketers' => 'nullable',
                     'subscribers' => 'nullable',
-                    'transaction_date' => 'nullable',
 
                     'property_type' => 'required|in:land,building',
                     'building_type_id' => 'nullable|exists:building_types,id',
@@ -196,8 +195,8 @@ class CustomerFormController extends Controller
        
         // To be used in customer form
         $data['next_of_kin_information'] = json_encode([
-            'nok_first_name' => $data['nok_first_name'] ?? null,
-            'nok_last_name' => $data['nok_last_name'] ?? null,
+            'nok_firstname' => $data['nok_firstname'] ?? null,
+            'nok_lastname' => $data['nok_lastname'] ?? null,
             'nok_house_address' => $data['nok_house_address'] ?? null,
             'nok_phone_number' => $data['nok_phone_number'] ?? null,
             'nok_email_address' => $data['nok_email_address'] ?? null,
@@ -233,9 +232,10 @@ class CustomerFormController extends Controller
         $data['company_id'] = $this->sessionDetails('company_id');
         if (\Request::route()->getPrefix() == 'api/customer') {
             $data['type'] = 'customer-response';
+            $data['status'] = 'pending';
         } else {
             $data['type'] = 'form2-request';
-            $data['status'] = 'completed';
+            $data['status'] = 'pending';
         }
 
         $data['date_of_birth'] = Carbon::parse($request->date_of_birth);
@@ -248,9 +248,11 @@ class CustomerFormController extends Controller
         $data['transaction_date'] = Carbon::parse($request->transaction_date);
         $data['raw'] = json_encode($request->all());
         $data['contract_ids'] = json_encode($customer_contract_ids);
+        $data['no_of_contracts'] = count($customer_contract_ids);
+
         $data['company_id'] = $this->sessionDetails('company_id');
         
-        $response = Arr::only($data, ['contract_ids', 'customer_id', 'title', 'type', 'status', 'no_of_contract', 'surname', 'first_name', 'middle_name', 'last_name', 'gender', 'date_of_birth', 'marital_status', 'lga_id', 'country_id', 'state_id', 'email_address', 'contact_details', 'next_of_kin_information', 'means_of_identification', 'contract_type', 'property_type', 'property_type_id', 'city_id', 'location_id', 'estate_id', 'building_type_id', 'plot_size_id', 'transaction_date', 'branch_id', 'other_details', 'primary_marketer', 'secondary_marketers', 'raw','company_id','no_of_contract', 'contact_details']);
+        $response = Arr::only($data, ['contract_ids', 'customer_id', 'title', 'type', 'status', 'no_of_contract', 'surname', 'first_name', 'middle_name', 'last_name', 'gender', 'date_of_birth', 'marital_status', 'lga_id', 'country_id', 'state_id', 'email_address', 'contact_details', 'next_of_kin_information', 'means_of_identification', 'contract_type', 'property_type', 'property_type_id', 'city_id', 'location_id', 'estate_id', 'building_type_id', 'plot_size_id', 'transaction_date', 'branch_id', 'other_details', 'primary_marketer', 'secondary_marketers', 'raw','company_id','no_of_contract', 'contact_details','no_of_contracts']);
         
         CustomerForm::updateOrCreate(
             ['customer_id' => $response['customer_id'], 'company_id' => $response['company_id']],

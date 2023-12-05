@@ -110,7 +110,7 @@ class MessageTransactionController extends Controller
                 $content .= 'Hello, your password reset link is: '. url('/').'/reset-password?token='.$data['token'];
             }else{
                 $subject = 'Password Reset Link';
-                $content .= '<strong>Dear ' . $data['name'] . '</strong><br><br>
+                $content .= '<strong>Dear ' . $data['name'] . ', </strong><br><br>
                 <div>
                 <p style="text-align:justify !important">You asked for a password RESET mail on '.$this->sessionDetails('company_name'). '. Please click the button below to reset your password. Thank you <br><br><a href="' . url('/') . '/reset-password?token=' . $data['token'] . '"><button style="background: green;text-decoration: none;padding: 10px;color: white;">RESET PASSWORD</button></a></p>
                 </div>';
@@ -121,7 +121,7 @@ class MessageTransactionController extends Controller
                
             } else {
                 $subject = 'Welcome to '.$this->sessionDetails('company_name');
-                $content .= '<strong>Dear ' . $data['name'] . '</strong><br><br>
+                $content .= '<strong>Dear ' . $data['name'] . ',</strong><br><br>
                 <div>
                 <p style="text-align:justify !important">Your new staff details have been created. Please find details below: <br><br>
                 First Name: '.$data['user']['first_name']. '<br>

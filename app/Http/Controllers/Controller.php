@@ -30,6 +30,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 class Controller extends BaseController
 {
     use AuthorizesRequests, ValidatesRequests;
+    
     public function sessionDetails($needle){
         if(Session::has($needle)){
             return Session::get($needle);

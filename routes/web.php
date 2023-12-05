@@ -14,11 +14,17 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
-Route::get('/tests', function(){
+Route::get('/testemailtemplate', function(){
     $data['message'] = 'helllosds';
     $data['company_id'] = 1;
-    
+
     return new App\Mail\OrderShipped($data);
+});
+
+Route::get('/testreceipttemplate', function () {
+    $data = [];
+    $data['company_id'] = 1;
+    return view('receipts.template1');
 });
 
 Route::get('/cron-process-messages-transaction', [MessageTransactionController::class, 'processMessagesTransaction']);
