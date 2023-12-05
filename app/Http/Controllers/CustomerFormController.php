@@ -27,8 +27,8 @@ class CustomerFormController extends Controller
         }
 
         $forms = CustomerForm::where('company_id', $this->sessionDetails('company_id'))->where('type', $request->type);
-        
-        if (\Request::route()->getPrefix() == 'api/customer'){
+
+        if (\Request::route()->getPrefix() == 'api/customer') {
             $forms = $forms->where('customer_id', auth::user()->customer->id);
         }
 
@@ -60,12 +60,12 @@ class CustomerFormController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request, $admin=false)
+    public function store(Request $request, $admin = false)
     {
         if (\Request::route()->getPrefix() == 'api/customer') {
             $request->customer_id = auth()->user()->customer->id;
         }
-       
+
         $validator = Validator::make($request->all(), [
             'title' => 'nullable',
             'surname' => 'nullable',
@@ -79,19 +79,19 @@ class CustomerFormController extends Controller
             // Contact details
             'phone_number' => 'nullable',
             'house_address' => 'nullable',
-            'alternate_phone_number' => 'nullable',
+            'alternate_number' => 'nullable',
 
             'lga_id' => 'required|exists:lgas,id',
             'country_id' => 'required|exists:countries,id',
             'state_id' => 'required|exists:states,id',
 
             // Next of kin information
-            'next_of_kin_firstname' => 'nullable',
-            'next_of_kin_lastname' => 'nullable',
-            'next_of_kin_house_address' => 'nullable',
-            'next_of_kin_phone_number' => 'nullable',
-            'next_of_kin_email_address' => 'nullable',
-            'next_of_kin_relationship' => 'nullable',
+            'nok_first_name' => 'nullable',
+            'nok_last_name' => 'nullable',
+            'nok_house_address' => 'nullable',
+            'nok_phone_number' => 'nullable',
+            'nok_email_address' => 'nullable',
+            'nok_relationship' => 'nullable',
 
             // Means of identification
             'occupation' => 'nullable',
@@ -111,62 +111,70 @@ class CustomerFormController extends Controller
             'contract' => 'required',
         ]);
 
-        $customer_contract_ids = [];
-
-        if(!empty($request->contract)){
-            $contracts = (array) $request->contract;
-            foreach($contracts as $cont){
-                // Make each contract a request
-                // $contract_validator = Validator::make($cont, [
-                    
-                //     'estate_id' => 'required|exists:estates,id,company_id,' . $this->sessionDetails('company_id'),
-                //     'city_id' => 'required|exists:cities,id,company_id,' . $this->sessionDetails('company_id'),
-                    
-                //     'property_type_id' => [
-                //         'required', Rule::exists('estate_property_type_details', 'id')->where(function ($query) use ($cont) {
-                //             $query->where('company_id', $this->sessionDetails('company_id'))->where('estate_id', $cont['estate_id'])->where('type', $cont['property_type']);
-                //         })
-                //     ],
-                //     // Other details
-                //     'property_price' => 'nullable',
-                //     'infrastuctural_fee' => 'nullable',
-                //     'net_property_fee' => 'nullable',
-                //     'setting_and_excavation_fee' => 'nullable',
-                //     'discount' => 'nullable',
-                //     'description' => 'nullable',
-
-                //     // Marketer
-                //     'primary_marketer' => 'nullable|exists:staff,id,company_id,' . $this->sessionDetails('company_id'),
-                //     'secondary_marketers' => 'nullable',
-                //     'subscribers' => 'nullable',
-                //     'transaction_date' => 'nullable',
-
-                //     'property_type' => 'required|in:land,building',
-                //     'building_type_id' => 'nullable|exists:building_types,id',
-                //     'plot_size_id' => 'nullable|exists:plot_sizes,id',
-                //     'branch_id' => 'nullable|exists:branches,id,company_id,' . $this->sessionDetails('company_id'),
-                //     'contract_type' => 'nullable',
-                
-                //     'contract_id' => 'required|exists:customer_contracts,id,company_id,' . $this->sessionDetails('company_id'),
-                // ]);
-
-                // Update the contract
-                $update = array_merge($validator->valid(), $cont);
-                $customer_contract_ids[] = $cont['contract_id'];
-                app('App\Http\Controllers\CustomerContractController')->updateCustomerContract($update, $cont['contract_id'], $update['customer_id']);
-                
-            }
-
-        }
-
         if ($validator->fails()) {
             return response()->json([
                 'error' => $validator->messages()->first(),
                 'data' => null,
             ], 412);
         }
+
+        $customer_contract_ids = [];
+        if (!empty($request->contract)) {
+
+            $contracts = $this->cleanJsonInput($request->contract);
+
+            foreach ($contracts as $cont) {
+                // Make each contract a request
+                $contract_validator = Validator::make($cont, [
+                    'estate_id' => 'required|exists:estates,id,company_id,' . $this->sessionDetails('company_id'),
+                    'city_id' => 'required|exists:cities,id,company_id,' . $this->sessionDetails('company_id'),
+                    'location_id' => 'required|exists:locations,id,company_id,' . $this->sessionDetails('company_id'),
+
+                    'property_type_id' => [
+                        'required', Rule::exists('estate_property_type_details', 'id')->where(function ($query) use ($cont) {
+                            $query->where('company_id', $this->sessionDetails('company_id'))->where('estate_id', $cont['estate_id'])->where('type', $cont['property_type']);
+                        })
+                    ],
+                    // Other details
+                    'property_price' => 'nullable',
+                    'infrastuctural_fee' => 'nullable',
+                    'net_property_fee' => 'nullable',
+                    'setting_and_excavation_fee' => 'nullable',
+                    'discount' => 'nullable',
+                    'description' => 'nullable',
+
+                    // Marketer
+                    'primary_marketer' => 'nullable|exists:staff,id,company_id,' . $this->sessionDetails('company_id'),
+                    'secondary_marketers' => 'nullable',
+                    'subscribers' => 'nullable',
+                    'transaction_date' => 'nullable',
+
+                    'property_type' => 'required|in:land,building',
+                    'building_type_id' => 'nullable|exists:building_types,id',
+                    'plot_size_id' => 'nullable|exists:plot_sizes,id',
+                    'branch_id' => 'nullable|exists:branches,id,company_id,' . $this->sessionDetails('company_id'),
+                    'contract_type' => 'nullable',
+
+                    'contract_id' => 'required|exists:customer_contracts,id,company_id,' . $this->sessionDetails('company_id'),
+                ]);
+
+                if ($contract_validator->fails()) {
+                    return response()->json([
+                        'error' => $contract_validator->messages()->first(),
+                        'data' => null,
+                    ], 412);
+                }
+
+
+                $update = $validator->valid();
+                $update['contract'] = $cont;
+                // Update the contract
+                $customer_contract_ids[] = $cont['contract_id'];
+                app('App\Http\Controllers\CustomerContractController')->updateCustomerContract($cont, $cont['contract_id'], $request->customer_id);
+            }
+        }
+
         $data = array_merge($validator->valid());
-       
         $data['date_of_birth'] = !empty($data['date_of_birth']) ? Carbon::parse($data['date_of_birth']) : '';
 
         if (!empty($request->passport_photo)) {
@@ -185,30 +193,26 @@ class CustomerFormController extends Controller
             $data['secondary_marketers'] = json_encode($request->secondary_marketers);
         }
         
-        $data['contact_details'] = json_encode([
-            'phone_number' => $data['phone_number'] ?? null,
-            'house_address' => $data['house_address'] ?? null,
-            'alternate_phone_number' => $data['alternate_phone_number'] ?? null,
-        ]);
-
+       
+        // To be used in customer form
         $data['next_of_kin_information'] = json_encode([
-            'next_of_kin_firstname' => $data['next_of_kin_firstname'] ?? null,
-            'next_of_kin_lastname' => $data['next_of_kin_lastname'] ?? null,
-            'next_of_kin_house_address' => $data['next_of_kin_house_address'] ?? null,
-            'next_of_kin_phone_number' => $data['next_of_kin_phone_number'] ?? null,
-            'next_of_kin_email_address' => $data['next_of_kin_email_address'] ?? null,
-            'next_of_kin_relationship' => $data['next_of_kin_relationship'] ?? null,
+            'nok_first_name' => $data['nok_first_name'] ?? null,
+            'nok_last_name' => $data['nok_last_name'] ?? null,
+            'nok_house_address' => $data['nok_house_address'] ?? null,
+            'nok_phone_number' => $data['nok_phone_number'] ?? null,
+            'nok_email_address' => $data['nok_email_address'] ?? null,
+            'nok_relationship' => $data['nok_relationship'] ?? null,
         ]);
 
         $data['means_of_identification'] = json_encode([
-            'occupation' => $data['nullable'] ?? null,
+            'occupation' => $data['occupation'] ?? null,
             'place_of_work' => $data['place_of_work'] ?? null,
             'id_card_type' => $data['id_card_type'] ?? null, // multiple
             'passport_photo' => $data['passport_photo'] ?? null,
             'id_card' => $data['id_card'] ?? null,
             'signature' => $data['signature'] ?? null,
         ]);
-
+        
         $data['other_details'] = json_encode([
             'property_price' => $data['property_price'] ?? null,
             'infrastuctural_fee' => $data['infrastuctural_fee'] ?? null,
@@ -217,40 +221,43 @@ class CustomerFormController extends Controller
             'discount' => $data['discount'] ?? null,
             'description' => $data['description'] ?? null,
         ]);
-        $data['company_id'] = $this->sessionDetails('company_id');
 
-        $data = Arr::except($data, [
-            'next_of_kin_firstname', 'next_of_kin_lastname', 'next_of_kin_house_address', 'next_of_kin_phone_number', 'next_of_kin_email_address', 'next_of_kin_relationship', 'phone_number', 'house_address', 'alternate_phone_number', 'occupation', 'place_of_work', 'id_card_type', 'passport_photo', 'id_card', 'signature', 'property_price', 'infrastuctural_fee', 'net_property_fee', 'setting_and_excavation_fee', 'discount', 'description'
+        $data['contact_details'] = json_encode([
+            'phone_number' => $data['phone_number'] ?? null,
+            'house_address' => $data['house_address'] ?? null,
+            'alternate_phone_number' => $data['alternate_number'] ?? null,
         ]);
 
+        // End to be used in customer form
+
+        $data['company_id'] = $this->sessionDetails('company_id');
         if (\Request::route()->getPrefix() == 'api/customer') {
             $data['type'] = 'customer-response';
-        }else{
+        } else {
             $data['type'] = 'form2-request';
-            $data['status'] = 'completed'; 
+            $data['status'] = 'completed';
         }
-        // take out transaction date
-        // create new cloumn to dump all the contract
-        // ask victor to send transaction date as part of the request
-        // $data['plot_size_id'] = $data['plot_size'];
+
+        $data['date_of_birth'] = Carbon::parse($request->date_of_birth);
         // Update user
         $customer = Customer::where('id', $data['customer_id'])->first();
         $user = $customer->user;
-
-        // Update customer
-        // app('App\Http\Controllers\CustomerController')->updateUser($user, $data);
         
+        // Update user
+        app('App\Http\Controllers\CustomerController')->updateUser($user, $data);
         $data['transaction_date'] = Carbon::parse($request->transaction_date);
-        $data['raw'] = json_encode($request->contract);
+        $data['raw'] = json_encode($request->all());
         $data['contract_ids'] = json_encode($customer_contract_ids);
-        $data = Arr::except($data, ['contract', 'building_type', 'plot_size', 'contract_id', 'subscribers']);
+        $data['company_id'] = $this->sessionDetails('company_id');
+        
+        $response = Arr::only($data, ['contract_ids', 'customer_id', 'title', 'type', 'status', 'no_of_contract', 'surname', 'first_name', 'middle_name', 'last_name', 'gender', 'date_of_birth', 'marital_status', 'lga_id', 'country_id', 'state_id', 'email_address', 'contact_details', 'next_of_kin_information', 'means_of_identification', 'contract_type', 'property_type', 'property_type_id', 'city_id', 'location_id', 'estate_id', 'building_type_id', 'plot_size_id', 'transaction_date', 'branch_id', 'other_details', 'primary_marketer', 'secondary_marketers', 'raw','company_id','no_of_contract', 'contact_details']);
         
         CustomerForm::updateOrCreate(
-            ['customer_id' => $data['customer_id'],'company_id' => $data['company_id']],
-            $data
+            ['customer_id' => $response['customer_id'], 'company_id' => $response['company_id']],
+            $response
         );
 
-        return response()->json(['message' => 'success', 'data' => null], 200);
+        return response()->json(['message' => 'success', 'data' => []], 200);
     }
 
     /**

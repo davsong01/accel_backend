@@ -125,7 +125,7 @@ class StaffImport implements ToCollection, WithHeadingRow
                     'additional_details' => $data['additional_details'],
                     'next_of_kin' => $data['next_of_kin'],
                     'branch_id' => $row['branch_id'] ?? '',
-                    'date_of_birth' => $row['date_of_birth'] ?? null,
+                    'date_of_birth' => !empty($row['date_of_birth']) ? Carbon::parse($row['date_of_birth']) : null,
                     'company_id' => $this->company_id,'staff_id' =>  $this->session->generateStaffId($date_of_employment, true),
                 ]);
     

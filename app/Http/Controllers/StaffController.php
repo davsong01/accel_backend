@@ -260,7 +260,7 @@ class StaffController extends Controller
                 'additional_details' => $data['additional_details'] ?? '',
                 'next_of_kin' => $data['next_of_kin'] ?? '',
                 'branch_id' => $data['branch_id'] ?? '',
-                'date_of_birth' => $request->date_of_birth ?? null,
+                'date_of_birth' => !empty($request->date_of_birth) ? Carbon::parse($request->date_of_birth) : null,
                 'company_id' => $this->sessionDetails('company_id'),
                 'staff_id' => $this->generateStaffId($data['date_of_employment'], true),
             ]);
@@ -409,7 +409,7 @@ class StaffController extends Controller
             'additional_details' => json_encode($additional_details),
             'next_of_kin' => json_encode($next_of_kin),
             'branch_id' => $request->has('branch_id')  ? $data['branch_id'] : $staff->user->branch_id,
-            'date_of_birth' => $request->has('date_of_birth')  ? $data['date_of_birth'] : $staff->user->date_of_birth,
+            'date_of_birth' => $request->has('date_of_birth')  ? Carbon::parse($data['date_of_birth']) : $staff->user->date_of_birth,
             'company_id' => $this->sessionDetails('company_id')
         ]);
 

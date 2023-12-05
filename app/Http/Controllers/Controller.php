@@ -520,12 +520,100 @@ class Controller extends BaseController
         } else {
             $left = 0;
         }
-        dd($type);
+        
         if ($internal) {
             return $left;
         }
 
         return response()->json(['message' => 'Retrieved successfully', 'data' => $left], 200);
+    }
+
+    public function cleanJsonInput($input){
+        // $input = ;
+        // $input2 = [
+        //     [
+        //         'property_price' => 'kjkkk',
+        //         'infrastuctural_fee' => 'kjkkk',
+        //         'net_property_fee' => 'kjkkk',
+        //         'setting_and_excavation_fee' => 'kjkkk',
+        //         'discount' => 'kjkkk',
+        //         'property_type_id' => '52',
+        //         'property_type' => 'land',
+        //         'building_type' => 2,
+        //         'plot_size' => 19,
+        //         'branch_id' => 2,
+        //         'contract_type' => 'joint',
+        //         'contract_id' => 46,
+        //         'estate_id' => 144,
+
+        //         'subscribers' => [
+        //             [
+        //                 's_name' => 'Subscriber 1',
+        //                 's_phone' => '00000000000', '
+        //             s_email' => 'sub1@gmail.com',
+        //                 's_relationship' => 'Brother'
+        //             ],
+        //             [
+        //                 's_name' => 'Subscriber 2',
+        //                 's_phone' => '0000000000',
+        //                 's_email' => 'sub2@gmail.com',
+        //                 's_relationship' => 'Mother'
+        //             ]
+        //         ],
+        //         'primary_marketer' => 1,
+        //         'secondary_marketers' => [
+        //             [
+        //                 'name' => 'marketer name',
+        //                 'secondary_marketer_id' => 2,
+        //                 'percentage' => 10
+        //             ]
+        //         ]
+        //     ],
+        //     [
+        //         'property_price' => 'kjkkk',
+        //         'infrastuctural_fee' =>
+        //         'kjkkk',
+        //         'net_property_fee' => 'kjkkk',
+        //         'setting_and_excavation_fee' => 'kjkkk',
+        //         'discount' => 'kjkkk',
+        //         'transaction_date' => '2023-11-17 18:40:00',
+        //         'property_type_id' => '52',
+        //         'property_type' => 'land',
+        //         'building_type' => 2,
+        //         'plot_size' => 19,
+        //         'branch_id' => 2,
+        //         'contract_type' => 'joint',
+        //         'contract_id' => 47,
+        //         'estate_id' => 144,
+        //         'subscribers' => [
+        //             [
+        //                 's_name' => 'Subscriber 2',
+        //                 's_phone' => '0000000000',
+        //                 's_email' => 'sub2@gmail.com',
+        //                 's_relationship' => 'Mother'
+        //             ]
+        //         ],
+        //         'primary_marketer' => 1,
+        //         'secondary_marketers' => [
+        //             [
+        //                 'name' => 'Marketer 2 name',
+        //                 'secondary_marketer_id' => 4,
+        //                 'percentage' => 4
+        //             ]
+        //         ]
+        //     ]
+        // ];
+        if(isset($input[0]) && ($input[0] == "'" || $input[0] == '"')){
+            $input = substr($input, 1);
+        }
+
+        if (isset($input[-1]) && ($input[-1] == "'" || $input[-1] == '"')) {
+            $input = substr($input, 0, -1);
+        }
+
+        $input = json_decode($input, true);
+       
+        return $input;
     }
 }
 

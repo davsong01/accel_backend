@@ -195,72 +195,7 @@ class CustomerController extends Controller
      */
     public function store(Request $request)
     {
-        // $validator = Validator::make($request->all(), [
-        //     'first_name' => 'required',
-        //     'last_name' => 'required',
-        //     'gender' => 'required|in:male,female',
-        //     'email' => [
-        //         'required', 'email', Rule::unique('users')->where(function ($query) {
-        //             $query->where('company_id', $this->sessionDetails('company_id'))->where('type', 'customer');
-        //         })
-        //     ],
-        //     'phone_number' => 'required',
-        //     // 'city' => 'required|exists:cities,id,company_id,' . $this->sessionDetails('company_id'),
-        //     // 'location' => 'required|exists:locations,id,company_id,' . $this->sessionDetails('company_id'),
-        //     // 'estate' => 'required|exists:estates,id,company_id,' . $this->sessionDetails('company_id'),
-        //     'residential_address' => 'required',
-        // ]);
-
-        // if ($validator->fails()) {
-        //     return response()->json([
-        //         'error' => $validator->messages()->first(),
-        //         'data' => null,
-        //     ], 412);
-        // }
-
-        // $data['additional_details'] = json_encode([
-        //     // 'alternate_number' => $data['alternate_number'] ?? '',
-        //     // 'alternate_email' => $data['alternate_email'] ?? '',
-        //     // 'state' => $data['state'] ?? '',
-        //     'residential_address' => $data['residential_address'] ?? '',
-        //     // 'marital_status' => $data['marital_status'] ?? '',
-        //     // 'nationality' => $data['nationality'] ?? '',
-        //     // 'lga' => $data['lga'] ?? '',
-        // ]);
-
-        // // Add User
-        // $user = User::updateOrCreate([
-        //     'first_name' => $request->first_name,
-        //     'email' => $request->email,
-        //     'gender' => $request->gender,
-        //     'last_name' => $request->last_name,
-        //     'phone_number' => $request->phone_number,
-        //     'additional_details' => $data['additional_details'],
-        //     'company_id' => $this->sessionDetails('company_id'),
-        //     'branch_id' => $this->sessionDetails('branch_id'),
-        //     'email_verified_at' => now(),
-        //     'status' => 'active',
-        //     'type' => 'customer',
-        //     'password' => Hash::make('123456'),
-        //     'company_id' => $this->sessionDetails('company_id'),
-        //     'branch_id' => $this->sessionDetails('branch_id'),
-        // ]);
-
-        // if ($user) {
-        //     // Add Customer
-        //     $customer = Customer::updateOrCreate([
-        //         'company_id' => $this->sessionDetails('company_id'),
-        //         'branch_id' => $this->sessionDetails('branch_id'),
-        //         'user_id' => $user->id,
-        //         'verified' => 1,
-        //     ]);
-
-        //     $user->update([
-        //         'customerId' => $this->generateCustomerId($user, true),
-        //     ]);
-        // }
-
-        // return response()->json(['message' => 'success', 'data' => $customer], 200);
+        
     }
 
     /**
@@ -357,38 +292,40 @@ class CustomerController extends Controller
         return response()->json(['message' => 'Successful', 'data' => []], 200);
     }
 
-    public function updateUser($data){
-        // Add User
+    public function updateUser($user, $data){
+        
+        $old_additional_details = !empty($user->additional_details) ? json_decode($user->additional_details, true) : [];
         $additional_details = json_encode([
-            // 'alternate_number' => $data['alternate_number'] ?? '',
-            // 'alternate_email' => $data['alternate_email'] ?? '',
-            // 'state' => $data['state'] ?? '',
-            'residential_address' => $data['residential_address'] ?? '',
-            // 'marital_status' => $data['marital_status'] ?? '',
-            // 'nationality' => $data['nationality'] ?? '',
-            // 'lga' => $data['lga'] ?? '',
+            'alternate_number' => !empty($data['alternate_number']) ? $data['alternate_number']: ($old_additional_details['alternate_number'] ?? ''),
+            'alternate_email' => !empty($data['alternate_email']) ? $data['alternate_email'] : ($old_additional_details['alternate_email'] ?? ''),
+            'state' => !empty($data['state_id']) ? $data['state_id'] : ($old_additional_details['state'] ?? ''),
+            'residential_address' => !empty($data['residential_address']) ? $data['residential_address'] : ($old_additional_details['residential_address'] ?? ''),
+            'marital_status' => !empty($data['marital_status']) ? $data['marital_status'] : ($old_additional_details['marital_status'] ?? ''),
+            'nationality' => !empty($data['country_id']) ? $data['country_id'] : ($old_additional_details['nationality'] ?? ''),
+            'lga' => !empty($data['lga_id']) ? $data['lga_id'] : ($old_additional_details['lga'] ?? ''),
         ]);
 
-        $update['email'];
-
-        // 'email' => $request->has('email') ? $data['email'] : $staff->user->email
-        // 'first_name' => $request->has('first_name') ? $data['first_name'] : $staff->user->first_name
-        // 'middle_name' => $request->has('middle_name') ? $data['middle_name'] : $staff->user->middle_name
-
-        $user = User::updateOrCreate([
-            'first_name' => $data['first_name'],
-            'email' => $data['email'],
-            'gender' => $data['gender'],
-            'last_name' => $data['last_name'],
-            'phone_number' => $data['phone_number'],
+        $old_next_of_kin = !empty($user->next_of_kin) ? json_decode($user->next_of_kin, true) : [];
+        $next_of_kin = json_encode([
+            'nok_first_name' => !empty($data['nok_first_name']) ? $data['nok_first_name']: ($old_next_of_kin['nok_first_name'] ?? ''),
+            'nok_last_name' => !empty($data['nok_last_name']) ? $data['nok_last_name']: ($old_next_of_kin['nok_last_name'] ?? ''),
+            'nok_phone_number' => !empty($data['nok_phone_number']) ? $data['nok_phone_number']: ($old_next_of_kin['nok_phone_number'] ?? ''),
+            'nok_house_address' => !empty($data['nok_house_address']) ? $data['nok_house_address']: ($old_next_of_kin['nok_house_address'] ?? ''),
+            'nok_email_address' => !empty($data['nok_email_address']) ? $data['nok_email_address']: ($old_next_of_kin['nok_email_address'] ?? ''),
+            'nok_relationship' => !empty($data['nok_relationship']) ? $data['nok_relationship']: ($old_next_of_kin['nok_relationship'] ?? ''),
+        ]);
+        
+        $user->update([
+            'first_name' => $data['first_name'] ?? $user->first_name,
+            'email' => $data['email'] ?? $user->email,
+            'date_of_birth' => $data['date_of_birth'] ?? $user->date_of_birth,
+            'gender' => $data['gender'] ?? $user->gender,
+            'last_name' => $data['last_name'] ?? $user->last_name,
+            'phone_number' => $data['phone_number'] ?? $user->phone_number,
             'additional_details' => $additional_details ?? null,
-            'company_id' => $this->sessionDetails('company_id'),
-            'branch_id' => $this->sessionDetails('branch_id'),
-            'company_id' => $this->sessionDetails('company_id'),
-            'branch_id' => $this->sessionDetails('branch_id'),
+            'next_of_kin' => $next_of_kin ?? null,
         ]);
-
-
+        
         return $user;
     }
 }
