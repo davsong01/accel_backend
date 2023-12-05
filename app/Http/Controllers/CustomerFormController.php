@@ -249,7 +249,7 @@ class CustomerFormController extends Controller
         $data['transaction_date'] = Carbon::parse($request->transaction_date);
         $data['raw'] = json_encode($request->all());
         $data['contract_ids'] = json_encode($customer_contract_ids);
-        $data['no_of_contracts'] = count($customer_contract_ids);
+        $data['no_of_contract'] = count($customer_contract_ids);
 
         $data['company_id'] = $this->sessionDetails('company_id');
         
