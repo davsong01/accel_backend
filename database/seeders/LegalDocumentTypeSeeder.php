@@ -24,7 +24,7 @@ class LegalDocumentTypeSeeder extends Seeder
             ['type' => 'CHANGE_OF_OWNERSHIP_LETTER'],
         )
         // ->for(PropertyType::factory())
-        ->has(LegalDocumentTemplate::factory()->count(4))
+        // ->has(LegalDocumentTemplate::factory()->count(4))
         ->create();
     }
 }

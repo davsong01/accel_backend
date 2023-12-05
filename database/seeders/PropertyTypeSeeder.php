@@ -15,7 +15,6 @@ class PropertyTypeSeeder extends Seeder
     {
         PropertyType::truncate();
         PropertyType::factory()
-            ->count(2)
             ->sequence(
                 ['type' => 'LAND'],
                 ['type' => 'BUILDING']
