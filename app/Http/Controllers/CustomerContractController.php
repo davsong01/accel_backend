@@ -200,15 +200,24 @@ class CustomerContractController extends Controller
     {
         // Add User
         $additional_details = json_encode([
-            // 'alternate_number' => $data['alternate_number'] ?? '',
-            // 'alternate_email' => $data['alternate_email'] ?? '',
-            // 'state' => $data['state'] ?? '',
+            'alternate_number' => $request->alternate_number ?? '',
+            'alternate_email' => $request->alternate_email ?? '',
+            'state' => $request->state ?? '',
             'residential_address' => $request->residential_address ?? '',
-            // 'marital_status' => $data['marital_status'] ?? '',
-            // 'nationality' => $data['nationality'] ?? '',
-            // 'lga' => $data['lga'] ?? '',
+            'marital_status' => $request->marital_status ?? '',
+            'nationality' => $request->nationality ?? '',
+            'lga' => $request->lga ?? '',
         ]);
-        
+
+        $next_of_kin = json_encode([
+            'nok_first_name' => $request->nok_first_name ?? '',
+            'nok_last_name' => $request->nok_last_name ?? '',
+            'nok_phone_number' => $request->nok_phone_number ?? '',
+            'nok_house_address' => $request->nok_house_address ?? '',
+            'nok_email_address' => $request->nok_email_address ?? '',
+            'nok_relationship' => $request->nok_relationship ?? '',
+        ]);
+
         $user = User::updateOrCreate([
             'first_name' => $request['first_name'],
             'email' => $request['email'],
@@ -216,6 +225,7 @@ class CustomerContractController extends Controller
             'last_name' => $request['last_name'],
             'phone_number' => $request['phone_number'],
             'additional_details' => $additional_details ?? null,
+            'next_of_kin' => $next_of_kin ?? null,
             'company_id' => $this->sessionDetails('company_id'),
             'branch_id' => $this->sessionDetails('branch_id'),
             'email_verified_at' => now(),
@@ -267,25 +277,25 @@ class CustomerContractController extends Controller
 
     public function updateCustomerContract($data, $contract_id, $customer_id){
         $contract = CustomerContract::where('id', $contract_id)->where('customer_id', $customer_id)->first();
-
+        
         if(!$contract){
             return;
         }
-
+       
         $contract->update([
-            'primary_marketer_id' => $data['primary_marketer_id'] ?? $data['primary_marketer'] ?? null,
-            'secondary_marketers' => isset($data['secondary_marketers']) ? json_encode($data['secondary_marketers']) : null,
-            'city_id' => $data['city_id'],
-            'location_id' => $data['location_id'],
-            'estate_id' => $data['estate_id'],
-            'plot_size' => $data['plot_size'] ?? null,
-            'building_type' => $data['building_type'] ?? null,
-            'property_type' => $data['property_type'],
-            'property_type_id' => $data['property_type_id'],
-            'subscribers' => isset($data['subscribers']) ? json_encode($data['subscribers']) : null,
-            'contract_type' => $data['contract_type']
+            'primary_marketer_id' => !empty($data['primary_marketer']) ? $data['primary_marketer'] : $contract->primary_marketer_id,
+            'secondary_marketers' => !empty($data['secondary_marketers']) ? json_encode($data['secondary_marketers']) : $contract->secondary_marketers,
+            'city_id' => !empty($data['city_id']) ? $data['city_id'] : $contract->city_id,
+            'location_id' => !empty($data['location_id']) ? $data['location_id'] : $contract->location_id,
+            'estate_id' => !empty($data['estate_id']) ? $data['estate_id'] : $contract->estate_id,
+            'plot_size' => !empty($data['plot_size']) ? $data['plot_size'] : $contract->plot_size,
+            'building_type' => !empty($data['building_type']) ? $data['building_type'] : $contract->building_type,
+            'property_type' => !empty($data['property_typeproperty_type']) ? $data['property_typeproperty_type'] : $contract->property_typeproperty_type ,
+            'property_type_id' => !empty($data['property_type_id']) ? $data['property_type_id'] : $contract->property_type_id,
+            'subscribers' => !empty($data['subscribers']) ? json_encode($data['subscribers']) : $contract->subscribers,
+            'contract_type' => !empty($data['contract_type']) ? $data['contract_type'] : $contract->contract_type,
         ]);
-
+        
         return;
     }
 

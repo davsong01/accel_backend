@@ -4823,6 +4823,5 @@ class GeneralResourceService
 
         return $zones;
     }
-
 }
   
