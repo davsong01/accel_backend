@@ -42,7 +42,9 @@ use App\Http\Controllers\CustomerContractController;
 use App\Http\Controllers\PropertyTypeDetailsController;
 use App\Http\Controllers\AccountClassificationController;
 use App\Http\Controllers\EstateConstructionSettingController;
+use App\Http\Controllers\GeneratedLegalDocumentController;
 use App\Http\Controllers\LeaveAndAbsenceManagementController;
+use App\Http\Controllers\LegalDocumentTemplateController;
 use App\Http\Controllers\TransactionTypeDefinitionController;
 
 /*
@@ -64,7 +66,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
         $realpath = base_path() . '/documents' . '/' . $filename;
         return response()->download($realpath);
     });
+    Route::get('generated-legal-documents/{filename}', function ($filename) {
+        $filename = base64_decode($filename);
+        $realpath = base_path() . '/generated-legal-documents' . '/' . $filename;
+        return response()->download($realpath);
+    });
 });
+
+
 Route::get('domain-details/{slug}', [CompanySettingController::class, 'domainDetails']);
 
 Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
@@ -258,6 +267,20 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('generate-customer-id', [Controller::class, 'generateCustomerId']);
         Route::get('customer-identification-settings', [CustomerController::class, 'customerIdentificationSetting']);
         Route::post('update-customer-identification-settings', [CustomerController::class, 'updateCustomerIdentificationSetting']);
+
+        Route::apiResource('legal-document-templates', LegalDocumentTemplateController::class)->only([
+             'store'
+        ]);
+        Route::apiResource('generated-legal-documents', GeneratedLegalDocumentController::class)->only([
+             'index', 'store'
+        ]);
+        
+        Route::controller(GeneratedLegalDocumentController::class)->name('generated-legal-documents.')->prefix('generated-legal-documents')->group(function(){
+            Route::get('search', 'search')->name('search');
+
+            Route::post('generate', 'generate')->name('generate');
+            Route::patch('{document}/regenerate', 'regenerate')->name('regenerate');
+        });
     });
 });
 
