@@ -221,12 +221,13 @@ class CustomerFormController extends Controller
                 // Update the contract
                 $customer_contract_ids[] = $cont['contract_id'];
                 app('App\Http\Controllers\CustomerContractController')->updateCustomerContract($cont, $cont['contract_id'], $request->customer_id);
+                
             }
         }
 
         $data = array_merge($validator->valid());
         $data['date_of_birth'] = !empty($data['date_of_birth']) ? Carbon::parse($data['date_of_birth']) : '';
-
+        
         if (!empty($request->passport_photo)) {
             $data['passport_photo'] = $this->uploadFile($request->passport_photo, 'avatars');
         }
@@ -303,7 +304,7 @@ class CustomerFormController extends Controller
 
         $data['company_id'] = $this->sessionDetails('company_id');
         
-        $response = Arr::only($data, ['contract_ids', 'customer_id', 'title', 'type', 'status', 'no_of_contract', 'surname', 'first_name', 'middle_name', 'last_name', 'gender', 'date_of_birth', 'marital_status', 'lga_id', 'country_id', 'state_id', 'email_address', 'contact_details', 'next_of_kin_information', 'means_of_identification', 'contract_type', 'property_type', 'property_type_id', 'city_id', 'location_id', 'estate_id', 'building_type_id', 'plot_size_id', 'transaction_date', 'branch_id', 'other_details', 'primary_marketer', 'secondary_marketers', 'raw','company_id','no_of_contract', 'contact_details','no_of_contracts']);
+        $response = Arr::only($data, ['contract_ids', 'customer_id', 'title', 'type', 'status', 'no_of_contract', 'surname', 'first_name', 'middle_name', 'last_name', 'gender', 'date_of_birth', 'marital_status', 'lga_id', 'country_id', 'state_id', 'email_address', 'contact_details', 'next_of_kin_information', 'means_of_identification', 'transaction_date', 'branch_id', 'other_details', 'primary_marketer', 'secondary_marketers', 'raw','company_id','no_of_contract', 'contact_details','no_of_contracts']);
         
         CustomerForm::updateOrCreate(
             ['customer_id' => $response['customer_id'], 'company_id' => $response['company_id']],

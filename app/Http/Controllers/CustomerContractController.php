@@ -276,7 +276,7 @@ class CustomerContractController extends Controller
     }
 
     public function updateCustomerContract($data, $contract_id, $customer_id){
-        $contract = CustomerContract::where('id', $contract_id)->where('customer_id', $customer_id)->first();
+        $contract = CustomerContract::with('customer', 'property_type_details:type,id,estate_price,settings_and_excavation,infrastructural_fee', 'city:name,id', 'estate:name,id', 'location:name,id', 'building_type:id,name', 'plot_size:id,size', 'plotSize:id,size')->where('id', $contract_id)->where('customer_id', $customer_id)->first();
         
         if(!$contract){
             return;
@@ -290,7 +290,7 @@ class CustomerContractController extends Controller
             'estate_id' => !empty($data['estate_id']) ? $data['estate_id'] : $contract->estate_id,
             'plot_size' => !empty($data['plot_size']) ? $data['plot_size'] : $contract->plot_size,
             'building_type' => !empty($data['building_type']) ? $data['building_type'] : $contract->building_type,
-            'property_type' => !empty($data['property_typeproperty_type']) ? $data['property_typeproperty_type'] : $contract->property_typeproperty_type ,
+            'property_type' => !empty($data['property_type']) ? $data['property_type'] : $contract->property_type ,
             'property_type_id' => !empty($data['property_type_id']) ? $data['property_type_id'] : $contract->property_type_id,
             'subscribers' => !empty($data['subscribers']) ? json_encode($data['subscribers']) : $contract->subscribers,
             'contract_type' => !empty($data['contract_type']) ? $data['contract_type'] : $contract->contract_type,
