@@ -43,6 +43,11 @@ class CustomerContract extends Model
         return $this->belongsTo(PlotSize::class, 'plot_size');
     }
 
+    public function plotSize()
+    {
+        return $this->belongsTo(PlotSize::class, 'plot_size');
+    }
+
     public function building_type_details()
     {
         return $this->belongsTo(BuildingType::class, 'building_type');
