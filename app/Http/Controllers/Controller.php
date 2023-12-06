@@ -10,6 +10,7 @@ use ReflectionMethod;
 use App\Models\Estate;
 use App\Models\States;
 use App\Models\Country;
+use App\Models\CompanySetting;
 use App\Models\EstateSettings;
 use App\Models\AdvanceAndClaims;
 use App\Models\CustomerContract;
@@ -530,80 +531,6 @@ class Controller extends BaseController
     }
 
     public function cleanJsonInput($input){
-        // $input = ;
-        // $input2 = [
-        //     [
-        //         'property_price' => 'kjkkk',
-        //         'infrastuctural_fee' => 'kjkkk',
-        //         'net_property_fee' => 'kjkkk',
-        //         'setting_and_excavation_fee' => 'kjkkk',
-        //         'discount' => 'kjkkk',
-        //         'property_type_id' => '52',
-        //         'property_type' => 'land',
-        //         'building_type' => 2,
-        //         'plot_size' => 19,
-        //         'branch_id' => 2,
-        //         'contract_type' => 'joint',
-        //         'contract_id' => 46,
-        //         'estate_id' => 144,
-
-        //         'subscribers' => [
-        //             [
-        //                 's_name' => 'Subscriber 1',
-        //                 's_phone' => '00000000000', '
-        //             s_email' => 'sub1@gmail.com',
-        //                 's_relationship' => 'Brother'
-        //             ],
-        //             [
-        //                 's_name' => 'Subscriber 2',
-        //                 's_phone' => '0000000000',
-        //                 's_email' => 'sub2@gmail.com',
-        //                 's_relationship' => 'Mother'
-        //             ]
-        //         ],
-        //         'primary_marketer' => 1,
-        //         'secondary_marketers' => [
-        //             [
-        //                 'name' => 'marketer name',
-        //                 'secondary_marketer_id' => 2,
-        //                 'percentage' => 10
-        //             ]
-        //         ]
-        //     ],
-        //     [
-        //         'property_price' => 'kjkkk',
-        //         'infrastuctural_fee' =>
-        //         'kjkkk',
-        //         'net_property_fee' => 'kjkkk',
-        //         'setting_and_excavation_fee' => 'kjkkk',
-        //         'discount' => 'kjkkk',
-        //         'transaction_date' => '2023-11-17 18:40:00',
-        //         'property_type_id' => '52',
-        //         'property_type' => 'land',
-        //         'building_type' => 2,
-        //         'plot_size' => 19,
-        //         'branch_id' => 2,
-        //         'contract_type' => 'joint',
-        //         'contract_id' => 47,
-        //         'estate_id' => 144,
-        //         'subscribers' => [
-        //             [
-        //                 's_name' => 'Subscriber 2',
-        //                 's_phone' => '0000000000',
-        //                 's_email' => 'sub2@gmail.com',
-        //                 's_relationship' => 'Mother'
-        //             ]
-        //         ],
-        //         'primary_marketer' => 1,
-        //         'secondary_marketers' => [
-        //             [
-        //                 'name' => 'Marketer 2 name',
-        //                 'secondary_marketer_id' => 4,
-        //                 'percentage' => 4
-        //             ]
-        //         ]
-        //     ]
-        // ];
         if(isset($input[0]) && ($input[0] == "'" || $input[0] == '"')){
             $input = substr($input, 1);
         }
@@ -615,6 +542,52 @@ class Controller extends BaseController
         $input = json_decode($input, true);
        
         return $input;
+    }
+
+    public function getFormRequestDetails($forms){
+       
+        $companySettings = CompanySetting::with(['currencyData'])->where('company_id', $this->sessionDetails('company_id'))->first();
+
+        $forms->next_of_kin_information = !empty($forms->next_of_kin_information) ? json_decode($forms->next_of_kin_information, true) : [];
+
+        $means_of_identification = !empty($forms->means_of_identification) ? json_decode($forms->means_of_identification, true) : [];
+
+        $means_of_identification['passport_photo'] = isset($means_of_identification['passport_photo']) && !empty($means_of_identification['passport_photo']) ? $this->encodeUploadedFile($means_of_identification['passport_photo']) : null;
+        $means_of_identification['id_card'] = isset($means_of_identification['id_card']) && !empty($means_of_identification['id_card']) ? $this->encodeUploadedFile($means_of_identification['id_card']) : null;
+        $means_of_identification['signature'] = isset($means_of_identification['signature']) && !empty($means_of_identification['signature']) ? $this->encodeUploadedFile($means_of_identification['signature']) : null;
+        $forms->means_of_identification = $means_of_identification;
+
+        $contract_details = [];
+
+        $contract_ids = (isset($forms->contract_ids) && !empty($forms->contract_ids)) ? json_decode($forms->contract_ids, true) : null;
+
+        if (!empty($contract_ids)) {
+            foreach ($contract_ids as $value) {
+
+                $contract = CustomerContract::with('customer','property_type_details:type,id,estate_price,settings_and_excavation,infrastructural_fee', 'city:name,id', 'estate:name,id', 'location:name,id', 'building_type:id,name', 'plot_size:id,size', 'plotSize:id,size')->where('customer_id', $forms->customer_id)->where('id', $value)->where('company_id', $this->sessionDetails('company_id'))->select(['id', 'customer_id', 'primary_marketer_id', 'property_type_id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'subscribers', 'contract_type', 'property_type', 'created_at'])->first();
+                
+                $contract_details[] = [
+                    'id' => $contract->id,
+                    'customer_id' => $contract->customer_id,
+                    'subscribers' => !empty($contract->subscribers) ? json_decode($contract->subscribers) : '',
+                    'contract_type' => $contract->contract_type,
+                    'property_type' => $contract->property_type_details->type,
+                    'property_price' => $companySettings->currencyData->symbol ?? '?' . number_format((float) $contract->property_type_details->estate_price),
+                    'city' =>  $contract->city,
+                    'building_type' => $contract->building_type,
+                    'location' => $contract->location->name,
+                    'estate' => $contract->estate,
+                    'plot_size' => $contract->plotSize,
+                    'infrastructural_fee' => $companySettings->currencyData->symbol ?? '?' . number_format((float) $contract->property_type_details->infrastructural_fee),
+                    // 'net_proerty_fee' => $companySettings->currencyData->symbol . number_format((float) $contract->property_type_details->infrastructure_fee),
+                    // 'discount',
+                    'primary_marketer' => $contract->primary_marketer = $contract->primaryMarketer($contract),
+                    'settings_and_escavation' => $contract->property_type_details->settings_and_excavation
+                ];
+            }
+        }
+
+        return $contract_details;
     }
 }
 

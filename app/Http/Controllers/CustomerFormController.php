@@ -24,54 +24,11 @@ class CustomerFormController extends Controller
     {
         if (!empty($id)) {
             $forms = CustomerForm::with(['country:id,name','state:id,name','lga:id,name'])->where('id',$id)->where('company_id', $this->sessionDetails('company_id'))->select('surname', 'title', 'status','no_of_contract', 'first_name','middle_name','last_name', 'gender','created_at','id', 'marital_status','date_of_birth','country_id','state_id','lga_id','next_of_kin_information','means_of_identification', 'transaction_date','primary_marketer', 'contract_ids', 'customer_id')->first();
-
-            $companySettings = CompanySetting::with(['currencyData'])->where('company_id', $this->sessionDetails('company_id'))->first();
-
-            $forms->next_of_kin_information = !empty($forms->next_of_kin_information) ? json_decode($forms->next_of_kin_information, true) : [];
-
-            $means_of_identification = !empty($forms->means_of_identification) ? json_decode($forms->means_of_identification, true) : [];
-
-            $means_of_identification['passport_photo'] = isset($means_of_identification['passport_photo']) && !empty($means_of_identification['passport_photo']) ? $this->encodeUploadedFile($means_of_identification['passport_photo']) : null;
-
-            $means_of_identification['id_card'] = isset($means_of_identification['id_card']) && !empty($means_of_identification['id_card']) ? $this->encodeUploadedFile($means_of_identification['id_card']) : null;
-
-            $means_of_identification['signature'] = isset($means_of_identification['signature']) && !empty($means_of_identification['signature']) ? $this->encodeUploadedFile($means_of_identification['signature']) : null;
             
-            $forms->means_of_identification = $means_of_identification;
-
-            $contract_details = [];
-
-            $contract_ids = (isset($forms->contract_ids) && !empty($forms->contract_ids)) ? json_decode($forms->contract_ids, true) : null;
-
-            if(!empty($contract_ids)){
-                foreach($contract_ids as $value){
-                   
-                    $contract = CustomerContract::with('property_type_details:type,id,estate_price,settings_and_excavation,infrastructural_fee', 'city:name,id', 'estate:name,id','location:name,id', 'building_type:id,name', 'plot_size:id,size', 'plotSize:id,size')->where('customer_id', $forms->customer_id)->where('id', $value)->where('company_id', $this->sessionDetails('company_id'))->select(['id', 'customer_id','primary_marketer_id', 'property_type_id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'subscribers', 'contract_type', 'property_type', 'created_at'])->first();
-                    
-                    $contract_details[] = [
-                        'id' => $contract->id,
-                        'customer_id' => $contract->customer_id,
-                        'subscribers' => !empty($contract->subscribers) ? json_decode($contract->subscribers) : '',
-                        'contract_type' => $contract->contract_type,
-                        'property_type' => $contract->property_type_details->type,
-                        'property_price' => $companySettings->currencyData->symbol.number_format((float) $contract->property_type_details->estate_price),
-                        'city' =>  $contract->city,
-                        'building_type' => $contract->building_type,
-                        'location' => $contract->location->name,
-                        'estate' => $contract->estate,
-                        'plot_size' => $contract->plotSize,
-                        'infrastructural_fee' => $companySettings->currencyData->symbol . number_format((float) $contract->property_type_details->infrastructural_fee),
-                        // 'net_proerty_fee' => $companySettings->currencyData->symbol . number_format((float) $contract->property_type_details->infrastructure_fee),
-                        // 'discount',
-                        'primary_marketer' => $contract->primary_marketer = $contract->primaryMarketer($contract),
-                        'settings_and_escavation' => $contract->property_type_details->settings_and_excavation
-                    ];
-                    
-                }
+            if($forms){
+                $forms->contract_details = $this->getFormRequestDetails($forms);
             }
-
-            $forms->contract_details = $contract_details;
-           
+            
             return response()->json(['message' => 'Successfully retrieved', 'data' => $forms], 200);
         }
 
@@ -122,7 +79,17 @@ class CustomerFormController extends Controller
         }
 
         $customer_form->update(['status' => 'approved']);
-
+        
+        $data['contract_details'] = $this->getFormRequestDetails($customer_form);
+        
+        $data['type'] = 'formrequest.approve';
+        $data['medium'] = 'email';
+        // $data['user'] = Customer::where('id', 'customer_id')->user;
+        $data['name'] = $customer_form->first_name ?? '';
+        $data['email'] = $customer_form->email_address ?? '';
+        
+        $this->logEmail($data);
+        
         return response()->json(['message' => 'Successful', 'data' => ['customer_id' => $customer_form->customer_id]], 200);
     }
 

@@ -116,6 +116,7 @@ class MessageTransactionController extends Controller
                 </div>';
             }
         }
+
         if ($data['type'] == 'staff.store') {
             if (isset($data['medium']) && $data['medium'] == 'sms') {
                
@@ -129,6 +130,19 @@ class MessageTransactionController extends Controller
                 Email: ' . $data['user']['email'] . '<br>
                 Staff Id: ' . $data['user']['staff_id'] . '<br>
                 Password: ' . '123456789' . '<br><br> Please click the login button below to login to your personalized dashboard using your email/staff Id and password above. Thank you <br><br><a href="' . url('/') . '"><button style="'.$button_style.'">LOGIN</button></a></p>
+                </div>';
+            }
+        }
+
+        if ($data['type'] == 'formrequest.approve') {
+            if (isset($data['medium']) && $data['medium'] == 'sms') {
+            } else {
+                $subject = 'Form 2 Approved!';
+                $content .= '<strong>Dear ' . $data['name'] . ',</strong><br><br>
+                <div>
+                <p style="text-align:justify !important">Your contract has been approved. Please find details below: <br><br>
+                
+                Password: ' . '123456789' . '<br><br> Please click the login button below to login to your personalized dashboard using your email/staff Id and password above. Thank you <br><br><a href="' . url('/') . '"><button style="' . $button_style . '">LOGIN</button></a></p>
                 </div>';
             }
         }

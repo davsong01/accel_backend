@@ -289,7 +289,7 @@ class StaffController extends Controller
             $data['medium'] = 'email';
             $data['user'] = $user;
             $data['name'] = $data['name'] ?? Auth::user()->first_name;
-            $data['recipient'] = $user->first_name ?? 'Staff';
+            $data['recipient'] = $user->email ?? 'Staff';
 
             $this->logEmail($data);
         }
