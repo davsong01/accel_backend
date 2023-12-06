@@ -202,10 +202,12 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::resource('transaction-type-definition', TransactionTypeDefinitionController::class);
         Route::resource('account', AccountController::class);
 
-        Route::get('single-customer-form-payment-details/{customer_id}', [CustomerContractController::class, 'singleCustomerFormDetails']); // real
-        Route::post('customer-form-response', [CustomerFormController::class, 'store']); // real
-        Route::get('customer-form-response/{id?}', [CustomerFormController::class, 'index']); // real
-
+        Route::get('single-customer-form-payment-details/{customer_id}', [CustomerContractController::class, 'singleCustomerFormDetails']);
+        Route::post('customer-form-response', [CustomerFormController::class, 'store']);
+        Route::get('customer-form-response/{id?}', [CustomerFormController::class, 'index']);
+        Route::get('approve-customer-form-response/{id?}', [CustomerFormController::class, 'approveCustomerFormResponse']);
+        Route::get('decline-customer-form-response/{id?}', [CustomerFormController::class, 'declineCustomerFormResponse']); 
+        
         Route::get('form-payment-history/{customer_id}', [CustomerContractController::class, 'formPaymentHistory']);
         Route::post('make-form-payment', [CustomerContractController::class, 'makeFormPayment']);
         Route::get('get-countries', [GeneralController::class, 'getCountries']);

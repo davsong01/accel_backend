@@ -106,6 +106,41 @@ class CustomerFormController extends Controller
         //
     }
 
+
+    public function approveCustomerFormResponse($id){
+        $customer_form = CustomerForm::where('id', $id)->where('company_id', $this->sessionDetails('company_id'))->where('type', 'form2-request')->first();
+        
+        if(!$customer_form){
+            return response()->json(['message' => 'No records found', 'data' => []], 200);
+        }
+
+        if($customer_form->status == 'declined'){
+            return response()->json([
+                'error' => 'Application form already declined',
+                'data' => $customer_form->customer_id,
+            ], 422);
+        }
+
+        $customer_form->update(['status' => 'approved']);
+
+        return response()->json(['message' => 'Successful', 'data' => ['customer_id' => $customer_form->customer_id]], 200);
+    }
+
+    public function declineCustomerFormResponse($id)
+    {
+        $customer_form = CustomerForm::where('id', $id)->where('company_id', $this->sessionDetails('company_id'))->where('type', 'form2-request')->first();
+
+        if (!$customer_form) {
+            return response()->json(['message' => 'No records found', 'data' => []], 200);
+        }
+
+        $customer_form->update(['status' => 'declined']);
+
+        return response()->json(['message' => 'Successful', 'data' => ['customer_id' => $customer_form->customer_id]], 200);
+    }
+
+    
+
     /**
      * Store a newly created resource in storage.
      */
