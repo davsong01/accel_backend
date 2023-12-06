@@ -22,12 +22,48 @@ class CustomerFormController extends Controller
     public function index(Request $request, $id = null, $paginate = true)
     {
         if (!empty($id)) {
-            $forms = CustomerForm::where('company_id', $this->sessionDetails('company_id'))->first();
+            $forms = CustomerForm::with(['country:id,name','state:id,name','lga:id,name'])->where('id',$id)->where('company_id', $this->sessionDetails('company_id'))->select('surname', 'title', 'status','no_of_contract', 'first_name','middle_name','last_name', 'gender','created_at','id', 'marital_status','date_of_birth','country_id','state_id','lga_id','next_of_kin_information','means_of_identification', 'transaction_date','primary_marketer', 'contract_ids')->first();
+
+            $forms->next_of_kin_information = !empty($forms->next_of_kin_information) ? json_decode($forms->next_of_kin_information, true) : [];
+
+            $means_of_identification = !empty($forms->means_of_identification) ? json_decode($forms->means_of_identification, true) : [];
+
+            $means_of_identification['passport_photo'] = isset($means_of_identification['passport_photo']) && !empty($means_of_identification['passport_photo']) ? $this->encodeUploadedFile($means_of_identification['passport_photo']) : null;
+
+            $means_of_identification['id_card'] = isset($means_of_identification['id_card']) && !empty($means_of_identification['id_card']) ? $this->encodeUploadedFile($means_of_identification['id_card']) : null;
+
+            $means_of_identification['signature'] = isset($means_of_identification['signature']) && !empty($means_of_identification['signature']) ? $this->encodeUploadedFile($means_of_identification['signature']) : null;
             
+            $forms->means_of_identification = $means_of_identification;
+
+            $other_details = [
+                // property_type,
+                // property_price,
+                // infrastructural_fee,
+                // net_proerty_fee,
+                // discount,
+                // primary marketer
+            ];
+
+            $forms->other_details = $other_details;
+            
+            $contract_details = [];
+
+            $contract_ids = (isset($forms->contract_ids) && !empty($forms->contract_ids)) ? json_decode($forms->contract_ids, true) : null;
+
+            if(!empty($contract_ids)){
+                foreach($contract_ids as $key=>$value){
+                    dd($value);         
+                }
+            }
+            dd($contract_ids, $forms->contract_ids);
+            
+            // $passport_photo;
+            // 'passport'
             return response()->json(['message' => 'Successfully retrieved', 'data' => $forms], 200);
         }
 
-        $forms = CustomerForm::where('company_id', $this->sessionDetails('company_id'))->where('type', $request->type);
+        $forms = CustomerForm::where('company_id', $this->sessionDetails('company_id'))->where('type', $request->type)->select('surname', 'title', 'status', 'no_of_contract', 'first_name', 'middle_name', 'last_name', 'gender', 'created_at', 'id');
 
         if (\Request::route()->getPrefix() == 'api/customer') {
             $forms = $forms->where('customer_id', auth::user()->customer->id);
@@ -268,7 +304,7 @@ class CustomerFormController extends Controller
      */
     public function show(CustomerForm $CustomerForm)
     {
-        //
+        dd($customerForm);
     }
 
     /**
