@@ -12,6 +12,7 @@ class ChartOfAccount extends Model
 {
     use HasFactory;
     protected $guarded = [];
+    protected $appends = ['gl_no'];
 
     public function account_category(){
         return $this->belongsTo(AccountCategory::class, 'account_category_id');
@@ -25,5 +26,13 @@ class ChartOfAccount extends Model
     public function currency()
     {
         return $this->belongsTo(Currency::class, 'currency');
+    }
+
+    public function getGlNoAttribute() {
+        return str_pad($this->getAttribute('id'), 5, "0", STR_PAD_LEFT);
+    }
+
+    public function payments(){
+        return $this->hasMany(Payment::class, 'account_id');
     }
 }
