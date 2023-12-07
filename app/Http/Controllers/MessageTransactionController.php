@@ -151,9 +151,9 @@ class MessageTransactionController extends Controller
             if (isset($data['medium']) && $data['medium'] == 'sms') {
             } else {
                 $subject = 'Subscriber Application Declined - Missing/Incorrect Information';
-                $content .= '<strong>Dear ' . $data['name'] . ',</strong><br><br>
+                $content .= '<strong>Dear ' . $data['name'] . ',</strong><br>
                 <div>
-                <p style="text-align:justify !important">Thank you for submitting your application to ' . $this->sessionDetails('company_name') . '. Unfortunately, we are unable to proceed with the processing of your application as certain crucial information is missing/incorrect.<br><br>Please review the provided feedback below and make the necessary corrections before resubmitting your application.<br><br>
+                <p style="text-align:justify !important">Thank you for submitting your application to ' . $this->sessionDetails('company_name') . '. Unfortunately, we are unable to proceed with the processing of your application as certain crucial information is missing/incorrect.<br><br>Please review the provided feedback below and make the necessary corrections before resubmitting your application.<br><div style="margin:5px;padding:10px;background:#d8e6f1 "><strong>'. $data['reason']. '</strong></div>
                 We appreciate your understanding and encourage you to reach out if you have any questions or need further clarification.<br><br>Best regards,<br><br>' . $this->sessionDetails('company_name') . '</p>
                 </div>';
             }

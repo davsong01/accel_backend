@@ -106,19 +106,37 @@ class CustomerFormController extends Controller
         return response()->json(['message' => 'Successful', 'data' => ['customer_id' => $customer_form->customer_id]], 200);
     }
 
-    public function declineCustomerFormResponse($id)
+    public function declineCustomerFormResponse(Request $request, $id)
     {
+        $validator = Validator::make($request->all(), [
+            'reason' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->messages()->first(),
+                'data' => null,
+            ], 412);
+        }
+
         $customer_form = CustomerForm::where('id', $id)->where('company_id', $this->sessionDetails('company_id'))->where('type', 'form2-request')->first();
 
         if (!$customer_form) {
-            return response()->json(['message' => 'No records found', 'data' => []], 200);
+            return response()->json([
+                'error' => 'No records found',
+                'data' => null,
+            ], 422);
         }
 
-        $customer_form->update(['status' => 'declined']);
+        $customer_form->update([
+            'status' => 'declined',
+            'reason' => $request->reason
+        ]);
 
         $data['contract_details'] = $this->getFormRequestDetails($customer_form);
 
         $data['type'] = 'formrequest.decline';
+        $data['reason'] = $request->reason;
         $data['medium'] = 'email';
         // $data['user'] = Customer::where('id', 'customer_id')->user;
         $data['name'] = $customer_form->first_name ?? '';
