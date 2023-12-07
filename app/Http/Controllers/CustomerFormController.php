@@ -32,8 +32,8 @@ class CustomerFormController extends Controller
             return response()->json(['message' => 'Successfully retrieved', 'data' => $forms], 200);
         }
 
-        $forms = CustomerForm::where('company_id', $this->sessionDetails('company_id'))->where('type', $request->type)->select('surname', 'title', 'status', 'no_of_contract', 'first_name', 'middle_name', 'last_name', 'gender', 'created_at', 'id');
-
+        $forms = CustomerForm::where('company_id', $this->sessionDetails('company_id'))->where('type', $request->type)->select('surname', 'title', 'status', 'no_of_contract', 'first_name', 'middle_name', 'last_name', 'gender', 'created_at', 'id', 'means_of_identification');
+       
         if (\Request::route()->getPrefix() == 'api/customer') {
             $forms = $forms->where('customer_id', auth::user()->customer->id);
         }
@@ -42,10 +42,23 @@ class CustomerFormController extends Controller
             $forms = $forms->where('status', $request->status);
         }
 
+        foreach($forms as $form){
+            dd($form);
+            dd($form->means_of_identification);
+            $form['means_of_identification'] = !empty($form->means_of_identification) ? json_decode($form->means_of_identification, true)['passport_photo'] : [];
+            // $form->means_of_identification['passport_photo'] = isset($means_of_identification['passport_photo'])
+        }
+
         if ($paginate && $paginate == true) {
             $forms = $forms->paginate(20)->withQueryString();
         } else {
             $forms = $forms->get();
+        }
+
+        foreach ($forms as $form) {
+            $means_of_identification = !empty($form->means_of_identification) ? json_decode($form->means_of_identification, true) : [];
+            $form['passport_photo'] = !empty($means_of_identification) && isset($means_of_identification['passport_photo']) ?  url('/') . '/uploads/' . base64_encode($means_of_identification['passport_photo']) :"";
+            unset($form['means_of_identification']);
         }
 
         if (!empty($forms)) {
@@ -264,7 +277,7 @@ class CustomerFormController extends Controller
             'nok_email_address' => $data['nok_email_address'] ?? null,
             'nok_relationship' => $data['nok_relationship'] ?? null,
         ]);
-
+        
         $data['means_of_identification'] = json_encode([
             'occupation' => $data['occupation'] ?? null,
             'place_of_work' => $data['place_of_work'] ?? null,
