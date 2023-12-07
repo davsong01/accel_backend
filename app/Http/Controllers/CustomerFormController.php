@@ -103,6 +103,16 @@ class CustomerFormController extends Controller
 
         $customer_form->update(['status' => 'declined']);
 
+        $data['contract_details'] = $this->getFormRequestDetails($customer_form);
+
+        $data['type'] = 'formrequest.decline';
+        $data['medium'] = 'email';
+        // $data['user'] = Customer::where('id', 'customer_id')->user;
+        $data['name'] = $customer_form->first_name ?? '';
+        $data['email'] = $customer_form->email_address ?? '';
+
+        $this->logEmail($data);
+
         return response()->json(['message' => 'Successful', 'data' => ['customer_id' => $customer_form->customer_id]], 200);
     }
 

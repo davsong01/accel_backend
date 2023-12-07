@@ -258,7 +258,7 @@ class CustomerContractController extends Controller
         $contract = CustomerContract::Create([
             'customer_id' => $data['customer_id'],
             'primary_marketer_id' => $data['primary_marketer_id'] ?? null,
-            'secondary_marketers' => $data['secondary_marketers'],
+            'secondary_marketers' => $data['secondary_marketers'] ?? null,
             'city_id' => $data['city_id'],
             'location_id' => $data['location_id'],
             'estate_id' => $data['estate_id'],
@@ -321,7 +321,7 @@ class CustomerContractController extends Controller
         // $request['contract_ids'] = [31,30,29,26];
         $validator = Validator::make($request->all(), [
             'contract_ids' => 'required',
-            'account_id' => 'required|exists:accounts,id',
+            'account_id' => 'required|exists:chart_of_accounts,id,company_id,' . $this->sessionDetails('company_id'),
             'payment_slip' => 'nullable',
             'description' => 'nullable',
             'amount' => 'required',
@@ -371,6 +371,7 @@ class CustomerContractController extends Controller
                     'payment_slip' => $filename ?? null,
                     'description' => $data['description'],
                     'amount' => $form['form_amount'],
+                    'type' => 'credit',
                     'estate_id' => $key,
                     'customer_id' => $data['customer_id'],
                     'company_id' => $this->sessionDetails('company_id'),
