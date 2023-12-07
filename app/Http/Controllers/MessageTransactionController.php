@@ -158,6 +158,17 @@ class MessageTransactionController extends Controller
                 </div>';
             }
         }
+
+        if ($data['type'] == 'form.payment') {
+            if (isset($data['medium']) && $data['medium'] == 'sms') {
+            } else {
+                $subject = '';
+                $content .= '<strong>Dear ' . $data['name'] . ',</strong><br>
+                <div>
+                <p style="text-align:justify !important"></p>
+                </div>';
+            }
+        }
        
         return [
             'subject' => $subject,

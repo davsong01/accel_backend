@@ -13,6 +13,7 @@ class MessageTransaction extends Model
        'medium',
        'name',
        'recipient',
+       'attachments',
        'message',
        'subject',
        'schedule_date',

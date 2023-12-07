@@ -239,9 +239,9 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
             Route::get('{staff_id}/{type}', [EmployeeExitController::class, 'getLeaveAndAbsencePeriodLeft']);
             Route::post('create-exit', [EmployeeExitController::class, 'store']);
             Route::get('leave-and-absence', [LeaveAndAbsenceManagementController::class, 'index']);
-            Route::get('single-leave-and-absence', [LeaveAndAbsenceManagementController::class, 'staffLeaveAndAbsence']);
+            // Route::get('single-leave-and-absence', [LeaveAndAbsenceManagementController::class, 'staffLeaveAndAbsence']);
             Route::get('advance-and-claims', [AdvanceAndClaimsController::class, 'index']);
-            Route::get('single-advance-and-claims', [AdvanceAndClaimsController::class, 'staffAdvanceAndClaims']);
+            // Route::get('single-advance-and-claims', [AdvanceAndClaimsController::class, 'staffAdvanceAndClaims']);
 
         });
 

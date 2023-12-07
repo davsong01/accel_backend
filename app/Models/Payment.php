@@ -2,9 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Staff;
+use App\Models\Customer;
+use App\Models\ChartOfAccount;
+use App\Models\CustomerContract;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 
 class Payment extends Model
@@ -24,4 +28,25 @@ class Payment extends Model
     {
         return $this->belongsTo(Estate::class);
     }
+
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class);
+    }
+
+    public function staff()
+    {
+        return $this->belongsTo(Staff::class);
+    }
+
+    public function contract()
+    {
+        return $this->belongsTo(CustomerContract::class, 'customer_contract_ids');
+    }
+
+    public function account()
+    {
+        return $this->belongsTo(ChartOfAccount::class, 'account_id');
+    }
+
 }
