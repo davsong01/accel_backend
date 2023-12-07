@@ -160,8 +160,8 @@ class CustomerFormController extends Controller
             'state_id' => 'required|exists:states,id',
 
             // Next of kin information
-            'nok_firstname' => 'nullable',
-            'nok_lastname' => 'nullable',
+            'nok_first_name' => 'nullable',
+            'nok_last_name' => 'nullable',
             'nok_house_address' => 'nullable',
             'nok_phone_number' => 'nullable',
             'nok_email_address' => 'nullable',
@@ -270,8 +270,8 @@ class CustomerFormController extends Controller
        
         // To be used in customer form
         $data['next_of_kin_information'] = json_encode([
-            'nok_firstname' => $data['nok_firstname'] ?? null,
-            'nok_lastname' => $data['nok_lastname'] ?? null,
+            'nok_first_name' => $data['nok_first_name'] ?? null,
+            'nok_last_name' => $data['nok_last_name'] ?? null,
             'nok_house_address' => $data['nok_house_address'] ?? null,
             'nok_phone_number' => $data['nok_phone_number'] ?? null,
             'nok_email_address' => $data['nok_email_address'] ?? null,
