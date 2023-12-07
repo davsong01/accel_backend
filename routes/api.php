@@ -42,6 +42,7 @@ use App\Http\Controllers\CustomerContractController;
 use App\Http\Controllers\PropertyTypeDetailsController;
 use App\Http\Controllers\AccountClassificationController;
 use App\Http\Controllers\EstateConstructionSettingController;
+use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\GeneratedLegalDocumentController;
 use App\Http\Controllers\LeaveAndAbsenceManagementController;
 use App\Http\Controllers\LegalDocumentTemplateController;
@@ -282,6 +283,11 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
 
             Route::post('generate', 'generate')->name('generate');
             Route::patch('{document}/regenerate', 'regenerate')->name('regenerate');
+        });
+
+        Route::controller(FinanceController::class)->name('finance.')->prefix('finance')->group(function() {
+            Route::get('gl-account', 'GLAccount')->name('gl-account');
+            Route::get('gl-account/{account}/transactions', 'GLAccountTransactions')->name('gl-account.transactions');
         });
     });
 });
