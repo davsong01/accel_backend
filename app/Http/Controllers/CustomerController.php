@@ -250,7 +250,7 @@ class CustomerController extends Controller
     }
 
     public function customerIdentificationSetting(){
-        $staff_ientification_settings = CustomerIdentificationSetting::where(['company_id' => $this->sessionDetails('company_id')])->get();
+        $staff_ientification_settings = CustomerIdentificationSetting::where(['company_id' => $this->sessionDetails('company_id')])->first();
         return response()->json(['message' => 'successfull', 'data' => $staff_ientification_settings], 200);
     }
 

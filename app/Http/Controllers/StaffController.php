@@ -433,7 +433,7 @@ class StaffController extends Controller
     public function staffIdentificationSetting()
     {
 
-        $staff_ientification_settings = StaffIdentificationSetting::where(['company_id' => $this->sessionDetails('company_id')])->get();
+        $staff_ientification_settings = StaffIdentificationSetting::where(['company_id' => $this->sessionDetails('company_id')])->first();
         return response()->json(['message' => 'successfull', 'data' => $staff_ientification_settings], 200);
     }
 
