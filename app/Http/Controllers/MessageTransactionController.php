@@ -178,6 +178,7 @@ class MessageTransactionController extends Controller
 
     public function processMessagesTransaction($pick = 100){
         $messages = MessageTransaction::where(['status'=>'pending'])->get()->take($pick);
+           
         if(!$messages){
             return response()->json('No pending messages');
 
@@ -187,7 +188,9 @@ class MessageTransactionController extends Controller
             if($message->medium == 'sms'){
 
             }
-         
+           
+            $message->attachments = !empty($message->attachments) ? json_decode($message->attachments) : null;
+            
             if ($message->medium == 'email') {
                 $providerX = [
                     'mail.driver' => $provider->credentials['MAIL_DRIVER'],
@@ -210,6 +213,7 @@ class MessageTransactionController extends Controller
 
                     $message->update(['status' => 'sent']);
                 }catch(\Exception $e) {
+                    dd($e->getMessage());
                     $message->update(['errors' => $e->getMessage()]);
                 }
             }

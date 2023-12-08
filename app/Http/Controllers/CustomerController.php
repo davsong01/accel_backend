@@ -251,6 +251,8 @@ class CustomerController extends Controller
 
     public function customerIdentificationSetting(){
         $staff_ientification_settings = CustomerIdentificationSetting::where(['company_id' => $this->sessionDetails('company_id')])->first();
+        $order = json_decode($staff_ientification_settings->order_of_appearance, true);
+        $staff_ientification_settings->order_of_appearance = $order;
         return response()->json(['message' => 'successfull', 'data' => $staff_ientification_settings], 200);
     }
 
@@ -286,7 +288,7 @@ class CustomerController extends Controller
         $data = $validator->valid();
         $data['order_of_appearance'] = json_encode($data['order_of_appearance']);
         $data['company_id'] = $this->sessionDetails('company_id');
-      
+        
         CustomerIdentificationSetting::updateOrCreate(['company_id' => $data['company_id']], $data);
 
         return response()->json(['message' => 'Successful', 'data' => []], 200);

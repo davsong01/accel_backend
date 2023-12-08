@@ -14,12 +14,13 @@ return new class extends Migration
         Schema::create('staff_identification_settings', function (Blueprint $table) {
             $table->id();
             $table->integer('use_id_generator')->default(0);
-            $table->enum('id_generator_type',['employment_year','employment_month','employment_day','auto_increment_number','random_number'])->default('random_number');
             $table->string('next_auto_increment_number')->nullable();
-            $table->string('prefix')->nullable();
             $table->string('auto_increment_number_digit')->nullable();
+            $table->string('appearance_format')->nullable();
+            $table->string('prefix')->nullable();
+            $table->string('order_of_appearance')->nullable();
             $table->integer('company_id');
-
+            
             $table->timestamps();
         });
     }
