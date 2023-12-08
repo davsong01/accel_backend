@@ -23,6 +23,8 @@ class CompanySettingController extends Controller
                 'company_id' =>  $this->sessionDetails('company_id'),
             ]);
         }
+
+        $companySetting->currency = $companySetting->currencyData;
         $companySetting->company_logo = !empty($companySetting->company_logo) ? url('/') . '/uploads/' . base64_encode($companySetting->company_logo) : '';
         $companySetting->company_secondary_logo = !empty($companySetting->company_secondary_logo) ? url('/') . '/uploads/' . base64_encode($companySetting->company_secondary_logo) : '';
 

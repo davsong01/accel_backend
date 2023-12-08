@@ -162,7 +162,7 @@ class MessageTransactionController extends Controller
         if ($data['type'] == 'form.payment') {
             if (isset($data['medium']) && $data['medium'] == 'sms') {
             } else {
-                $subject = '';
+                $subject = 'Payment made';
                 $content .= '<strong>Dear ' . $data['name'] . ',</strong><br>
                 <div>
                 <p style="text-align:justify !important"></p>
@@ -213,7 +213,7 @@ class MessageTransactionController extends Controller
 
                     $message->update(['status' => 'sent']);
                 }catch(\Exception $e) {
-                    dd($e->getMessage());
+                    // dd($e->getMessage());
                     $message->update(['errors' => $e->getMessage()]);
                 }
             }
