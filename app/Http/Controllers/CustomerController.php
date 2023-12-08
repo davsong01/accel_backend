@@ -250,10 +250,16 @@ class CustomerController extends Controller
     }
 
     public function customerIdentificationSetting(){
-        $staff_ientification_settings = CustomerIdentificationSetting::where(['company_id' => $this->sessionDetails('company_id')])->first();
-        $order = json_decode($staff_ientification_settings->order_of_appearance, true);
-        $staff_ientification_settings->order_of_appearance = $order;
-        return response()->json(['message' => 'successfull', 'data' => $staff_ientification_settings], 200);
+        $customer_identification_settings = CustomerIdentificationSetting::where(['company_id' => $this->sessionDetails('company_id')])->first();
+
+        if($customer_identification_settings){
+            $order = json_decode($customer_identification_settings->order_of_appearance, true);
+            $customer_identification_settings->order_of_appearance = $order;
+        }else{
+            $customer_identification_settings = [];
+        }
+
+        return response()->json(['message' => 'successfull', 'data' => $customer_identification_settings], 200);
     }
 
     public function updateCustomerIdentificationSetting(Request $request){
