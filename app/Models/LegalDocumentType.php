@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class LegalDocumentType extends Model
 {
@@ -16,9 +17,9 @@ class LegalDocumentType extends Model
     /**
      * Get the documents for the legal document type.
      */
-    public function generatedLegalDocuments(): HasMany
+    public function generatedLegalDocuments(): HasManyThrough
     {
-        return $this->hasMany(GeneratedLegalDocument::class);
+        return $this->hasManyThrough(GeneratedLegalDocument::class, LegalDocumentTemplate::class);
     }
 
     /**
