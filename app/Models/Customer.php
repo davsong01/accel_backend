@@ -52,4 +52,8 @@ class Customer extends Model
             get: fn (string $value) => date("M jS, Y", strtotime($value)),
         );
     }
+
+    public function generatedLegalDocuments(){
+        return $this->hasMany(GeneratedLegalDocument::class);
+    }
 }
