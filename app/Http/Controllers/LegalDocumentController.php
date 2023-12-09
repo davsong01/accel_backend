@@ -18,12 +18,14 @@ class LegalDocumentController extends Controller
     /**
      * 
      */
-    public function type(Request $request, string $type){
+    public function type(Request $request)
+    {
+        $type = $request->input('type');
         $types = LegalDocumentType::where('type', strtoupper($type))->paginate(20);
         return response()->json(['message' => 'success', 'data' => $types], 200);
     }
 
-      /**
+    /**
      * Store a newly created resource in storage.
      */
     public function template(Request $request): JsonResponse
@@ -56,22 +58,28 @@ class LegalDocumentController extends Controller
         return response()->json(['message' => 'success', 'data' => $document], 200);
     }
 
-      /**
+    /**
      * Display a listing of the resource.
      */
-    public function generated(): JsonResponse
+    public function generated(Request $request): JsonResponse
     {
-        $legalDocuments = GeneratedLegalDocument::with(['customer', 'estate'])
-            ->orderBy('created_at', 'desc')
-            ->where([
-                'company_id' => $this->sessionDetails('company_id'),
-            ])
-            ->paginate(20);
+        $legalDocumentType = LegalDocumentType::where([
+            'type' => $request->input('property_type'),
+            'name' => $request->input('name')
+        ])->first();
+        if ($legalDocumentType) {
+            $legalDocumentTemplate = LegalDocumentTemplate::where('legal_document_type_id', $legalDocumentType->id)->first();
+            $data = [
+                'template' => $legalDocumentTemplate,
+                'customers' => Customer::with(['user', 'generatedLegalDocuments'])->paginate(20)
+            ];
+            return response()->json(['message' => 'success', 'data' => $data], 200);
+        }
 
-        return response()->json(['message' => 'success', 'data' => $legalDocuments], 200);
+        return response()->json(['message' => 'success', 'data' => null], 200);
     }
 
-        /**
+    /**
      * Generate legal document
      */
     public function generate(Request $request): JsonResponse
@@ -105,30 +113,15 @@ class LegalDocumentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function regenerate(Request $request, GeneratedLegalDocument $generatedLegalDocument): JsonResponse
+    public function regenerate(Request $request, GeneratedLegalDocument $document): JsonResponse
     {
-        $validator = Validator::make([
-            'document' => $generatedLegalDocument
-        ], [
-            'document' => ['required', 'exists:generated_legal_documents,id'],
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'error' => $validator->messages()->first(),
-                'data' => null,
-            ], 412);
-        }
-
-        $generatedLegalDocument = GeneratedLegalDocument::find($generatedLegalDocument);
-
-        $documentGen = $this->documentGenerator($request->customer_id, $generatedLegalDocument->documentTemplate);
-        $generatedLegalDocument->update([
-            'regenerate_count' => $generatedLegalDocument->regenerate_count + 1,
+        $documentGen = $this->documentGenerator($document->customer->id, $document->template);
+        $document->update([
+            'regenerate_count' => $document->regenerate_count + 1,
             'file_location' => $documentGen['filepath'] . $documentGen['filename']
         ]);
 
-        return response()->json(['message' => 'success', 'data' => $generatedLegalDocument], 200);
+        return response()->json(['message' => 'success', 'data' => $document], 200);
     }
 
     private function setOptions()
@@ -171,7 +164,7 @@ class LegalDocumentController extends Controller
         GeneratedDocumentService::handler(base_path($file['filepath']), $values, $destination);
 
         return [
-            'filepath' =>str_replace('generated-legal-documents/', '', $filepath) . '/',
+            'filepath' => str_replace('generated-legal-documents/', '', $filepath) . '/',
             'filename' => $filename,
         ];
     }
