@@ -511,6 +511,7 @@ class StaffController extends Controller
         }
 
         $data = $validator->valid();
+        
         $data['order_of_appearance'] = json_encode($data['order_of_appearance']);
         $data['company_id'] = $this->sessionDetails('company_id');
         
