@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Lga;
+use App\Models\Pfa;
 use App\Models\Bank;
 use App\Models\States;
 use App\Models\Country;
@@ -45,8 +46,14 @@ class GeneralController extends Controller
         return response()->json(['message' => 'success', 'data' => $lgas], 200);
     }
 
-    public function getBanks(){
-        $banks = Bank::all();
+    public function getBanks($country_id = null){
+        $banks = Bank::orderBy('id');
+
+        if (!empty($country_id)) {
+            $banks = $banks->where('country_id', $country_id);
+        }
+
+        $banks = $banks->get();
 
         return response()->json(['message' => 'success', 'data' => $banks], 200);
     }
@@ -56,6 +63,16 @@ class GeneralController extends Controller
         $currencies = Currency::all();
 
         return response()->json(['message' => 'success', 'data' => $currencies], 200);
+    }
+
+    public function getPfas($country_id = null)
+    {
+        $pfas = Pfa::orderBy('id');
+        if(!empty($country_id)){
+            $pfas = $pfas->where('country_id', $country_id);
+        }
+        $pfas = $pfas->get();
+        return response()->json(['message' => 'success', 'data' => $pfas], 200);
     }
 
 }

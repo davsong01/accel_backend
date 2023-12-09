@@ -216,6 +216,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('get-states', [GeneralController::class, 'getStates']);
         Route::get('get-lga', [GeneralController::class, 'getLgas']);
         Route::get('get-banks', [GeneralController::class, 'getBanks']);
+        Route::get('get-pfas', [GeneralController::class, 'getPfas']);
         Route::get('get-currencies', [GeneralController::class, 'getCurrencies']);
 
             // Self Service

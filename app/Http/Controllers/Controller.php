@@ -487,7 +487,7 @@ class Controller extends BaseController
     }
 
     public function logEmail($data){
-        $data['attachments'] = ($data['attachments'] && !empty($data['attachments'])) ? json_encode($data['attachments']) : null;
+        $data['attachments'] = (isset($data['attachments']) && !empty($data['attachments'])) ? json_encode($data['attachments']) : null;
         $mes = new MessageTransactionController();
         $mes->logEmailTransaction($data);
 
