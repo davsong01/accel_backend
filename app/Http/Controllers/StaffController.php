@@ -408,9 +408,6 @@ class StaffController extends Controller
             'nhf_number' => $request->has('nhf_number') ? $data['nhf_number'] : $staffx->nhf_number,
             'company_id' => $this->sessionDetails('company_id'),
         ]);
-
-        $staff->update([
-        ]);
         
         // Update staff role here
         if(!empty($request->roles)){
