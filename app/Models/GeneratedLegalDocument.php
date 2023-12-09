@@ -48,8 +48,8 @@ class GeneratedLegalDocument extends Model
     /**
      * Get the document template that have the document.
      */
-    public function documentTemplate(): HasOne
+    public function template(): HasOne
     {
-        return $this->hasOne(DocumentTemplate::class);
+        return $this->hasOne(LegalDocumentTemplate::class, 'id', 'legal_document_template_id');
     }
 }
