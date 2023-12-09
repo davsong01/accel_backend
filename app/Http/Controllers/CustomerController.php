@@ -276,7 +276,7 @@ class CustomerController extends Controller
 
         if ($request->use_id_generator == 1) {
             $validator = Validator::make($request->all(), [
-                'order_of_appearance' => 'required', // | prefix,registration_year,registration_month,auto_increment_number,random_number
+                'order_of_appearance' => 'required', //|in:prefix,registration_year,registration_month,auto_increment_number,random_number',
                 'next_auto_increment_number' => 'nullable',
                 'auto_increment_number_digit' => 'nullable',
                 'prefix' => 'nullable',
@@ -297,7 +297,7 @@ class CustomerController extends Controller
         
         CustomerIdentificationSetting::updateOrCreate(['company_id' => $data['company_id']], $data);
 
-        return response()->json(['message' => 'Successful', 'data' => []], 200);
+        return response()->json(['message' => 'Successful', 'data' => $request['order_of_appearance']], 200);
     }
 
     public function updateUser($user, $data){

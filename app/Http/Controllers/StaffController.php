@@ -459,9 +459,11 @@ class StaffController extends Controller
 
         if ($request->use_id_generator == 1) {
             $validator = Validator::make($request->all(), [
-                'id_generator_type' => 'nullable|in:employment_year,employment_month,employment_day,auto_increment_number,random_number',
+                'order_of_appearance' => 'required', //|in:prefix,employment_year,employment_month,employment_day,auto_increment_number,random_number',
                 'next_auto_increment_number' => 'nullable',
                 'auto_increment_number_digit' => 'nullable',
+                'prefix' => 'nullable',
+                'appearance_format' => 'nullable',
             ]);
         }
 
@@ -473,11 +475,12 @@ class StaffController extends Controller
         }
 
         $data = $validator->valid();
+        $data['order_of_appearance'] = json_encode($data['order_of_appearance']);
         $data['company_id'] = $this->sessionDetails('company_id');
         
         StaffIdentificationSetting::updateOrCreate(['company_id' => $data['company_id']], $data);
 
-        return response()->json(['message' => 'successfull', 'data' => []], 200);
+        return response()->json(['message' => 'successfull', 'data' => $request['order_of_appearance']], 200);
     }
 
     public function staffDocumentSetting($id = null)
