@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\User;
+use App\Models\Payment;
 use App\Models\Property;
 use App\Models\CustomerRole;
 use App\Models\CustomerContract;
@@ -55,5 +56,10 @@ class Customer extends Model
 
     public function generatedLegalDocuments(){
         return $this->hasMany(GeneratedLegalDocument::class);
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
     }
 }

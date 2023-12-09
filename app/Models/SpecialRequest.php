@@ -6,6 +6,7 @@ use App\Customer;
 use App\Models\Branch;
 use App\Models\Company;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class SpecialRequest extends Model
@@ -34,6 +35,13 @@ class SpecialRequest extends Model
     public function newowner()
     {
         return $this->belongsTo(Customer::class, 'new_owner_id');
+    }
+
+    protected function amount(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string $value) => number_format($value),
+        );
     }
 
 }
