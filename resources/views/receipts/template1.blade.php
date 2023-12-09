@@ -1,14 +1,13 @@
 <?php 
 
     use App\Models\CompanySetting;
-    $company = CompanySetting::where('company_id',1)->first();
+    $company = CompanySetting::with(['currencyData'])->where('company_id', \Session::get('company_id') ?? 1)->first();
 
-    $logo = !empty( $company->company_logo) ? url('/') . '/uploads/' . base64_encode( $company->company_logo) : url('/') . '/uploads/' .'images/brands/logos/default.png';
-    $invoice_number = rand(111111,999999);
+    $logo = !empty( $company->company_logo) ? base_path() . '/uploads/' . $company->company_logo : base_path() . '/uploads/' .'images/brands/logos/default.png';
     $address = $company->address;
     $website = $company->website;
     $company_name = $company->company_name;
-
+    $count = 0;
 
 ?>
 <!DOCTYPE html>
@@ -17,11 +16,9 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,700;1,500&display=swap"
-        rel="stylesheet" />
-    <title>Consode Receipt</title>
+    {{-- <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin /> --}}
+    
     <style>
         * {
             margin: 0;
@@ -164,27 +161,29 @@
             border-bottom: 1px solid #dddddd;
             padding: 1rem 0rem;
         }
+
+        /* cyrillic-ext */
+
     </style>
 </head>
 
 <body>
     <header class="logo-address">
-        <img src="{{ $logo }}" alt="logo" style="width: 11%" />
-        <div style="
-          display: flex;
+        <img src="{{ $logo }}" alt="logo" style="width: 5%" style="text-align:center"/>
+        <div style="display: flex;
           align-items: center;
           flex-direction: column;
           margin: 0rem;
           padding: 0rem;
         ">
-            <p class="address">{{$address}}</p>
+            <p class="address">{{ $address }}</p>
             {{-- <p class="phone">+234 901 234 5678</p> --}}
         </div>
         <p class="web">{{ $website }}</p>
     </header>
 
     <main class="container">
-        <h1 style="color:{{ $company->main_color}}">PAYMENT RECIEPT</h1>
+        <h1>PAYMENT RECIEPT</h1>
         <div style="
           display: flex;
           gap: 1rem;
@@ -193,7 +192,7 @@
         ">
             <div style="display: flex; gap: 0.5rem; flex-direction: column">
                 <p class="text-header">Receipt No.</p>
-                <p class="text-subText">{{$invoice_number}}</p>
+                <p class="text-subText">{{ $data['receipt_no'] }}</p>
             </div>
             <div style="display: flex; justify-content: space-between">
                 <div>
@@ -204,7 +203,7 @@
                 padding-bottom: 0.5rem;
               ">
                         <p class="text-top">Contract ID</p>
-                        <p class="text-header">${contract_id}</p>
+                        <p class="text-header">{{ $payment->customer_contract_ids }}</p>
                     </div>
                     <div style="
                 display: flex;
@@ -213,7 +212,9 @@
                 padding-bottom: 0.5rem;
               ">
                         <p class="text-top">Customer name</p>
-                        <p class="text-header">${customer_name}</p>
+                        <p class="text-header">
+                            {{ $payment->customer->user->first_name .' '.$payment->customer->user->last_name }}
+                        </p>
                     </div>
                     <div style="
                 display: flex;
@@ -221,8 +222,8 @@
                 gap: 0.3rem;
                 padding-bottom: 0.5rem;
               ">
-                        <p class="text-top">Contract</p>
-                        <p class="text-header">${contract}</p>
+                        {{-- <p class="text-top">Contract</p>
+                        <p class="text-header">${contract}</p> --}}
                     </div>
                     <div style="
                 display: flex;
@@ -231,7 +232,7 @@
                 padding-bottom: 0.5rem;
               ">
                         <p class="text-top">Property Location</p>
-                        <p class="text-header">${property_location}</p>
+                        <p class="text-header">{{ $payment->contract->location->name}}</p>
                     </div>
                 </div>
                 <div>
@@ -242,7 +243,7 @@
                 padding-bottom: 0.5rem;
               ">
                         <p class="text-top">Contract Status</p>
-                        <p class="text-header">{contract_status}</p>
+                        <p class="text-header">{{ ucfirst($payment->contract->status) }}</p>
                     </div>
                     <div style="
                 display: flex;
@@ -250,8 +251,13 @@
                 gap: 0.3rem;
                 padding-bottom: 0.5rem;
               ">
+                    @if(!empty($payment->contract->primaryMarketer($payment->contract)))
+                    <?php 
+                        $marketer = $payment->contract->primaryMarketer($payment->contract)
+                    ?>
                         <p class="text-top">Marketer</p>
-                        <p class="text-header">${markerter}</p>
+                        <p class="text-header">{{ $marketer['first_name'] . ' ' . $marketer['last_name']}}</p>
+                    @endif
                     </div>
                     <div style="
                 display: flex;
@@ -259,8 +265,8 @@
                 gap: 0.3rem;
                 padding-bottom: 0.5rem;
               ">
-                        <p class="text-top">Payment Bank</p>
-                        <p class="text-header">${payment_bank}</p>
+                        {{-- <p class="text-top">Payment Bank</p>
+                        <p class="text-header">{{ $payment->account}}</p> --}}
                     </div>
                     <div style="
                 display: flex;
@@ -269,7 +275,7 @@
                 padding-bottom: 0.5rem;
               ">
                         <p class="text-top">Payment Purpose</p>
-                        <p class="text-header">${payment_purpose}</p>
+                        <p class="text-header">{{ ucwords(str_replace('_', ' ',$payment->purpose)) }}</p>
                     </div>
                 </div>
             </div>
@@ -278,15 +284,15 @@
         <table>
             <tr>
                 <th>S/N</th>
-                <th>Transaction Date & Time</th>
+                <th>Transaction Date</th>
                 <th>Description</th>
-                <th>Price</th>
+                <th>Amount</th>
             </tr>
             <tr>
-                <td>${s/n}</td>
-                <td>${transaction_date}</td>
-                <td>${description}</td>
-                <td>${price}</td>
+                <td>{{ $count + 1}}</td>
+                <td>{{ date("M jS, Y", strtotime($payment->created_at)) }}</td>
+                <td>{{ $payment->description }}</td>
+                <td>{{ $company->currencyData->symbol . number_format($payment->amount) }}</td>
             </tr>
         </table>
         <div style="
@@ -304,25 +310,16 @@
             gap: 3rem;
           ">
                 <p class="text-header">Previous Amount Paid</p>
-                <p class="receipt-details">${previous_amountPaid}</p>
+                <p class="receipt-details">0</p>
             </div>
             <div class="border-bottom" style="
             display: grid;
-            grid-template-columns: 250px 1fr;
+            grid-template-columns: 1fr 170px;
             justify-content: space-between;
             gap: 3rem;
           ">
-                <p class="text-header">To Balance</p>
-                <p class="receipt-details">${to_balance}</p>
-            </div>
-            <div style="
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            justify-content: space-between;
-            gap: 3rem;
-          ">
-                <p class="text-header">Current Amount Paid</p>
-                <p class="text-header">${current_amountPaid}</p>
+                <p class="text-header">Balance</p>
+                <p class="receipt-details">0</p>
             </div>
         </div>
 
@@ -335,12 +332,12 @@
         ">
             <div>
                 <p class="text-top">Payment received by</p>
-                <p class="text-header">${payment_receivedBy}</p>
+                <p class="text-header">{{ $payment->staff->user->first_name . ' ' .$payment->staff->user->last_name }}</p>
             </div>
-            <div>
+            {{-- <div>
                 <p class="text-top">Branch</p>
                 <p class="text-header">${city}</p>
-            </div>
+            </div> --}}
         </div>
     </main>
 </body>

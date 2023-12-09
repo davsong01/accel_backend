@@ -325,7 +325,7 @@ class SelfServiceController extends Controller
         $codeData = ResetCodePassword::create($data);
         $data['type'] = 'password-reset';
         $data['token'] = $rand;
-
+        
         // Log email only
         $mes = new MessageTransactionController();
         $mes->logEmailTransaction($data);

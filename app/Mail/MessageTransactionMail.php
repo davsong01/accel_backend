@@ -5,6 +5,7 @@ namespace App\Mail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use App\Models\CompanySetting;
+use Illuminate\Mail\Attachment;
 use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Queue\SerializesModels;
@@ -69,6 +70,16 @@ class MessageTransactionMail extends Mailable
      */
     public function attachments(): array
     {
-        return [];
+        $files = [];
+
+        if(!empty($this->data['attachments'])){
+            foreach($this->data['attachments'] as $key=>$attachment){
+                if (file_exists(base_path() . $attachment)) {
+                    $files[] = Attachment::fromPath(base_path().$attachment);
+                }
+            }
+        }
+        
+        return $files;
     }
 }

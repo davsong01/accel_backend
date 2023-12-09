@@ -137,12 +137,35 @@ class MessageTransactionController extends Controller
         if ($data['type'] == 'formrequest.approve') {
             if (isset($data['medium']) && $data['medium'] == 'sms') {
             } else {
-                $subject = 'Form 2 Approved!';
+                $subject = 'Subscriber Application Approved - Welcome to ' . $this->sessionDetails('company_name');
                 $content .= '<strong>Dear ' . $data['name'] . ',</strong><br><br>
                 <div>
-                <p style="text-align:justify !important">Your contract has been approved. Please find details below: <br><br>
-                
-                Password: ' . '123456789' . '<br><br> Please click the login button below to login to your personalized dashboard using your email/staff Id and password above. Thank you <br><br><a href="' . url('/') . '"><button style="' . $button_style . '">LOGIN</button></a></p>
+                <p style="text-align:justify !important">We are pleased to inform you that your recent application to ' . $this->sessionDetails('company_name'). ' has been carefully reviewed and approved.<br><br>We are excited to welcome you as a customer and look forward to a fruitful relationship.<br><br>
+                Please visit our office to pick up your Offer Letter, and if you have any questions, do not hesitate to contact our support team/contact person.
+                <br><br> Once again, congratulations, and we anticipate a fruitful association. <br><br>Best regards,<br>'. $this->sessionDetails('company_name').'</p>
+                </div>';
+            }
+        }
+
+        if ($data['type'] == 'formrequest.decline') {
+            if (isset($data['medium']) && $data['medium'] == 'sms') {
+            } else {
+                $subject = 'Subscriber Application Declined - Missing/Incorrect Information';
+                $content .= '<strong>Dear ' . $data['name'] . ',</strong><br>
+                <div>
+                <p style="text-align:justify !important">Thank you for submitting your application to ' . $this->sessionDetails('company_name') . '. Unfortunately, we are unable to proceed with the processing of your application as certain crucial information is missing/incorrect.<br><br>Please review the provided feedback below and make the necessary corrections before resubmitting your application.<br><div style="margin:5px;padding:10px;background:#d8e6f1 "><strong>'. $data['reason']. '</strong></div>
+                We appreciate your understanding and encourage you to reach out if you have any questions or need further clarification.<br><br>Best regards,<br><br>' . $this->sessionDetails('company_name') . '</p>
+                </div>';
+            }
+        }
+
+        if ($data['type'] == 'form.payment') {
+            if (isset($data['medium']) && $data['medium'] == 'sms') {
+            } else {
+                $subject = 'Payment made';
+                $content .= '<strong>Dear ' . $data['name'] . ',</strong><br>
+                <div>
+                <p style="text-align:justify !important"></p>
                 </div>';
             }
         }
@@ -155,6 +178,7 @@ class MessageTransactionController extends Controller
 
     public function processMessagesTransaction($pick = 100){
         $messages = MessageTransaction::where(['status'=>'pending'])->get()->take($pick);
+           
         if(!$messages){
             return response()->json('No pending messages');
 
@@ -164,7 +188,9 @@ class MessageTransactionController extends Controller
             if($message->medium == 'sms'){
 
             }
-         
+           
+            $message->attachments = !empty($message->attachments) ? json_decode($message->attachments) : null;
+            
             if ($message->medium == 'email') {
                 $providerX = [
                     'mail.driver' => $provider->credentials['MAIL_DRIVER'],
@@ -187,6 +213,7 @@ class MessageTransactionController extends Controller
 
                     $message->update(['status' => 'sent']);
                 }catch(\Exception $e) {
+                    // dd($e->getMessage());
                     $message->update(['errors' => $e->getMessage()]);
                 }
             }

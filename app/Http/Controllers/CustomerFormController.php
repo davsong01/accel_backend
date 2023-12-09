@@ -32,8 +32,8 @@ class CustomerFormController extends Controller
             return response()->json(['message' => 'Successfully retrieved', 'data' => $forms], 200);
         }
 
-        $forms = CustomerForm::where('company_id', $this->sessionDetails('company_id'))->where('type', $request->type)->select('surname', 'title', 'status', 'no_of_contract', 'first_name', 'middle_name', 'last_name', 'gender', 'created_at', 'id');
-
+        $forms = CustomerForm::where('company_id', $this->sessionDetails('company_id'))->where('type', $request->type)->select('surname', 'title', 'status', 'no_of_contract', 'first_name', 'middle_name', 'last_name', 'gender', 'created_at', 'id', 'means_of_identification');
+       
         if (\Request::route()->getPrefix() == 'api/customer') {
             $forms = $forms->where('customer_id', auth::user()->customer->id);
         }
@@ -42,10 +42,23 @@ class CustomerFormController extends Controller
             $forms = $forms->where('status', $request->status);
         }
 
+        foreach($forms as $form){
+            dd($form);
+            dd($form->means_of_identification);
+            $form['means_of_identification'] = !empty($form->means_of_identification) ? json_decode($form->means_of_identification, true)['passport_photo'] : [];
+            // $form->means_of_identification['passport_photo'] = isset($means_of_identification['passport_photo'])
+        }
+
         if ($paginate && $paginate == true) {
             $forms = $forms->paginate(20)->withQueryString();
         } else {
             $forms = $forms->get();
+        }
+
+        foreach ($forms as $form) {
+            $means_of_identification = !empty($form->means_of_identification) ? json_decode($form->means_of_identification, true) : [];
+            $form['passport_photo'] = !empty($means_of_identification) && isset($means_of_identification['passport_photo']) ?  url('/') . '/uploads/' . base64_encode($means_of_identification['passport_photo']) :"";
+            unset($form['means_of_identification']);
         }
 
         if (!empty($forms)) {
@@ -93,15 +106,43 @@ class CustomerFormController extends Controller
         return response()->json(['message' => 'Successful', 'data' => ['customer_id' => $customer_form->customer_id]], 200);
     }
 
-    public function declineCustomerFormResponse($id)
+    public function declineCustomerFormResponse(Request $request, $id)
     {
+        $validator = Validator::make($request->all(), [
+            'reason' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->messages()->first(),
+                'data' => null,
+            ], 412);
+        }
+
         $customer_form = CustomerForm::where('id', $id)->where('company_id', $this->sessionDetails('company_id'))->where('type', 'form2-request')->first();
 
         if (!$customer_form) {
-            return response()->json(['message' => 'No records found', 'data' => []], 200);
+            return response()->json([
+                'error' => 'No records found',
+                'data' => null,
+            ], 422);
         }
 
-        $customer_form->update(['status' => 'declined']);
+        $customer_form->update([
+            'status' => 'declined',
+            'reason' => $request->reason
+        ]);
+
+        $data['contract_details'] = $this->getFormRequestDetails($customer_form);
+
+        $data['type'] = 'formrequest.decline';
+        $data['reason'] = $request->reason;
+        $data['medium'] = 'email';
+        // $data['user'] = Customer::where('id', 'customer_id')->user;
+        $data['name'] = $customer_form->first_name ?? '';
+        $data['email'] = $customer_form->email_address ?? '';
+
+        $this->logEmail($data);
 
         return response()->json(['message' => 'Successful', 'data' => ['customer_id' => $customer_form->customer_id]], 200);
     }
@@ -137,8 +178,8 @@ class CustomerFormController extends Controller
             'state_id' => 'required|exists:states,id',
 
             // Next of kin information
-            'nok_firstname' => 'nullable',
-            'nok_lastname' => 'nullable',
+            'nok_first_name' => 'nullable',
+            'nok_last_name' => 'nullable',
             'nok_house_address' => 'nullable',
             'nok_phone_number' => 'nullable',
             'nok_email_address' => 'nullable',
@@ -247,14 +288,14 @@ class CustomerFormController extends Controller
        
         // To be used in customer form
         $data['next_of_kin_information'] = json_encode([
-            'nok_firstname' => $data['nok_firstname'] ?? null,
-            'nok_lastname' => $data['nok_lastname'] ?? null,
+            'nok_first_name' => $data['nok_first_name'] ?? null,
+            'nok_last_name' => $data['nok_last_name'] ?? null,
             'nok_house_address' => $data['nok_house_address'] ?? null,
             'nok_phone_number' => $data['nok_phone_number'] ?? null,
             'nok_email_address' => $data['nok_email_address'] ?? null,
             'nok_relationship' => $data['nok_relationship'] ?? null,
         ]);
-
+        
         $data['means_of_identification'] = json_encode([
             'occupation' => $data['occupation'] ?? null,
             'place_of_work' => $data['place_of_work'] ?? null,

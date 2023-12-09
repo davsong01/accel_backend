@@ -258,7 +258,7 @@ class CustomerContractController extends Controller
         $contract = CustomerContract::Create([
             'customer_id' => $data['customer_id'],
             'primary_marketer_id' => $data['primary_marketer_id'] ?? null,
-            'secondary_marketers' => $data['secondary_marketers'],
+            'secondary_marketers' => $data['secondary_marketers'] ?? null,
             'city_id' => $data['city_id'],
             'location_id' => $data['location_id'],
             'estate_id' => $data['estate_id'],
@@ -321,7 +321,7 @@ class CustomerContractController extends Controller
         // $request['contract_ids'] = [31,30,29,26];
         $validator = Validator::make($request->all(), [
             'contract_ids' => 'required',
-            'account_id' => 'required|exists:accounts,id',
+            'account_id' => 'required|exists:chart_of_accounts,id,company_id,' . $this->sessionDetails('company_id'),
             'payment_slip' => 'nullable',
             'description' => 'nullable',
             'amount' => 'required',
@@ -337,7 +337,11 @@ class CustomerContractController extends Controller
 
         $data = $validator->valid();
 
-        $request['contract_ids'] = json_decode($request['contract_ids'], true);
+        if(env('ENT') == 'local'){
+            $request['contract_ids'] = $request['contract_ids'];
+        }else{
+            $request['contract_ids'] = json_decode($request['contract_ids'], true);
+        }
         $contract_ids = array_column($request['contract_ids'], 'contract_id');
 
         $ids = [];
@@ -345,7 +349,6 @@ class CustomerContractController extends Controller
             $ids[] = $a;
         });
 
-    
         $form_payment = $this->generateFormPayment($ids, $request->customer_id);
         
         if ($request->amount != $form_payment['form_payment']) {
@@ -358,12 +361,13 @@ class CustomerContractController extends Controller
         if (!empty($request->payment_slip)) {
             $filename = $this->uploadFile($request->payment_slip, 'payments');
         }
-       
+
+        $customer = Customer::where('id', $request->customer_id)->first();
+        
         if ($form_payment) {
-            
+            $receipts = [];
             foreach ($form_payment['explanation'] as $key => $form) {
                 $customer_contract_ids = implode(',', $form['contracts']);
-                              
                 $payment = Payment::updateOrCreate(['customer_contract_ids' => $customer_contract_ids], [
                     'customer_contract_ids' => $customer_contract_ids,
                     'account_id' => $data['account_id'],
@@ -371,18 +375,34 @@ class CustomerContractController extends Controller
                     'payment_slip' => $filename ?? null,
                     'description' => $data['description'],
                     'amount' => $form['form_amount'],
+                    'staff_id' => auth()->user()->staff->id,
+                    'type' => 'credit',
                     'estate_id' => $key,
                     'customer_id' => $data['customer_id'],
                     'company_id' => $this->sessionDetails('company_id'),
                 ]);
 
+                $receipt = $this->generateFormPaymentReceipt($payment);
+                
+                $payment->update(['receipt_location' => $receipt['filepath'] ?? null]);
+                $receipts[] = $receipt['filepath'] ?? null;
+
                 foreach ($form['contracts'] as $contract) {
                     CustomerContract::where('id', $contract)->update(['status' => 'prospect']);
-                }  
-                
-                Customer::where('id', $data['customer_id'])->update(['form_status' => 'Not Filled']);
+                }
 
+                $customer->form_status = 'Not Filled';
+                $customer->save();
+                // Customer::where('id', $data['customer_id'])->update(['form_status' => 'Not Filled']);
             }
+
+            // Log email
+            $data['type'] = 'form.payment';
+            $data['name'] =  $customer->user->first_name;
+            $data['email'] =  $customer->user->email;
+            $data['attachments'] = $receipts;
+            
+            $this->logEmail($data);
         }
         return response()->json(['message' => 'success', 'data' => null], 200);
     }

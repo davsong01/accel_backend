@@ -72,13 +72,14 @@ class CustomerContract extends Model
     {
         if(!empty($this->primary_marketer_id)){
             $staff = Staff::with('user:first_name,middle_name,last_name,id')->where('id', $this->primary_marketer_id)->first();
+            
             $details = [
                 'staff_id' => $staff->id ?? null,
                 'first_name' => $staff->user->first_name ?? null,
                 'middle_name' => $staff->user->middle_name ?? null,
                 'last_name' => $staff->user->last_name ?? null,
             ];
-
+            
             return $details;
 
         }else{

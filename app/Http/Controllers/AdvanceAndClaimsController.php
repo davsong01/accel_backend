@@ -20,7 +20,7 @@ class AdvanceAndClaimsController extends Controller
     public function index(Request $request, $id = null)
     {
         $aac = AdvanceAndClaims::where('company_id', $this->sessionDetails('company_id'));
-
+        
         if (\Request::route()->getPrefix() == 'api/admin/self-service') {
             $staff_id = Auth::user()->staff->id;
             $aac = $aac->where('staff_id',$staff_id);

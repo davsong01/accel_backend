@@ -24,7 +24,9 @@ Route::get('/testemailtemplate', function(){
 Route::get('/testreceipttemplate', function () {
     $data = [];
     $data['company_id'] = 1;
-    return view('receipts.template1');
+    $data['receipt_no'] = '0001';
+    $payment = App\Models\Payment::find(24);
+    return view('receipts.template1', compact('data','payment'));
 });
 
 Route::get('/cron-process-messages-transaction', [MessageTransactionController::class, 'processMessagesTransaction']);

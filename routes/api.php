@@ -208,7 +208,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::post('customer-form-response', [CustomerFormController::class, 'store']);
         Route::get('customer-form-response/{id?}', [CustomerFormController::class, 'index']);
         Route::get('approve-customer-form-response/{id?}', [CustomerFormController::class, 'approveCustomerFormResponse']);
-        Route::get('decline-customer-form-response/{id?}', [CustomerFormController::class, 'declineCustomerFormResponse']); 
+        Route::post('decline-customer-form-response/{id?}', [CustomerFormController::class, 'declineCustomerFormResponse']); 
         
         Route::get('form-payment-history/{customer_id}', [CustomerContractController::class, 'formPaymentHistory']);
         Route::post('make-form-payment', [CustomerContractController::class, 'makeFormPayment']);
@@ -240,9 +240,9 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
             Route::get('{staff_id}/{type}', [EmployeeExitController::class, 'getLeaveAndAbsencePeriodLeft']);
             Route::post('create-exit', [EmployeeExitController::class, 'store']);
             Route::get('leave-and-absence', [LeaveAndAbsenceManagementController::class, 'index']);
-            Route::get('single-leave-and-absence', [LeaveAndAbsenceManagementController::class, 'staffLeaveAndAbsence']);
+            // Route::get('single-leave-and-absence', [LeaveAndAbsenceManagementController::class, 'staffLeaveAndAbsence']);
             Route::get('advance-and-claims', [AdvanceAndClaimsController::class, 'index']);
-            Route::get('single-advance-and-claims', [AdvanceAndClaimsController::class, 'staffAdvanceAndClaims']);
+            // Route::get('single-advance-and-claims', [AdvanceAndClaimsController::class, 'staffAdvanceAndClaims']);
 
         });
 

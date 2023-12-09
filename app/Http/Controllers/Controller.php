@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use PDF;
 use Carbon\Carbon;
 use App\Models\Lga;
 use App\Models\User;
@@ -339,8 +340,8 @@ class Controller extends BaseController
             $location = $year . '/' . $month . '/' . $day;
         }
 
-        if (file_exists(base_path() . $location)) {
-            unlink(base_path() . $location);
+        if (!is_dir(base_path() . $location)) {
+            mkdir(base_path() . $location, 0777, true);
         }
 
         return $location;
@@ -486,6 +487,7 @@ class Controller extends BaseController
     }
 
     public function logEmail($data){
+        $data['attachments'] = ($data['attachments'] && !empty($data['attachments'])) ? json_encode($data['attachments']) : null;
         $mes = new MessageTransactionController();
         $mes->logEmailTransaction($data);
 
@@ -563,12 +565,7 @@ class Controller extends BaseController
 
         if (!empty($contract_ids)) {
             foreach ($contract_ids as $value) {
-
                 $contract = CustomerContract::with('customer','property_type_details:type,id,estate_price,settings_and_excavation,infrastructural_fee', 'city:name,id', 'estate:name,id', 'location:name,id', 'building_type:id,name', 'plot_size:id,size', 'plotSize:id,size')->where('customer_id', $forms->customer_id)->where('id', $value)->where('company_id', $this->sessionDetails('company_id'))->select(['id', 'customer_id', 'primary_marketer_id', 'property_type_id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'subscribers', 'contract_type', 'property_type_id', 'created_at'])->first();
-                // dd($contract->property_type_details->estate_price);
-                // dd(number_format((float) $contract->property_type_details->estate_price));
-                $price = (float) $contract->property_type_details->estate_price;
-                // dd(number_format($price));
                 $contract_details[] = [
                     'id' => $contract->id,
                     
@@ -592,6 +589,30 @@ class Controller extends BaseController
         }
         
         return $contract_details;
+    }
+
+    public function generateFormPaymentReceipt($payment){
+        $name = $this->generateReceiptNumber($payment);
+        $data['receipt_no'] = $name;
+        $pathToSave = $this->getPathToSaveFile('/receipts/' . $this->sessionDetails('company_slug')).'/' . $name . '.pdf';
+
+        $pdf = PDF::loadView('receipts.template1', compact('payment','data'))->setPaper('a4', 'portrait');
+
+        file_put_contents(base_path() . $pathToSave, $pdf->output());
+
+        return [
+            'receipt_no' => $name . '.pdf',
+            'filename' => $name . '.pdf',
+            'filepath' => $pathToSave
+        ];
+    }
+
+    public function generateReceiptNumber($payment){
+        $rand = $payment->id . strtotime($payment->created_at);
+        $year = date('Y', strtotime($payment->created_at));
+        $month = date('m', strtotime($payment->created_at));
+        
+        return $rand.$year.$month;
     }
 }
 

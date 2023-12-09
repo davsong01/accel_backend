@@ -432,9 +432,16 @@ class StaffController extends Controller
 
     public function staffIdentificationSetting()
     {
+        $staff_identification_settings = StaffIdentificationSetting::where(['company_id' => $this->sessionDetails('company_id')])->first();
 
-        $staff_ientification_settings = StaffIdentificationSetting::where(['company_id' => $this->sessionDetails('company_id')])->get();
-        return response()->json(['message' => 'successfull', 'data' => $staff_ientification_settings], 200);
+        if ($staff_identification_settings) {
+            $order = json_decode($staff_identification_settings->order_of_appearance, true);
+            $staff_identification_settings->order_of_appearance = $order;
+        } else {
+            $staff_identification_settings = [];
+        }
+
+        return response()->json(['message' => 'successfull', 'data' => $staff_identification_settings], 200);
     }
 
     public function updateStaffIdentificationSetting(Request $request)
