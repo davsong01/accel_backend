@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Bank;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\JobType;
@@ -73,5 +74,16 @@ class Staff extends Model
        
         return $rolesX;
     }
+
+    public function bank()
+    {
+        return $this->belongsTo(Bank::class);
+    }
+
+    public function pfa()
+    {
+        return $this->belongsTo(Pfa::class, 'pfa_id');
+    }
+    
 
 }

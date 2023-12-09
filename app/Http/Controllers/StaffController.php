@@ -182,7 +182,16 @@ class StaffController extends Controller
                 
                 'nationality' => 'sometimes|integer',
                 'state' => 'sometimes|integer',
-                'lga' => 'sometimes|integer'
+                'lga' => 'sometimes|integer',
+
+                'bank_id' => 'nullable|exists:banks,id',
+                'pfa_id' => 'nullable|exists:pfas,id',
+                'account_name' => 'nullable',
+                'account_number' => 'nullable',
+                'sort_code' => 'nullable',
+                'swift_code' => 'nullable',
+                'nhf_number' => 'nullable'
+
             ]);
 
             if ($validator->fails()) {
@@ -242,9 +251,9 @@ class StaffController extends Controller
             ]);
 
         }
-
         $data = array_merge($validator2, $validator);
-        
+       
+        $data['date_of_birth'] = !empty($request->date_of_birth) ? Carbon::parse($request->date_of_birth) : null;
         // Create user
         if (!$request->staff_id && empty($request->staff_id)) {
             $user = User::create([
@@ -260,7 +269,7 @@ class StaffController extends Controller
                 'additional_details' => $data['additional_details'] ?? '',
                 'next_of_kin' => $data['next_of_kin'] ?? '',
                 'branch_id' => $data['branch_id'] ?? '',
-                'date_of_birth' => !empty($request->date_of_birth) ? Carbon::parse($request->date_of_birth) : null,
+                'date_of_birth' => $data['date_of_birth'],
                 'company_id' => $this->sessionDetails('company_id'),
                 'staff_id' => $this->generateStaffId($data['date_of_employment'], true),
             ]);
@@ -274,13 +283,21 @@ class StaffController extends Controller
                 'jobrole_id' => $data['jobrole_id'] ?? '',
                 'commission_id' => $data['commission_id'] ?? '',
                 'company_id' => $this->sessionDetails('company_id'),
+                
+                'bank_id' => $data['bank_id'] ?? null,
+                'pfa_id' => $data['pfa_id'] ?? null,
+                'account_name' => $data['account_name'] ?? null,
+                'account_number' => $data['account_number'] ?? null,
+                'sort_code' => $data['sort_code'] ?? null,
+                'swift_code' => $data['swift_code'] ?? null,
+                'nhf_number' => $data['nhf_number'] ?? null,
             ]);
 
         } else {
             $staff = Staff::where('id', $request->staff_id)->where('company_id', $this->sessionDetails('company_id'))->first();
             $user = $staff->user;
             $updateUser = Arr::only($data, ['email', 'additional_details','first_name', 'middle_name', 'last_name', 'username', 'phone_number', 'gender', 'next_of_kin', 'branch_id', 'date_of_birth']);
-            $updateStaff = Arr::only($data, ['jobtype_id', 'date_of_employment', 'department_id', 'jobrole_id', 'commission_id']);
+            $updateStaff = Arr::only($data, ['jobtype_id', 'date_of_employment', 'department_id', 'jobrole_id', 'commission_id', 'bank_id', 'pfa_id', 'account_name', 'account_name', 'account_number', 'sort_code', 'swift_code', 'nhf_number']);
             
             $user->update($updateUser);
             $staff->update($updateStaff);
@@ -305,13 +322,13 @@ class StaffController extends Controller
             ->leftjoin("job_roles", "staff.jobrole_id", "=", "job_roles.id")
             ->leftjoin("branches", "users.branch_id", "=", "branches.id")
             ->leftjoin("departments", "staff.department_id", "=", "departments.id")
-            ->select("users.status", "staff.created_at", "users.first_name", "users.username", "users.last_name", "users.email", "staff.id AS staff_id", "users.type", "users.company_id", "staff.jobtype_id", "users.id AS user_id", "staff.date_of_employment", "branches.id AS branch_id", "branches.name AS branch_name", "departments.id AS department_id", "departments.name AS department_name", "job_roles.id AS job_role_id", "job_roles.name AS job_role_name", "job_types.id AS job_type_id", "job_types.name AS job_type_name", "users.additional_details", "users.next_of_kin", "users.date_of_birth")
+            ->select("users.status", "staff.created_at", "users.first_name", "users.username", "users.last_name", "users.email", "staff.id AS staff_id", "users.type", "users.company_id", "staff.jobtype_id", "users.id AS user_id", "staff.date_of_employment", "branches.id AS branch_id", "branches.name AS branch_name", "departments.id AS department_id", "departments.name AS department_name", "job_roles.id AS job_role_id", "job_roles.name AS job_role_name", "job_types.id AS job_type_id", "job_types.name AS job_type_name", "users.additional_details", "users.next_of_kin", "users.date_of_birth", "bank_id", "pfa_id", "account_name", "account_number", "sort_code", "swift_code")
             ->first();
         
         if (!$staff) {
             return response()->json(['message' => 'Staff not found!', 'data' => null], 200);
         }
-
+        
         $validator = Validator::make($request->all(), [
             'email' => [
                 'required', Rule::unique('users')->where(function ($query) use ($staff) {
@@ -333,6 +350,14 @@ class StaffController extends Controller
             'date_of_employment' => 'nullable',
             'department_id' => 'nullable|exists:departments,id,company_id,' . $this->sessionDetails('company_id'),
             'commission_id' => 'nullable|exists:commissions,id,company_id,' . $this->sessionDetails('company_id'),
+
+            'bank_id' => 'nullable|exists:banks,id',
+            'pfa_id' => 'nullable|exists:pfas,id',
+            'account_name' => 'nullable',
+            'account_number' => 'nullable',
+            'sort_code' => 'nullable',
+            'swift_code' => 'nullable',
+            'nhf_number' => 'nullable'
         ]);
 
         if ($validator->fails()) {
@@ -364,16 +389,26 @@ class StaffController extends Controller
             'nok_email_address' => $request->has('nok_email_address')  ? $request->nok_email_address : $t_next_of_kin['nok_email_address'],
             'nok_relationship' => $request->has('nok_relationship')  ? $request->nok_relationship : $t_next_of_kin['nok_relationship'],
         ];
-
-        $staff->update([
-            'jobtype_id' => $request->has('jobtype_id') ? $data['jobtype_id'] :$staff->job_type_id,
-            'date_of_employment' => $request->has('date_of_employment') ? $data['date_of_employment'] : $staff->data_of_employment,
-            'department_id' => $request->has('department_id') ? $data['department_id'] :$staff->department_id,
-            'jobrole_id' => $request->has('jobrole_id') ? $data['jobrole_id'] :$staff->job_role_id,
-            'commission_id' => $request->has('commission_id') ? $data['commission_id'] : $staff->commision_percentage,
+        
+        // persist update for staff
+        $staffx = Staff::where('id', $staff->staff_id)->first();
+        $staffx->update([
+            'jobtype_id' => $request->has('jobtype_id') ? $data['jobtype_id'] : $staffx->job_type_id,
+            'date_of_employment' => $request->has('date_of_employment') ? $data['date_of_employment'] : $staffx->date_of_employment,
+            'department_id' => $request->has('department_id') ? $data['department_id'] : $staffx->department_id,
+            'jobrole_id' => $request->has('jobrole_id') ? $data['jobrole_id'] :$staffx->job_role_id,
+            'commission_id' => $request->has('commission_id') ? $data['commission_id'] : $staffx->commision_percentage,
+    
+            'bank_id' => $request->has('bank_id') ? $data['bank_id'] : $staffx->bank_id,
+            'pfa_id' => $request->has('pfa_id') ? $data['pfa_id'] : $staffx->pfa_id,
+            'account_name' => $request->has('account_name') ? $data['account_name'] : $staffx->account_name,
+            'account_number' => $request->has('account_number') ? $data['account_number'] : $staffx->account_number,
+            'sort_code' => $request->has('sort_code') ? $data['sort_code'] : $staffx->sort_code,
+            'swift_code' => $request->has('swift_code') ? $data['swift_code'] : $staffx->swift_code,
+            'nhf_number' => $request->has('nhf_number') ? $data['nhf_number'] : $staffx->nhf_number,
             'company_id' => $this->sessionDetails('company_id'),
         ]);
-
+        
         // Update staff role here
         if(!empty($request->roles)){
             $rolesx = explode(',', $request->roles);
@@ -410,6 +445,7 @@ class StaffController extends Controller
             'next_of_kin' => json_encode($next_of_kin),
             'branch_id' => $request->has('branch_id')  ? $data['branch_id'] : $staff->user->branch_id,
             'date_of_birth' => $request->has('date_of_birth')  ? Carbon::parse($data['date_of_birth']) : $staff->user->date_of_birth,
+
             'company_id' => $this->sessionDetails('company_id')
         ]);
 
@@ -475,6 +511,7 @@ class StaffController extends Controller
         }
 
         $data = $validator->valid();
+        
         $data['order_of_appearance'] = json_encode($data['order_of_appearance']);
         $data['company_id'] = $this->sessionDetails('company_id');
         
