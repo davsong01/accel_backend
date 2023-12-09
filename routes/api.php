@@ -45,6 +45,7 @@ use App\Http\Controllers\EstateConstructionSettingController;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\GeneratedLegalDocumentController;
 use App\Http\Controllers\LeaveAndAbsenceManagementController;
+use App\Http\Controllers\LegalDocumentController;
 use App\Http\Controllers\LegalDocumentTemplateController;
 use App\Http\Controllers\TransactionTypeDefinitionController;
 
@@ -271,18 +272,14 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('customer-identification-settings', [CustomerController::class, 'customerIdentificationSetting']);
         Route::post('update-customer-identification-settings', [CustomerController::class, 'updateCustomerIdentificationSetting']);
 
-        Route::apiResource('legal-document-templates', LegalDocumentTemplateController::class)->only([
-             'store'
-        ]);
-        Route::apiResource('generated-legal-documents', GeneratedLegalDocumentController::class)->only([
-             'index', 'store'
-        ]);
-        
-        Route::controller(GeneratedLegalDocumentController::class)->name('generated-legal-documents.')->prefix('generated-legal-documents')->group(function(){
-            Route::get('search', 'search')->name('search');
+        Route::controller(LegalDocumentController::class)->prefix('legal-documents')->group(function () {
+            Route::get('type/{type}', 'type');
+            Route::post('template', 'template');
+            Route::get('{type}/name/{name}/generated', 'generated');
 
-            Route::post('generate', 'generate')->name('generate');
-            Route::patch('{document}/regenerate', 'regenerate')->name('regenerate');
+           Route::get('{document}/generated', 'generated');
+           Route::get('generate', 'generate');
+           Route::get('{document}/regenerate', 'regenerate');
         });
 
         Route::controller(FinanceController::class)->name('finance.')->prefix('finance')->group(function() {
