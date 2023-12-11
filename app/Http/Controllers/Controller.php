@@ -32,11 +32,12 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 class Controller extends BaseController
 {
     use AuthorizesRequests, ValidatesRequests;
-    
-    public function sessionDetails($needle){
-        if(Session::has($needle)){
+
+    public function sessionDetails($needle)
+    {
+        if (Session::has($needle)) {
             return Session::get($needle);
-        }else{
+        } else {
             return null;
         }
     }
@@ -51,11 +52,12 @@ class Controller extends BaseController
         return;
     }
 
-    public function getContractFormAmount($estate_contracts, $single=null){
+    public function getContractFormAmount($estate_contracts, $single = null)
+    {
         $buildAmount = [];
         $settings = EstateSettings::select(['form_payment_for_land', 'form_payment_for_building'])->where('company_id', $this->sessionDetails('company_id'))->first();
-        
-        if(isset($single)){
+
+        if (isset($single)) {
             $buildAmount = 0;
             if ($estate_contracts->property_type == 'building') {
                 $buildAmount += $settings->form_payment_for_building;
@@ -64,79 +66,76 @@ class Controller extends BaseController
             if ($estate_contracts->property_type == 'land') {
                 $buildAmount += $settings->form_payment_for_land;
             }
-           
-            return $buildAmount;
 
-        }else{
-            foreach($estate_contracts as $contract){
-               
-                if($contract->property_type == 'building'){
+            return $buildAmount;
+        } else {
+            foreach ($estate_contracts as $contract) {
+
+                if ($contract->property_type == 'building') {
                     $buildAmount[] = $settings->form_payment_for_building;
                 }
 
                 if ($contract->property_type == 'land') {
                     $buildAmount[] = $settings->form_payment_for_land;
                 }
-               
             }
-         
-            $buildAmount = array_sum(array_unique($buildAmount));
 
+            $buildAmount = array_sum(array_unique($buildAmount));
         }
 
         return $buildAmount;
     }
 
-    public function generateFormPayment(array $contract_ids, $customer_id){
+    public function generateFormPayment(array $contract_ids, $customer_id)
+    {
         $contracts = [];
         $ids = [];
         $estates = [];
-       
-        foreach($contract_ids as $contract_id){
+
+        foreach ($contract_ids as $contract_id) {
             // Get estates
             $est = CustomerContract::select('estate_id')->where('id', $contract_id)
-            ->where('customer_id', $customer_id)
-            ->where('company_id', $this->sessionDetails('company_id'))->value('estate_id');
+                ->where('customer_id', $customer_id)
+                ->where('company_id', $this->sessionDetails('company_id'))->value('estate_id');
 
-            if(!empty($est)){
-                $estates[]= $est;
+            if (!empty($est)) {
+                $estates[] = $est;
                 $ids[] = $contract_id;
             }
         }
-       
+
         $estateContracts = [];
-        
-        foreach($estates as $e){
+
+        foreach ($estates as $e) {
             // Get the contracts for each estate
             $es = Estate::where('id', $e)->first();
-            
+
             $estateContracts[$e] = [
                 'estate_id' => $es->id,
                 'form_payment' => $es->form_amount,
                 'contracts' => $es->contracts($customer_id)
             ];
         }
-        
+
         $form_payment = [];
-       
-        foreach($estateContracts as $contract){
-           
+
+        foreach ($estateContracts as $contract) {
+
             $contract['i_form_payment'] = [];
             $s_ids = array_intersect($contract['contracts'], $ids);
-            if(array_diff($contract['contracts'], $ids)){
+            if (array_diff($contract['contracts'], $ids)) {
                 $dif = (count($contract['contracts']) - count(array_diff($contract['contracts'], $ids)));
                 $contract['i_form_payment']['form_amount'] = $dif *  $contract['form_payment'];
-            }
-            else{
+            } else {
                 $contract['i_form_payment']['form_amount'] = $contract['form_payment'];
             }
 
-            
-            
+
+
             $contract['i_form_payment']['contracts'] =  array_values($s_ids);
             $form_payment[$contract['estate_id']] = $contract['i_form_payment'];
         }
-      
+
         $amount = array_sum(array_column($form_payment, 'form_amount'));
         return [
             'form_payment' => $amount,
@@ -144,18 +143,18 @@ class Controller extends BaseController
         ];
     }
 
-    public function generateStaffId($date_of_employment = null, $internal = false){
+    public function generateStaffId($date_of_employment = null, $internal = false)
+    {
         $date_of_employment = !empty($date_of_employment) ? Carbon::parse($date_of_employment) : Carbon::today();
 
-        $settings = StaffIdentificationSetting::where('company_id',$this->sessionDetails('company_id'))->first();
+        $settings = StaffIdentificationSetting::where('company_id', $this->sessionDetails('company_id'))->first();
         $lastUser = User::where('company_id', $this->sessionDetails('company_id'))->where('type', 'staff')->latest()->first();
         $lastUserId = $lastUser->id + 1;
         $lastStaffId = $lastUser->staff_id ?? 1;
-       
-        if(!$settings){
+
+        if (!$settings) {
             $id =  sprintf('%06d', $lastUserId);
-           
-        } else{
+        } else {
             $id = '';
 
             if ($settings->use_id_generator == 1) {
@@ -191,16 +190,15 @@ class Controller extends BaseController
             }
         }
 
-       
-        if($internal && $internal == true){
+
+        if ($internal && $internal == true) {
             return $id;
         }
 
         return response()->json(['message' => 'Successful', 'data' => $id], 200);
-
     }
 
-    public function generatecustomerId()
+    public function generateCustomerId($isJson = true)
     {
         $created_at = !empty($created_at) ? Carbon::parse($created_at) : Carbon::today();
 
@@ -218,21 +216,21 @@ class Controller extends BaseController
         // "order_of_appearance" => "["prefix","registration_year","registration_month"]"
         if (!$settings) {
             return response()->json(['message' => 'Successful', 'data' => $lastUserId], 200);
-        } 
-        
+        }
+
         $order_of_appearance = !empty($settings->order_of_appearance) ? json_decode($settings->order_of_appearance, true) : [];
         $id = '';
-        
+
         if ($settings->use_id_generator == 1) {
             $format = !empty($settings->appearance_format) ? $settings->appearance_format : ' ';
-            
-            foreach($order_of_appearance as $appearance){
+
+            foreach ($order_of_appearance as $appearance) {
                 $slash = end($order_of_appearance) != $appearance ? '/' : '';
-                if($appearance == 'prefix'){
-                    $id .= $settings->prefix. $slash;
+                if ($appearance == 'prefix') {
+                    $id .= $settings->prefix . $slash;
                 }
 
-                if($appearance == 'registration_year'){
+                if ($appearance == 'registration_year') {
                     $id .= $created_at->format('Y') . $slash;
                 }
 
@@ -244,28 +242,30 @@ class Controller extends BaseController
                     $digits = $settings->auto_increment_number_digit;
                     $id .= $lastUserId + $digits . $slash;
                 }
-                
-                if($appearance == 'random_number'){
+
+                if ($appearance == 'random_number') {
                     $count = strlen($format);
                     $min = pow(10, $count - 1);
                     $id .= mt_rand($min, $min * 9) . $slash;
                 }
-
             }
-
         } else {
             $count = strlen($lastCustomerId);
             $min = pow(10, $count - 1);
             $id = mt_rand($min, $min * 9);
         }
-        
+
+        if (isset($isJson) && $isJson == false) {
+            return $id;
+        }
+
         return response()->json(['message' => 'Successful', 'data' => $id], 200);
     }
 
     public function deleteUploadsFile($imagePath)
     {
-        if (file_exists(base_path() . '/'. $imagePath)) {
-            unlink(base_path(). '/' . $imagePath);
+        if (file_exists(base_path() . '/' . $imagePath)) {
+            unlink(base_path() . '/' . $imagePath);
         }
 
         return;
@@ -275,7 +275,7 @@ class Controller extends BaseController
     {
         $folder = $this->getPathToSaveFile($location);
         $name = uniqid(11) . '.' . $file->getClientOriginalExtension();
-       
+
         if (substr($file->getMimeType(), 0, 5) == 'image') {
             $imageFile = Image::make($file);
             $imgWidth = $width ?? $imageFile->width();
@@ -291,12 +291,11 @@ class Controller extends BaseController
                     });
                 }
             }
-            
         }
 
         $file->storeAs($folder, $name, "uploads");
 
-        return $folder.'/'.$name;
+        return $folder . '/' . $name;
     }
 
     public function uploadProtectedFile($file, $location = null, $width = null, $height = null)
@@ -320,23 +319,24 @@ class Controller extends BaseController
                 }
             }
         }
-       
+
         $file->storeAs($folder, $name, "documents");
-       
+
         return [
             'filename' => $name,
             'filepath' => $folder . '/' . $name
         ];
     }
 
-    public function getPathToSaveFile($location = null){
+    public function getPathToSaveFile($location = null)
+    {
         $year = date('Y');
         $month = date('m');
         $day = date('d');
-        
-        if($location){
-            $location = $location .'/' . $year . '/' . $month . '/' . $day;
-        }else{
+
+        if ($location) {
+            $location = $location . '/' . $year . '/' . $month . '/' . $day;
+        } else {
             $location = $year . '/' . $month . '/' . $day;
         }
 
@@ -347,20 +347,22 @@ class Controller extends BaseController
         return $location;
     }
 
-    public function deleteFile($file){
-        if(Storage::disk('uploads')->exists($file)){
+    public function deleteFile($file)
+    {
+        if (Storage::disk('uploads')->exists($file)) {
             Storage::disk('uploads')->delete($file);
         }
     }
 
-    public function getStateDetails($state_id){
+    public function getStateDetails($state_id)
+    {
         $state = collect([
             'id' => null,
             'name' => 'N/A',
         ]);
 
-        $res = States::select('id','name')->where('id',$state_id)->first();
-        if($res){
+        $res = States::select('id', 'name')->where('id', $state_id)->first();
+        if ($res) {
             $state = $res;
         }
 
@@ -397,31 +399,32 @@ class Controller extends BaseController
         return $lga;
     }
 
-    public function notify($data){
+    public function notify($data)
+    {
         try {
             $staff = Staff::where('id', $data['staff_id'])->first();
             $user = $staff->user;
             $data['user_id'] = $user->id;
-            
+
             $user->notify(new StaffNotification($data));
-          
-        } catch (\Throwable $th) {}
+        } catch (\Throwable $th) {
+        }
     }
 
     public static function definedRelations($class, $resource)
     {
-        $reflector = new \ReflectionClass('App\Models\\'.$class);
-       
-        $methods = array_filter($reflector->getMethods(), function($methods) use ($class) {
+        $reflector = new \ReflectionClass('App\Models\\' . $class);
+
+        $methods = array_filter($reflector->getMethods(), function ($methods) use ($class) {
             return str_contains($methods, $class) && $methods->getModifiers() == ReflectionMethod::IS_PUBLIC;
         });
 
         $counter = 0;
-        foreach($methods as $meth){
+        foreach ($methods as $meth) {
             $first = 'App\Models';
-            $rest = ['where',['id' =>$resource->id]];
+            $rest = ['where', ['id' => $resource->id]];
             $r = (string) $meth->name;
-            
+
             $re = call_user_func($first . '\\' . $class . '::' . $rest[0], ...array_slice($rest, 1))->first()->$r->count();
             $counter = $counter + $re;
         }
@@ -429,19 +432,19 @@ class Controller extends BaseController
         return $counter;
     }
 
-    public function profileCompletenes($staff=null)
+    public function profileCompletenes($staff = null)
     {
-        if($staff){
+        if ($staff) {
             $user = $staff;
-        }else{
+        } else {
             $user = Auth::user();
         }
         $job_information_max_percent = 15;
         $others_max_percent = 85;
-        
+
         $additional_details = !empty($user->additional_details) ? json_decode($user->additional_details, true) : [];
         $nok_details = !empty($user->next_of_kin) ? json_decode(Auth::user()->next_of_kin, true) : [];
-        
+
         $job_information = [
             'jobtype_id' => !empty($staff->jobtype_id) ? 1 : 0,
             'date_of_employment' => !empty($staff->date_of_employment) ? 1 : 0,
@@ -476,25 +479,28 @@ class Controller extends BaseController
             // 'nok_email_address' => !empty($nok_details['nok_email_address']) ? 1 : 0,
             // 'nok_relationship' => !empty($nok_details['nok_relationship']) ? 1 : 0
         ];
-        
+
         $others = !empty($others) ? array_sum($others) / count($others) * $others_max_percent : 0;
         $total = number_format($job_information + $others);
         return $total . '%';
     }
 
-    public function encodeUploadedFile($file){
+    public function encodeUploadedFile($file)
+    {
         return !empty($file) ? url('/') . '/uploads/' . base64_encode($file) : '';
     }
 
-    public function logEmail($data){
+    public function logEmail($data)
+    {
         $data['attachments'] = (isset($data['attachments']) && !empty($data['attachments'])) ? json_encode($data['attachments']) : null;
         $mes = new MessageTransactionController();
         $mes->logEmailTransaction($data);
 
         return;
     }
-   
-    public function getLeaveAndAbsencePeriodLeft($staff_id, $type, $internal=false){
+
+    public function getLeaveAndAbsencePeriodLeft($staff_id, $type, $internal = false)
+    {
         $allowedPeriod = LeaveAndAbsenceSetting::where('company_id', $this->sessionDetails('company_id'))->where('type', $type)->first();
         $allapproved = LeaveAndAbsenceManagement::where(['company_id' => $this->sessionDetails('company_id'), 'type' => $type, 'staff_id' => $staff_id, 'status' => 'approved'])->sum('period');
         // ->count('period');
@@ -503,28 +509,27 @@ class Controller extends BaseController
         } else {
             $left = 0;
         }
-        
-        if(!$internal){
+
+        if (!$internal) {
             return response()->json(['message' => 'Retrieved successfully', 'data' => $left], 200);
         }
-        
+
         return $left;
- 
     }
 
     public function getAdvanceAndClaimsPeriodLeft($staff_id, $type, $internal = false)
-    {   
+    {
         $allowedPeriod = LeaveAndAbsenceSetting::where('company_id', $this->sessionDetails('company_id'))->where('type', $type)->first();
-        
+
         $allapproved = AdvanceAndClaims::where(['company_id' => $this->sessionDetails('company_id'), 'type' => $type, 'staff_id' => $staff_id ?? Auth::user()->staff->id, 'status' => 'approved'])->sum('period');
-        
-       
+
+
         if ($allowedPeriod) {
             $left = $allowedPeriod->period - $allapproved;
         } else {
             $left = 0;
         }
-        
+
         if ($internal) {
             return $left;
         }
@@ -532,8 +537,9 @@ class Controller extends BaseController
         return response()->json(['message' => 'Retrieved successfully', 'data' => $left], 200);
     }
 
-    public function cleanJsonInput($input){
-        if(isset($input[0]) && ($input[0] == "'" || $input[0] == '"')){
+    public function cleanJsonInput($input)
+    {
+        if (isset($input[0]) && ($input[0] == "'" || $input[0] == '"')) {
             $input = substr($input, 1);
         }
 
@@ -542,13 +548,12 @@ class Controller extends BaseController
         }
 
         $input = json_decode($input, true);
-       
+
         return $input;
     }
 
-    public function getFormRequestDetails($forms){
-       
-        $companySettings = CompanySetting::with(['currencyData'])->where('company_id', $this->sessionDetails('company_id'))->first();
+    public function getFormRequestContractDetails($forms)
+    {
 
         $forms->next_of_kin_information = !empty($forms->next_of_kin_information) ? json_decode($forms->next_of_kin_information, true) : [];
 
@@ -565,38 +570,39 @@ class Controller extends BaseController
 
         if (!empty($contract_ids)) {
             foreach ($contract_ids as $value) {
-                $contract = CustomerContract::with('customer','property_type_details:type,id,estate_price,settings_and_excavation,infrastructural_fee', 'city:name,id', 'estate:name,id', 'location:name,id', 'building_type:id,name', 'plot_size:id,size', 'plotSize:id,size')->where('customer_id', $forms->customer_id)->where('id', $value)->where('company_id', $this->sessionDetails('company_id'))->select(['id', 'customer_id', 'primary_marketer_id', 'property_type_id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'subscribers', 'contract_type', 'property_type_id', 'created_at'])->first();
+                $contract = CustomerContract::with('customer', 'property_type_details:type,id,estate_price,settings_and_excavation,infrastructural_fee', 'city:name,id', 'estate:name,id', 'location:name,id', 'building_type:id,name', 'plot_size:id,size', 'plotSize:id,size')->where('customer_id', $forms->customer_id)->where('id', $value)->where('company_id', $this->sessionDetails('company_id'))->select(['id', 'customer_id', 'primary_marketer_id', 'property_type_id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'subscribers', 'contract_type', 'property_type_id', 'created_at'])->first();
                 $contract_details[] = [
                     'id' => $contract->id,
-                    
+
                     'customer_id' => $contract->customer_id,
                     'subscribers' => !empty($contract->subscribers) ? json_decode($contract->subscribers) : '',
                     'contract_type' => $contract->contract_type,
                     'property_type' => $contract->property_type_details->type,
-                    'property_price' => $companySettings->currencyData->symbol . number_format((float) $contract->property_type_details->estate_price),
+                    'property_price' => number_format((float) $contract->property_type_details->estate_price),
                     'city' =>  $contract->city,
                     'building_type' => $contract->building_type,
                     'location' => $contract->location->name,
                     'estate' => $contract->estate,
                     'plot_size' => $contract->plotSize,
-                    'infrastructural_fee' => $companySettings->currencyData->symbol . number_format((float) $contract->property_type_details->infrastructural_fee),
-                    // 'net_proerty_fee' => $companySettings->currencyData->symbol . number_format((float) $contract->property_type_details->infrastructure_fee),
-                    // 'discount',
+                    'infrastructural_fee' => number_format((float)$contract->property_type_details->infrastructural_fee),
+                    // 'net_property_fee' => number_format((float) $contract->net_property_fee),
+                    // 'discount' => number_format((float) $contract->discount),
                     'primary_marketer' => $contract->primary_marketer = $contract->primaryMarketer($contract),
                     'settings_and_escavation' => $contract->property_type_details->settings_and_excavation
                 ];
             }
         }
-        
+
         return $contract_details;
     }
 
-    public function generateFormPaymentReceipt($payment){
+    public function generateFormPaymentReceipt($payment)
+    {
         $name = $this->generateReceiptNumber($payment);
         $data['receipt_no'] = $name;
-        $pathToSave = $this->getPathToSaveFile('/receipts/' . $this->sessionDetails('company_slug')).'/' . $name . '.pdf';
+        $pathToSave = $this->getPathToSaveFile('/receipts/' . $this->sessionDetails('company_slug')) . '/' . $name . '.pdf';
 
-        $pdf = PDF::loadView('receipts.template1', compact('payment','data'))->setPaper('a4', 'portrait');
+        $pdf = PDF::loadView('receipts.template1', compact('payment', 'data'))->setPaper('a4', 'portrait');
 
         file_put_contents(base_path() . $pathToSave, $pdf->output());
 
@@ -607,12 +613,12 @@ class Controller extends BaseController
         ];
     }
 
-    public function generateReceiptNumber($payment){
+    public function generateReceiptNumber($payment)
+    {
         $rand = $payment->id . strtotime($payment->created_at);
         $year = date('Y', strtotime($payment->created_at));
         $month = date('m', strtotime($payment->created_at));
-        
-        return $rand.$year.$month;
+
+        return $rand . $year . $month;
     }
 }
-

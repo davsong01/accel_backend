@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\RegisterRequest;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rules\Exists;
 
 class AuthController extends Controller
 {
@@ -61,6 +62,15 @@ class AuthController extends Controller
             }
             $user = User::where('type','customer');
             $user = $user->where('email', $request['email'])->orWhere('customerId', $request['email'])->first();
+
+            // Check if customer has made payment for response form
+            $payments = $user->customer->payments;
+
+            if($payments->count() < 1){
+                return response()->json([
+                    'error' => 'You do have not made any form payment!'
+                ], 412);
+            }
         }else{
             if (!$request['email']) {
                 return response()->json([

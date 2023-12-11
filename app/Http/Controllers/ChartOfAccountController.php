@@ -57,6 +57,7 @@ class ChartOfAccountController extends Controller
             'account_category_id' => 'required|exists:account_categories,id,company_id,' . $this->sessionDetails('company_id'),
             'currency' => 'required|exists:currencies,id',
             'name' => 'required',
+            'account_number' => 'nullable',
             'input_method' => 'required|in:direct,indirect',
         ]);
 
@@ -72,6 +73,7 @@ class ChartOfAccountController extends Controller
             'account_category_id' => $request->account_category_id,
             'currency' => $request->currency,
             'name' => $request->name,
+            'account_number' => $request->account_number,
             'input_method' => $request->input_method,
             'company_id' => $this->sessionDetails('company_id'),
         ]);
@@ -110,6 +112,7 @@ class ChartOfAccountController extends Controller
             'currency' => 'required',
             'name' => 'required',
             'input_method' => 'required|in:direct,manual',
+            'account_number' => 'nullable',
             'status' => 'required|in:active,inactive',
         ]);
 
@@ -127,6 +130,7 @@ class ChartOfAccountController extends Controller
             'name' => $request->name,
             'input_method' => $request->input_method,
             'status' => $request->status,
+            'account_number' => $request->account_number,
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 

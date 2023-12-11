@@ -38,4 +38,11 @@ class AdvanceAndClaims extends Model
         return $proofs;
     }
 
+    protected function amount(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string $value) => number_format($value),
+        );
+    }
+
 }

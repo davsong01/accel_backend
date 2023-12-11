@@ -122,7 +122,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('estate-in-location/{location_id}', [EstateController::class, 'getEstateInLocation']);
 
         Route::resource('estate-construction-setting', EstateConstructionSettingController::class);
-        
+
         Route::post('update-company-profile', [CompanySettingController::class, 'updateCompanyProfile']);
         Route::get('all-staff-and-role/{staff_id?}', [CompanySettingController::class, 'staffAndRoles']);
 
@@ -208,8 +208,8 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::post('customer-form-response', [CustomerFormController::class, 'store']);
         Route::get('customer-form-response/{id?}', [CustomerFormController::class, 'index']);
         Route::get('approve-customer-form-response/{id?}', [CustomerFormController::class, 'approveCustomerFormResponse']);
-        Route::post('decline-customer-form-response/{id?}', [CustomerFormController::class, 'declineCustomerFormResponse']); 
-        
+        Route::post('decline-customer-form-response/{id?}', [CustomerFormController::class, 'declineCustomerFormResponse']);
+
         Route::get('form-payment-history/{customer_id}', [CustomerContractController::class, 'formPaymentHistory']);
         Route::post('make-form-payment', [CustomerContractController::class, 'makeFormPayment']);
         Route::get('get-countries', [GeneralController::class, 'getCountries']);
@@ -219,7 +219,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('get-pfas', [GeneralController::class, 'getPfas']);
         Route::get('get-currencies', [GeneralController::class, 'getCurrencies']);
 
-            // Self Service
+        // Self Service
         Route::group(['prefix' => 'self-service', 'before' => 'self-service'], function () {
             Route::get('dashboard', [SelfServiceController::class, 'dashboard']);
             Route::get('my-profile', [SelfServiceController::class, 'myWorkProfile']);
@@ -255,7 +255,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('generate-staff-id', [Controller::class, 'generateStaffId']);
 
         Route::get('get-staff-leave-remnant/{staff_id}/{type}', [AdvanceAndClaimsController::class, 'getLeaveAndAbsencePeriodLeft']);
-        
+
         Route::resource('commission', CommissionController::class);
         Route::resource('account-category', AccountCategoryController::class);
         Route::get('modify-account-category/{id}', [AccountCategoryController::class, 'modifyAccountCategory']);
@@ -282,7 +282,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
             Route::get('search', 'search');
         });
 
-        Route::controller(FinanceController::class)->name('finance.')->prefix('finance')->group(function() {
+        Route::controller(FinanceController::class)->name('finance.')->prefix('finance')->group(function () {
             Route::get('gl-account', 'GLAccount')->name('gl-account');
             Route::get('gl-account/{account}/transactions', 'GLAccountTransactions')->name('gl-account.transactions');
         });
@@ -292,7 +292,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
 Route::group(['prefix' => 'customer', 'before' => 'customer'], function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/validate', [AuthController::class, 'validateCustomer']);
-    
+
     Route::middleware(['auth:sanctum', 'company_check'])->group(function () {
         Route::post('form-response', [CustomerFormController::class, 'store']);
         Route::get('form-response/{id}', [CustomerFormController::class, 'index']);

@@ -49,4 +49,11 @@ class Payment extends Model
         return $this->belongsTo(ChartOfAccount::class, 'account_id');
     }
 
+    protected function amount(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string $value) => number_format($value),
+        );
+    }
+
 }
