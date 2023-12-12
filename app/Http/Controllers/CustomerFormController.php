@@ -151,10 +151,11 @@ class CustomerFormController extends Controller
      */
     public function store(Request $request, $admin = false)
     {
+       
         if (\Request::route()->getPrefix() == 'api/customer') {
-            $request->customer_id = auth()->user()->customer->id;
+            $request['customer_id'] = auth()->user()->customer->id;
         }
-
+        
         $validator = Validator::make($request->all(), [
             'title' => 'nullable',
             'surname' => 'nullable',
@@ -331,7 +332,7 @@ class CustomerFormController extends Controller
         // Update user
         $customer = Customer::where('id', $data['customer_id'])->first();
         $user = $customer->user;
-
+        
         // Update user
         app('App\Http\Controllers\CustomerController')->updateUser($user, $data);
         $data['transaction_date'] = Carbon::parse($request->transaction_date);

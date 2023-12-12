@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\User;
-use App\Models\Customer;
 use App\Models\Payment;
+use App\Models\Customer;
 use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -331,7 +332,8 @@ class CustomerContractController extends Controller
             'payment_slip' => 'nullable',
             'description' => 'nullable',
             'amount' => 'required',
-            'customer_id' => 'required'
+            'customer_id' => 'required',
+            'transaction_date' => 'required'
         ]);
 
         if ($validator->fails()) {
@@ -394,12 +396,14 @@ class CustomerContractController extends Controller
                 $receipts[] = $receipt['filepath'] ?? null;
 
                 foreach ($form['contracts'] as $contract) {
-                    CustomerContract::where('id', $contract)->update(['status' => 'prospect']);
+                    CustomerContract::where('id', $contract)->update([
+                        'status' => 'prospect',
+                        'transaction_date' => Carbon::parse($request->transaction_date)
+                    ]);
                 }
 
                 $customer->form_status = 'Not Filled';
                 $customer->save();
-                // Customer::where('id', $data['customer_id'])->update(['form_status' => 'Not Filled']);
             }
 
             // Log email
