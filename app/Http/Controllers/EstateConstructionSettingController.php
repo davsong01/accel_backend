@@ -83,7 +83,7 @@ class EstateConstructionSettingController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required',
             'price' => 'required',
-            'building_type_id' => 'required|exists:building_types,id',
+            'building_type_id' => 'exists:building_types,id',
         ]);
 
         if ($validator->fails()) {
@@ -94,10 +94,8 @@ class EstateConstructionSettingController extends Controller
         }
 
         $estateConstructionSetting->update([
-            'name' => $request->name,
-            'price' => $request->price,
+            ...$validator->validated(),
             'company_id' => $this->sessionDetails('company_id'),
-            'building_type_id' => $request->building_type_id,
         ]);
 
         return response()->json(['message' => 'Updated Successfully.', 'data' => $estateConstructionSetting], 200);
