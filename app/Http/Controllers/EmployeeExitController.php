@@ -114,7 +114,19 @@ class EmployeeExitController extends Controller
      */
     public function update(Request $request, EmployeeExit $employeeExit)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'status' => 'in:PENDING,APPROVED,DECLINED',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->messages()->first(),
+                'data' => null,
+            ], 412);
+        }
+        
+        $employeeExit->update($validator->validated());
+        return response()->json(['message' => 'Successfully updated', 'data' => $employeeExit], 200);
     }
 
     /**
