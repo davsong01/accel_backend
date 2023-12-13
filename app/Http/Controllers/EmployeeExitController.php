@@ -18,7 +18,7 @@ class EmployeeExitController extends Controller
     public function index(Request $request, $staff_id=null)
     {
 
-        $exit = EmployeeExit::where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'DESC');
+        $exit = EmployeeExit::with('staff.user')->where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'DESC');
 
         if (!empty($staff_id)) {
             $exit = $exit->where('staff_id', $staff_id);
@@ -115,7 +115,7 @@ class EmployeeExitController extends Controller
     public function update(Request $request, EmployeeExit $employeeExit)
     {
         $validator = Validator::make($request->all(), [
-            'status' => 'in:PENDING,APPROVED,DECLINED',
+            'status' => 'required|in:PENDING,APPROVED,DECLINED',
         ]);
 
         if ($validator->fails()) {
