@@ -136,4 +136,12 @@ class EmployeeExitController extends Controller
     {
         //
     }
+
+    public function search(Request $request){
+        $params = $request->input();
+
+        $employeeExits = EmployeeExit::where('company_id', $this->sessionDetails('company_id'))->where($params)->orderBy('created_at', 'DESC')->paginate(20);
+
+        return response()->json(['message' => 'success', 'data' => $employeeExits], 200);
+    }
 }
