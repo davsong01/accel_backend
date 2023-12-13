@@ -23,13 +23,12 @@ class CustomerFormController extends Controller
     public function index(Request $request, $id = null, $paginate = true)
     {
         if (!empty($id)) {
-            $forms = CustomerForm::with(['country:id,name', 'state:id,name', 'lga:id,name'])->where('id', $id)->where('company_id', $this->sessionDetails('company_id'))->select('surname', 'title', 'status', 'no_of_contract', 'first_name', 'middle_name', 'last_name', 'gender', 'created_at', 'id', 'marital_status', 'date_of_birth', 'country_id', 'state_id', 'lga_id', 'next_of_kin_information', 'means_of_identification', 'transaction_date', 'primary_marketer', 'contract_ids', 'other_details', 'customer_id')->first();
+            $forms = CustomerForm::with(['country:id,name', 'state:id,name', 'lga:id,name'])->where('id', $id)->where('company_id', $this->sessionDetails('company_id'))->select('surname', 'title', 'status', 'no_of_contract', 'first_name', 'middle_name', 'last_name', 'gender', 'created_at', 'id', 'marital_status', 'date_of_birth', 'country_id', 'state_id', 'lga_id', 'next_of_kin_information', 'means_of_identification', 'primary_marketer', 'contract_ids', 'other_details', 'customer_id')->first();
 
             if ($forms) {
                 $forms->contract_details = $this->getFormRequestContractDetails($forms);
+                $forms->other_details = !empty($forms->other_details) ? json_decode($forms->other_details, true) : [];
             }
-
-            $forms->other_details = !empty($forms->other_details) ? json_decode($forms->other_details, true) : null;
             
             return response()->json(['message' => 'Successfully retrieved', 'data' => $forms], 200);
         }

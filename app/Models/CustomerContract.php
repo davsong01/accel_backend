@@ -18,6 +18,7 @@ class CustomerContract extends Model
     use HasFactory;
     protected $table = 'customer_contracts';
     protected $guarded = [];
+    protected $appends = ['form_amount_paid','form_payment_status'];
 
     public function customer(){
         return $this->belongsTo(Customer::class, 'customer_id');
@@ -66,6 +67,28 @@ class CustomerContract extends Model
     public function property_type_details()
     {
         return $this->belongsTo(EstatePropertyTypeDetails::class, 'property_type_id');
+    }
+
+    
+    public function getFormPaymentStatusAttribute()
+    {
+        $payment = Payment::where('customer_contract_ids', $this->id)->first();
+        if($payment){
+            return 'paid';
+        }else{
+            return 'unpaid';
+        }
+       
+    }
+
+    public function getFormAmountPaidAttribute()
+    {
+        $payment = Payment::where('customer_contract_ids', $this->id)->first();
+        if ($payment) {
+            return number_format((float) $payment->amount);
+        } else {
+            return 0;
+        }
     }
 
     public function primaryMarketer()

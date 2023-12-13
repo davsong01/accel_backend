@@ -21,16 +21,15 @@ class CustomerContractController extends Controller
      */
     public function index(Request $request, $customer_id)
     {
-        $contracts = CustomerContract::with('property_type_details:type,id,estate_price,settings_and_excavation,infrastructural_fee', 'city:name,id', 'estate:name,id', 'location:name,id', 'building_type:id,name', 'plot_size:id,size')->where('customer_id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->select(['id', 'primary_marketer_id', 'property_type_id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'subscribers', 'contract_type', 'property_type','transaction_date', 'created_at']);
-
+        $contracts = CustomerContract::with('property_type_details:type,id,estate_price,settings_and_excavation,infrastructural_fee', 'city:name,id', 'estate:name,id', 'location:name,id', 'building_type:id,name', 'plot_size:id,size')->where('customer_id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->select(['id', 'primary_marketer_id', 'property_type_id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'subscribers','contract_type', 'property_type','transaction_date', 'created_at']);
+        
         if (!empty($request->contract_type)) {
             $contracts = $contracts->where('contract_type', $request->contract_type);
         }
         // ->groupBy('estate_id')
         $contracts = $contracts->orderBy('created_at', 'DESC')
             ->get();
-
-
+        
         $allContracts = [];
         if ($contracts) {
             // get the customer
@@ -53,9 +52,10 @@ class CustomerContractController extends Controller
                 $contract['location'] = $contract->location->name;
                 $allContracts[$key] = $contract;
                 $allContracts[$key]['form_amount'] = $this->getContractFormAmount($contract, 'single');
+               
             }
             $data['all_contracts'] = $allContracts;
-
+            
             return response()->json(['message' => 'success', 'data' => $data], 200);
         } else {
             return response()->json(['message' => 'No records found', 'data' => []], 200);
