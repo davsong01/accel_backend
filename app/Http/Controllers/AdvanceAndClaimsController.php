@@ -37,6 +37,15 @@ class AdvanceAndClaimsController extends Controller
         if (isset($id) && !empty($id)) {
             $aac = $aac->where('id', $id)->first();
             if ($aac) {
+
+                if (!empty($aac->staff_id)) {
+                    $aac->request_by = [
+                        'first_name' => $aac->staff->user->first_name,
+                        'middle_name' => $aac->staff->user->middle_name,
+                        'last_name' => $aac->staff->user->last_name,
+                        'id' => $aac->staff->id,
+                    ];
+                }
                 return response()->json(['message' => 'Retrieved Successfully', 'data' => $aac], 200);
             } else {
                 return response()->json(['message' => 'No records found', 'data' => $aac], 200);
@@ -45,6 +54,16 @@ class AdvanceAndClaimsController extends Controller
 
         $aac = $aac->orderBy('created_at', 'DESC')->paginate(20)->withQueryString();
 
+        foreach($aac as $l){
+            if (!empty($l->staff_id)) {
+                $l->request_by = [
+                    'first_name' => $l->staff->user->first_name,
+                    'middle_name' => $l->staff->user->middle_name,
+                    'last_name' => $l->staff->user->last_name,
+                    'id' => $l->staff->id,
+                ];
+            }
+        }
         if ($aac->count() > 0) {
             return response()->json(['message' => 'Retrieved Successfully', 'data' => $aac], 200);
         } else {
@@ -105,14 +124,14 @@ class AdvanceAndClaimsController extends Controller
 
         if($request->type == 'advance'){
             $validator = Validator::make($request->all(), [
-                'amount' => 'required',
+                'amount' => 'required|numeric',
                 'time_sensitivity' => 'required',
             ]);
         }
 
         if ($request->type == 'claims') {
             $validator = Validator::make($request->all(), [
-                'amount' => 'required',
+                'amount' => 'required|numeric',
                 'date' => [
                     'required',Rule::unique('advance_and_claims')->where(function ($query) {
                         $query->where('company_id', $this->sessionDetails('company_id'));

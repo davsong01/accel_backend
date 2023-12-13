@@ -38,6 +38,16 @@ class LeaveAndAbsenceManagementController extends Controller
         
         if (isset($id) && !empty($id)) {
             $lam = $lam->where('id', $id)->first();
+
+            if (!empty($lam->staff_id)) {
+                $lam->request_by = [
+                    'first_name' => $lam->staff->user->first_name,
+                    'middle_name' => $lam->staff->user->middle_name,
+                    'last_name' => $lam->staff->user->last_name,
+                    'id' => $lam->staff->id,
+                ];
+            }
+            
             if ($lam) {
                 return response()->json(['message' => 'Retrieved Successfully', 'data' => $lam], 200);
             } else {
@@ -47,6 +57,17 @@ class LeaveAndAbsenceManagementController extends Controller
 
         $lam = $lam->orderBy('created_at', 'DESC')->paginate(20)->withQueryString();
 
+        foreach($lam as $l){
+            if(!empty($l->staff_id)){
+                $l->request_by = [
+                    'first_name' => $l->staff->user->first_name,
+                    'middle_name' => $l->staff->user->middle_name,
+                    'last_name' => $l->staff->user->last_name,
+                    'id' => $l->staff->id,
+                ]; 
+            }
+            
+        }
         if ($lam->count() > 0) {
             return response()->json(['message' => 'Retrieved Successfully', 'data' => $lam], 200);
         } else {
@@ -72,6 +93,16 @@ class LeaveAndAbsenceManagementController extends Controller
 
         if (isset($id) && !empty($id)) {
             $lam = $lam->where('id', $id)->first();
+            
+            if (!empty($lam->staff_id)) {
+                $lam->request_by = [
+                    'first_name' => $lam->staff->user->first_name,
+                    'middle_name' => $lam->staff->user->middle_name,
+                    'last_name' => $lam->staff->user->last_name,
+                    'id' => $lam->staff->id,
+                ];
+            }
+
             if ($lam) {
                 return response()->json(['message' => 'Retrieved Successfully', 'data' => $lam], 200);
             } else {
@@ -81,6 +112,16 @@ class LeaveAndAbsenceManagementController extends Controller
 
         $lam = $lam->orderBy('created_at', 'DESC')->paginate(20)->withQueryString();
 
+        foreach ($lam as $l) {
+            if (!empty($l->staff_id)) {
+                $l->request_by = [
+                    'first_name' => $l->staff->user->first_name,
+                    'middle_name' => $l->staff->user->middle_name,
+                    'last_name' => $l->staff->user->last_name,
+                    'id' => $l->staff->id,
+                ];
+            }
+        }
         if ($lam->count() > 0) {
             return response()->json(['message' => 'Retrieved Successfully', 'data' => $lam], 200);
         } else {

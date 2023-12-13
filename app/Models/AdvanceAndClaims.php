@@ -41,7 +41,7 @@ class AdvanceAndClaims extends Model
     protected function amount(): Attribute
     {
         return Attribute::make(
-            get: fn (string $value) => number_format($value),
+            get: fn (string $value) => number_format((float) $value),
         );
     }
 

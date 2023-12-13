@@ -183,7 +183,7 @@ class SelfServiceController extends Controller
         $validator = Validator::make($request->all(), [
             'id' => 'required|exists:staff_document_settings,id,company_id,' . $this->sessionDetails('company_id'),
             'staff_id' => 'required|exists:staff,id,company_id,' . $this->sessionDetails('company_id'),
-            'files' => 'required',
+            'files' => 'required|mimetypes:application/pdf|max:2048',
         ]);
 
         if (\Request::route()->getPrefix() == 'api/admin/self-service') {
