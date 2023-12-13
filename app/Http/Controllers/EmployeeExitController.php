@@ -18,7 +18,7 @@ class EmployeeExitController extends Controller
     public function index(Request $request, $staff_id=null)
     {
 
-        $exit = EmployeeExit::where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'DESC');
+        $exit = EmployeeExit::with('staff.user')->where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'DESC');
 
         if (!empty($staff_id)) {
             $exit = $exit->where('staff_id', $staff_id);
@@ -114,7 +114,19 @@ class EmployeeExitController extends Controller
      */
     public function update(Request $request, EmployeeExit $employeeExit)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'status' => 'required|in:PENDING,APPROVED,DECLINED',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->messages()->first(),
+                'data' => null,
+            ], 412);
+        }
+        
+        $employeeExit->update($validator->validated());
+        return response()->json(['message' => 'Successfully updated', 'data' => $employeeExit], 200);
     }
 
     /**
@@ -123,5 +135,13 @@ class EmployeeExitController extends Controller
     public function destroy(EmployeeExit $employeeExit)
     {
         //
+    }
+
+    public function search(Request $request){
+        $params = $request->input();
+
+        $employeeExits = EmployeeExit::where('company_id', $this->sessionDetails('company_id'))->where($params)->orderBy('created_at', 'DESC')->paginate(20);
+
+        return response()->json(['message' => 'success', 'data' => $employeeExits], 200);
     }
 }
