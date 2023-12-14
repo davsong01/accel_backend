@@ -193,8 +193,6 @@ class CustomerFormController extends Controller
             // 'bypass_approval' => 'nullable',
             'marital_status' => 'nullable',
             'customer_id' => 'required|exists:customers,id,company_id,' . $this->sessionDetails('company_id'),
-            'branch_id' => 'required|exists:branches,id,company_id,' . $this->sessionDetails('company_id'),
-            'transaction_date' => 'nullable',
 
             // Contracts
             'contract' => 'required',
@@ -242,6 +240,7 @@ class CustomerFormController extends Controller
                     'plot_size_id' => 'nullable|exists:plot_sizes,id',
                     'branch_id' => 'nullable|exists:branches,id,company_id,' . $this->sessionDetails('company_id'),
                     'contract_type' => 'nullable',
+                    'transaction_date' => 'nullable',
 
                     'contract_id' => 'required|exists:customer_contracts,id,company_id,' . $this->sessionDetails('company_id'),
                 ]);
@@ -256,6 +255,8 @@ class CustomerFormController extends Controller
 
                 $update = $validator->valid();
                 $update['contract'] = $cont;
+                $cont['transaction_date'] = Carbon::parse($request->transaction_date);
+                
                 // Update the contract
                 $customer_contract_ids[] = $cont['contract_id'];
                 app('App\Http\Controllers\CustomerContractController')->updateCustomerContract($cont, $cont['contract_id'], $request->customer_id);
@@ -334,14 +335,13 @@ class CustomerFormController extends Controller
         
         // Update user
         app('App\Http\Controllers\CustomerController')->updateUser($user, $data);
-        $data['transaction_date'] = Carbon::parse($request->transaction_date);
         $data['raw'] = json_encode($request->all());
         $data['contract_ids'] = json_encode($customer_contract_ids);
         $data['no_of_contract'] = count($customer_contract_ids);
 
         $data['company_id'] = $this->sessionDetails('company_id');
 
-        $response = Arr::only($data, ['contract_ids', 'customer_id', 'title', 'type', 'status', 'no_of_contract', 'surname', 'first_name', 'middle_name', 'last_name', 'gender', 'date_of_birth', 'marital_status', 'lga_id', 'country_id', 'state_id', 'email_address', 'contact_details', 'next_of_kin_information', 'means_of_identification', 'transaction_date', 'branch_id', 'other_details', 'primary_marketer', 'secondary_marketers', 'raw', 'company_id', 'no_of_contract', 'contact_details', 'no_of_contracts']);
+        $response = Arr::only($data, ['contract_ids', 'customer_id', 'title', 'type', 'status', 'no_of_contract', 'surname', 'first_name', 'middle_name', 'last_name', 'gender', 'date_of_birth', 'marital_status', 'lga_id', 'country_id', 'state_id', 'email_address', 'contact_details', 'next_of_kin_information', 'means_of_identification', 'branch_id', 'other_details', 'primary_marketer', 'secondary_marketers', 'raw', 'company_id', 'no_of_contract', 'contact_details', 'no_of_contracts']);
 
         CustomerForm::updateOrCreate(
             ['customer_id' => $response['customer_id'], 'company_id' => $response['company_id']],

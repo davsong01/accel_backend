@@ -302,6 +302,7 @@ class CustomerContractController extends Controller
             'property_type_id' => !empty($data['property_type_id']) ? $data['property_type_id'] : $contract->property_type_id,
             'subscribers' => !empty($data['subscribers']) ? json_encode($data['subscribers']) : $contract->subscribers,
             'contract_type' => !empty($data['contract_type']) ? $data['contract_type'] : $contract->contract_type,
+            'transaction_date' => !empty($data['transaction_date']) ? $data['transaction_date'] : $contract->transaction_date,
         ]);
 
         return;
