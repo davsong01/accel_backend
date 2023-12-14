@@ -13,6 +13,7 @@ use App\Mail\MessageTransactionMail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\RedirectResponse;
+use App\Models\MessageTemplate;
 
 class MessageTransactionController extends Controller
 {
@@ -100,17 +101,29 @@ class MessageTransactionController extends Controller
 
     public function getMessageContent($data){
         $company_setting = CompanySetting::where('company_id', $this->sessionDetails('company_id'))->first();
-
+        
         $button_style = "background: ".$company_setting->primary_color. ";text-decoration: none; padding: 10px;color: white;border: none;color: white;border-radius: 5px;";
         $all = [];
         $content = "";
         $subject = "";
+
         if ($data['type'] == 'password-reset') {
             if(isset($data['medium']) && $data['medium'] == 'sms'){
-                $content .= 'Hello, your password reset link is: '. url('/').'/reset-password?token='.$data['token'];
+                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium','sms')->where('type','password-reset')->first();
+                $content = $email_template->content ?? null;
+
+                if(!empty($content)){
+                    $content .= $content;
+                }else{
+                    $content .= 'Hello, your password reset link is: ' . url('/') . '/reset-password?token=' . $data['token'];
+                }
             }else{
-                $subject = 'Password Reset Link';
-                $content .= '<strong>Dear ' . $data['name'] . ', </strong><br><br>
+                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'email')->where('type', 'password-reset')->first();
+                $subject = $email_template->subject ?? null;
+                $content = $email_template->content ?? null;
+
+                $subject = $subject ?? 'Password Reset Link';
+                $content .= $content ?? '<strong>Dear ' . $data['name'] . ', </strong><br><br>
                 <div>
                 <p style="text-align:justify !important">You asked for a password RESET mail on '.$this->sessionDetails('company_name'). '. Please click the button below to reset your password. Thank you <br><br><a href="' . url('/') . '/reset-password?token=' . $data['token'] . '"><button style="background: green;text-decoration: none;padding: 10px;color: white;">RESET PASSWORD</button></a></p>
                 </div>';
@@ -162,14 +175,18 @@ class MessageTransactionController extends Controller
         if ($data['type'] == 'form.payment') {
             if (isset($data['medium']) && $data['medium'] == 'sms') {
             } else {
-                $subject = 'Payment made';
-                $content .= '<strong>Dear ' . $data['name'] . ',</strong><br>
+                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'email')->where('type', 'form.payment')->first();
+                $subject = $email_template->subject ?? null;
+                $content = $email_template->content ?? null;
+
+                $subject = $subject ?? 'Receipt for Form payment';
+                $content .= $content ?? '<strong>Dear ' . $data['name'] . ',</strong><br>
                 <div>
                 <p style="text-align:justify !important"></p>
                 </div>';
             }
         }
-       
+        
         return [
             'subject' => $subject,
             'content' => $content,
