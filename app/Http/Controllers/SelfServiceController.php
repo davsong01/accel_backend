@@ -180,11 +180,33 @@ class SelfServiceController extends Controller
 
     public function uploadDocuments(Request $request)
     {
+        // $this->validate(request(), [
+        //     'id' => 'required|exists:staff_document_settings,id,company_id,' . $this->sessionDetails('company_id'),
+        //     'staff_id' => 'required|exists:staff,id,company_id,' . $this->sessionDetails('company_id'),
+        //     'files.*' => 'mimes:jpeg,jpg,bmp,png,gif,pdf|max:2048',
+        // ], [
+        //     'files.*.mimes' => 'The fiype: xlsx'
+        // ]);
+
         $validator = Validator::make($request->all(), [
             'id' => 'required|exists:staff_document_settings,id,company_id,' . $this->sessionDetails('company_id'),
             'staff_id' => 'required|exists:staff,id,company_id,' . $this->sessionDetails('company_id'),
-            'files' => 'required|mimetypes:application/pdf|max:2048',
-        ]);
+            'files.*' => 'mimes:jpeg,jpg,bmp,png,gif,pdf|max:2048',
+        ],
+        
+            [
+                'files.*.mimes' => 'Supported file formats are jpeg,jpg,bmp,png,gif,pdf',
+                'files.*.required' => 'The files field is required!',
+            ],
+    
+        );
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->messages()->all(),
+                'data' => null,
+            ], 412);
+        }
 
         if (\Request::route()->getPrefix() == 'api/admin/self-service') {
             $staff_id = Auth::user()->staff->id;
@@ -208,7 +230,7 @@ class SelfServiceController extends Controller
         
         $toUpload = count($files);
         $newCount = $uploaded + $toUpload;
-
+        dd($toUpload);
         if ($newCount > $allowed) {
             return response()->json([
                 'error' => 'Only ' . $setting->required . ' documents are required for ' . $setting->name . '!',
