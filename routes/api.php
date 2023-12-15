@@ -278,7 +278,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::controller(LegalDocumentController::class)->prefix('legal-documents')->group(function () {
             Route::get('type/', 'type');
             Route::post('template', 'template');
-            Route::get('generate', 'generate');
+            Route::post('generate', 'generate');
             Route::patch('{document}/regenerate', 'regenerate');
             Route::get('generated', 'generated');
             Route::get('search', 'search');
