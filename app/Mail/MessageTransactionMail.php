@@ -74,12 +74,13 @@ class MessageTransactionMail extends Mailable
 
         if(!empty($this->data['attachments'])){
             foreach($this->data['attachments'] as $key=>$attachment){
-                if (file_exists(base_path() . $attachment)) {
-                    $files[] = Attachment::fromPath(base_path().$attachment);
+                
+                if (file_exists(base_path() . '/uploads/' . $attachment)) {
+                    $files[] = Attachment::fromPath(base_path() . '/uploads/' . $attachment);
                 }
             }
         }
-        
+     
         return $files;
     }
 }

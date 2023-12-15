@@ -200,6 +200,7 @@ class MessageTransactionController extends Controller
             return response()->json('No pending messages');
 
         }
+        
         foreach($messages as $message){
             $provider = MessageProvider::where('id', $message->provider_id)->first();
             if($message->medium == 'sms'){
@@ -207,7 +208,7 @@ class MessageTransactionController extends Controller
             }
            
             $message->attachments = !empty($message->attachments) ? json_decode($message->attachments) : null;
-            
+           
             if ($message->medium == 'email') {
                 $providerX = [
                     'mail.driver' => $provider->credentials['MAIL_DRIVER'],
@@ -227,7 +228,7 @@ class MessageTransactionController extends Controller
                 config($providerX);
                 try {
                     Mail::to($message->recipient)->send(new MessageTransactionMail($message->toArray(), $providerX));
-
+                    
                     $message->update(['status' => 'sent']);
                 }catch(\Exception $e) {
                     // dd($e->getMessage());
@@ -235,7 +236,7 @@ class MessageTransactionController extends Controller
                 }
             }
         }
-        
+       
         return response()->json('All done');
     }
 }
