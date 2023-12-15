@@ -265,7 +265,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::post('create-exit', [EmployeeExitController::class, 'store']);
         Route::get('exits/search', [EmployeeExitController::class, 'search']);
         Route::get('exits/{staff_id?}', [EmployeeExitController::class, 'index']);
-        Route::match(['put', 'patch'],'exits/{staff}', [EmployeeExitController::class, 'update']);
+        Route::match(['put', 'patch'],'exits/{employeeExit}', [EmployeeExitController::class, 'update']);
         Route::get('access-control-list', [MenuController::class, 'adminAccessControls']);
 
         Route::get('staff-documents/{staff_id}', [SelfServiceController::class, 'getStaffDocument']);
