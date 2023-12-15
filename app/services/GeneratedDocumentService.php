@@ -37,7 +37,7 @@ class GeneratedDocumentService
         $templateProcessor->saveAs($destination . '.docx'); // temp file
 
         $rendererName = Settings::PDF_RENDERER_DOMPDF;
-        $rendererLibraryPath = realpath('../vendor/dompdf/dompdf');
+        $rendererLibraryPath = base_path('vendor/dompdf/dompdf');
         Settings::setPdfRenderer($rendererName, $rendererLibraryPath);
 
         $phpWord = IOFactory::load($destination . '.docx');

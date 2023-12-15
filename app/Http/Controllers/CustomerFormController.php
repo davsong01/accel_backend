@@ -75,7 +75,7 @@ class CustomerFormController extends Controller
     public function approveCustomerFormResponse($id)
     {
         $customer_form = CustomerForm::where('id', $id)->where('company_id', $this->sessionDetails('company_id'))->where('type', 'form2-request')->first();
-
+        
         if (!$customer_form) {
             return response()->json(['message' => 'No records found', 'data' => []], 200);
         }
@@ -89,8 +89,8 @@ class CustomerFormController extends Controller
 
         $customer_form->update(['status' => 'approved']);
 
-        $data['contract_details'] = $this->getFormRequestContractDetails($customer_form);
-
+        $data['contract_details'] = $this->getFormRequestContractDetails($customer_form, 'approve_contract');
+        
         $data['type'] = 'formrequest.approve';
         $data['medium'] = 'email';
         // $data['user'] = Customer::where('id', 'customer_id')->user;
@@ -114,7 +114,7 @@ class CustomerFormController extends Controller
                 'data' => null,
             ], 412);
         }
-
+        
         $customer_form = CustomerForm::where('id', $id)->where('company_id', $this->sessionDetails('company_id'))->where('type', 'form2-request')->first();
 
         if (!$customer_form) {
@@ -129,7 +129,7 @@ class CustomerFormController extends Controller
             'reason' => $request->reason
         ]);
 
-        $data['contract_details'] = $this->getFormRequestContractDetails($customer_form);
+        $data['contract_details'] = $this->getFormRequestContractDetails($customer_form, 'decline_contract', $request->reason);
 
         $data['type'] = 'formrequest.decline';
         $data['reason'] = $request->reason;
@@ -348,7 +348,7 @@ class CustomerFormController extends Controller
             $response
         );
 
-        return response()->json(['message' => 'success', 'data' => []], 200);
+        return response()->json(['message' => 'Success', 'data' => []], 200);
     }
 
     /**
