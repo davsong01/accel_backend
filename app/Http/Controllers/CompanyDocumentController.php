@@ -64,7 +64,7 @@ class CompanyDocumentController extends Controller
         
         $document = CompanyDocument::create($data);
         return response()->json(['message' => 'success', 'data' => $document], 200);
-
+        
     }
 
     /**
@@ -110,7 +110,7 @@ class CompanyDocumentController extends Controller
         ];
 
         if (!empty($request->file)) {
-            $data['file'] = $this->uploadProtectedFile($request->file, $this->sessionDetails('company_slug'))['filepath'];
+            $data['file'] = $this->uploadProtectedFile($request->file, 'documents/'.$this->sessionDetails('company_slug'))['filepath'];
         }
         
         $companyDocument->update($data);

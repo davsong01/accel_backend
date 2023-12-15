@@ -89,13 +89,14 @@ class LegalDocumentController extends Controller
             'customer_id' => ['required', 'exists:customers,id'],
             'document_template_id' => ['required', 'exists:legal_document_templates,id'],
         ]);
-
+        
         if ($validator->fails()) {
             return response()->json([
                 'error' => $validator->messages()->first(),
                 'data' => null,
             ], 412);
         }
+
         $legalDocumentTemplate = LegalDocumentTemplate::find($request->document_template_id);
         
         $documentGen = $this->documentGenerator($request->customer_id, $legalDocumentTemplate);

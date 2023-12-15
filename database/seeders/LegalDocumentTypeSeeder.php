@@ -16,11 +16,15 @@ class LegalDocumentTypeSeeder extends Seeder
     {
         LegalDocumentType::truncate();
         LegalDocumentType::factory()
-            ->count(4)
+            ->count(8)
             ->sequence(
                 ['name' => 'OFFER_LETTER', 'type' => 'LAND'],
+                ['name' => 'OFFER_LETTER', 'type' => 'BUILDING'],
+                ['name' => 'PROVISIONAL_LETTER',  'type' => 'LAND'],
                 ['name' => 'PROVISIONAL_LETTER',  'type' => 'BUILDING'],
                 ['name' => 'ALLOCATION_LETTER',  'type' => 'LAND'],
+                ['name' => 'ALLOCATION_LETTER',  'type' => 'BUILDING'],
+                ['name' => 'CHANGE_OF_OWNERSHIP_LETTER',  'type' => 'LAND'],
                 ['name' => 'CHANGE_OF_OWNERSHIP_LETTER',  'type' => 'BUILDING'],
             )
             // ->for(PropertyType::factory())

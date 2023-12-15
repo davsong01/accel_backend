@@ -12,6 +12,8 @@ use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\RedirectResponse;
 use App\Models\EstatePropertyTypeDetails;
+use App\Models\LegalDocumentTemplate;
+use App\Models\LegalDocumentType;
 use Illuminate\Support\Facades\Validator;
 
 class EstateController extends Controller
@@ -198,6 +200,9 @@ class EstateController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
             'branch_id' => $this->sessionDetails('branch_id'),
         ]);
+
+        // Create document template
+        generateEstateDefaultLegalDocument($estate);
 
         // Create Property Type Details
         if ($request->has('building_details') && !empty($request->building_details)) {
