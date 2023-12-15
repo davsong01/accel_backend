@@ -51,10 +51,15 @@ class LegalDocumentController extends Controller
             'estate_id' => $request->estate_id,
             'company_id' => $this->sessionDetails('company_id'), // $request->company_id,
             'created_by' => Auth::user()->id,
-            'file_location' =>  $this->uploadProtectedFile($request->file, $this->sessionDetails('company_slug'))['filepath']
+            'file_location' =>  $this->uploadProtectedFile($request->file, 'uploaded_legal_document_templates/'.$this->sessionDetails('company_slug'))['filepath']
         ];
+        
+        $document = LegalDocumentTemplate::updateOrcreate([
+            'estate_id' => $data['estate_id'], 
+            'company_id' => $this->sessionDetails('company_id'), 
+            'legal_document_type_id' => $data['legal_document_type_id']
+        ], $data);
 
-        $document = LegalDocumentTemplate::create($data);
         return response()->json(['message' => 'success', 'data' => $document], 200);
     }
 
