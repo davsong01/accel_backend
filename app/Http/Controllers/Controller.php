@@ -552,7 +552,7 @@ class Controller extends BaseController
         return $input;
     }
 
-    public function getFormRequestContractDetails($forms)
+    public function getFormRequestContractDetails($forms, $modify = false, $reason = '')
     {
 
         $forms->next_of_kin_information = !empty($forms->next_of_kin_information) ? json_decode($forms->next_of_kin_information, true) : [];
@@ -570,7 +570,18 @@ class Controller extends BaseController
 
         if (!empty($contract_ids)) {
             foreach ($contract_ids as $value) {
-                $contract = CustomerContract::with('customer', 'property_type_details:type,id,estate_price,settings_and_excavation,infrastructural_fee', 'city:name,id', 'estate:name,id', 'location:name,id', 'building_type:id,name', 'plot_size:id,size', 'plotSize:id,size')->where('customer_id', $forms->customer_id)->where('id', $value)->where('company_id', $this->sessionDetails('company_id'))->select(['id', 'customer_id', 'primary_marketer_id', 'property_type_id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'subscribers', 'contract_type', 'property_type_id', 'created_at'])->first();
+                $contract = CustomerContract::with('customer', 'property_type_details:type,id,estate_price,settings_and_excavation,infrastructural_fee', 'city:name,id', 'estate:name,id', 'location:name,id', 'building_type:id,name', 'plot_size:id,size', 'plotSize:id,size')->where('customer_id', $forms->customer_id)->where('id', $value)->where('company_id', $this->sessionDetails('company_id'))->select(['id', 'customer_id', 'primary_marketer_id', 'property_type_id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'subscribers', 'contract_type', 'property_type_id', 'form_approval_status','reason', 'created_at'])->first();
+                
+                if(!empty($contract->form_payment_status) && $contract->form_payment_status == 'paid'){
+                    if($modify && $modify == 'approve_contract'){
+                        $this->approveCustomerContract($contract);
+                    }
+                }
+
+                if($modify && $modify == 'decline_contract'){
+                    $this->declineCustomerContract($contract, $reason);
+                }
+
                 $contract_details[] = [
                     'id' => $contract->id,
 
@@ -594,6 +605,20 @@ class Controller extends BaseController
         }
 
         return $contract_details;
+    }
+
+    public function approveCustomerContract($contract){
+        $contract->update([
+            'form_approval_status' => 'approved',
+        ]);
+    }
+
+    public function declineCustomerContract($contract, $reason)
+    {
+        $contract->update([
+            'form_approval_status' => 'declined',
+            'reason' => $reason,
+        ]);
     }
 
     public function generateFormPaymentReceipt($payment)
