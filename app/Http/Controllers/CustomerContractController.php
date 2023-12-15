@@ -211,6 +211,7 @@ class CustomerContractController extends Controller
             'alternate_email' => $request->alternate_email ?? '',
             'state' => $request->state ?? '',
             'residential_address' => $request->residential_address ?? '',
+            'office_address' => $request->office_address ?? '',
             'marital_status' => $request->marital_status ?? '',
             'nationality' => $request->nationality ?? '',
             'lga' => $request->lga ?? '',
@@ -392,7 +393,7 @@ class CustomerContractController extends Controller
                 ]);
 
                 $receipt = $this->generateFormPaymentReceipt($payment);
-
+               
                 $payment->update(['receipt_location' => $receipt['filepath'] ?? null]);
                 $receipts[] = $receipt['filepath'] ?? null;
 

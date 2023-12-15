@@ -67,6 +67,7 @@ class LegalDocumentController extends Controller
             'type' => $request->input('property_type'),
             'name' => $request->input('name')
         ])->first();
+        
         if ($legalDocumentType) {
             $legalDocumentTemplate = LegalDocumentTemplate::where('legal_document_type_id', $legalDocumentType->id)->first();
             $data = [
@@ -96,7 +97,7 @@ class LegalDocumentController extends Controller
             ], 412);
         }
         $legalDocumentTemplate = LegalDocumentTemplate::find($request->document_template_id);
-
+        
         $documentGen = $this->documentGenerator($request->customer_id, $legalDocumentTemplate);
 
         $generatedLegalDocument = GeneratedLegalDocument::create([
@@ -153,7 +154,7 @@ class LegalDocumentController extends Controller
     private function documentGenerator($customer_id, $legalDocumentTemplate)
     {
         $file = reConstructUploadedProtectedDocument($legalDocumentTemplate->file_location);
-
+       
         $options = $this->setOptions();
         $values = $this->getOptions($options, $customer_id, $legalDocumentTemplate);
 

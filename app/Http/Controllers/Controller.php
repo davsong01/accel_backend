@@ -280,6 +280,7 @@ class Controller extends BaseController
             $imageFile = Image::make($file);
             $imgWidth = $width ?? $imageFile->width();
             $imgHeight = $imgHeight ?? $imageFile->height();
+            
             if (!is_null($imgWidth) && !is_null($imgHeight)) {
                 if ($imgWidth < $imgHeight) {
                     $imageFile->resize($imgWidth, null, function ($constraint) {
@@ -291,10 +292,11 @@ class Controller extends BaseController
                     });
                 }
             }
+            
         }
 
-        $file->storeAs($folder, $name, "uploads");
-
+        $imageFile->save(base_path() . '/uploads/' . $folder . '/' . $name);
+       
         return $folder . '/' . $name;
     }
 
@@ -302,7 +304,7 @@ class Controller extends BaseController
     {
         $folder = $this->getPathToSaveFile($location);
         $name = uniqid(11) . '.' . $file->getClientOriginalExtension();
-
+        
         if (substr($file->getMimeType(), 0, 5) == 'image') {
             $imageFile = Image::make($file);
             $imgWidth = $width ?? $imageFile->width();
@@ -319,8 +321,8 @@ class Controller extends BaseController
                 }
             }
         }
-
-        $file->storeAs($folder, $name, "documents");
+       
+        $file->storeAs($folder, $name, "uploads");
 
         return [
             'filename' => $name,
@@ -333,19 +335,38 @@ class Controller extends BaseController
         $year = date('Y');
         $month = date('m');
         $day = date('d');
-
+        
         if ($location) {
             $location = $location . '/' . $year . '/' . $month . '/' . $day;
         } else {
             $location = $year . '/' . $month . '/' . $day;
         }
-
-        if (!is_dir(base_path() . $location)) {
-            mkdir(base_path() . $location, 0777, true);
+        
+        if (!is_dir(base_path() . '/uploads/' . $location)) {
+            mkdir(base_path() . '/uploads/' . $location, 0777, true);
         }
 
         return $location;
     }
+
+    // public function getPathToSaveFileProtectedFiles($location = null)
+    // {
+    //     $year = date('Y');
+    //     $month = date('m');
+    //     $day = date('d');
+
+    //     if ($location) {
+    //         $location = $location . '/' . $year . '/' . $month . '/' . $day;
+    //     } else {
+    //         $location = $year . '/' . $month . '/' . $day;
+    //     }
+
+    //     if (!is_dir(base_path(). '/' .  $location)) {
+    //         mkdir(base_path() . '/' . $location, 0777, true);
+    //     }
+
+    //     return $location;
+    // }
 
     public function deleteFile($file)
     {
@@ -570,7 +591,7 @@ class Controller extends BaseController
 
         if (!empty($contract_ids)) {
             foreach ($contract_ids as $value) {
-                $contract = CustomerContract::with('customer', 'property_type_details:type,id,estate_price,settings_and_excavation,infrastructural_fee', 'city:name,id', 'estate:name,id', 'location:name,id', 'building_type:id,name', 'plot_size:id,size', 'plotSize:id,size')->where('customer_id', $forms->customer_id)->where('id', $value)->where('company_id', $this->sessionDetails('company_id'))->select(['id', 'customer_id', 'primary_marketer_id', 'property_type_id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'subscribers', 'contract_type', 'property_type_id', 'form_approval_status','reason', 'created_at'])->first();
+                $contract = CustomerContract::with('customer', 'property_type_details:type,id,estate_price,settings_and_excavation,infrastructural_fee', 'city:name,id', 'estate:name,id', 'location:name,id', 'building_type:id,name', 'plot_size:id,size', 'plotSize:id,size')->where('customer_id', $forms->customer_id)->where('id', $value)->where('company_id', $this->sessionDetails('company_id'))->select(['id', 'customer_id', 'primary_marketer_id', 'property_type_id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'subscribers', 'contract_type', 'property_type_id', 'form_approval_status','transaction_date','reason', 'created_at'])->first();
                 
                 if(!empty($contract->form_payment_status) && $contract->form_payment_status == 'paid'){
                     if($modify && $modify == 'approve_contract'){
@@ -598,7 +619,8 @@ class Controller extends BaseController
                     'infrastructural_fee' => number_format((float)$contract->property_type_details->infrastructural_fee),
                     // 'net_property_fee' => number_format((float) $contract->net_property_fee),
                     // 'discount' => number_format((float) $contract->discount),
-                    'primary_marketer' => $contract->primary_marketer = $contract->primaryMarketer($contract),
+                    'transaction_date' => $contract->transaction_date,
+                    'primary_marketer' => $contract->primaryMarketer($contract),
                     'settings_and_escavation' => $contract->property_type_details->settings_and_excavation
                 ];
             }
@@ -623,13 +645,14 @@ class Controller extends BaseController
 
     public function generateFormPaymentReceipt($payment)
     {
-        $name = $this->generateReceiptNumber($payment);
+       
+        $name = $this->generateReceiptNumber($payment).'_'. $payment->id;
         $data['receipt_no'] = $name;
-        $pathToSave = $this->getPathToSaveFile('/receipts/' . $this->sessionDetails('company_slug')) . '/' . $name . '.pdf';
+        $pathToSave = $this->getPathToSaveFile('receipts/' . $this->sessionDetails('company_slug')) . '/' . $name . '.pdf';
 
         $pdf = PDF::loadView('receipts.template1', compact('payment', 'data'))->setPaper('a4', 'portrait');
 
-        file_put_contents(base_path() . $pathToSave, $pdf->output());
+        file_put_contents(base_path() . '/uploads/'. $pathToSave, $pdf->output());
 
         return [
             'receipt_no' => $name . '.pdf',

@@ -20,6 +20,7 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $guarded = [];
+    protected $append = ['additional_details', 'means_of_identification','next_of_kin'];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -45,6 +46,43 @@ class User extends Authenticatable
         return $this->hasOne(Staff::class);
     }
 
+    public function getAdditionalDetailsAttribute()
+    {
+        $additional_details = !empty($this->attributes['additional_details']) ? json_decode($this->attributes['additional_details'], true) : [];
+        return $additional_details;
+    }
+
+    public function getMeansOfIdentificationAttribute()
+    {
+
+        $means_of_identification = !empty($this->attributes['means_of_identification']) ? json_decode($this->attributes['means_of_identification'], true) : [];
+
+        $means_of_identification['occupation'] = isset($means_of_identification['occupation']) ? $means_of_identification['occupation'] : null;
+        $means_of_identification['place_of_work'] = isset($means_of_identification['place_of_work']) ? $means_of_identification['place_of_work'] : null;
+        $means_of_identification['id_card_type'] = isset($means_of_identification['id_card_type']) ? $means_of_identification['id_card_type'] : null;
+
+        $means_of_identification['passport_photo'] = isset($means_of_identification['passport_photo']) ? app('App\Http\Controllers\Controller')->encodeUploadedFile($means_of_identification['passport_photo']) : null;
+
+        $means_of_identification['id_card'] = isset($means_of_identification['id_card']) ? app('App\Http\Controllers\Controller')->encodeUploadedFile($means_of_identification['id_card']) : null;
+       
+        $means_of_identification['signature'] = isset($means_of_identification['signature']) ? app('App\Http\Controllers\Controller')->encodeUploadedFile($means_of_identification['signature']) : null;
+
+        // 'id_card' => isset($data['means_of_identification']['id_card']) ? $data['means_of_identification']['id_card'] : ($old_means_of_identification['id_card'] ?? ''),
+        // 'signature' => isset($data['means_of_identification']['signature']) ? $data['means_of_identification']['signature'] : ($old_means_of_identification['signature'] ?? ''),
+        // $form['passport_photo'] = !empty($means_of_identification) && isset($means_of_identification['passport_photo']) ?  url('/') . '/uploads/' . base64_encode($means_of_identification['passport_photo']) : "";
+        
+        
+        return $means_of_identification;
+    }
+
+    public function getNextOfKinAttribute()
+    {
+        $next_of_kin = !empty($this->attributes['next_of_kin']) ? json_decode($this->attributes['next_of_kin'], true) : [];
+        
+        return $next_of_kin;
+    }
+
+
     public function customer()
     {
         return $this->hasOne(Customer::class);
@@ -56,4 +94,5 @@ class User extends Authenticatable
             get: fn (string $value = null) => !empty($value) ? url('/') . '/uploads/' . base64_encode($value) : '',
         );
     }
+
 }

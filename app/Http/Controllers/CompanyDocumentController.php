@@ -59,7 +59,7 @@ class CompanyDocumentController extends Controller
         ];
 
         if (!empty($request->file)) {
-            $data['file'] = $this->uploadProtectedFile($request->file, $this->sessionDetails('company_slug'))['filepath'];
+            $data['file'] = $this->uploadProtectedFile($request->file, 'documents/'.$this->sessionDetails('company_slug'))['filepath'];
         }
         
         $document = CompanyDocument::create($data);

@@ -65,7 +65,7 @@ return [
 
         'documents' => [
             'driver' => 'local',
-            'root' => base_path('documents'),
+            'root' => base_path('uploads'),
             'visibility' => 'private',
             'throw' => true,
         ],

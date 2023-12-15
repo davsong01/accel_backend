@@ -22,6 +22,7 @@ class CustomerFormController extends Controller
      */
     public function index(Request $request, $id = null, $paginate = true)
     {
+        
         if (!empty($id)) {
             $forms = CustomerForm::with(['country:id,name', 'state:id,name', 'lga:id,name'])->where('id', $id)->where('company_id', $this->sessionDetails('company_id'))->select('surname', 'title', 'status', 'no_of_contract', 'first_name', 'middle_name', 'last_name', 'gender', 'created_at', 'id', 'marital_status', 'date_of_birth', 'country_id', 'state_id', 'lga_id', 'next_of_kin_information', 'means_of_identification', 'primary_marketer', 'contract_ids', 'other_details', 'customer_id')->first();
 
@@ -32,7 +33,7 @@ class CustomerFormController extends Controller
             
             return response()->json(['message' => 'Successfully retrieved', 'data' => $forms], 200);
         }
-
+       
         $forms = CustomerForm::where('company_id', $this->sessionDetails('company_id'))->where('type', $request->type)->select('surname', 'title', 'status', 'no_of_contract', 'first_name', 'middle_name', 'last_name', 'gender', 'created_at', 'id', 'means_of_identification', 'other_details');
 
         if (\Request::route()->getPrefix() == 'api/customer') {

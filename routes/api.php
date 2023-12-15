@@ -65,12 +65,15 @@ use App\Http\Controllers\TransactionTypeDefinitionController;
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('documents/{filename}', function ($filename) {
         $filename = base64_decode($filename);
-        $realpath = base_path() . '/documents' . '/' . $filename;
+        $realpath = base_path() . '/uploads' . '/' . $filename;
+        
         return response()->download($realpath);
     });
+    
     Route::get('generated-legal-documents/{filename}', function ($filename) {
         $filename = base64_decode($filename);
-        $realpath = base_path() . '/generated-legal-documents' . '/' . $filename;
+        $realpath = base_path() . '/uploads/generated-legal-documents' . '/' . $filename;
+        
         return response()->download($realpath);
     });
 });
