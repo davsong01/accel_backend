@@ -40,7 +40,7 @@ class CompanyDocumentController extends Controller
                 })
             ],
             'description' => 'sometimes',
-            'file' => 'required',
+            'file' => 'required|max:1024',
             'visible_to_staff' => 'required',
         ]);
 

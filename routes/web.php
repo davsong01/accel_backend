@@ -21,6 +21,10 @@ Route::get('/testemailtemplate', function(){
     return new App\Mail\OrderShipped($data);
 });
 
+Route::get('/testfile', function () {
+    
+});
+
 Route::get('/testreceipttemplate', function () {
     $data = [];
     $data['company_id'] = 1;
@@ -40,9 +44,8 @@ Route::get('login', function () {
 
 Route::get('general-uploads/{filename}', function ($filename) {
     $filename = base64_decode($filename);
-
-    $realpath = base_path() . '/' . config('app.upload_path') . '/' . $filename;
-
+    $realpath = base_path() . '/' . $filename;
+    
     try {
         return response()->download($realpath);
         //code...

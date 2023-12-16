@@ -323,8 +323,8 @@ class Controller extends BaseController
                 }
             }
         }
-
-        $file->storeAs($folder, $name, "uploads");
+        
+        $file->storeAs($folder, $name, config('app.upload_path'));
 
         return [
             'filename' => $name,

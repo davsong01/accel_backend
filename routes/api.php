@@ -94,12 +94,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
         }
     });
     
-    Route::get('generated-legal-documents/{filename}', function ($filename) {
-        $filename = base64_decode($filename);
-        $realpath = base_path() . '/uploads/generated-legal-documents' . '/' . $filename;
+    // Route::get('generated-legal-documents/{filename}', function ($filename) {
+    //     $filename = base64_decode($filename);
+    //     $realpath = base_path() . '/uploads/generated-legal-documents' . '/' . $filename;
         
-        return response()->download($realpath);
-    });
+    //     return response()->download($realpath);
+    // });
 });
 
 

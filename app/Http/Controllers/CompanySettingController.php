@@ -17,6 +17,7 @@ class CompanySettingController extends Controller
      */
     public function index()
     {
+       
         $companySetting = CompanySetting::where('company_id', $this->sessionDetails('company_id'))->first();
         
         if (!$companySetting) {
