@@ -20,8 +20,8 @@ class LegalDocumentController extends Controller
      */
     public function type(Request $request)
     {
-        $type = $request->input('type');
-        $types = LegalDocumentType::where('type', strtoupper($type))->get();
+        $params = $request->input();
+        $types = LegalDocumentType::where($params)->get();
         return response()->json(['message' => 'success', 'data' => $types], 200);
     }
 
