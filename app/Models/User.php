@@ -67,11 +67,6 @@ class User extends Authenticatable
        
         $means_of_identification['signature'] = isset($means_of_identification['signature']) ? app('App\Http\Controllers\Controller')->encodeUploadedFile($means_of_identification['signature']) : null;
 
-        // 'id_card' => isset($data['means_of_identification']['id_card']) ? $data['means_of_identification']['id_card'] : ($old_means_of_identification['id_card'] ?? ''),
-        // 'signature' => isset($data['means_of_identification']['signature']) ? $data['means_of_identification']['signature'] : ($old_means_of_identification['signature'] ?? ''),
-        // $form['passport_photo'] = !empty($means_of_identification) && isset($means_of_identification['passport_photo']) ?  url('/') . '/uploads/' . base64_encode($means_of_identification['passport_photo']) : "";
-        
-        
         return $means_of_identification;
     }
 
@@ -91,7 +86,7 @@ class User extends Authenticatable
     protected function avatar(): Attribute
     {
         return Attribute::make( 
-            get: fn (string $value = null) => !empty($value) ? url('/') . '/uploads/' . base64_encode($value) : '',
+            get: fn (string $value = null) => !empty($value) ? app('App\Http\Controllers\Controller')->encodeUploadedFile($value) : '',
         );
     }
 

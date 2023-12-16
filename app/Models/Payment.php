@@ -16,6 +16,7 @@ class Payment extends Model
     use HasFactory;
     protected $guarded = [];
     protected $table = 'payments';
+    protected $appends = ['receipt_location'];
 
     protected function createdAt(): Attribute
     {
@@ -54,6 +55,11 @@ class Payment extends Model
         return Attribute::make(
             get: fn (string $value) => number_format($value),
         );
+    }
+
+    public function getReceiptLocationAttribute()
+    {
+        return app('App\Http\Controllers\Controller')->encodeUploadedFile($this->attributes['receipt_location']);
     }
 
 }

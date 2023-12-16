@@ -65,9 +65,32 @@ use App\Http\Controllers\TransactionTypeDefinitionController;
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('documents/{filename}', function ($filename) {
         $filename = base64_decode($filename);
-        $realpath = base_path() . '/uploads' . '/' . $filename;
-        
-        return response()->download($realpath);
+        $realpath = base_path() . '/' . config('app.upload_path') . '/' . $filename;
+
+        try {
+            return response()->download($realpath);
+            //code...
+        } catch (\Throwable $th) {
+            return response()->json([
+                'error' => 'The file does not exist',
+                'data' => [],
+            ], 200);
+        }
+    });
+
+    Route::get('uploads/{filename}', function ($filename) {
+        $filename = base64_decode($filename);
+        $realpath = base_path() . '/' . config('app.upload_path') . '/' . $filename;
+
+        try {
+            return response()->download($realpath);
+            //code...
+        } catch (\Throwable $th) {
+            return response()->json([
+                'error' => 'The file does not exist',
+                'data' => [],
+            ], 200);
+        }
     });
     
     Route::get('generated-legal-documents/{filename}', function ($filename) {

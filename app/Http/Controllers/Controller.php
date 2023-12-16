@@ -44,7 +44,8 @@ class Controller extends BaseController
 
     public function deleteImage($image)
     {
-
+        // Decode file first
+        dd(reConstructUploadedFile($image));
         if (file_exists(public_path($image))) {
             unlink(public_path($image));
         }
@@ -262,10 +263,12 @@ class Controller extends BaseController
         return response()->json(['message' => 'Successful', 'data' => $id], 200);
     }
 
-    public function deleteUploadsFile($imagePath)
+    public function deleteUploadedFile($imagePath)
     {
-        if (file_exists(base_path() . '/' . $imagePath)) {
-            unlink(base_path() . '/' . $imagePath);
+        $file = getEncodedFileRealPath($imagePath)['filepath'];
+
+        if (file_exists($file)) {
+            unlink($file);
         }
 
         return;
@@ -280,7 +283,7 @@ class Controller extends BaseController
             $imageFile = Image::make($file);
             $imgWidth = $width ?? $imageFile->width();
             $imgHeight = $imgHeight ?? $imageFile->height();
-            
+
             if (!is_null($imgWidth) && !is_null($imgHeight)) {
                 if ($imgWidth < $imgHeight) {
                     $imageFile->resize($imgWidth, null, function ($constraint) {
@@ -292,11 +295,10 @@ class Controller extends BaseController
                     });
                 }
             }
-            
         }
 
-        $imageFile->save(base_path() . '/uploads/' . $folder . '/' . $name);
-       
+        $imageFile->save(base_path() . '/' . config('app.upload_path') . '/' . $folder . '/' . $name);
+
         return $folder . '/' . $name;
     }
 
@@ -304,7 +306,7 @@ class Controller extends BaseController
     {
         $folder = $this->getPathToSaveFile($location);
         $name = uniqid(11) . '.' . $file->getClientOriginalExtension();
-        
+
         if (substr($file->getMimeType(), 0, 5) == 'image') {
             $imageFile = Image::make($file);
             $imgWidth = $width ?? $imageFile->width();
@@ -321,7 +323,7 @@ class Controller extends BaseController
                 }
             }
         }
-       
+
         $file->storeAs($folder, $name, "uploads");
 
         return [
@@ -335,38 +337,19 @@ class Controller extends BaseController
         $year = date('Y');
         $month = date('m');
         $day = date('d');
-        
+
         if ($location) {
             $location = $location . '/' . $year . '/' . $month . '/' . $day;
         } else {
             $location = $year . '/' . $month . '/' . $day;
         }
-        
-        if (!is_dir(base_path() . '/uploads/' . $location)) {
-            mkdir(base_path() . '/uploads/' . $location, 0777, true);
+
+        if (!is_dir(base_path() . '/' . config('app.upload_path') . '/' . $this->sessionDetails('company_slug') . '/' . $location)) {
+            mkdir(base_path() . '/' . config('app.upload_path') . '/' . $this->sessionDetails('company_slug') . '/' . $location, 0777, true);
         }
 
-        return $location;
+        return $this->sessionDetails('company_slug') . '/' . $location;
     }
-
-    // public function getPathToSaveFileProtectedFiles($location = null)
-    // {
-    //     $year = date('Y');
-    //     $month = date('m');
-    //     $day = date('d');
-
-    //     if ($location) {
-    //         $location = $location . '/' . $year . '/' . $month . '/' . $day;
-    //     } else {
-    //         $location = $year . '/' . $month . '/' . $day;
-    //     }
-
-    //     if (!is_dir(base_path(). '/' .  $location)) {
-    //         mkdir(base_path() . '/' . $location, 0777, true);
-    //     }
-
-    //     return $location;
-    // }
 
     public function deleteFile($file)
     {
@@ -463,8 +446,8 @@ class Controller extends BaseController
         $job_information_max_percent = 15;
         $others_max_percent = 85;
 
-        $additional_details = !empty($user->additional_details) ? json_decode($user->additional_details, true) : [];
-        $nok_details = !empty($user->next_of_kin) ? json_decode(Auth::user()->next_of_kin, true) : [];
+        $additional_details = !empty($user->additional_details) ? $user->additional_details : [];
+        $nok_details = !empty($user->next_of_kin) ? Auth::user()->next_of_kin : [];
 
         $job_information = [
             'jobtype_id' => !empty($staff->jobtype_id) ? 1 : 0,
@@ -503,12 +486,18 @@ class Controller extends BaseController
 
         $others = !empty($others) ? array_sum($others) / count($others) * $others_max_percent : 0;
         $total = number_format($job_information + $others);
+
         return $total . '%';
     }
 
     public function encodeUploadedFile($file)
     {
-        return !empty($file) ? url('/') . '/uploads/' . base64_encode($file) : '';
+        return !empty($file) ? url('/') . '/api/uploads/' . base64_encode($file) : '';
+    }
+
+    public function encodeGeneralUploadedFile($file)
+    {
+        return !empty($file) ? url('/') . '/general-uploads/' . base64_encode($file) : '';
     }
 
     public function logEmail($data)
@@ -591,15 +580,15 @@ class Controller extends BaseController
 
         if (!empty($contract_ids)) {
             foreach ($contract_ids as $value) {
-                $contract = CustomerContract::with('customer', 'property_type_details:type,id,estate_price,settings_and_excavation,infrastructural_fee', 'city:name,id', 'estate:name,id', 'location:name,id', 'building_type:id,name', 'plot_size:id,size', 'plotSize:id,size')->where('customer_id', $forms->customer_id)->where('id', $value)->where('company_id', $this->sessionDetails('company_id'))->select(['id', 'customer_id', 'primary_marketer_id', 'property_type_id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'subscribers', 'contract_type', 'property_type_id', 'form_approval_status','transaction_date','reason', 'created_at'])->first();
-                
-                if(!empty($contract->form_payment_status) && $contract->form_payment_status == 'paid'){
-                    if($modify && $modify == 'approve_contract'){
+                $contract = CustomerContract::with('customer', 'property_type_details:type,id,estate_price,settings_and_excavation,infrastructural_fee', 'city:name,id', 'estate:name,id', 'location:name,id', 'building_type:id,name', 'plot_size:id,size', 'plotSize:id,size')->where('customer_id', $forms->customer_id)->where('id', $value)->where('company_id', $this->sessionDetails('company_id'))->select(['id', 'customer_id', 'primary_marketer_id', 'property_type_id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'subscribers', 'contract_type', 'property_type_id', 'form_approval_status', 'transaction_date', 'reason', 'created_at'])->first();
+
+                if (!empty($contract->form_payment_status) && $contract->form_payment_status == 'paid') {
+                    if ($modify && $modify == 'approve_contract') {
                         $this->approveCustomerContract($contract);
                     }
                 }
 
-                if($modify && $modify == 'decline_contract'){
+                if ($modify && $modify == 'decline_contract') {
                     $this->declineCustomerContract($contract, $reason);
                 }
 
@@ -629,7 +618,8 @@ class Controller extends BaseController
         return $contract_details;
     }
 
-    public function approveCustomerContract($contract){
+    public function approveCustomerContract($contract)
+    {
         $contract->update([
             'form_approval_status' => 'approved',
         ]);
@@ -645,14 +635,12 @@ class Controller extends BaseController
 
     public function generateFormPaymentReceipt($payment)
     {
-       
-        $name = $this->generateReceiptNumber($payment).'_'. $payment->id;
+        $name = $this->generateReceiptNumber($payment) . '_' . $payment->id;
         $data['receipt_no'] = $name;
-        $pathToSave = $this->getPathToSaveFile('receipts/' . $this->sessionDetails('company_slug')) . '/' . $name . '.pdf';
+        $pathToSave = $this->getPathToSaveFile('receipts') . '/' . $name . '.pdf';
 
         $pdf = PDF::loadView('receipts.template1', compact('payment', 'data'))->setPaper('a4', 'portrait');
-
-        file_put_contents(base_path() . '/uploads/'. $pathToSave, $pdf->output());
+        file_put_contents(base_path() . '/uploads/' . $pathToSave, $pdf->output());
 
         return [
             'receipt_no' => $name . '.pdf',

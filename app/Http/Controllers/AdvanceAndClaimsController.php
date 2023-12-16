@@ -57,10 +57,10 @@ class AdvanceAndClaimsController extends Controller
         foreach($aac as $l){
             if (!empty($l->staff_id)) {
                 $l->request_by = [
-                    'first_name' => $l->staff->user->first_name,
-                    'middle_name' => $l->staff->user->middle_name,
-                    'last_name' => $l->staff->user->last_name,
-                    'id' => $l->staff->id,
+                    'first_name' => $l->staff->user->first_name ?? '',
+                    'middle_name' => $l->staff->user-> middle_name ?? '',
+                    'last_name' => $l->staff->user-> last_name ?? '',
+                    'id' => $l->staff->id ?? '',
                 ];
             }
         }

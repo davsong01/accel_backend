@@ -14,7 +14,7 @@ class CompanyDocument extends Model
     protected function file(): Attribute
     {
         return Attribute::make(
-            get: fn (string $value) => url('/') . '/api/documents/' . base64_encode($value),
+            get: fn (string $value = null) => !empty($value) ? app('App\Http\Controllers\Controller')->encodeUploadedFile($value) : '',
         );
     }
 }

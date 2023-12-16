@@ -49,14 +49,14 @@ class LegalDocumentController extends Controller
             'property_type_id' => $request->property_type_id,
             'legal_document_type_id' => $request->legal_document_type_id,
             'estate_id' => $request->estate_id,
-            'company_id' => $this->sessionDetails('company_id'), // $request->company_id,
+            'company_id' => $this->sessionDetails('company_id'),
             'created_by' => Auth::user()->id,
-            'file_location' =>  $this->uploadProtectedFile($request->file, 'uploaded_legal_document_templates/'.$this->sessionDetails('company_slug'))['filepath']
+            'file_location' =>  $this->uploadProtectedFile($request->file, 'uploaded_legal_document_templates')['filepath']
         ];
-        
+
         $document = LegalDocumentTemplate::updateOrcreate([
-            'estate_id' => $data['estate_id'], 
-            'company_id' => $this->sessionDetails('company_id'), 
+            'estate_id' => $data['estate_id'],
+            'company_id' => $this->sessionDetails('company_id'),
             'legal_document_type_id' => $data['legal_document_type_id']
         ], $data);
 
@@ -72,7 +72,7 @@ class LegalDocumentController extends Controller
             'type' => $request->input('property_type'),
             'name' => $request->input('name')
         ])->first();
-        
+
         if ($legalDocumentType) {
             $legalDocumentTemplate = LegalDocumentTemplate::where('legal_document_type_id', $legalDocumentType->id)->first();
             $data = [
@@ -94,7 +94,7 @@ class LegalDocumentController extends Controller
             'customer_id' => ['required', 'exists:customers,id'],
             'document_template_id' => ['required', 'exists:legal_document_templates,id'],
         ]);
-        
+
         if ($validator->fails()) {
             return response()->json([
                 'error' => $validator->messages()->first(),
@@ -103,7 +103,7 @@ class LegalDocumentController extends Controller
         }
 
         $legalDocumentTemplate = LegalDocumentTemplate::find($request->document_template_id);
-        
+
         $documentGen = $this->documentGenerator($request->customer_id, $legalDocumentTemplate);
 
         $generatedLegalDocument = GeneratedLegalDocument::create([
@@ -159,16 +159,16 @@ class LegalDocumentController extends Controller
 
     private function documentGenerator($customer_id, $legalDocumentTemplate)
     {
-        $file = reConstructUploadedProtectedDocument($legalDocumentTemplate->file_location);
-       
+        $file = getEncodedFileRealPath($legalDocumentTemplate->file_location);
+
         $options = $this->setOptions();
         $values = $this->getOptions($options, $customer_id, $legalDocumentTemplate);
 
-        $filepath = $this->getPathToSaveFile('generated-legal-documents/' . $this->sessionDetails('company_slug'));
+        $filepath = $this->getPathToSaveFile('generated-legal-documents');
         $filename =  uniqid(11) . '.pdf';
         $destination = base_path($filepath . '/' . $filename);
 
-        GeneratedDocumentService::handler(base_path($file['filepath']), $values, $destination);
+        GeneratedDocumentService::handler($file['filepath'], $values, $destination);
 
         return [
             'filepath' => str_replace('generated-legal-documents/', '', $filepath) . '/',

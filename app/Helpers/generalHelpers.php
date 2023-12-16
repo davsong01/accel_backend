@@ -6,7 +6,7 @@ use App\Models\StaffRole;
 use App\Models\LegalDocumentType;
 use App\Models\LegalDocumentTemplate;
 
-define('SAMPLE_LEGAL_DOCUMENTS',[
+define('SAMPLE_LEGAL_DOCUMENTS', [
     1 => 'land_offer_letter_sample.docx',
     2 => 'building_offer_letter_sample.docx',
     3 => 'land_provisional_letter_sample.docx',
@@ -21,44 +21,43 @@ if (!function_exists("getPackageAccess")) {
     function getPackageAccess()
     {
         $package_ids = Session::get('company_package_ids');
-        if(!$package_ids){
+        if (!$package_ids) {
             return [];
         }
 
         $package_ids = explode(',', $package_ids);
         $access = Package::whereIn('id', $package_ids)->pluck('access')->toArray();
-        if(!$access){
+        if (!$access) {
             return [];
         }
 
         $allAccess = [];
 
-        foreach($access as $acc){
-            $all = explode(',',$acc);
+        foreach ($access as $acc) {
+            $all = explode(',', $acc);
 
-            foreach($all as $key=>$value){
-                $allAccess [] = $value;
+            foreach ($all as $key => $value) {
+                $allAccess[] = $value;
             }
         }
         $allAccess = array_unique($allAccess);
-        
+
         return $allAccess;
     }
-
 }
 
 if (!function_exists("getRoleAccess")) {
-    function getRoleAccess($individual_access=null)
+    function getRoleAccess($individual_access = null)
     {
         $roleAccess = StaffRole::whereIn('id', Session::get('staff_roles'))->pluck('role_id');
         $access = Role::whereIn('id', $roleAccess)->pluck('access')->toArray();
 
         // we have to make sure these access exist in company package, else yank it off
         $packageAccess = getPackageAccess();
-       
+
         $allowed = [];
-       
-        if($individual_access){
+
+        if ($individual_access) {
             // merge with access
         }
 
@@ -70,34 +69,59 @@ if (!function_exists("getRoleAccess")) {
             foreach ($all as $key => $value) {
                 if (!in_array($value, $packageAccess)) {
                     unset($all[$key]);
-                }else{
+                } else {
                     $allAccess[] = $value;
                 }
             }
         }
-        
-        $allAccess = array_unique($allAccess);
-        
-        return $allAccess;
 
+        $allAccess = array_unique($allAccess);
+
+        return $allAccess;
     }
 
-    if (!function_exists("reConstructUploadedProtectedDocument")) {
-        function reConstructUploadedProtectedDocument($file){
+    // if (!function_exists("reConstructUploadedProtectedDocument")) {
+    //     function reConstructUploadedProtectedDocument($file){
+    //         $res = [];
+
+    //         $file = explode('/', $file);
+
+    //         if(!empty($file)){
+    //             $file = array_slice($file, -1, 1);
+
+    //             $full = base64_decode($file[0]);
+
+    //             $name = explode('/', $full);
+    //             $name = array_slice($name, -1, 1);
+
+    //             $res = [
+    //                 'filename' => $name[0],
+    //                 'filepath' => base_path() . '/' . config('app.upload_path') . '/' . $full,
+    //             ];
+    //         }
+
+    //         return $res;
+    //     }
+    // }
+
+    if (!function_exists("getEncodedFileRealPath")) {
+        function getEncodedFileRealPath($file)
+        {
             $res = [];
-            
+            // $realpath = base_path() . '/' . config('app.upload_path') . '/' . $filename;
+
             $file = explode('/', $file);
-            if(!empty($file)){
+            if (!empty($file)) {
                 $file = array_slice($file, -1, 1);
-                
+
                 $full = base64_decode($file[0]);
-               
+
                 $name = explode('/', $full);
                 $name = array_slice($name, -1, 1);
-                
+
                 $res = [
                     'filename' => $name[0],
-                    'filepath' => 'documents/'.$full,
+                    'filepath' => base_path() . '/' . config('app.upload_path') . '/' . $full,
                 ];
             }
 

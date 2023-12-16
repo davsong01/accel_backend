@@ -49,9 +49,6 @@ class SelfServiceController extends Controller
             ->take(10)
             ->get();
 
-        $additional_details = !empty(Auth::user()->additional_details) ? json_decode(Auth::user()->additional_details, true) : [];
-        $nok_details = !empty(Auth::user()->next_of_kin) ? json_decode(Auth::user()->next_of_kin, true) : [];
-
         $profile_completenes = $this->profileCompletenes();
 
         // $payments = Payment::where('staff_id', Auth::user()->staff->id)->get();
@@ -240,8 +237,8 @@ class SelfServiceController extends Controller
             $check = in_array($extension, $allowedfileExtension);
             
             if ($check) {
-                $save = $this->uploadProtectedFile($file, 'documents/'.$this->sessionDetails('company_slug'));
-               
+                $save = $this->uploadProtectedFile($file, 'documents');
+                
                 StaffUploadedDocument::create([
                     'staff_id' => $staff_id,
                     'staff_document_id' => $setting->id,
@@ -268,10 +265,9 @@ class SelfServiceController extends Controller
             $document = StaffUploadedDocument::where(['id' => $id, 'company_id'=> $this->sessionDetails('company_id')])->first();
         }
         
-        if($document){
-            $file = reConstructUploadedProtectedDocument($document->file);
-            $this->deleteUploadsFile($file['filepath']);
-           
+        if($document){            
+            $this->deleteUploadedFile($document->file);
+            
             $document->delete();
             return response()->json(['message' => 'Delete succesful', 'data' => []], 200);
         }else{
