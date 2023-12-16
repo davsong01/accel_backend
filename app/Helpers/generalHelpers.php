@@ -5,6 +5,18 @@ use App\Models\Package;
 use App\Models\StaffRole;
 use App\Models\LegalDocumentType;
 use App\Models\LegalDocumentTemplate;
+
+define('SAMPLE_LEGAL_DOCUMENTS',[
+    1 => 'land_offer_letter_sample.docx',
+    2 => 'building_offer_letter_sample.docx',
+    3 => 'land_provisional_letter_sample.docx',
+    4 => 'building_provisional_letter_sample.docx',
+    5 => 'land_allocation_letter_sample.docx',
+    6 => 'building_allocation_letter_sample.docx',
+    7 => 'land_change_of_ownership_sample.docx',
+    8 => 'building_change_of_ownership_sample.docx',
+]);
+
 if (!function_exists("getPackageAccess")) {
     function getPackageAccess()
     {
@@ -99,24 +111,13 @@ if (!function_exists("getRoleAccess")) {
             $legal_documents = LegalDocumentType::all();
             $estate_legal_documents = $estate->LegalDocumentTemplates()->pluck('legal_document_type_id');
 
-            $samples = [
-                1 => 'land_offer_letter_sample.docx',
-                2 => 'building_offer_letter_sample.docx',
-                3 => 'land_provisional_letter_sample.docx',
-                4 => 'building_provisional_letter_sample.docx',
-                5 => 'land_allocation_letter_sample.docx',
-                6 => 'building_allocation_letter_sample.docx',
-                7 => 'land_change_of_ownership_sample.docx',
-                8 => 'building_change_of_ownership_sample.docx',
-            ];
-
             foreach ($legal_documents as $document) {
                 LegalDocumentTemplate::updateOrCreate(
                     ['estate_id' => $estate->id, 'company_id' => $estate->company_id, 'legal_document_type_id' => $document->id],
                     [
                         'created_by' => auth()->user()->staff->id,
                         'property_type_id' => $document->property_type_id,
-                        'file_location' => 'legal_documents_samples/' . $samples[$document->id],
+                        'file_location' => 'legal_documents_samples/' . SAMPLE_LEGAL_DOCUMENTS[$document->id],
                     ]
                 );
             }
