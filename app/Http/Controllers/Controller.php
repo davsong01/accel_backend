@@ -299,7 +299,7 @@ class Controller extends BaseController
 
         $imageFile->save(base_path() . '/' . config('app.upload_path') . '/' . $folder . '/' . $name);
 
-        return $folder . '/' . $name;
+        return config('app.upload_path') . '/' . $folder . '/' . $name;
     }
 
     public function uploadProtectedFile($file, $location = null, $width = null, $height = null)
@@ -328,7 +328,8 @@ class Controller extends BaseController
 
         return [
             'filename' => $name,
-            'filepath' => $folder . '/' . $name
+            'filepath' => config('app.upload_path') . '/' . $folder . '/' . $name
+            // 'filepath' => $folder . '/' . $name
         ];
     }
 
@@ -492,6 +493,7 @@ class Controller extends BaseController
 
     public function encodeUploadedFile($file)
     {
+       
         return !empty($file) ? url('/') . '/api/uploads/' . base64_encode($file) : '';
     }
 
@@ -638,14 +640,14 @@ class Controller extends BaseController
         $name = $this->generateReceiptNumber($payment) . '_' . $payment->id;
         $data['receipt_no'] = $name;
         $pathToSave = $this->getPathToSaveFile('receipts') . '/' . $name . '.pdf';
-
+        
         $pdf = PDF::loadView('receipts.template1', compact('payment', 'data'))->setPaper('a4', 'portrait');
-        file_put_contents(base_path() . '/uploads/' . $pathToSave, $pdf->output());
-
+        file_put_contents(base_path() . '/' . config('app.upload_path') . '/' . $pathToSave, $pdf->output());
+        
         return [
             'receipt_no' => $name . '.pdf',
             'filename' => $name . '.pdf',
-            'filepath' => $pathToSave
+            'filepath' => config('app.upload_path').'/'.$pathToSave
         ];
     }
 
