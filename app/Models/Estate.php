@@ -51,4 +51,12 @@ class Estate extends Model
         return LegalDocumentTemplate::where('estate_id', $this->id);
     }
 
+    public function documentTemplates(){
+        return $this->hasMany(LegalDocumentTemplate::class);
+    }
+
+    public function company(){
+        return $this->belongsTo(Company::class);
+    }
+
 }
