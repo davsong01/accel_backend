@@ -49,9 +49,6 @@ class SelfServiceController extends Controller
             ->take(10)
             ->get();
 
-        $additional_details = !empty(Auth::user()->additional_details) ? json_decode(Auth::user()->additional_details, true) : [];
-        $nok_details = !empty(Auth::user()->next_of_kin) ? json_decode(Auth::user()->next_of_kin, true) : [];
-
         $profile_completenes = $this->profileCompletenes();
 
         // $payments = Payment::where('staff_id', Auth::user()->staff->id)->get();

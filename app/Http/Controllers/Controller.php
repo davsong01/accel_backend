@@ -463,9 +463,9 @@ class Controller extends BaseController
         $job_information_max_percent = 15;
         $others_max_percent = 85;
 
-        $additional_details = !empty($user->additional_details) ? json_decode($user->additional_details, true) : [];
-        $nok_details = !empty($user->next_of_kin) ? json_decode(Auth::user()->next_of_kin, true) : [];
-
+        $additional_details = !empty($user->additional_details) ? $user->additional_details : [];
+        $nok_details = !empty($user->next_of_kin) ? Auth::user()->next_of_kin : [];
+        
         $job_information = [
             'jobtype_id' => !empty($staff->jobtype_id) ? 1 : 0,
             'date_of_employment' => !empty($staff->date_of_employment) ? 1 : 0,
@@ -503,6 +503,7 @@ class Controller extends BaseController
 
         $others = !empty($others) ? array_sum($others) / count($others) * $others_max_percent : 0;
         $total = number_format($job_information + $others);
+        
         return $total . '%';
     }
 
