@@ -303,6 +303,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
 
         Route::controller(LegalDocumentController::class)->prefix('legal-documents')->group(function () {
             Route::get('type/', 'type');
+            Route::get('template/preview', 'preview');
             Route::post('template', 'template');
             Route::post('generate', 'generate');
             Route::patch('{document}/regenerate', 'regenerate');
