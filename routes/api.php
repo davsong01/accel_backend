@@ -66,6 +66,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('documents/{filename}', function ($filename) {
         $filename = base64_decode($filename);
         $realpath = base_path() . '/uploads' . '/' . $filename;
+
+        return response()->download($realpath);
+    });
+    
+    
+    Route::get('documents/{filename}', function ($filename) {
+        $filename = base64_decode($filename);
+        $realpath = base_path() . '/uploads' . '/' . $filename;
         
         return response()->download($realpath);
     });

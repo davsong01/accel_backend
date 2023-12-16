@@ -342,8 +342,8 @@ class Controller extends BaseController
             $location = $year . '/' . $month . '/' . $day;
         }
         
-        if (!is_dir(base_path() . '/uploads/' . $location)) {
-            mkdir(base_path() . '/uploads/' . $location, 0777, true);
+        if (!is_dir(base_path() . '/uploads/' .$this->sessionDetails('company_slug').'/'. $location)) {
+            mkdir(base_path() . '/uploads/' .$this->sessionDetails('company_slug').'/'. $location, 0777, true);
         }
 
         return $location;
