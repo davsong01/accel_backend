@@ -15,4 +15,18 @@ class CompanySetting extends Model
     public function currencyData(){
         return $this->belongsTo(Currency::class, 'currency');
     }
+
+    protected function companyLogo(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string $value = null) => !empty($value) ? app('App\Http\Controllers\Controller')->encodeGeneralUploadedFile($value) : '',
+        );
+    }
+
+    protected function companySecondaryLogo(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string $value = null) => !empty($value) ? app('App\Http\Controllers\Controller')->encodeGeneralUploadedFile($value) : '',
+        );
+    }
 }

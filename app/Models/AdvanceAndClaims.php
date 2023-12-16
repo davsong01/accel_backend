@@ -30,11 +30,11 @@ class AdvanceAndClaims extends Model
             if (!empty($value)) {
                 $value = json_decode($value, true);
                 foreach ($value as $p) {
-                    $proofs[] = url('/').'/uploads/' . base64_encode($p);
+                    $proofs[] = app('App\Http\Controllers\Controller')->encodeUploadedFile($p);
                 }
             }
         }
-
+        
         return $proofs;
     }
 

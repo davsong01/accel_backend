@@ -24,10 +24,9 @@ class CompanySettingController extends Controller
                 'company_id' =>  $this->sessionDetails('company_id'),
             ]);
         }
-
+       
         $companySetting->currency = $companySetting->currencyData;
-        $companySetting->company_logo = !empty($companySetting->company_logo) ? url('/') . '/uploads/' . base64_encode($companySetting->company_logo) : '';
-        $companySetting->company_secondary_logo = !empty($companySetting->company_secondary_logo) ? url('/') . '/uploads/' . base64_encode($companySetting->company_secondary_logo) : '';
+        
 
         return response()->json(['message' => 'success', 'data' => $companySetting], 200);
     }
@@ -53,8 +52,8 @@ class CompanySettingController extends Controller
             ]);
         }
 
-        $companySetting->company_logo = !empty($companySetting->company_logo) ? url('/') . '/uploads/' . base64_encode($companySetting->company_logo) : '';
-        $companySetting->company_secondary_logo = !empty($companySetting->company_secondary_logo) ? url('/') . '/uploads/' . base64_encode($companySetting->company_secondary_logo) : '';
+        $companySetting->company_logo = !empty($companySetting->company_logo) ? url('/') . '/'. config('app.upload_path').'/' . base64_encode($companySetting->company_logo) : '';
+        $companySetting->company_secondary_logo = !empty($companySetting->company_secondary_logo) ? url('/') . '/'. config('app.upload_path').'/' . base64_encode($companySetting->company_secondary_logo) : '';
 
         return response()->json(['message' => 'success', 'data' => $companySetting], 200);
     }
@@ -146,7 +145,7 @@ class CompanySettingController extends Controller
         }
 
         if ($request->has('company_secondary_logo') && !is_null($request->company_secondary_logo)) {
-            $data['company_secondary_logo'] = $this->uploadFile($request->company_secondary_logo, 'images/brands/logos');
+            $data['company_secondary_logo'] = $this->uploadFile($request->company_secondary_logo, 'brands/logos');
         }
 
         if (!$companySetting) {

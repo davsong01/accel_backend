@@ -34,10 +34,24 @@ Route::get('/', function () {
     // return view('welcome');
 });
 
-Route::get('uploads/{filename}', function ($filename) {
+Route::get('login', function () {
+    return response()->json(['error' => 'Unauthenticated.'], 401);
+})->name('login');
+
+Route::get('general-uploads/{filename}', function ($filename) {
     $filename = base64_decode($filename);
-    $realpath = base_path() . '/uploads' . '/' . $filename;
-    return response()->download($realpath);
+
+    $realpath = base_path() . '/' . config('app.upload_path') . '/' . $filename;
+
+    try {
+        return response()->download($realpath);
+        //code...
+    } catch (\Throwable $th) {
+        return response()->json([
+            'error' => 'The file does not exist',
+            'data' => [],
+        ], 200);
+    }
 });
 
 

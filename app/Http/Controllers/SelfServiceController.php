@@ -237,8 +237,8 @@ class SelfServiceController extends Controller
             $check = in_array($extension, $allowedfileExtension);
             
             if ($check) {
-                $save = $this->uploadProtectedFile($file, 'documents/'.$this->sessionDetails('company_slug'));
-               
+                $save = $this->uploadProtectedFile($file, 'documents');
+                
                 StaffUploadedDocument::create([
                     'staff_id' => $staff_id,
                     'staff_document_id' => $setting->id,
@@ -265,10 +265,9 @@ class SelfServiceController extends Controller
             $document = StaffUploadedDocument::where(['id' => $id, 'company_id'=> $this->sessionDetails('company_id')])->first();
         }
         
-        if($document){
-            $file = reConstructUploadedProtectedDocument($document->file);
-            $this->deleteUploadsFile($file['filepath']);
-           
+        if($document){            
+            $this->deleteUploadedFile($document->file);
+            
             $document->delete();
             return response()->json(['message' => 'Delete succesful', 'data' => []], 200);
         }else{

@@ -58,14 +58,14 @@ return [
 
         'uploads' => [
             'driver' => 'local',
-            'root' => base_path('uploads'),
+            'root' => base_path(config('app.upload_path')),
             'visibility' => 'private',
             'throw' => true,
         ],
 
         'documents' => [
             'driver' => 'local',
-            'root' => base_path('uploads'),
+            'root' => base_path(config('app.upload_path')),
             'visibility' => 'private',
             'throw' => true,
         ],

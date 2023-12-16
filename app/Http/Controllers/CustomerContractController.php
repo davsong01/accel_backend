@@ -327,7 +327,6 @@ class CustomerContractController extends Controller
 
     public function makeFormPayment(Request $request)
     {
-        // $request['contract_ids'] = [31,30,29,26];
         $validator = Validator::make($request->all(), [
             'contract_ids' => 'required',
             'account_id' => 'required|exists:chart_of_accounts,id,company_id,' . $this->sessionDetails('company_id'),
@@ -360,18 +359,18 @@ class CustomerContractController extends Controller
         });
 
         $form_payment = $this->generateFormPayment($ids, $request->customer_id);
-
+       
         if ($request->amount != $form_payment['form_payment']) {
             return response()->json([
                 'error' => 'Amount does not correspond with selected contract. Amount should be exactly ' . $form_payment['form_payment'],
                 'data' => null,
             ], 412);
         }
-
+        
         if (!empty($request->payment_slip)) {
             $filename = $this->uploadFile($request->payment_slip, 'payments');
         }
-
+        
         $customer = Customer::where('id', $request->customer_id)->first();
 
         if ($form_payment) {
@@ -393,7 +392,7 @@ class CustomerContractController extends Controller
                 ]);
 
                 $receipt = $this->generateFormPaymentReceipt($payment);
-               
+                
                 $payment->update(['receipt_location' => $receipt['filepath'] ?? null]);
                 $receipts[] = $receipt['filepath'] ?? null;
 
@@ -573,7 +572,7 @@ class CustomerContractController extends Controller
     public function formPaymentHistory($customer_id)
     {
         $histories = Payment::with('estate:id,name')->where(['customer_id' => $customer_id, 'company_id' => $this->sessionDetails('company_id'), 'purpose' => 'form_payment'])->orderBy('created_at', 'DESC')->get();
-
+        
         $data = [];
 
         foreach ($histories as $history) {
@@ -588,7 +587,7 @@ class CustomerContractController extends Controller
                     'building_type' => $cont->building_type_details,
                 ];
             }
-
+            
             $data[] = [
                 'id' => $history->id,
                 'estate_id' => $history->estate_id,
@@ -598,6 +597,7 @@ class CustomerContractController extends Controller
                 'estate_id' => $history->estate_id,
                 'estate_name' => $history->estate->name,
                 'payment_slip' => $history->payment_slip,
+                'receipt_location' => $history->receipt_location,
                 'purpose' => ucwords(str_replace('_', ' ', $history->purpose)),
                 'contracts' => $contracts
             ];
