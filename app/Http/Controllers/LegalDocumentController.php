@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
+use App\Models\CustomerContract;
 use App\Models\GeneratedLegalDocument;
 use App\Models\LegalDocumentTemplate;
 use App\Models\LegalDocumentType;
@@ -35,7 +36,6 @@ class LegalDocumentController extends Controller
             // 'company_id' => ['required', 'exists:companies,id'],
             'file' => ['required', 'mimes:docx,doc'],
             'legal_document_type_id' => ['required', 'exists:legal_document_types,id'],
-            'property_type_id' => ['required', 'exists:property_types,id'],
         ]);
 
         if ($validator->fails()) {
@@ -46,9 +46,7 @@ class LegalDocumentController extends Controller
         }
 
         $data = [
-            'property_type_id' => $request->property_type_id,
-            'legal_document_type_id' => $request->legal_document_type_id,
-            'estate_id' => $request->estate_id,
+            ...$validator->validated(),
             'company_id' => $this->sessionDetails('company_id'),
             'created_by' => Auth::user()->id,
             'file_location' =>  $this->uploadProtectedFile($request->file, 'uploaded_legal_document_templates')['filepath']
@@ -78,21 +76,18 @@ class LegalDocumentController extends Controller
      */
     public function generated(Request $request): JsonResponse
     {
-        $legalDocumentType = LegalDocumentType::where([
-            'type' => $request->input('property_type'),
-            'name' => $request->input('name')
-        ])->first();
+        $params = $request->except('legal_document_template_id');
+        $legalDocumentTemplate = LegalDocumentTemplate::where($params)->where('id', $request->input('legal_document_template_id'))->firstOrFail();
 
-        if ($legalDocumentType) {
-            $legalDocumentTemplate = LegalDocumentTemplate::where('legal_document_type_id', $legalDocumentType->id)->first();
-            $data = [
-                'template' => $legalDocumentTemplate,
-                'customers' => Customer::with(['user', 'generatedLegalDocuments'])->paginate(20)
-            ];
-            return response()->json(['message' => 'success', 'data' => $data], 200);
-        }
-
-        return response()->json(['message' => 'success', 'data' => null], 200);
+        $data = null;
+        // if($legalDocumentTemplate->legalDocumentType->name === 'OFFER_LETTER'){
+            $data =  CustomerContract::with(['customer.user'])->where([
+                'estate_id' => $request->input('estate_id'),
+                // 'status' => 'APPROVED',
+                'property_type' =>  strtolower($legalDocumentTemplate->legalDocumentType->type)
+            ])->paginate(20);
+        // }
+        return response()->json(['message' => 'success', 'data' => $data], 200);
     }
 
     /**
@@ -102,7 +97,7 @@ class LegalDocumentController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'customer_id' => ['required', 'exists:customers,id'],
-            'document_template_id' => ['required', 'exists:legal_document_templates,id'],
+            'legal_document_template_id' => ['required', 'exists:legal_document_templates,id'],
         ]);
 
         if ($validator->fails()) {
@@ -112,13 +107,13 @@ class LegalDocumentController extends Controller
             ], 412);
         }
 
-        $legalDocumentTemplate = LegalDocumentTemplate::find($request->document_template_id);
+        $legalDocumentTemplate = LegalDocumentTemplate::find($request->legal_document_template_id);
 
         $documentGen = $this->documentGenerator($request->customer_id, $legalDocumentTemplate);
 
         $generatedLegalDocument = GeneratedLegalDocument::create([
             'customer_id' => $request->customer_id,
-            'document_template_id' => $request->document_template_id,
+            'legal_document_template_id' => $request->legal_document_template_id,
             'file_location' => $documentGen['filepath'] . $documentGen['filename'],
             'estate_id' => $legalDocumentTemplate->estate_id,
             'company_id' => $this->sessionDetails('company_id'),
