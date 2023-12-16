@@ -48,9 +48,9 @@ class LegalDocumentTemplate extends Model
     /**
      * Get the legal document type for the legal document template.
      */
-    public function legalDocumentType(): HasOne
+    public function legalDocumentType(): BelongsTo
     {
-        return $this->hasOne(LegalDocumentType::class);
+        return $this->belongsTo(LegalDocumentType::class);
     }
 
     /**
