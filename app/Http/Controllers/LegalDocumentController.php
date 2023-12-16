@@ -64,6 +64,16 @@ class LegalDocumentController extends Controller
     }
 
     /**
+     * preview a document
+     */
+    public function preview(Request $request): JsonResponse
+    {
+        $params = $request->input();
+        $types = LegalDocumentTemplate::where($params)->first();
+        return response()->json(['message' => 'success', 'data' => $types], 200);
+    }
+
+    /**
      * Display a listing of the resource.
      */
     public function generated(Request $request): JsonResponse
