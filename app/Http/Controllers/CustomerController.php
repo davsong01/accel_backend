@@ -294,7 +294,8 @@ class CustomerController extends Controller
         }
 
         $data = $validator->valid();
-        $data['order_of_appearance'] = json_encode($data['order_of_appearance']);
+        $data['order_of_appearance'] = isset($data['order_of_appearance']) ? json_encode($data['order_of_appearance']) : null;
+
         $data['company_id'] = $this->sessionDetails('company_id');
         
         CustomerIdentificationSetting::updateOrCreate(['company_id' => $data['company_id']], $data);
@@ -308,6 +309,7 @@ class CustomerController extends Controller
         $old_next_of_kin = !empty($user->next_of_kin) ? $user->next_of_kin : [];
 
         $additional_details = json_encode([
+            'title' => !empty($data['title']) ? $data['title'] : ($old_additional_details['title'] ?? ''),
             'alternate_number' => !empty($data['alternate_number']) ? $data['alternate_number']: ($old_additional_details['alternate_number'] ?? ''),
             'alternate_email' => !empty($data['alternate_email']) ? $data['alternate_email'] : ($old_additional_details['alternate_email'] ?? ''),
             'state' => !empty($data['state_id']) ? $data['state_id'] : ($old_additional_details['state'] ?? ''),
@@ -316,7 +318,6 @@ class CustomerController extends Controller
             'nationality' => !empty($data['country_id']) ? $data['country_id'] : ($old_additional_details['nationality'] ?? ''),
             'lga' => !empty($data['lga_id']) ? $data['lga_id'] : ($old_additional_details['lga'] ?? ''),
             'office_address' => isset($data['contact_details']['office_address']) ? $data['contact_details']['office_address'] : ($old_additional_details['office_address'] ?? ''),
-
         ]);
 
         $means_of_identification = json_encode([

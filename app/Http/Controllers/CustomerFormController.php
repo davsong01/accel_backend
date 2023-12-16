@@ -330,6 +330,7 @@ class CustomerFormController extends Controller
         }
 
         $data['date_of_birth'] = Carbon::parse($request->date_of_birth);
+       
         // Update user
         $customer = Customer::where('id', $data['customer_id'])->first();
         $user = $customer->user;

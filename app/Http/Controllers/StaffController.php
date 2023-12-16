@@ -512,7 +512,7 @@ class StaffController extends Controller
 
         $data = $validator->valid();
         
-        $data['order_of_appearance'] = json_encode($data['order_of_appearance']);
+        $data['order_of_appearance'] = isset($data['order_of_appearance']) ? json_encode($data['order_of_appearance']) : null;
         $data['company_id'] = $this->sessionDetails('company_id');
         
         StaffIdentificationSetting::updateOrCreate(['company_id' => $data['company_id']], $data);
