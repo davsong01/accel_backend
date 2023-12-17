@@ -13,13 +13,14 @@ class GeneratedLegalDocument extends Model
     use HasFactory;
 
     protected $fillable = [ 'estate_id', 'customer_id', 'regenerate_count', 'file_location', 'company_id', 'legal_document_template_id'];
+    protected $append = ['file_location'];
     
 
-    protected function fileLocation(): Attribute
+    public function getFileLocationAttribute()
     {
-        return Attribute::make(
-            get: fn (string $value) => url('/') . '/api/generated-legal-documents/' . base64_encode($value),
-        );
+        $file_location = !empty($this->attributes['file_location']) ? app('App\Http\Controllers\Controller')->encodeUploadedFile($this->attributes['file_location'])
+        : '';
+        return $file_location;
     }
 
     /**

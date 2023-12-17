@@ -121,7 +121,7 @@ if (!function_exists("getRoleAccess")) {
 
                 $res = [
                     'filename' => $name[0],
-                    'filepath' => base_path() . '/' . config('app.upload_path') . '/' . $full,
+                    'filepath' => base_path() . '/' . $full,
                 ];
             }
 

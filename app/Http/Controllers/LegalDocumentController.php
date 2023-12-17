@@ -169,14 +169,14 @@ class LegalDocumentController extends Controller
         $options = $this->setOptions();
         $values = $this->getOptions($options, $customer_id, $legalDocumentTemplate);
 
-        $filepath = $this->getPathToSaveFile('generated-legal-documents');
+        $filepath = config('app.upload_path') . '/' . $this->getPathToSaveFile('generated-legal-documents') . '/';
         $filename =  uniqid(11) . '.pdf';
-        $destination = base_path(config('app.upload_path') . '/' . $filepath . '/' . $filename );
+        $destination = base_path( $filepath . '/' . $filename );
 
         GeneratedDocumentService::handler($file['filepath'], $values, $destination);
 
         return [
-            'filepath' => str_replace('generated-legal-documents/', '', $filepath) . '/',
+            'filepath' => $filepath,
             'filename' => $filename,
         ];
     }
