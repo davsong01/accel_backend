@@ -116,7 +116,7 @@ class MenuController extends Controller
     public function linkGenerator()
     {
         $links = [];
-
+        
         // Get permissions from staff roles
         if (Session::has('staff_id')) {
             $access = getRoleAccess();
