@@ -27,7 +27,7 @@ class OtherChecksMiddleware
         }
         // Check if user has access to resource
         $name = Route::currentRouteName();
-
+        
         if (isset($name)) {
             $permCheck = permissionsCheck($name);
             

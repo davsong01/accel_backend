@@ -107,6 +107,7 @@ Route::get('domain-details/{slug}', [CompanySettingController::class, 'domainDet
 
 Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
     Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/get-permission-to-resource', [MenuController::class, 'getPermissionToResource'])->middleware(['auth:sanctum', 'company_check']);
 
     Route::middleware(['auth:sanctum', 'company_check', 'user_roles', 'otherchecks'])->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
@@ -115,7 +116,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('/single-menu-generator/{parent_id}', [MenuController::class, 'singleLinkGenerator'])->name('single.linkgenerator');
 
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
+        
         // Staff Module Routes
         // Route::post('filter-customers', [CustomerController::class, 'index']);
         Route::resource('customers', CustomerController::class);

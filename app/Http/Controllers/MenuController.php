@@ -33,40 +33,40 @@ class MenuController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request, $status = null)
-    {
-        $individual_permissions = Session::get('individual_permissions');
+    // public function index(Request $request, $status = null)
+    // {
+    //     $individual_permissions = Session::get('individual_permissions');
 
-        $parents = RolePermission::where(['parent' => 0])->orderBy('order', 'ASC')->get();
-        $menus = RolePermission::orderBy('parent', 'asc')->orderBy('order', 'asc')->get();
-       
-        $user_roles = auth()->user()->roles; // You can 
-       
-        foreach ($menus as $parent) {
-            $rolex = [];
-            $roleIds = [];
-            $roles = isset($parent->role_ids) ? explode(',', $parent->role_ids) : [];
+    //     $parents = RolePermission::where(['parent' => 0])->orderBy('order', 'ASC')->get();
+    //     $menus = RolePermission::orderBy('parent', 'asc')->orderBy('order', 'asc')->get();
+        
+    //     $user_roles = auth()->user()->roles; // You can 
+        
+    //     foreach ($menus as $parent) {
+    //         $rolex = [];
+    //         $roleIds = [];
+    //         $roles = isset($parent->role_ids) ? explode(',', $parent->role_ids) : [];
 
-            if (count($roles) > 0) {
-                foreach ($roles as $role) {
-                    $rrr = Role::where('id', $role)->first();
-                    $rolex[] = $rrr->name;
-                    $roleIds[] = $rrr->id;
-                }
-            }
-            $parent['roles'] = $rolex;
-            $parent['roleIds'] = $roleIds;
-        }
+    //         if (count($roles) > 0) {
+    //             foreach ($roles as $role) {
+    //                 $rrr = Role::where('id', $role)->first();
+    //                 $rolex[] = $rrr->name;
+    //                 $roleIds[] = $rrr->id;
+    //             }
+    //         }
+    //         $parent['roles'] = $rolex;
+    //         $parent['roleIds'] = $roleIds;
+    //     }
 
-        $roles = Role::where(['type' => 'staff'])->get();
-
-        return response()->json(['data' => $menus, 'message' => 'success'], 200);
-    }
+    //     $roles = Role::where(['type' => 'staff'])->get();
+        
+    //     return response()->json(['data' => $menus, 'message' => 'success'], 200);
+    // }
 
     public function generateLinks($linkid, $link_name, $link_route, $link_slug, $link_icon, $description, $parent_id)
     {
         if (Session::has('staff_id')) {
-            $access = getRoleAccess();
+            $access = getAllAccess();
 
             $getChildren = RolePermission::whereIn('id', $access)->where(['status' => 'active', 'is_menu' => 'yes', 'parent' => $linkid, 'type' => 'staff'])->orderBy('order', 'ASC')->get();
         }
@@ -77,11 +77,12 @@ class MenuController extends Controller
             }
 
             $sub_links = $linko;
-
+            
             $links = [
                 'id' => $linkid,
                 'name' => $link_name,
                 'icon' => $link_icon,
+                'route' => $link_route,
                 'link' => Route::has($link_route) ? route($link_route) : '',
                 'slug' => $link_slug,
                 'description' => $description,
@@ -94,6 +95,7 @@ class MenuController extends Controller
                     'parent_id' => $parent_id,
                     'name' => $link_name,
                     'icon' => $link_icon,
+                    'route' => $link_route,
                     'link' => Route::has($link_route) ? route($link_route) : '',
                     'slug' => $link_slug,
                     'description' => $description
@@ -104,6 +106,7 @@ class MenuController extends Controller
                     'parent_id' => $parent_id,
                     'name' => $link_name,
                     'icon' => $link_icon,
+                    'route' => $link_route,
                     'link' => Route::has($link_route) ? route($link_route) : '',
                     'slug' => $link_slug,
                     'description' => $description
@@ -119,14 +122,12 @@ class MenuController extends Controller
         
         // Get permissions from staff roles
         if (Session::has('staff_id')) {
-            $access = getRoleAccess();
-            
+            $access = getAllAccess();
             $links = RolePermission::whereIn('id', $access)->where(['status' => 'active', 'is_menu' => 'yes', 'parent' => NULL, 'type' => 'staff', 'company_id' => $this->sessionDetails('company_id')])->orderBy('order', 'ASC')->get();
-            
         }
 
         $lo = [];
-
+        
         foreach ($links as $key => $value) {
             $lox[] = $value->link_name;
             $lo[] = $this->generateLinks($value->id, $value->menu_name, $value->route, $value->slug, $value->icon, $value->description, $value->parent);
@@ -140,7 +141,7 @@ class MenuController extends Controller
         $links = [];
 
         if (Session::has('staff_id')) {
-            $access = getRoleAccess();
+            $access = getAllAccess();
 
             $links = RolePermission::whereIn('id', $access)->where(['status' => 'active', 'is_menu' => 'yes', 'id' => $parent_id, 'type' => 'staff'])->orderBy('order', 'ASC')->first();
 
@@ -293,5 +294,31 @@ class MenuController extends Controller
         ];
         
         return response()->json(['message' => 'Retrieved successfully', 'data' => $data], 200);
+    }
+
+    public function getPermissionToResource(Request $request){
+       
+        $data = $this->validate($request, [
+            'route_name' => 'required',
+        ]);
+
+        $name = $data['route_name'];
+        
+        if (isset($name)) {
+            $permCheck = permissionsCheck($name);
+            
+            if (isset($permCheck)) {
+                if (isset($permCheck['permission']) && $permCheck['permission'] == true) {
+                    return response()->json($permCheck, $permCheck['code'] ?? 200);
+                } else {
+                    return response()->json(['message' => $permCheck['permission'], 'data' => []],200);
+                }
+            } else {
+                return response()->json(["message" => false, 'data' => 'Something went wrong while trying to validate access to resource!'], 200);
+            }
+        } else {
+            return response()->json(["permission" => false,"error" => "Not Permissioned"],200);
+        }
+
     }
 }

@@ -112,7 +112,7 @@ if (!function_exists("getEncodedFileRealPath")) {
 
             $res = [
                 'filename' => $name[0],
-                'filepath' => base_path() . '/' . config('app.upload_path') . '/' . $full,
+                'filepath' => base_path() . '/' . $full,
             ];
         }
 
@@ -178,17 +178,17 @@ if (!function_exists("permissionsCheck")) {
                 $code = 200;
             };
             
-            // confirm permission has roles
-            if (is_null($permission->role_ids)) {
-                $permissionx = false;
-                $error = 'No roles assigned!';
-                $code = 403;
-            }
+            // confirm permission has roles assigned - Deprecated
+            // if (is_null($permission->role_ids)) {
+            //     $permissionx = false;
+            //     $error = 'No roles assigned!';
+            //     $code = 403;
+            // }
         } else {
             $permissionx = true;
             $code = 200;
         }
-
+        
         return [
             'permission' => $permissionx,
             'error' => $error,
