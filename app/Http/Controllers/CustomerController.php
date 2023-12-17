@@ -23,7 +23,7 @@ class CustomerController extends Controller
         $customers = Customer::with(['user:id,avatar,first_name,last_name,status,gender,phone_number', 'contracts:id,status,customer_id'])->withCount('contracts')
             ->where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'DESC');
 
-           
+
         if (!empty($request->name)) {
             $customers = $customers->whereHas('user', function ($query) use ($request) {
                 $query->where('first_name', 'LIKE', "%{$request->name}%")
@@ -196,7 +196,6 @@ class CustomerController extends Controller
      */
     public function store(Request $request)
     {
-        
     }
 
     /**
@@ -205,9 +204,9 @@ class CustomerController extends Controller
     public function show($id)
     {
         $customer = Customer::where('customers.id', $id)
-        ->with('user')->first();
+            ->with('user')->first();
         $customer->customer_id = $customer->user->id;
-       
+
         return response()->json(['message' => 'success', 'data' => $customer], 200);
     }
 
@@ -251,20 +250,22 @@ class CustomerController extends Controller
         return response()->json(['message' => 'success', 'data' => $data], 200);
     }
 
-    public function customerIdentificationSetting(){
+    public function customerIdentificationSetting()
+    {
         $customer_identification_settings = CustomerIdentificationSetting::where(['company_id' => $this->sessionDetails('company_id')])->first();
 
-        if($customer_identification_settings){
+        if ($customer_identification_settings) {
             $order = json_decode($customer_identification_settings->order_of_appearance, true);
             $customer_identification_settings->order_of_appearance = $order;
-        }else{
+        } else {
             $customer_identification_settings = [];
         }
 
-        return response()->json(['message' => 'successfull', 'data' => $customer_identification_settings], 200);
+        return response()->json(['message' => 'Operation successfull', 'data' => $customer_identification_settings], 200);
     }
 
-    public function updateCustomerIdentificationSetting(Request $request){
+    public function updateCustomerIdentificationSetting(Request $request)
+    {
         $validator = Validator::make($request->all(), [
             'use_id_generator' => 'in:0,1',
         ]);
@@ -285,7 +286,7 @@ class CustomerController extends Controller
                 'appearance_format' => 'nullable',
             ]);
         }
-        
+
         if ($validator->fails()) {
             return response()->json([
                 'error' => $validator->messages()->first(),
@@ -297,20 +298,21 @@ class CustomerController extends Controller
         $data['order_of_appearance'] = isset($data['order_of_appearance']) ? json_encode($data['order_of_appearance']) : null;
 
         $data['company_id'] = $this->sessionDetails('company_id');
-        
+
         CustomerIdentificationSetting::updateOrCreate(['company_id' => $data['company_id']], $data);
 
         return response()->json(['message' => 'Successful', 'data' => $request['order_of_appearance']], 200);
     }
 
-    public function updateUser($user, $data){
+    public function updateUser($user, $data)
+    {
         $old_additional_details = !empty($user->additional_details) ? $user->additional_details : [];
         $old_means_of_identification = !empty($user->means_of_identification) ? $user->means_of_identification : [];
         $old_next_of_kin = !empty($user->next_of_kin) ? $user->next_of_kin : [];
 
         $additional_details = json_encode([
             'title' => !empty($data['title']) ? $data['title'] : ($old_additional_details['title'] ?? ''),
-            'alternate_number' => !empty($data['alternate_number']) ? $data['alternate_number']: ($old_additional_details['alternate_number'] ?? ''),
+            'alternate_number' => !empty($data['alternate_number']) ? $data['alternate_number'] : ($old_additional_details['alternate_number'] ?? ''),
             'alternate_email' => !empty($data['alternate_email']) ? $data['alternate_email'] : ($old_additional_details['alternate_email'] ?? ''),
             'state' => !empty($data['state_id']) ? $data['state_id'] : ($old_additional_details['state'] ?? ''),
             'residential_address' => isset($data['contact_details']['house_address']) ? $data['contact_details']['house_address'] : ($old_additional_details['residential_address'] ?? ''),
@@ -328,16 +330,16 @@ class CustomerController extends Controller
             'id_card' => isset($data['id_card']) ? $data['id_card'] : ($old_means_of_identification['id_card'] ?? ''),
             'signature' => isset($data['signature']) ? $data['signature'] : ($old_means_of_identification['signature'] ?? ''),
         ]);
-        
+
         $next_of_kin = json_encode([
-            'nok_first_name' => isset($data['next_of_kin_information']['nok_first_name']) ? $data['next_of_kin_information']['nok_first_name']: ($old_next_of_kin['nok_first_name'] ?? ''),
-            'nok_last_name' => isset($data['next_of_kin_information']['nok_last_name']) ? $data['next_of_kin_information']['nok_last_name']: ($old_next_of_kin['nok_last_name'] ?? ''),
-            'nok_phone_number' => isset($data['next_of_kin_information']['nok_phone_number']) ? $data['next_of_kin_information']['nok_phone_number']: ($old_next_of_kin['nok_phone_number'] ?? ''),
-            'nok_house_address' => isset($data['next_of_kin_information']['nok_house_address']) ? $data['next_of_kin_information']['nok_house_address']: ($old_next_of_kin['nok_house_address'] ?? ''),
-            'nok_email_address' => isset($data['next_of_kin_information']['nok_email_address']) ? $data['next_of_kin_information']['nok_email_address']: ($old_next_of_kin['nok_email_address'] ?? ''),
-            'nok_relationship' => isset($data['next_of_kin_information']['nok_relationship']) ? $data['next_of_kin_information']['nok_relationship']: ($old_next_of_kin['nok_relationship'] ?? ''),
+            'nok_first_name' => isset($data['next_of_kin_information']['nok_first_name']) ? $data['next_of_kin_information']['nok_first_name'] : ($old_next_of_kin['nok_first_name'] ?? ''),
+            'nok_last_name' => isset($data['next_of_kin_information']['nok_last_name']) ? $data['next_of_kin_information']['nok_last_name'] : ($old_next_of_kin['nok_last_name'] ?? ''),
+            'nok_phone_number' => isset($data['next_of_kin_information']['nok_phone_number']) ? $data['next_of_kin_information']['nok_phone_number'] : ($old_next_of_kin['nok_phone_number'] ?? ''),
+            'nok_house_address' => isset($data['next_of_kin_information']['nok_house_address']) ? $data['next_of_kin_information']['nok_house_address'] : ($old_next_of_kin['nok_house_address'] ?? ''),
+            'nok_email_address' => isset($data['next_of_kin_information']['nok_email_address']) ? $data['next_of_kin_information']['nok_email_address'] : ($old_next_of_kin['nok_email_address'] ?? ''),
+            'nok_relationship' => isset($data['next_of_kin_information']['nok_relationship']) ? $data['next_of_kin_information']['nok_relationship'] : ($old_next_of_kin['nok_relationship'] ?? ''),
         ]);
-        
+
         $user->update([
             'first_name' => $data['first_name'] ?? $user->first_name,
             'middle_name' => $data['middle_name'] ?? $user->middle_name,
@@ -351,7 +353,7 @@ class CustomerController extends Controller
             'next_of_kin' => $next_of_kin ?? null,
             'means_of_identification' => $means_of_identification ?? null,
         ]);
-        
+
         return $user;
     }
 }

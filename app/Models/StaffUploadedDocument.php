@@ -14,7 +14,7 @@ class StaffUploadedDocument extends Model
     protected function file(): Attribute
     {
         return Attribute::make(
-            get: fn (string $value) => url('/') . '/api/documents/' . base64_encode($value),
+            get: fn (string $value) => url('/') . '/api/uploads/' . base64_encode($value),
         );
     }
 

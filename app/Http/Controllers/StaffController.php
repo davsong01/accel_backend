@@ -121,7 +121,7 @@ class StaffController extends Controller
         //         ->get();
         // }
 
-        // return response()->json(['message' => 'successfull', 'data' => $departments], 200);
+        // return response()->json(['message' => 'Operation successfull', 'data' => $departments], 200);
     }
 
     public function assignRoleToStaff(Request $request)
@@ -138,9 +138,9 @@ class StaffController extends Controller
             ], 412);
         }
 
-        $roles = explode(',',$request->roles);
-        if(!empty($roles)){
-            foreach($roles as $role){
+        $roles = explode(',', $request->roles);
+        if (!empty($roles)) {
+            foreach ($roles as $role) {
                 $assign = StaffRole::updateOrCreate([
                     'role_id' => $role,
                     'staff_id' => $request->staff_id,
@@ -149,7 +149,7 @@ class StaffController extends Controller
                 ]);
             }
         }
-        
+
 
         return response()->json(['message' => 'Created successfully', 'data' => []], 200);
     }
@@ -164,7 +164,7 @@ class StaffController extends Controller
             $validator = Validator::make($request->all(), [
                 'email' => [
                     'required', 'email', Rule::unique('users')->where(function ($query) {
-                        $query->where('company_id', $this->sessionDetails('company_id'))->where('type','staff');
+                        $query->where('company_id', $this->sessionDetails('company_id'))->where('type', 'staff');
                     })
                 ],
                 'first_name' => 'required',
@@ -179,7 +179,7 @@ class StaffController extends Controller
                 'commission_id' => 'nullable|exists:commissions,id,company_id,' . $this->sessionDetails('company_id'),
                 'date_of_employment' => 'nullable',
                 'department_id' => 'required|exists:departments,id,company_id,' . $this->sessionDetails('company_id'),
-                
+
                 'nationality' => 'sometimes|integer',
                 'state' => 'sometimes|integer',
                 'lga' => 'sometimes|integer',
@@ -202,8 +202,7 @@ class StaffController extends Controller
             }
 
             $validator = $validator->valid();
-
-        }else{
+        } else {
 
             $validator2 = Validator::make($request->all(), [
                 'date_of_birth' => 'nullable',
@@ -230,7 +229,7 @@ class StaffController extends Controller
             }
 
             $validator2 = $validator2->valid();
-            
+
             $validator2['additional_details'] = json_encode([
                 'alternate_number' => $validator2['alternate_number'] ?? '',
                 'alternate_email' => $validator2['alternate_email'] ?? '',
@@ -249,10 +248,9 @@ class StaffController extends Controller
                 'nok_email_address' => $validator2['nok_email_address'] ?? '',
                 'nok_relationship' => $validator2['nok_relationship'] ?? '',
             ]);
-
         }
         $data = array_merge($validator2, $validator);
-       
+
         $data['date_of_birth'] = !empty($request->date_of_birth) ? Carbon::parse($request->date_of_birth) : null;
         // Create user
         if (!$request->staff_id && empty($request->staff_id)) {
@@ -283,7 +281,7 @@ class StaffController extends Controller
                 'jobrole_id' => $data['jobrole_id'] ?? '',
                 'commission_id' => $data['commission_id'] ?? '',
                 'company_id' => $this->sessionDetails('company_id'),
-                
+
                 'bank_id' => $data['bank_id'] ?? null,
                 'pfa_id' => $data['pfa_id'] ?? null,
                 'account_name' => $data['account_name'] ?? null,
@@ -292,13 +290,12 @@ class StaffController extends Controller
                 'swift_code' => $data['swift_code'] ?? null,
                 'nhf_number' => $data['nhf_number'] ?? null,
             ]);
-
         } else {
             $staff = Staff::where('id', $request->staff_id)->where('company_id', $this->sessionDetails('company_id'))->first();
             $user = $staff->user;
-            $updateUser = Arr::only($data, ['email', 'additional_details','first_name', 'middle_name', 'last_name', 'username', 'phone_number', 'gender', 'next_of_kin', 'branch_id', 'date_of_birth']);
+            $updateUser = Arr::only($data, ['email', 'additional_details', 'first_name', 'middle_name', 'last_name', 'username', 'phone_number', 'gender', 'next_of_kin', 'branch_id', 'date_of_birth']);
             $updateStaff = Arr::only($data, ['jobtype_id', 'date_of_employment', 'department_id', 'jobrole_id', 'commission_id', 'bank_id', 'pfa_id', 'account_name', 'account_name', 'account_number', 'sort_code', 'swift_code', 'nhf_number']);
-            
+
             $user->update($updateUser);
             $staff->update($updateStaff);
 
@@ -324,11 +321,11 @@ class StaffController extends Controller
             ->leftjoin("departments", "staff.department_id", "=", "departments.id")
             ->select("users.status", "staff.created_at", "users.first_name", "users.username", "users.last_name", "users.email", "staff.id AS staff_id", "users.type", "users.company_id", "staff.jobtype_id", "users.id AS user_id", "staff.date_of_employment", "branches.id AS branch_id", "branches.name AS branch_name", "departments.id AS department_id", "departments.name AS department_name", "job_roles.id AS job_role_id", "job_roles.name AS job_role_name", "job_types.id AS job_type_id", "job_types.name AS job_type_name", "users.additional_details", "users.next_of_kin", "users.date_of_birth", "bank_id", "pfa_id", "account_name", "account_number", "sort_code", "swift_code")
             ->first();
-        
+
         if (!$staff) {
             return response()->json(['message' => 'Staff not found!', 'data' => null], 200);
         }
-        
+
         $validator = Validator::make($request->all(), [
             'email' => [
                 'required', Rule::unique('users')->where(function ($query) use ($staff) {
@@ -389,16 +386,16 @@ class StaffController extends Controller
             'nok_email_address' => $request->has('nok_email_address')  ? $request->nok_email_address : $t_next_of_kin['nok_email_address'],
             'nok_relationship' => $request->has('nok_relationship')  ? $request->nok_relationship : $t_next_of_kin['nok_relationship'],
         ];
-        
+
         // persist update for staff
         $staffx = Staff::where('id', $staff->staff_id)->first();
         $staffx->update([
             'jobtype_id' => $request->has('jobtype_id') ? $data['jobtype_id'] : $staffx->job_type_id,
             'date_of_employment' => $request->has('date_of_employment') ? $data['date_of_employment'] : $staffx->date_of_employment,
             'department_id' => $request->has('department_id') ? $data['department_id'] : $staffx->department_id,
-            'jobrole_id' => $request->has('jobrole_id') ? $data['jobrole_id'] :$staffx->job_role_id,
+            'jobrole_id' => $request->has('jobrole_id') ? $data['jobrole_id'] : $staffx->job_role_id,
             'commission_id' => $request->has('commission_id') ? $data['commission_id'] : $staffx->commision_percentage,
-    
+
             'bank_id' => $request->has('bank_id') ? $data['bank_id'] : $staffx->bank_id,
             'pfa_id' => $request->has('pfa_id') ? $data['pfa_id'] : $staffx->pfa_id,
             'account_name' => $request->has('account_name') ? $data['account_name'] : $staffx->account_name,
@@ -408,20 +405,20 @@ class StaffController extends Controller
             'nhf_number' => $request->has('nhf_number') ? $data['nhf_number'] : $staffx->nhf_number,
             'company_id' => $this->sessionDetails('company_id'),
         ]);
-        
+
         // Update staff role here
-        if(!empty($request->roles)){
+        if (!empty($request->roles)) {
             $rolesx = explode(',', $request->roles);
             $newRoles = [];
-            foreach($rolesx as $rlid){
+            foreach ($rolesx as $rlid) {
                 $dt = Role::where('id', $rlid)->where('company_id', $this->sessionDetails('company_id'))->where('type', 'staff')->count();
-                if($dt > 0){
+                if ($dt > 0) {
                     $newRoles[] = $rlid;
                 }
             }
-            
+
             StaffRole::where('staff_id', $staff->staff_id)->where('company_id', $this->sessionDetails('company_id'))->delete();
-            foreach($newRoles as $new){
+            foreach ($newRoles as $new) {
                 StaffRole::Create([
                     'role_id' => $new,
                     'staff_id' => $staff->staff_id,
@@ -430,7 +427,7 @@ class StaffController extends Controller
                 ]);
             }
         }
-     
+
         // dd(json_encode($next_of_kin));
         $user = $staff->user->update([
             'email' => $request->has('email') ? $data['email'] : $staff->user->email,
@@ -463,7 +460,7 @@ class StaffController extends Controller
 
         $roles = $staff->roles->pluck('id')->toArray();
 
-        return response()->json(['message' => 'successfull', 'data' => $roles], 200);
+        return response()->json(['message' => 'Operation successfull', 'data' => $roles], 200);
     }
 
     public function staffIdentificationSetting()
@@ -477,7 +474,7 @@ class StaffController extends Controller
             $staff_identification_settings = [];
         }
 
-        return response()->json(['message' => 'successfull', 'data' => $staff_identification_settings], 200);
+        return response()->json(['message' => 'Operation successfull', 'data' => $staff_identification_settings], 200);
     }
 
     public function updateStaffIdentificationSetting(Request $request)
@@ -511,13 +508,13 @@ class StaffController extends Controller
         }
 
         $data = $validator->valid();
-        
+
         $data['order_of_appearance'] = isset($data['order_of_appearance']) ? json_encode($data['order_of_appearance']) : null;
         $data['company_id'] = $this->sessionDetails('company_id');
-        
+
         StaffIdentificationSetting::updateOrCreate(['company_id' => $data['company_id']], $data);
 
-        return response()->json(['message' => 'successfull', 'data' => $request['order_of_appearance']], 200);
+        return response()->json(['message' => 'Operation successfull', 'data' => $request['order_of_appearance']], 200);
     }
 
     public function staffDocumentSetting($id = null)
@@ -527,7 +524,7 @@ class StaffController extends Controller
         } else {
             $settings = StaffDocumentSetting::where(['company_id' => $this->sessionDetails('company_id')])->get();
         }
-        return response()->json(['message' => 'successfull', 'data' => $settings], 200);
+        return response()->json(['message' => 'Operation successfull', 'data' => $settings], 200);
     }
 
     public function addStaffDocumentSetting(Request $request)
@@ -551,7 +548,7 @@ class StaffController extends Controller
 
         $data = $validator->valid();
         $data['company_id'] = $this->sessionDetails('company_id');
-       
+
         StaffDocumentSetting::updateOrCreate($data);
 
         return response()->json(['message' => 'Operation Successfull', 'data' => []], 200);
@@ -577,14 +574,14 @@ class StaffController extends Controller
 
         $settings = StaffDocumentSetting::where(['id' => $id, 'company_id' => $this->sessionDetails('company_id')])->update($data);
 
-        return response()->json(['message' => 'successfull', 'data' => $settings], 200);
+        return response()->json(['message' => 'Operation successfull', 'data' => $settings], 200);
     }
 
     public function deleteStaffDocumentSetting(Request $request, $id)
     {
         $settings = StaffDocumentSetting::where(['id' => $id, 'company_id' => $this->sessionDetails('company_id')])->delete();
 
-        return response()->json(['message' => 'successfull', 'data' => []], 200);
+        return response()->json(['message' => 'Operation successfull', 'data' => []], 200);
     }
 
     public function getSingleStaffProfile($staff_id, $internal = null)
@@ -598,7 +595,7 @@ class StaffController extends Controller
             ->leftjoin("commissions", "staff.commission_id", "=", "commissions.id")
             ->select("staff.id AS staff_id", "users.status", "users.staff_id as employee_id", "staff.created_at", "users.first_name", "users.username", "users.last_name", "users.middle_name", "users.avatar", "users.phone_number", "users.email", "staff.id AS staff_id", "users.type", "users.company_id", "staff.jobtype_id", "users.id AS user_id", "staff.date_of_employment", "staff.branch_id AS branch_id", "branches.name AS branch_name", "departments.id AS department_id", "departments.name AS department_name", "job_roles.id AS job_role_id", "job_roles.name AS job_role_name", "job_types.id AS job_type_id", "job_types.name AS job_type_name", "users.additional_details", "users.next_of_kin", "users.date_of_birth AS date_of_birth", "users.gender", "staff.commission_id AS commission_id", "commissions.name AS commission_name", "commissions.percentage",)
             ->first();
-        
+
 
         $profile_completenes = $this->profileCompletenes($staff);
         $additional_details = !empty($staff->additional_details) ? json_decode($staff->additional_details, true) : [];
@@ -613,7 +610,7 @@ class StaffController extends Controller
 
         $employment_date = $staff->date_of_employment ? date("jS\\, F Y", strtotime($staff->date_of_employment)) : '';
         $date_of_birth = $staff->date_of_birth ? date("jS\\, F Y", strtotime($staff->date_of_employment)) : '';
-        
+
         $data['job_information'] = [
             'job_type' => [
                 'id' => $staff->job_type_id ?? '',
@@ -639,7 +636,7 @@ class StaffController extends Controller
                 'name' => $staff->branch_name ?? '',
             ]
         ];
-        
+
         $data['personal_information'] = [
             'first_name' => $staff->first_name ?? '',
             'middle_name' => $staff->middle_name ?? '',
@@ -661,7 +658,7 @@ class StaffController extends Controller
             'lga' => !empty($additional_details['lga']) ? $this->getLgaDetails($additional_details['lga']) : '',
             'nationality' => !empty($additional_details['nationality']) ? $this->getCountryDetails($additional_details['nationality']) : '',
         ];
-        
+
         $data['next_of_kin_information'] = [
             'first_name' => $next_of_kin['nok_first_name'] ?? '',
             'last_name' => $next_of_kin['nok_last_name'] ?? '',
@@ -678,10 +675,10 @@ class StaffController extends Controller
     {
         $self_service = new SelfServiceController();
         $res = $self_service->uploadDocuments($request, $self);
-        
-        if(isset($res['error'])){
+
+        if (isset($res['error'])) {
             return response()->json(['error' => $res['error'], 'data' => $res['data']], $res['code'] ?? 412);
-        }else{
+        } else {
             return response()->json(['message' => $res['message'], 'data' => $res['data']], $res['code'] ?? 200);
         }
     }

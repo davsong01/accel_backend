@@ -56,17 +56,17 @@ class User extends Authenticatable
     {
 
         $means_of_identification = !empty($this->attributes['means_of_identification']) ? json_decode($this->attributes['means_of_identification'], true) : [];
-
+        
         $means_of_identification['occupation'] = isset($means_of_identification['occupation']) ? $means_of_identification['occupation'] : null;
         $means_of_identification['place_of_work'] = isset($means_of_identification['place_of_work']) ? $means_of_identification['place_of_work'] : null;
         $means_of_identification['id_card_type'] = isset($means_of_identification['id_card_type']) ? $means_of_identification['id_card_type'] : null;
-
+       
         $means_of_identification['passport_photo'] = isset($means_of_identification['passport_photo']) ? app('App\Http\Controllers\Controller')->encodeUploadedFile($means_of_identification['passport_photo']) : null;
-
+        
         $means_of_identification['id_card'] = isset($means_of_identification['id_card']) ? app('App\Http\Controllers\Controller')->encodeUploadedFile($means_of_identification['id_card']) : null;
        
         $means_of_identification['signature'] = isset($means_of_identification['signature']) ? app('App\Http\Controllers\Controller')->encodeUploadedFile($means_of_identification['signature']) : null;
-
+        
         return $means_of_identification;
     }
 
