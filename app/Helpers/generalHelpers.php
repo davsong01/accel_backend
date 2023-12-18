@@ -178,12 +178,6 @@ if (!function_exists("permissionsCheck")) {
                 $code = 200;
             };
             
-            // confirm permission has roles assigned - Deprecated
-            // if (is_null($permission->role_ids)) {
-            //     $permissionx = false;
-            //     $error = 'No roles assigned!';
-            //     $code = 403;
-            // }
         } else {
             $permissionx = true;
             $code = 200;
