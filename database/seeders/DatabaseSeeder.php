@@ -30,6 +30,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             // GeneralSeeder::class,
+            AddAccessSeeder::class,
             CountriesTableSeeder::class,
             StatesTableSeeder::class,
             LgasTableSeeder::class,

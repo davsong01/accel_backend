@@ -116,7 +116,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('/single-menu-generator/{parent_id}', [MenuController::class, 'singleLinkGenerator'])->name('single.linkgenerator');
 
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
-        
+
         // Staff Module Routes
         // Route::post('filter-customers', [CustomerController::class, 'index']);
         Route::resource('customers', CustomerController::class);
@@ -233,7 +233,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::resource('account', AccountController::class);
 
         Route::get('single-customer-form-payment-details/{customer_id}', [CustomerContractController::class, 'singleCustomerFormDetails']);
-        Route::post('customer-form-response', [CustomerFormController::class, 'store']);
+        Route::post('customer-form-response', [CustomerFormController::class, 'store'])->name('application.form.submit');
         Route::get('customer-form-response/{id?}', [CustomerFormController::class, 'index']);
         Route::get('approve-customer-form-response/{id?}', [CustomerFormController::class, 'approveCustomerFormResponse']);
         Route::post('decline-customer-form-response/{id?}', [CustomerFormController::class, 'declineCustomerFormResponse']);
