@@ -46,7 +46,7 @@ return [
     |
     */
 
-    'expiration' => env('ENT') == 'local' ? null : 300,
+    'expiration' => env('ENT') == 'local' ? null : null,
 
     /*
     |--------------------------------------------------------------------------
