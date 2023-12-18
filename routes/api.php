@@ -107,6 +107,7 @@ Route::get('domain-details/{slug}', [CompanySettingController::class, 'domainDet
 
 Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
     Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/get-permission-to-resource', [MenuController::class, 'getPermissionToResource'])->middleware(['auth:sanctum', 'company_check']);
 
     Route::middleware(['auth:sanctum', 'company_check', 'user_roles', 'otherchecks'])->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
@@ -232,7 +233,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::resource('account', AccountController::class);
 
         Route::get('single-customer-form-payment-details/{customer_id}', [CustomerContractController::class, 'singleCustomerFormDetails']);
-        Route::post('customer-form-response', [CustomerFormController::class, 'store']);
+        Route::post('customer-form-response', [CustomerFormController::class, 'store'])->name('application.form.submit');
         Route::get('customer-form-response/{id?}', [CustomerFormController::class, 'index']);
         Route::get('approve-customer-form-response/{id?}', [CustomerFormController::class, 'approveCustomerFormResponse']);
         Route::post('decline-customer-form-response/{id?}', [CustomerFormController::class, 'declineCustomerFormResponse']);

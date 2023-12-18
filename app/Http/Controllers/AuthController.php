@@ -87,8 +87,9 @@ class AuthController extends Controller
                 'error' => 'Invalid Credentials!'
             ], 401);
         }
-
+        
         $token = $user->createToken('auth_token')->plainTextToken;
+        
         $company = Company::where('id', $user->company_id)->first();
 
         if (!$company) {
@@ -99,6 +100,7 @@ class AuthController extends Controller
 
         // $user->token = $token;
         $cookie = cookie('token', $token, 60 * 24); // 1 day
+        
         $datax = [
             'token' => $token,
             'userInfo' => [
