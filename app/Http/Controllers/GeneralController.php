@@ -15,23 +15,24 @@ use NunoMaduro\Collision\Adapters\Phpunit\State;
 class GeneralController extends Controller
 {
     //
-    public function getCountries(){
+    public function getCountries()
+    {
         $countries = Country::all();
-        
-        return response()->json(['message' => 'success', 'data' => $countries], 200);
+
+        return response()->json(['message' => 'Success', 'data' => $countries], 200);
     }
 
     public function getStates(Request $request)
     {
         $states = States::orderBy('name');
-        
-        if(!empty($request->country_id)){
+
+        if (!empty($request->country_id)) {
             $states = $states->where('country_id', $request->country_id);
         }
 
         $states = $states->get();
 
-        return response()->json(['message' => 'success', 'data' => $states], 200);
+        return response()->json(['message' => 'Success', 'data' => $states], 200);
     }
 
     public function getLgas(Request $request)
@@ -43,10 +44,11 @@ class GeneralController extends Controller
         }
         $lgas = $lgas->get();
 
-        return response()->json(['message' => 'success', 'data' => $lgas], 200);
+        return response()->json(['message' => 'Success', 'data' => $lgas], 200);
     }
 
-    public function getBanks($country_id = null){
+    public function getBanks($country_id = null)
+    {
         $banks = Bank::orderBy('id');
 
         if (!empty($country_id)) {
@@ -55,24 +57,23 @@ class GeneralController extends Controller
 
         $banks = $banks->get();
 
-        return response()->json(['message' => 'success', 'data' => $banks], 200);
+        return response()->json(['message' => 'Success', 'data' => $banks], 200);
     }
 
     public function getCurrencies()
     {
         $currencies = Currency::all();
 
-        return response()->json(['message' => 'success', 'data' => $currencies], 200);
+        return response()->json(['message' => 'Success', 'data' => $currencies], 200);
     }
 
     public function getPfas($country_id = null)
     {
         $pfas = Pfa::orderBy('id');
-        if(!empty($country_id)){
+        if (!empty($country_id)) {
             $pfas = $pfas->where('country_id', $country_id);
         }
         $pfas = $pfas->get();
-        return response()->json(['message' => 'success', 'data' => $pfas], 200);
+        return response()->json(['message' => 'Success', 'data' => $pfas], 200);
     }
-
 }

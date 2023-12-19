@@ -17,7 +17,7 @@ class AccountClassificationController extends Controller
     public function index()
     {
         $account_classification = AccountClassification::where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'desc')->get();
-        return response()->json(['message' => 'success', 'data' => $account_classification], 200);
+        return response()->json(['message' => 'Success', 'data' => $account_classification], 200);
     }
 
     /**
@@ -35,7 +35,7 @@ class AccountClassificationController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'class' => [
-                'required', Rule::unique('account_classifications')->where(function ($query) {      
+                'required', Rule::unique('account_classifications')->where(function ($query) {
                     $query->where('company_id', $this->sessionDetails('company_id'));
                 })
             ],
@@ -61,9 +61,9 @@ class AccountClassificationController extends Controller
      */
     public function show(AccountClassification $accountClassification)
     {
-        if($accountClassification){
+        if ($accountClassification) {
             return response()->json(['message' => 'Retrieved successfully', 'data' => $accountClassification], 200);
-        }else{
+        } else {
             return response()->json(['message' => 'No records found', 'data' => $accountClassification], 200);
         }
     }

@@ -14,18 +14,18 @@ class RoleController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index($type=null)
+    public function index($type = null)
     {
         $type = \Request::get('type');
-        
+
         if (!$type) {
             return response()->json(['error' => 'The role type is required as a query param!'], 412);
         }
         $roles = Role::where('type', $type)
             ->where('company_id', $this->sessionDetails('company_id'))
             ->get();
-      
-        return response()->json(['message' => 'success', 'data' => $roles], 200);
+
+        return response()->json(['message' => 'Success', 'data' => $roles], 200);
     }
 
     /**
@@ -72,7 +72,8 @@ class RoleController extends Controller
             $access_control = implode(',', $allowed);
         }
 
-        Role::updateOrcreate(['name' => $request->name, 'company_id' => $this->sessionDetails('company_id'), 'type' => $request->type],
+        Role::updateOrcreate(
+            ['name' => $request->name, 'company_id' => $this->sessionDetails('company_id'), 'type' => $request->type],
             [
                 'access' => $access_control,
                 'description' => $request->description
@@ -88,7 +89,7 @@ class RoleController extends Controller
     public function show(Role $role)
     {
         // $role = $role->load('department');
-        return response()->json(['message' => 'success', 'data' => $role], 200);
+        return response()->json(['message' => 'Success', 'data' => $role], 200);
     }
 
     /**
@@ -157,7 +158,7 @@ class RoleController extends Controller
         if ($roles > 0) {
             return response()->json(['message' => 'Unable to delete, resource in use', 'data' => []], 412);
         }
-        
+
         $role->delete();
         return response()->json(['message' => 'Deleted Successfully.', 'data' => null], 200);
     }

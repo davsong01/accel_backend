@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('username')->nullable();
             $table->string('residential_address')->nullable();
             $table->string('avatar')->nullable();
-            $table->string('user_permissions')->nullable();
+            $table->longText('user_permissions')->nullable();
             $table->integer('company_id');
             $table->string('email');
             $table->dateTime('date_of_birth')->nullable();

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name')->nullable();
             // $table->integer('department_id')->nullable();
-            $table->string('access')->nullable();
+            $table->longText('access')->nullable();
             $table->text('description')->nullable();
             $table->enum('type', ['staff', 'customer']);
             $table->integer('company_id');

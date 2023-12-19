@@ -22,8 +22,8 @@ class AccountTypeController extends Controller
         }
 
         $account_type = $account_type->get();
-        
-        return response()->json(['message' => 'success', 'data' => $account_type], 200);
+
+        return response()->json(['message' => 'Success', 'data' => $account_type], 200);
     }
 
     public function modifyAccountType($id)
@@ -38,7 +38,7 @@ class AccountTypeController extends Controller
         }
         return response()->json(['message' => 'Successfully updated', 'data' => []], 200);
     }
-    
+
     /**
      * Show the form for creating a new resource.
      */
@@ -78,9 +78,9 @@ class AccountTypeController extends Controller
      */
     public function show(AccountType $account_type)
     {
-        if($account_type){
+        if ($account_type) {
             return response()->json(['message' => 'Retrieved successfully', 'data' => $account_type], 200);
-        }else{
+        } else {
             return response()->json(['message' => 'No records found', 'data' => $account_type], 200);
         }
     }

@@ -24,7 +24,7 @@ class GeneratedLegalDocumentController extends Controller
             ])
             ->paginate(20);
 
-        return response()->json(['message' => 'success', 'data' => $legalDocuments], 200);
+        return response()->json(['message' => 'Success', 'data' => $legalDocuments], 200);
     }
 
 
@@ -42,7 +42,7 @@ class GeneratedLegalDocumentController extends Controller
             ])
             ->paginate(20);
 
-        return response()->json(['message' => 'success', 'data' => $documents], 200);
+        return response()->json(['message' => 'Success', 'data' => $documents], 200);
     }
 
 
@@ -74,7 +74,7 @@ class GeneratedLegalDocumentController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
-        return response()->json(['message' => 'success', 'data' => $generatedLegalDocument], 200);
+        return response()->json(['message' => 'Success', 'data' => $generatedLegalDocument], 200);
     }
 
     /**
@@ -103,7 +103,7 @@ class GeneratedLegalDocumentController extends Controller
             'file_location' => $documentGen['filepath'] . $documentGen['filename']
         ]);
 
-        return response()->json(['message' => 'success', 'data' => $generatedLegalDocument], 200);
+        return response()->json(['message' => 'Success', 'data' => $generatedLegalDocument], 200);
     }
 
     private function setOptions()

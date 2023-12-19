@@ -14,7 +14,7 @@ class AddAccessToRolesTable extends Migration
     {
         if (!Schema::hasColumn('roles', 'access')) {
             Schema::table('roles', function (Blueprint $table) {
-                $table->string('access')->nullable()->after('id');
+                $table->longText('access')->nullable()->after('id');
             });
         }
 

@@ -148,13 +148,13 @@ class SelfServiceController extends Controller
 
         $user->update(['avatar' => $avatar]);
 
-        return response()->json(['message' => 'success', 'data' => Auth::user()->avatar], 200);
+        return response()->json(['message' => 'Success', 'data' => Auth::user()->avatar], 200);
     }
 
     public function getAvatar(Request $request, $staff_id)
     {
         $avatar = Staff::where('id', $staff_id)->first()->user->avatar;
-        return response()->json(['message' => 'success', 'data' => $avatar], 200);
+        return response()->json(['message' => 'Success', 'data' => $avatar], 200);
     }
 
     public function deleteAvatar($staff_id = null)
@@ -177,20 +177,23 @@ class SelfServiceController extends Controller
 
     public function uploadDocuments(Request $request)
     {
-      
-        $validator = Validator::make($request->all(), [
-            'id' => 'required|exists:staff_document_settings,id,company_id,' . $this->sessionDetails('company_id'),
-            'staff_id' => 'required|exists:staff,id,company_id,' . $this->sessionDetails('company_id'),
-            'files' => 'required|array',
-            'files.*' => 'mimes:pdf,jpeg,jpg,png|max:2048',
-        ],
-        
-        [
-            'files.*.required' => 'The files field is required!',
-            'files.*.mimes' => 'Supported file formats are jpeg,jpg,png,pdf',
-            'files.*.max' => 'Sorry! Maximum allowed size for a file is 2MB',
 
-        ]);
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'id' => 'required|exists:staff_document_settings,id,company_id,' . $this->sessionDetails('company_id'),
+                'staff_id' => 'required|exists:staff,id,company_id,' . $this->sessionDetails('company_id'),
+                'files' => 'required|array',
+                'files.*' => 'mimes:pdf,jpeg,jpg,png|max:2048',
+            ],
+
+            [
+                'files.*.required' => 'The files field is required!',
+                'files.*.mimes' => 'Supported file formats are jpeg,jpg,png,pdf',
+                'files.*.max' => 'Sorry! Maximum allowed size for a file is 2MB',
+
+            ]
+        );
 
         if ($validator->fails()) {
             return response()->json([
@@ -198,30 +201,30 @@ class SelfServiceController extends Controller
                 'data' => null,
             ], 412);
         }
-       
+
         if (\Request::route()->getPrefix() == 'api/admin/self-service') {
             $staff_id = Auth::user()->staff->id;
-        }else{
+        } else {
             $staff_id = $request->staff_id;
         }
 
         $setting = StaffDocumentSetting::where(['company_id' => $this->sessionDetails('company_id'), 'id' => $request->id])->first();
-        
-        if(!$setting){
+
+        if (!$setting) {
             return response()->json([
                 'error' => 'No document setting defined!',
                 'data' => null,
-            ], 412); 
+            ], 412);
         }
         $allowed = $setting->required;
         $uploaded = StaffUploadedDocument::where(['staff_document_id' => $setting->id, 'staff_id' => $staff_id])->count();
-        
-        $allowedfileExtension = ['pdf','jpg', 'png', 'docx', 'jpeg'];
+
+        $allowedfileExtension = ['pdf', 'jpg', 'png', 'docx', 'jpeg'];
         $files = $request->file('files');
-        
+
         $toUpload = count($files);
         $newCount = $uploaded + $toUpload;
-       
+
         if ($newCount > $allowed) {
             return response()->json([
                 'error' => 'Only ' . $setting->required . ' documents are required for ' . $setting->name . '!',
@@ -235,10 +238,10 @@ class SelfServiceController extends Controller
             // $filename = $file->getClientOriginalName();
             $extension = $file->getClientOriginalExtension();
             $check = in_array($extension, $allowedfileExtension);
-            
+
             if ($check) {
                 $save = $this->uploadProtectedFile($file, 'documents');
-                
+
                 StaffUploadedDocument::create([
                     'staff_id' => $staff_id,
                     'staff_document_id' => $setting->id,
@@ -247,7 +250,7 @@ class SelfServiceController extends Controller
                     'filename' => $save['filename'],
                     'company_id' => $this->sessionDetails('company_id')
                 ]);
-            }else{
+            } else {
                 return response()->json([
                     'error' => 'Allowed files are ' . implode(',', $allowedfileExtension) . ' files',
                     'data' => null,
@@ -258,26 +261,26 @@ class SelfServiceController extends Controller
         return response()->json(['message' => 'Upload succesful', 'data' => []], 200);
     }
 
-    public function deleteDocument($id){
+    public function deleteDocument($id)
+    {
         if (\Request::route()->getPrefix() == 'api/admin/self-service') {
             $document = StaffUploadedDocument::where(['staff_id' => auth()->user()->staff->id, 'company_id' => $this->sessionDetails('company_id')])->first();
-        }else{
-            $document = StaffUploadedDocument::where(['id' => $id, 'company_id'=> $this->sessionDetails('company_id')])->first();
+        } else {
+            $document = StaffUploadedDocument::where(['id' => $id, 'company_id' => $this->sessionDetails('company_id')])->first();
         }
-        
-        if($document){            
+
+        if ($document) {
             $this->deleteUploadedFile($document->file);
-            
+
             $document->delete();
             return response()->json(['message' => 'Delete succesful', 'data' => []], 200);
-        }else{
+        } else {
             return response()->json(['message' => 'No record found', 'data' => []], 200);
-
         }
-
     }
 
-    public function getStaffDocument($staff_id=null){
+    public function getStaffDocument($staff_id = null)
+    {
         if (\Request::route()->getPrefix() == 'api/admin/self-service') {
             $staff_id = Auth::user()->staff->id;
         }
@@ -287,7 +290,7 @@ class SelfServiceController extends Controller
         }])->get();
 
         $refined = [];
-        foreach($document as $document){            
+        foreach ($document as $document) {
             $refined[] = [
                 'staff_id' => $staff_id,
                 'staff_document_id' => $document->id,
@@ -299,20 +302,20 @@ class SelfServiceController extends Controller
         }
 
         return response()->json(['message' => 'Succesful retrieved', 'data' => $refined], 200);
-
     }
 
-    public function getStaffDocumentBySettingId($id, $staff_id=null){
+    public function getStaffDocumentBySettingId($id, $staff_id = null)
+    {
         if (\Request::route()->getPrefix() == 'api/admin/self-service') {
             $staff_id = Auth::user()->staff->id;
         }
 
-        $setting = StaffDocumentSetting::with(['documents' => function($query) use ($staff_id){
+        $setting = StaffDocumentSetting::with(['documents' => function ($query) use ($staff_id) {
             $query->where('staff_id', $staff_id);
         }])->where('id', $id)->first();
-        
+
         $setting->uploaded = $setting->documents->count();
-        
+
         return response()->json(['message' => 'Succesful retrieved', 'data' => $setting], 200);
     }
 
@@ -337,7 +340,7 @@ class SelfServiceController extends Controller
         $codeData = ResetCodePassword::create($data);
         $data['type'] = 'password-reset';
         $data['token'] = $rand;
-        
+
         // Log email only
         $mes = new MessageTransactionController();
         $mes->logEmailTransaction($data);
@@ -417,7 +420,7 @@ class SelfServiceController extends Controller
 
     public function fetchViewedNotifications(Request $request)
     {
-        
+
         $user = Auth::user();
         $notifications = [];
         $read = $user->readNotifications()->where('company_id', $this->sessionDetails('company_id'));
@@ -497,14 +500,14 @@ class SelfServiceController extends Controller
     {
         $notifications = Auth::user()->notifications();
 
-        if(!empty($request->to) && !empty($request->from)){
+        if (!empty($request->to) && !empty($request->from)) {
             $from = Carbon::parse($request->from . ' 00:00:00');
             $to = Carbon::parse($request->to . ' 23:59:00');
 
-            $notifications = $notifications->whereBetween('created_at',[$from, $to]);
+            $notifications = $notifications->whereBetween('created_at', [$from, $to]);
         }
         $notifications = $notifications->paginate(20)->withQueryString();
-        
+
         foreach ($notifications as $notification) {
             $notification['title'] = $notification->data['title'];
             $notification['title'] = $notification->data['title'];

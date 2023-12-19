@@ -29,24 +29,24 @@ class AccountGroupController extends Controller
             $account_group = AccountGroup::where('company_id', $this->sessionDetails('company_id'))->paginate(20)->withQueryString();
         }
 
-        return response()->json(['message' => 'success', 'data' => $account_group], 200);
+        return response()->json(['message' => 'Success', 'data' => $account_group], 200);
     }
 
     /**
      * Show the form for creating a new resource.
      */
 
-    public function modifyAccountGroup($id){
+    public function modifyAccountGroup($id)
+    {
         $account_group = AccountGroup::where('company_id', $this->sessionDetails('company_id'))->where('id', $id)->first();
-        if($account_group){
-            if($account_group->status == 'active'){
+        if ($account_group) {
+            if ($account_group->status == 'active') {
                 $account_group->update(['status' => 'inactive']);
-            }else{
+            } else {
                 $account_group->update(['status' => 'active']);
             }
         }
         return response()->json(['message' => 'Successfully updated', 'data' => []], 200);
-
     }
 
     public function create()
@@ -84,7 +84,7 @@ class AccountGroupController extends Controller
      */
     public function show(AccountGroup $accountGroup)
     {
-        return response()->json(['message' => 'success', 'data' => $accountGroup], 200);
+        return response()->json(['message' => 'Success', 'data' => $accountGroup], 200);
     }
 
     /**
@@ -92,7 +92,6 @@ class AccountGroupController extends Controller
      */
     public function edit(AccountGroup $accountGroup)
     {
-        
     }
 
     /**

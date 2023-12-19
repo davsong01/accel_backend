@@ -17,19 +17,19 @@ class CompanySettingController extends Controller
      */
     public function index()
     {
-       
+
         $companySetting = CompanySetting::where('company_id', $this->sessionDetails('company_id'))->first();
-        
+
         if (!$companySetting) {
             $companySetting = CompanySetting::create([
                 'company_id' =>  $this->sessionDetails('company_id'),
             ]);
         }
-       
-        $companySetting->currency = $companySetting->currencyData;
-        
 
-        return response()->json(['message' => 'success', 'data' => $companySetting], 200);
+        $companySetting->currency = $companySetting->currencyData;
+
+
+        return response()->json(['message' => 'Success', 'data' => $companySetting], 200);
     }
 
     public function domainDetails($slug)
@@ -53,7 +53,7 @@ class CompanySettingController extends Controller
             ]);
         }
 
-        return response()->json(['message' => 'success', 'data' => $companySetting], 200);
+        return response()->json(['message' => 'Success', 'data' => $companySetting], 200);
     }
 
     /**
@@ -366,10 +366,10 @@ class CompanySettingController extends Controller
             foreach ($currency_list as $k => $v) {
 
                 if ($v["id"] == $country_id) {
-                    return response()->json(['message' => 'success', 'data' => $currency_list[$k]], 200);
+                    return response()->json(['message' => 'Success', 'data' => $currency_list[$k]], 200);
                 }
             }
         }
-        return response()->json(['message' => 'success', 'data' => $currency_list], 200);
+        return response()->json(['message' => 'Success', 'data' => $currency_list], 200);
     }
 }

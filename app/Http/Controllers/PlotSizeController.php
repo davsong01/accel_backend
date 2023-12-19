@@ -22,7 +22,7 @@ class PlotSizeController extends Controller
     {
         $plot = PlotSize::where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'desc')->get();
 
-        return response()->json(['message' => 'success', 'data' => $plot], 200);
+        return response()->json(['message' => 'Success', 'data' => $plot], 200);
     }
 
     /**
@@ -87,7 +87,7 @@ class PlotSizeController extends Controller
      */
     public function show(PlotSize $plotsize)
     {
-        return response()->json(['message' => 'success', 'data' => $plotsize], 200);
+        return response()->json(['message' => 'Success', 'data' => $plotsize], 200);
     }
 
     /**
@@ -121,18 +121,18 @@ class PlotSizeController extends Controller
 
         return response()->json(['message' => 'Updated Successfully.', 'data' => $plotsize], 200);
     }
-    
+
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(PlotSize $plotsize)
     {
         EstatePropertyTypeDetails::where(['plot_size' => $plotsize->size, 'company_id' => $plotsize->company_id])->count();
-        
-        if($this->definedRelations('PlotSize', $plotsize) > 0){
+
+        if ($this->definedRelations('PlotSize', $plotsize) > 0) {
             return response()->json(['message' => 'Unable to delete, resource in use', 'data' => null], 412);
         }
-        
+
         $plotsize->delete();
         return response()->json(['message' => 'Deleted Successfully.', 'data' => null], 200);
     }

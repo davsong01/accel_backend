@@ -17,7 +17,7 @@ class JobTypeController extends Controller
     public function index()
     {
         $jobtype = JobType::where('company_id', $this->sessionDetails('company_id'))->get();
-        return response()->json(['message' => 'success', 'data' => $jobtype], 200);
+        return response()->json(['message' => 'Success', 'data' => $jobtype], 200);
     }
 
     /**
@@ -69,8 +69,7 @@ class JobTypeController extends Controller
      */
     public function edit(JobType $jobtype)
     {
-        return response()->json(['message' => 'success', 'data' => $jobtype], 200);
-        
+        return response()->json(['message' => 'Success', 'data' => $jobtype], 200);
     }
 
     /**
@@ -88,7 +87,7 @@ class JobTypeController extends Controller
                 'data' => null,
             ], 412);
         }
-      
+
         $jobtype->update([
             'name' => $request->name,
             'company_id' => $this->sessionDetails('company_id'),

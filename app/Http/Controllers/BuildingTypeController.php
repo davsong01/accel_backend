@@ -21,7 +21,7 @@ class BuildingTypeController extends Controller
     public function index()
     {
         $building_types = BuildingType::where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'desc')->get();
-        return response()->json(['message' => 'success', 'data' => $building_types], 200);
+        return response()->json(['message' => 'Success', 'data' => $building_types], 200);
     }
 
     /**
@@ -127,7 +127,7 @@ class BuildingTypeController extends Controller
      */
     public function destroy(BuildingType $buildingType)
     {
-        
+
         $count = EstatePropertyTypeDetails::where(['building_type' => $buildingType->size, 'company_id' => $buildingType->company_id])->count();
         if ($count > 0) {
             return response()->json(['message' => 'Unable to delete, resource in use', 'data' => null], 412);

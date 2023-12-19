@@ -17,7 +17,7 @@ class CompanyDocumentController extends Controller
     public function index()
     {
         $documents = CompanyDocument::where('company_id', $this->sessionDetails('company_id'))->get();
-        return response()->json(['message' => 'success', 'data' => $documents], 200);
+        return response()->json(['message' => 'Success', 'data' => $documents], 200);
     }
 
     /**
@@ -25,7 +25,6 @@ class CompanyDocumentController extends Controller
      */
     public function create()
     {
-        
     }
 
     /**
@@ -50,7 +49,7 @@ class CompanyDocumentController extends Controller
                 'data' => null,
             ], 412);
         }
-        
+
         $data = [
             'name' => $request->name,
             'description' => $request->description,
@@ -61,10 +60,9 @@ class CompanyDocumentController extends Controller
         if (!empty($request->file)) {
             $data['file'] = $this->uploadProtectedFile($request->file, 'documents')['filepath'];
         }
-        
+
         $document = CompanyDocument::create($data);
-        return response()->json(['message' => 'success', 'data' => $document], 200);
-        
+        return response()->json(['message' => 'Success', 'data' => $document], 200);
     }
 
     /**
@@ -112,10 +110,10 @@ class CompanyDocumentController extends Controller
         if (!empty($request->file)) {
             $data['file'] = $this->uploadProtectedFile($request->file, 'documents')['filepath'];
         }
-        
+
         $companyDocument->update($data);
 
-        return response()->json(['message' => 'success', 'data' => null], 200);
+        return response()->json(['message' => 'Success', 'data' => null], 200);
     }
 
     /**
@@ -125,6 +123,6 @@ class CompanyDocumentController extends Controller
     {
         $this->deleteImage($companyDocument->file);
         $companyDocument->delete();
-        return response()->json(['message' => 'success', 'data' => null], 200);
+        return response()->json(['message' => 'Success', 'data' => null], 200);
     }
 }

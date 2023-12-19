@@ -104,7 +104,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 
 Route::get('domain-details/{slug}', [CompanySettingController::class, 'domainDetails']);
-
+Route::group(['middleware' => 'throttle:60,1'], function () {
+    // [...]
+});
 Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/get-permission-to-resource', [MenuController::class, 'getPermissionToResource'])->middleware(['auth:sanctum', 'company_check']);
@@ -130,14 +132,14 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::resource('building-type', BuildingTypeController::class);
         Route::get('sample-bulk-building-type-import', [BuildingTypeController::class, 'sampleBulkBuildingType']);
         Route::post('import-bulk-building-type', [BuildingTypeController::class, 'importBulkBuildingType']);
-
+        
         Route::get('sample-bulk-plotsizes-import', [PlotSizeController::class, 'sampleBulkPlotSize']);
         Route::post('import-bulk-plotsizes', [PlotSizeController::class, 'importBulkPlotSize']);
 
         Route::resource('estate', EstateController::class);
         Route::get('filter-estates', [EstateController::class, 'filterEstates']);
         Route::get('sample-bulk-estate-import', [EstateController::class, 'sampleBulkEstate']);
-        Route::post('import-bulk-estate', [EstateController::class, 'importBulkEstates']);
+        Route::post('import-bulk-estate', [EstateController::class, 'importBulkEstates'])->name('import.bulk.estate');
         Route::get('change-estate-status/{id}', [EstateController::class, 'changeEstateStatus']);
         // Route::get('estate-count/{estate_id}/{search?}', [EstateController::class, 'filterPropertyCount']);
         Route::get('property_count', [EstateController::class, 'getPropertyCount']);
@@ -322,6 +324,8 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
 
 Route::group(['prefix' => 'customer', 'before' => 'customer'], function () {
     Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/logout', [AuthController::class, 'logoutCustomer']);
+
     Route::post('/validate', [AuthController::class, 'validateCustomer']);
 
     Route::middleware(['auth:sanctum', 'company_check'])->group(function () {

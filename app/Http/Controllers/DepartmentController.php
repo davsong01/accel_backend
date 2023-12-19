@@ -19,7 +19,7 @@ class DepartmentController extends Controller
     public function index()
     {
         $departments = Department::where('company_id', $this->sessionDetails('company_id'))->get();
-        return response()->json(['message' => 'success', 'data' => $departments], 200);
+        return response()->json(['message' => 'Success', 'data' => $departments], 200);
     }
 
     /**
@@ -37,7 +37,7 @@ class DepartmentController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => [
-                'required', Rule::unique('departments')->where(function ($query) {      
+                'required', Rule::unique('departments')->where(function ($query) {
                     $query->where('company_id', $this->sessionDetails('company_id'));
                 })
             ],
@@ -52,13 +52,13 @@ class DepartmentController extends Controller
             ], 412);
         }
 
-        $department = Department::updateOrcreate(['name'=>$request->name, 'company_id' => $this->sessionDetails('company_id')],[
+        $department = Department::updateOrcreate(['name' => $request->name, 'company_id' => $this->sessionDetails('company_id')], [
             'name' => $request->name,
             'description' => $request->description,
             'status' => $request->status,
             'company_id' => $this->sessionDetails('company_id'),
         ]);
-        
+
         return response()->json(['message' => 'Created successfully', 'data' => $department], 200);
     }
 
@@ -67,7 +67,7 @@ class DepartmentController extends Controller
      */
     public function show(Department $department)
     {
-        return response()->json(['message' => 'success', 'data' => $department], 200);
+        return response()->json(['message' => 'Success', 'data' => $department], 200);
     }
 
     /**

@@ -125,13 +125,36 @@ class AuthController extends Controller
     // logout a user method
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        if ($request->user()) {
+            $request->user()->currentAccessToken()->delete();
+            $cookie = cookie()->forget('token');
+            Session::flush();
+            return response()->json([
+                'message' => 'Logged out successfully!'
+            ])->withCookie($cookie);
+        }else {
+            Session::flush();
+            return response()->json([
+                'message' => 'Already Logged out!',
+            ]);
+        }
+    }
 
-        $cookie = cookie()->forget('token');
-        Session::flush();
-        return response()->json([
-            'message' => 'Logged out successfully!'
-        ])->withCookie($cookie);
+    public function logoutCustomer(Request $request)
+    {
+        if($request->user()){
+            $request->user()->currentAccessToken()->delete();
+            $cookie = cookie()->forget('token');
+            Session::flush();
+            return response()->json([
+                'message' => 'Logged out successfully!'
+            ])->withCookie($cookie);
+        }else{
+            Session::flush();
+            return response()->json([
+                'message' => 'Already Logged out!',
+            ]);
+        }
     }
 
     // get the authenticated user method

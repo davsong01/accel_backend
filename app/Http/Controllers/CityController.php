@@ -18,7 +18,7 @@ class CityController extends Controller
     public function index()
     {
         $cities = City::where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'desc')->get();
-        return response()->json(['message' => 'success', 'data' => $cities], 200);
+        return response()->json(['message' => 'Success', 'data' => $cities], 200);
     }
 
 
@@ -62,8 +62,7 @@ class CityController extends Controller
      */
     public function show(City $city)
     {
-        return response()->json(['message' => 'success', 'data' => $city], 200);
-        
+        return response()->json(['message' => 'Success', 'data' => $city], 200);
     }
 
     /**

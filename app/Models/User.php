@@ -45,7 +45,7 @@ class User extends Authenticatable
     {
         return $this->hasOne(Staff::class);
     }
-
+    
     public function getAdditionalDetailsAttribute()
     {
         $additional_details = !empty($this->attributes['additional_details']) ? json_decode($this->attributes['additional_details'], true) : [];
