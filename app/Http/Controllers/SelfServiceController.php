@@ -62,7 +62,7 @@ class SelfServiceController extends Controller
                 'id' => $b->user_id,
                 'first_name' => $b->first_name,
                 'last_name' => $b->last_name,
-                'avatar' => !empty($b->avatar) ? $this->encodeUploadedFile($b->avatar) : '',
+                'avatar' => !empty($b->avatar) ? $this->encodeGeneralUploadedFile($b->avatar) : '',
                 'date_of_birth' => Carbon::parse($b->date_of_birth)->format('jS \\of F'),
             ];
         }
@@ -72,7 +72,7 @@ class SelfServiceController extends Controller
                 'id' => $b->staff_id,
                 'first_name' => $b->first_name,
                 'last_name' => $b->last_name,
-                'avatar' => !empty($b->avatar) ? $this->encodeUploadedFile($b->avatar) : '',
+                'avatar' => !empty($b->avatar) ? $this->encodeGeneralUploadedFile($b->avatar) : '',
                 'date_of_employment' => Carbon::parse($b->date_of_employment)->format('jS \\of F'),
             ];
         }
@@ -87,7 +87,7 @@ class SelfServiceController extends Controller
                 'user_id' => $b->user_id,
                 'first_name' => $b->first_name,
                 'last_name' => $b->last_name,
-                'avatar' => !empty($b->avatar) ? $this->encodeUploadedFile($b->avatar) : '',
+                'avatar' => !empty($b->avatar) ? $this->encodeGeneralUploadedFile($b->avatar) : '',
                 'created_at' => Carbon::parse($b->created_at)->format('jS \\of F'),
             ];
         }

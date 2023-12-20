@@ -647,7 +647,7 @@ class StaffController extends Controller
             'gender' => $staff->user->gender ?? '',
             'marital_status' => $additional_details['marital_status'] ?? '',
             'dob' => $date_of_birth,
-            'avatar' => !empty($staff->avatar) ? url('/') . '/uploads/' . base64_encode($staff->avatar) : '',
+            'avatar' => !empty($staff->avatar) ? $this->encodeGeneralUploadedFile($staff->avatar) : '',
         ];
 
         $data['contact_and_additional_information'] = [
