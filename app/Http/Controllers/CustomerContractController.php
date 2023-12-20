@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Carbon\Carbon;
 use App\Models\User;
+use App\Models\Staff;
 use App\Models\Payment;
 use App\Models\Customer;
 use Illuminate\Support\Arr;
@@ -207,6 +208,14 @@ class CustomerContractController extends Controller
 
             if ($user) {
                 $customer = $this->createCustomer($user);
+
+                // Log email
+                $data['type'] = 'user.store';
+                $data['name'] =  $user->first_name;
+                $data['email'] =  $user->email;
+                $data['customer_id'] =  $user->customerId;
+
+                $this->logEmail($data);
             } else {
                 return response()->json(['message' => 'Could not create user', 'data' => null], 422);
             }
@@ -219,6 +228,25 @@ class CustomerContractController extends Controller
 
                     $this->createCustomerContract($data);
                 }
+                
+                if($data['primary_marketer_id']){
+                    $data2['type'] = 'primary.marketer.email.for.new.contract';
+                    $markerter = Staff::where('id', $data['primary_marketer_id'])->first();
+
+                    if($markerter){
+                        $data2['name'] =  $markerter->user->first_name;
+                        $data2['customer_details'] = [
+                            'customer_name' => $customer->user->first_name . ' ' . $customer->user->last_name,
+                            'customer_phone' => $customer->user->phone . ' ' . $customer->user->phone,
+                            'customerId' => $customer->user->customerId,
+                        ];
+                        $data2['customer_name'] =  $customer->user->first_name;
+                        $data2['email'] =  $markerter->user->email;
+        
+                        $this->logEmail($data2);
+                    }
+                }
+                // Email Primary Marketer
             } else {
                 return response()->json(['message' => 'Could not create customer', 'data' => null], 422);
             }
@@ -371,18 +399,15 @@ class CustomerContractController extends Controller
         }
 
         $data = $validator->valid();
-
-        if (env('ENT') == 'local') {
-            $request['contract_ids'] = $request['contract_ids'];
-        } else {
-            $request['contract_ids'] = json_decode($request['contract_ids'], true);
-        }
+       
+        $request['contract_ids'] = json_decode($request['contract_ids'], true);
         $contract_ids = array_column($request['contract_ids'], 'contract_id');
 
         $ids = [];
         array_walk_recursive($contract_ids, function ($a) use (&$ids) {
             $ids[] = $a;
         });
+
 
         $form_payment = $this->generateFormPayment($ids, $request->customer_id);
 
