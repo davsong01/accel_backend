@@ -52,7 +52,7 @@ class CustomerFormController extends Controller
 
         foreach ($forms as $form) {
             $means_of_identification = !empty($form->means_of_identification) ? json_decode($form->means_of_identification, true) : [];
-            $form['passport_photo'] = !empty($means_of_identification) && isset($means_of_identification['passport_photo']) ?  url('/') . '/general-uploads/' . base64_encode($means_of_identification['passport_photo']) : "";
+            $form['passport_photo'] = !empty($means_of_identification) && isset($means_of_identification['passport_photo']) ?  $this->encodeGeneralUploadedFile($means_of_identification['passport_photo']) : "";
             unset($form['means_of_identification']);
             unset($form['other_details']);
         }

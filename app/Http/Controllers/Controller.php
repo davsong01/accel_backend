@@ -571,7 +571,7 @@ class Controller extends BaseController
 
         $means_of_identification = !empty($forms->means_of_identification) ? json_decode($forms->means_of_identification, true) : [];
 
-        $means_of_identification['passport_photo'] = isset($means_of_identification['passport_photo']) && !empty($means_of_identification['passport_photo']) ? $this->encodeUploadedFile($means_of_identification['passport_photo']) : null;
+        $means_of_identification['passport_photo'] = isset($means_of_identification['passport_photo']) && !empty($means_of_identification['passport_photo']) ? $this->encodeGeneralUploadedFile($means_of_identification['passport_photo']) : null;
         $means_of_identification['id_card'] = isset($means_of_identification['id_card']) && !empty($means_of_identification['id_card']) ? $this->encodeUploadedFile($means_of_identification['id_card']) : null;
         $means_of_identification['signature'] = isset($means_of_identification['signature']) && !empty($means_of_identification['signature']) ? $this->encodeUploadedFile($means_of_identification['signature']) : null;
         $forms->means_of_identification = $means_of_identification;
@@ -644,7 +644,7 @@ class Controller extends BaseController
         $pdf = PDF::loadView('receipts.template1', compact('payment', 'data'))->setPaper('a4', 'portrait');
         file_put_contents(base_path() . '/' . config('app.upload_path') . '/' . $pathToSave, $pdf->output());
         // Rmember to create a public folder in the root directory if there is a PDF error
-        
+
         return [
             'receipt_no' => $name . '.pdf',
             'filename' => $name . '.pdf',
