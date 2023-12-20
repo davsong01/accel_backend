@@ -82,7 +82,7 @@ class CustomerController extends Controller
         }
 
         $customers = $customers->paginate(20)->withQueryString();
-
+        
         foreach ($customers as $customer) {
             $statuses = $customer->contracts->pluck('status')->toArray();
             $customer->contract_statuses = array_count_values($statuses);
@@ -205,7 +205,8 @@ class CustomerController extends Controller
     {
         $customer = Customer::where('customers.id', $id)
             ->with('user')->first();
-        $customer->customer_id = $customer->user->id;
+            
+        $customer->customer_id = $customer->id;
 
         return response()->json(['message' => 'Success', 'data' => $customer], 200);
     }
