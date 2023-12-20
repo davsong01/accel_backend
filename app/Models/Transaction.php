@@ -11,11 +11,11 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 
-class Payment extends Model
+class Transaction extends Model
 {
     use HasFactory;
     protected $guarded = [];
-    protected $table = 'payments';
+    protected $table = 'transactions';
     protected $appends = ['receipt_location'];
 
     protected function createdAt(): Attribute
