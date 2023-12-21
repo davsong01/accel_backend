@@ -42,7 +42,7 @@ class FinanceController extends Controller
      * Create a resource for GL Ledger.
      * 
      */
-    public function GLLedgerCreate(Request $request): JsonResponse
+    public function createGLLedger(Request $request): JsonResponse
     {
         $company_id = $this->sessionDetails('company_id');
 
@@ -69,5 +69,22 @@ class FinanceController extends Controller
         $transaction = $this->createTransaction($validator->validated());
         return response()->json(['message' => 'success', 'data' => $transaction], 200);
     }
+
+    /**
+     * Search/filter GL Ledger
+     * 
+     */
+     public function searchGLLedger(Request $request){ 
+        $params = $request->only((new Transaction)->getAttributes());
+        $query = Transaction::with(['account', 'staff', 'customer'])->where($params);
+
+        $from = $request->input('from');
+        $to = $request->input('to');
+        if($from && $to)
+            $query->whereBetween('created_at', [$from, $to]);
+
+        $transactions = $query->latest()->paginate(20);
+        return response()->json(['message' => 'success', 'data' => $transactions], 200);
+     }
 
 }
