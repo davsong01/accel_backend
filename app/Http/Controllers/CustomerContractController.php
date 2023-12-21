@@ -14,6 +14,7 @@ use Illuminate\Validation\Rule;
 use App\Models\CustomerContract;
 use Illuminate\Http\RedirectResponse;
 use App\Models\GeneratedLegalDocument;
+use App\Models\LegalDocumentType;
 use Illuminate\Support\Facades\Validator;
 
 class CustomerContractController extends Controller
@@ -54,12 +55,11 @@ class CustomerContractController extends Controller
                 $contract['location'] = $contract->location->name;
                 $allContracts[$key] = $contract;
 
-                $contract->legal_documents = $this->generatedDocuments($contract);
-               
-
+                $contract->generated_legal_documents = $this->generatedDocuments($contract);
+                $contract->legal_document_type_ids = $this->prepareDocumentTypeIds($contract);
                 $allContracts[$key]['form_amount'] = $this->getContractFormAmount($contract, 'single');
-               
             }
+
             $data['all_contracts'] = $allContracts;
 
             return response()->json(['message' => 'Success', 'data' => $data], 200);
@@ -72,26 +72,32 @@ class CustomerContractController extends Controller
     {
         $generated = GeneratedLegalDocument::with('template')->where('contract_id', $contract->id)->where('customer_id', $contract->customer_id)->get();
         $alldocumts = [];
-
+        
         foreach($generated as $generate){
             $alldocumts[$generate->template->legalDocumentType->name] = [
-                'legal_document_template_id' => $generate->template->legal_document_template_id,
+                'legal_document_template_id' => $generate->template->id,
                 'legal_document_type_id' => $generate->template->legalDocumentType->id,
                 'legal_document_name' => $generate->template->legalDocumentType->name,
                 'legal_document_type' => $generate->template->legalDocumentType->type,
                 'regenerate_count' => $generate->regenerate_count,
             ];
-           
-            // dd($generate->template->legalDocumentType);
         }
         return $alldocumts;
-        // return $this->hasMany(GeneratedLegalDocument::class, 'contract_id')->select('id,tem');
     }
 
+    public function prepareDocumentTypeIds($contract)
+    {
+        $documents = LegalDocumentType::where('type', strtoupper($contract->property_type))->get(['id','name','type']);
+        $alldocs = [];
+        foreach ($documents as $generate) {
+            $alldocs[$generate->name] = $generate->id;
+        }
+
+        return $alldocs;
+    }
 
     public function getSingleCustomerContract($customer_id)
     {
-
         if (auth()->user()->customer->id != $customer_id) {
             return response()->json([
                 'error' => 'Invalid customer id',
