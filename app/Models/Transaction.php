@@ -59,7 +59,9 @@ class Transaction extends Model
 
     public function getReceiptLocationAttribute()
     {
-        return app('App\Http\Controllers\Controller')->encodeUploadedFile($this->attributes['receipt_location']);
+        if(key_exists('receipt_location', $this->attributes))
+            return app('App\Http\Controllers\Controller')->encodeUploadedFile($this->attributes['receipt_location']);
+        return '';
     }
 
 }
