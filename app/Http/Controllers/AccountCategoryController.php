@@ -29,7 +29,7 @@ class AccountCategoryController extends Controller
             $account_category = $account_category->paginate(20)->withQueryString();
         }
 
-        return response()->json(['message' => 'success', 'data' => $account_category], 200);
+        return response()->json(['message' => 'Success', 'data' => $account_category], 200);
     }
 
     public function modifyAccountCategory($id)
@@ -44,7 +44,7 @@ class AccountCategoryController extends Controller
         }
         return response()->json(['message' => 'Successfully updated', 'data' => []], 200);
     }
-    
+
 
     /**
      * Show the form for creating a new resource.
@@ -87,7 +87,7 @@ class AccountCategoryController extends Controller
      */
     public function show(AccountCategory $accountCategory)
     {
-        return response()->json(['message' => 'success', 'data' => $accountCategory], 200);
+        return response()->json(['message' => 'Success', 'data' => $accountCategory], 200);
     }
 
     /**
@@ -105,9 +105,9 @@ class AccountCategoryController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => [
-                'required', Rule::unique('account_categories')->where(function ($query) use ($accountCategory ){
+                'required', Rule::unique('account_categories')->where(function ($query) use ($accountCategory) {
                     $query->where('company_id', $this->sessionDetails('company_id'));
-                    $query->where('name','!=', $accountCategory->name);
+                    $query->where('name', '!=', $accountCategory->name);
                 })
             ],
             'account_group_id' => 'required|exists:account_groups,id,company_id,' . $this->sessionDetails('company_id'),
@@ -137,7 +137,7 @@ class AccountCategoryController extends Controller
         if ($this->definedRelations('AccountCategory', $accountCategory) > 0) {
             return response()->json(['message' => 'Unable to delete, resource in use', 'data' => []], 412);
         }
-        
+
         $accountCategory->delete();
         return response()->json(['message' => 'Deleted Successfully.', 'data' => []], 200);
     }

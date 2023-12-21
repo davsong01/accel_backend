@@ -15,14 +15,14 @@ class ChartOfAccountController extends Controller
      */
     public function index(Request $request)
     {
-        $coa = ChartOfAccount::with('currency','account_category:id,name', 'account_type:id,type')->where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'desc');
-       
-        if(!empty($request->status)){
+        $coa = ChartOfAccount::with('currency', 'account_category:id,name', 'account_type:id,type')->where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'desc');
+
+        if (!empty($request->status)) {
             $coa = $coa->where('status', $request->status);
         }
 
         $coa = $coa->get();
-        return response()->json(['message' => 'success', 'data' => $coa], 200);
+        return response()->json(['message' => 'Success', 'data' => $coa], 200);
     }
 
 
@@ -44,7 +44,6 @@ class ChartOfAccountController extends Controller
      */
     public function create()
     {
-        
     }
 
     /**
@@ -87,7 +86,7 @@ class ChartOfAccountController extends Controller
     public function show(ChartOfAccount $chartOfAccount)
     {
         if ($chartOfAccount) {
-            return response()->json(['message' => 'Retrieved successfully', 'data' => $chartOfAccount->load('currency','account_category:id,name', 'account_type:id,type')], 200);
+            return response()->json(['message' => 'Retrieved successfully', 'data' => $chartOfAccount->load('currency', 'account_category:id,name', 'account_type:id,type')], 200);
         } else {
             return response()->json(['message' => 'No records found', 'data' => $chartOfAccount], 200);
         }

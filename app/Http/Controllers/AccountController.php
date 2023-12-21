@@ -17,7 +17,7 @@ class AccountController extends Controller
     public function index()
     {
         $coa = Account::where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'desc')->get();
-        return response()->json(['message' => 'success', 'data' => $coa], 200);
+        return response()->json(['message' => 'Success', 'data' => $coa], 200);
     }
 
     /**

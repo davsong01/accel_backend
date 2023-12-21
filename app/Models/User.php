@@ -45,7 +45,7 @@ class User extends Authenticatable
     {
         return $this->hasOne(Staff::class);
     }
-
+    
     public function getAdditionalDetailsAttribute()
     {
         $additional_details = !empty($this->attributes['additional_details']) ? json_decode($this->attributes['additional_details'], true) : [];
@@ -61,7 +61,7 @@ class User extends Authenticatable
         $means_of_identification['place_of_work'] = isset($means_of_identification['place_of_work']) ? $means_of_identification['place_of_work'] : null;
         $means_of_identification['id_card_type'] = isset($means_of_identification['id_card_type']) ? $means_of_identification['id_card_type'] : null;
        
-        $means_of_identification['passport_photo'] = isset($means_of_identification['passport_photo']) ? app('App\Http\Controllers\Controller')->encodeUploadedFile($means_of_identification['passport_photo']) : null;
+        $means_of_identification['passport_photo'] = isset($means_of_identification['passport_photo']) ? app('App\Http\Controllers\Controller')->encodeGeneralUploadedFile($means_of_identification['passport_photo']) : null;
         
         $means_of_identification['id_card'] = isset($means_of_identification['id_card']) ? app('App\Http\Controllers\Controller')->encodeUploadedFile($means_of_identification['id_card']) : null;
        
@@ -86,7 +86,7 @@ class User extends Authenticatable
     protected function avatar(): Attribute
     {
         return Attribute::make( 
-            get: fn (string $value = null) => !empty($value) ? app('App\Http\Controllers\Controller')->encodeUploadedFile($value) : '',
+            get: fn (string $value = null) => !empty($value) ? app('App\Http\Controllers\Controller')->encodeGeneralUploadedFile($value) : '',
         );
     }
 

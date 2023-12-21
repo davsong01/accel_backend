@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('packages', function (Blueprint $table) {
             $table->id();
             $table->string('name')->nullable();
-            $table->string('access')->nullable();
+            $table->longText('access')->nullable();
             $table->text('description')->nullable();
             $table->timestamps();
         });

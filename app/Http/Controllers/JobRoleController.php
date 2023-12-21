@@ -24,7 +24,7 @@ class JobRoleController extends Controller
         //     $jobroles = $jobroles->whereType($request->type);
         // }
 
-        return response()->json(['message' => 'success', 'data' => $jobroles], 200);
+        return response()->json(['message' => 'Success', 'data' => $jobroles], 200);
     }
 
     /**
@@ -42,7 +42,7 @@ class JobRoleController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => [
-                'required', Rule::unique('job_roles')->where(function ($query) {      
+                'required', Rule::unique('job_roles')->where(function ($query) {
                     $query->where('company_id', $this->sessionDetails('company_id'));
                 })
             ],
@@ -55,7 +55,7 @@ class JobRoleController extends Controller
                 'data' => null,
             ], 412);
         }
-        
+
         $jobrole = JobRole::updateOrcreate([
             'name' => $request->name,
             'department_id' => $request->department_id,
@@ -72,7 +72,7 @@ class JobRoleController extends Controller
             ->select('id', 'department_id', 'name')
             ->get();
 
-        return response()->json(['message' => 'success', 'data' => $roles], 200);
+        return response()->json(['message' => 'Success', 'data' => $roles], 200);
     }
 
     /**
@@ -80,8 +80,7 @@ class JobRoleController extends Controller
      */
     public function show(JobRole $jobrole)
     {
-        return response()->json(['message' => 'success', 'data' => $jobrole->load('department:id,name')], 200);
-        
+        return response()->json(['message' => 'Success', 'data' => $jobrole->load('department:id,name')], 200);
     }
 
     /**
@@ -89,7 +88,7 @@ class JobRoleController extends Controller
      */
     public function edit(JobRole $jobRole)
     {
-        return response()->json(['message' => 'success', 'data' => $jobRole->load('department:id,name')], 200);
+        return response()->json(['message' => 'Success', 'data' => $jobRole->load('department:id,name')], 200);
     }
 
     /**

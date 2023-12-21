@@ -23,7 +23,7 @@ class LegalDocumentController extends Controller
     {
         $params = $request->input();
         $types = LegalDocumentType::where($params)->get();
-        return response()->json(['message' => 'success', 'data' => $types], 200);
+        return response()->json(['message' => 'Success', 'data' => $types], 200);
     }
 
     /**
@@ -58,7 +58,7 @@ class LegalDocumentController extends Controller
             'legal_document_type_id' => $data['legal_document_type_id']
         ], $data);
 
-        return response()->json(['message' => 'success', 'data' => $document], 200);
+        return response()->json(['message' => 'Success', 'data' => $document], 200);
     }
 
     /**
@@ -68,7 +68,7 @@ class LegalDocumentController extends Controller
     {
         $params = $request->input();
         $types = LegalDocumentTemplate::where($params)->first();
-        return response()->json(['message' => 'success', 'data' => $types], 200);
+        return response()->json(['message' => 'Success', 'data' => $types], 200);
     }
 
     /**
@@ -83,7 +83,7 @@ class LegalDocumentController extends Controller
         if($legalDocumentTemplate->legalDocumentType->name === 'OFFER_LETTER'){
             $data =  CustomerContract::with(['customer.user', 'customer.generatedLegalDocuments'])->where([
                 'estate_id' => $request->input('estate_id'),
-                'status' => 'APPROVED',
+                'form_payment_status' => 'approved',
                 'property_type' =>  strtolower($legalDocumentTemplate->legalDocumentType->type)
             ])->paginate(20);
         }
@@ -119,7 +119,7 @@ class LegalDocumentController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
-        return response()->json(['message' => 'success', 'data' => $generatedLegalDocument], 200);
+        return response()->json(['message' => 'Success', 'data' => $generatedLegalDocument], 200);
     }
 
     /**
@@ -133,7 +133,7 @@ class LegalDocumentController extends Controller
             'file_location' => $documentGen['filepath'] . $documentGen['filename']
         ]);
 
-        return response()->json(['message' => 'success', 'data' => $document], 200);
+        return response()->json(['message' => 'Success', 'data' => $document], 200);
     }
 
     private function setOptions()
@@ -171,7 +171,7 @@ class LegalDocumentController extends Controller
 
         $filepath = config('app.upload_path') . '/' . $this->getPathToSaveFile('generated-legal-documents') . '/';
         $filename =  uniqid(11) . '.pdf';
-        $destination = base_path( $filepath . '/' . $filename );
+        $destination = base_path($filepath . '/' . $filename);
 
         GeneratedDocumentService::handler($file['filepath'], $values, $destination);
 

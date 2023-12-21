@@ -64,7 +64,7 @@ class EstateConstructionSettingController extends Controller
      */
     public function show(EstateConstructionSetting $estateConstructionSetting)
     {
-        return response()->json(['message' => 'success', 'data' => $estateConstructionSetting], 200);
+        return response()->json(['message' => 'Success', 'data' => $estateConstructionSetting], 200);
     }
 
     /**

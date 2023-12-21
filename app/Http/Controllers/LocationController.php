@@ -17,7 +17,7 @@ class LocationController extends Controller
     public function index()
     {
         $location = Location::with('city')->where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'desc')->get();
-        return response()->json(['message' => 'success', 'data' => $location], 200);
+        return response()->json(['message' => 'Success', 'data' => $location], 200);
     }
 
     public function cityLocations($city_id)
@@ -28,7 +28,7 @@ class LocationController extends Controller
             return response()->json(['message' => 'No records found', 'data' => $locations], 200);
         }
 
-        return response()->json(['message' => 'success', 'data' => $locations], 200);
+        return response()->json(['message' => 'Success', 'data' => $locations], 200);
     }
     /**
      * Show the form for creating a new resource.

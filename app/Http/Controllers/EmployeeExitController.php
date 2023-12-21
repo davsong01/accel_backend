@@ -15,23 +15,22 @@ class EmployeeExitController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request, $staff_id=null)
+    public function index(Request $request, $staff_id = null)
     {
 
         $exit = EmployeeExit::with('staff.user')->where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'DESC');
 
         if (!empty($staff_id)) {
             $exit = $exit->where('staff_id', $staff_id);
-        } 
-        
+        }
+
         if (!empty($request->paginate) && $request->paginate == 'false') {
             $exit = $exit->get();
         } else {
             $exit = $exit->paginate(20)->withQueryString();
         }
 
-        return response()->json(['message' => 'success', 'data' => $exit], 200);
-
+        return response()->json(['message' => 'Success', 'data' => $exit], 200);
     }
 
     /**
@@ -50,7 +49,7 @@ class EmployeeExitController extends Controller
         $validator = Validator::make($request->all(), [
             'type' => 'required|in:Voluntary Resignation,Requested Resignation,Termination,Demise,Retirement,Dismissal',
             'last_day_work' => 'required',
-            'reason' => 'required|in:Better Remuneration,Career Advancement,Relocation,Performance', 
+            'reason' => 'required|in:Better Remuneration,Career Advancement,Relocation,Performance',
             'comment' => 'nullable'
         ]);
 
@@ -59,12 +58,11 @@ class EmployeeExitController extends Controller
                 'staff_id' => 'required|exists:staff,id,company_id,' . $this->sessionDetails('company_id'),
             ]);
         }
-       
+
         if ($request->type == 'Voluntary Resignation') {
             $validator = Validator::make($request->all(), [
                 'resignation_letter' => 'required',
             ]);
-
         }
 
         if ($validator->fails()) {
@@ -80,8 +78,8 @@ class EmployeeExitController extends Controller
 
         $last_day = Carbon::parse($request->last_day_of_work);
         $resignation_letter = !empty($request->resignation_letter) ? $this->uploadFile($request->resignation_letter, 'exits') : null;
-        
-        EmployeeExit::updateOrCreate(['staff_id' => $request->staff_id ?? $staff_id, 'type' => $request->type],[
+
+        EmployeeExit::updateOrCreate(['staff_id' => $request->staff_id ?? $staff_id, 'type' => $request->type], [
             'last_day_work' => $last_day,
             'reason' => $request->reason,
             'file' => $resignation_letter,
@@ -89,8 +87,7 @@ class EmployeeExitController extends Controller
             'company_id' => $this->sessionDetails('company_id')
         ]);
 
-        return response()->json(['message' => 'success', 'data' => []], 200);
-
+        return response()->json(['message' => 'Success', 'data' => []], 200);
     }
 
     /**
@@ -124,7 +121,7 @@ class EmployeeExitController extends Controller
                 'data' => null,
             ], 412);
         }
-        
+
         $employeeExit->update($validator->validated());
         return response()->json(['message' => 'Successfully updated', 'data' => $employeeExit], 200);
     }
@@ -137,11 +134,12 @@ class EmployeeExitController extends Controller
         //
     }
 
-    public function search(Request $request){
+    public function search(Request $request)
+    {
         $params = $request->input();
 
         $employeeExits = EmployeeExit::where('company_id', $this->sessionDetails('company_id'))->where($params)->orderBy('created_at', 'DESC')->paginate(20);
 
-        return response()->json(['message' => 'success', 'data' => $employeeExits], 200);
+        return response()->json(['message' => 'Success', 'data' => $employeeExits], 200);
     }
 }

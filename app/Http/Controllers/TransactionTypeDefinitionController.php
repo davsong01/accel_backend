@@ -16,7 +16,7 @@ class TransactionTypeDefinitionController extends Controller
     public function index()
     {
         $tdt = TransactionTypeDefinition::where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'desc')->get();
-        return response()->json(['message' => 'success', 'data' => $tdt], 200);
+        return response()->json(['message' => 'Success', 'data' => $tdt], 200);
     }
 
     /**
@@ -24,7 +24,6 @@ class TransactionTypeDefinitionController extends Controller
      */
     public function create()
     {
-        
     }
 
     /**

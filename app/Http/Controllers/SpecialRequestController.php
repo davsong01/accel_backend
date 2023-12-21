@@ -19,7 +19,7 @@ class SpecialRequestController extends Controller
             // ->where('branch_id', auth()->user()->staff->branch_id)
             ->orderBy('created_at', 'DESC')->paginate(20)->withQueryString();
 
-        return response()->json(['message' => 'success', 'data' => $special_requests], 200);
+        return response()->json(['message' => 'Success', 'data' => $special_requests], 200);
     }
 
     /**

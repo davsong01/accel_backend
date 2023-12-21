@@ -22,7 +22,7 @@ class CustomerFormController extends Controller
      */
     public function index(Request $request, $id = null, $paginate = true)
     {
-        
+
         if (!empty($id)) {
             $forms = CustomerForm::with(['country:id,name', 'state:id,name', 'lga:id,name'])->where('id', $id)->where('company_id', $this->sessionDetails('company_id'))->select('surname', 'title', 'status', 'no_of_contract', 'first_name', 'middle_name', 'last_name', 'gender', 'created_at', 'id', 'marital_status', 'date_of_birth', 'country_id', 'state_id', 'lga_id', 'next_of_kin_information', 'means_of_identification', 'primary_marketer', 'contract_ids', 'other_details', 'customer_id')->first();
 
@@ -30,10 +30,10 @@ class CustomerFormController extends Controller
                 $forms->contract_details = $this->getFormRequestContractDetails($forms);
                 $forms->other_details = !empty($forms->other_details) ? json_decode($forms->other_details, true) : [];
             }
-            
+
             return response()->json(['message' => 'Successfully retrieved', 'data' => $forms], 200);
         }
-       
+
         $forms = CustomerForm::where('company_id', $this->sessionDetails('company_id'))->where('type', $request->type)->select('surname', 'title', 'status', 'no_of_contract', 'first_name', 'middle_name', 'last_name', 'gender', 'created_at', 'id', 'means_of_identification', 'other_details');
 
         if (\Request::route()->getPrefix() == 'api/customer') {
@@ -43,7 +43,7 @@ class CustomerFormController extends Controller
         if (!empty($request->status)) {
             $forms = $forms->where('status', $request->status);
         }
-        
+
         if ($paginate && $paginate == true) {
             $forms = $forms->paginate(20)->withQueryString();
         } else {
@@ -52,7 +52,7 @@ class CustomerFormController extends Controller
 
         foreach ($forms as $form) {
             $means_of_identification = !empty($form->means_of_identification) ? json_decode($form->means_of_identification, true) : [];
-            $form['passport_photo'] = !empty($means_of_identification) && isset($means_of_identification['passport_photo']) ?  url('/') . '/uploads/' . base64_encode($means_of_identification['passport_photo']) : "";
+            $form['passport_photo'] = !empty($means_of_identification) && isset($means_of_identification['passport_photo']) ?  $this->encodeGeneralUploadedFile($means_of_identification['passport_photo']) : "";
             unset($form['means_of_identification']);
             unset($form['other_details']);
         }
@@ -76,7 +76,7 @@ class CustomerFormController extends Controller
     public function approveCustomerFormResponse($id)
     {
         $customer_form = CustomerForm::where('id', $id)->where('company_id', $this->sessionDetails('company_id'))->where('type', 'form2-request')->first();
-        
+
         if (!$customer_form) {
             return response()->json(['message' => 'No records found', 'data' => []], 200);
         }
@@ -91,7 +91,7 @@ class CustomerFormController extends Controller
         $customer_form->update(['status' => 'approved']);
 
         $data['contract_details'] = $this->getFormRequestContractDetails($customer_form, 'approve_contract');
-        
+
         $data['type'] = 'formrequest.approve';
         $data['medium'] = 'email';
         // $data['user'] = Customer::where('id', 'customer_id')->user;
@@ -115,7 +115,7 @@ class CustomerFormController extends Controller
                 'data' => null,
             ], 412);
         }
-        
+
         $customer_form = CustomerForm::where('id', $id)->where('company_id', $this->sessionDetails('company_id'))->where('type', 'form2-request')->first();
 
         if (!$customer_form) {
@@ -151,11 +151,10 @@ class CustomerFormController extends Controller
      */
     public function store(Request $request, $admin = false)
     {
-       
         if (\Request::route()->getPrefix() == 'api/customer') {
             $request['customer_id'] = auth()->user()->customer->id;
         }
-        
+
         $validator = Validator::make($request->all(), [
             'title' => 'nullable',
             'surname' => 'nullable',
@@ -257,7 +256,7 @@ class CustomerFormController extends Controller
                 $update = $validator->valid();
                 $update['contract'] = $cont;
                 $cont['transaction_date'] = Carbon::parse($request->transaction_date);
-                
+
                 // Update the contract
                 $customer_contract_ids[] = $cont['contract_id'];
                 app('App\Http\Controllers\CustomerContractController')->updateCustomerContract($cont, $cont['contract_id'], $request->customer_id);
@@ -330,11 +329,11 @@ class CustomerFormController extends Controller
         }
 
         $data['date_of_birth'] = Carbon::parse($request->date_of_birth);
-       
+
         // Update user
         $customer = Customer::where('id', $data['customer_id'])->first();
         $user = $customer->user;
-        
+
         // Update user
         app('App\Http\Controllers\CustomerController')->updateUser($user, $data);
         $data['raw'] = json_encode($request->all());

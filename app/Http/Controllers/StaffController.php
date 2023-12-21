@@ -35,7 +35,7 @@ class StaffController extends Controller
             ->groupBy("staff.id")
             ->get();
 
-        return response()->json(['message' => 'success', 'data' => $staff], 200);
+        return response()->json(['message' => 'Success', 'data' => $staff], 200);
     }
 
     public function getAllStaff(Request $request)
@@ -78,7 +78,7 @@ class StaffController extends Controller
             $staff = $staff->paginate(20)->withQueryString();
         }
 
-        return response()->json(['message' => 'success', 'data' => $staff], 200);
+        return response()->json(['message' => 'Success', 'data' => $staff], 200);
     }
 
     public function isNotOnLeave($staff_id = null)
@@ -102,7 +102,7 @@ class StaffController extends Controller
             ->join("users", "staff.user_id", "=", "users.id")->where(['users.status' => 'active', 'type' => 'staff'])
             ->select("staff.id AS staff_id", "users.id As user_id", "users.status", "staff.created_at", "users.first_name", "users.last_name", "users.email", "users.staff_id AS user_staff_id", "staff.id AS staff_id", "users.type", "users.company_id")
             ->get();
-        return response()->json(['message' => 'success', 'data' => $staff], 200);
+        return response()->json(['message' => 'Success', 'data' => $staff], 200);
     }
 
     public function getMultipleRoleAdmins(Request $request)
@@ -647,7 +647,7 @@ class StaffController extends Controller
             'gender' => $staff->user->gender ?? '',
             'marital_status' => $additional_details['marital_status'] ?? '',
             'dob' => $date_of_birth,
-            'avatar' => !empty($staff->avatar) ? url('/') . '/uploads/' . base64_encode($staff->avatar) : '',
+            'avatar' => !empty($staff->avatar) ? $this->encodeGeneralUploadedFile($staff->avatar) : '',
         ];
 
         $data['contact_and_additional_information'] = [
@@ -668,7 +668,7 @@ class StaffController extends Controller
             'relationship' => $next_of_kin['nok_relationship'] ?? '',
         ];
 
-        return response()->json(['message' => 'success', 'data' => $data], 200);
+        return response()->json(['message' => 'Success', 'data' => $data], 200);
     }
 
     public function uploadDocuments(Request $request, $self = false)

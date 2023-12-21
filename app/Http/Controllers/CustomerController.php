@@ -82,13 +82,13 @@ class CustomerController extends Controller
         }
 
         $customers = $customers->paginate(20)->withQueryString();
-
+        
         foreach ($customers as $customer) {
             $statuses = $customer->contracts->pluck('status')->toArray();
             $customer->contract_statuses = array_count_values($statuses);
         }
 
-        return response()->json(['message' => 'success', 'data' => $customers], 200);
+        return response()->json(['message' => 'Success', 'data' => $customers], 200);
     }
 
     public function getLeads(Request $request)
@@ -110,7 +110,7 @@ class CustomerController extends Controller
 
         $leads = $leads->paginate(20)->withQueryString();
 
-        return response()->json(['message' => 'success', 'data' => $leads], 200);
+        return response()->json(['message' => 'Success', 'data' => $leads], 200);
     }
 
     public function getSubscribers(Request $request)
@@ -132,7 +132,7 @@ class CustomerController extends Controller
 
         $subscriber = $subscriber->paginate(20)->withQueryString();
 
-        return response()->json(['message' => 'success', 'data' => $subscriber], 200);
+        return response()->json(['message' => 'Success', 'data' => $subscriber], 200);
     }
 
     public function getProspects(Request $request)
@@ -154,7 +154,7 @@ class CustomerController extends Controller
 
         $prospect = $prospect->paginate(20)->withQueryString();
 
-        return response()->json(['message' => 'success', 'data' => $prospect], 200);
+        return response()->json(['message' => 'Success', 'data' => $prospect], 200);
     }
 
     public function CustomerCount()
@@ -180,7 +180,7 @@ class CustomerController extends Controller
             'prospect' => $prospect,
         ];
 
-        return response()->json(['message' => 'success', 'data' => $contract], 200);
+        return response()->json(['message' => 'Success', 'data' => $contract], 200);
     }
 
     /**
@@ -205,9 +205,10 @@ class CustomerController extends Controller
     {
         $customer = Customer::where('customers.id', $id)
             ->with('user')->first();
-        $customer->customer_id = $customer->user->id;
+            
+        $customer->customer_id = $customer->id;
 
-        return response()->json(['message' => 'success', 'data' => $customer], 200);
+        return response()->json(['message' => 'Success', 'data' => $customer], 200);
     }
 
     /**
@@ -247,7 +248,7 @@ class CustomerController extends Controller
             'single_contracts' => $customer->join_contract_count
         ];
 
-        return response()->json(['message' => 'success', 'data' => $data], 200);
+        return response()->json(['message' => 'Success', 'data' => $data], 200);
     }
 
     public function customerIdentificationSetting()

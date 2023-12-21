@@ -8,6 +8,7 @@ use App\Models\Estate;
 use App\Models\Customer;
 use App\Models\PlotSize;
 use App\Models\BuildingType;
+use App\Models\GeneratedLegalDocument;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\EstatePropertyTypeDetails;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -53,6 +54,7 @@ class CustomerContract extends Model
     {
         return $this->belongsTo(BuildingType::class, 'building_type');
     }
+ 
 
     public function plot_size_details()
     {

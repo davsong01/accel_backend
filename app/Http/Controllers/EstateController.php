@@ -58,7 +58,7 @@ class EstateController extends Controller
             $estates = $estates->paginate(20)->withQueryString();
         }
 
-        return response()->json(['message' => 'success', 'data' => $estates], 200);
+        return response()->json(['message' => 'Success', 'data' => $estates], 200);
     }
 
 
@@ -96,7 +96,7 @@ class EstateController extends Controller
         // dd($estates->get(), $request->status);
         $estates = $estates->orderBy('created_at', 'DESC')->paginate(20)->withQueryString();
 
-        return response()->json(['message' => 'success', 'data' => $estates], 200);
+        return response()->json(['message' => 'Success', 'data' => $estates], 200);
     }
 
     /**
@@ -120,7 +120,7 @@ class EstateController extends Controller
 
         $property_count = $property_count->count();
 
-        return response()->json(['message' => 'success', 'data' => $property_count], 200);
+        return response()->json(['message' => 'Success', 'data' => $property_count], 200);
     }
 
     public function getPropertyCount()
@@ -131,7 +131,7 @@ class EstateController extends Controller
             'land_count' => EstatePropertyTypeDetails::where('company_id', $this->sessionDetails('company_id'))->where('type', 'land')->count(),
         ];
 
-        return response()->json(['message' => 'success', 'data' => $data]);
+        return response()->json(['message' => 'Success', 'data' => $data]);
     }
 
     /**
@@ -279,7 +279,7 @@ class EstateController extends Controller
         $estate = $estate->load('city', 'location', 'estate_property_type');
         $estate->project_supervisor_name = ($estate->staff->user->first_name ?? '') . ' ' . ($estate->staff->user->last_name ?? '');
 
-        return response()->json(['message' => 'success', 'data' => $estate], 200);
+        return response()->json(['message' => 'Success', 'data' => $estate], 200);
     }
 
     /**

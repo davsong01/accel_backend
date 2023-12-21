@@ -39,9 +39,9 @@ class MenuController extends Controller
 
     //     $parents = RolePermission::where(['parent' => 0])->orderBy('order', 'ASC')->get();
     //     $menus = RolePermission::orderBy('parent', 'asc')->orderBy('order', 'asc')->get();
-        
+
     //     $user_roles = auth()->user()->roles; // You can 
-        
+
     //     foreach ($menus as $parent) {
     //         $rolex = [];
     //         $roleIds = [];
@@ -59,8 +59,8 @@ class MenuController extends Controller
     //     }
 
     //     $roles = Role::where(['type' => 'staff'])->get();
-        
-    //     return response()->json(['data' => $menus, 'message' => 'success'], 200);
+
+    //     return response()->json(['data' => $menus, 'message' => 'Success'], 200);
     // }
 
     public function generateLinks($linkid, $link_name, $link_route, $link_slug, $link_icon, $description, $parent_id)
@@ -73,11 +73,11 @@ class MenuController extends Controller
 
         if (count($getChildren) > 0) {
             foreach ($getChildren as $key => $value) {
-                $linko[] = $this->generateLinks($value->id, $value->menu_name, $value->route, $value->slug, $value->icon, $value->description, $value->parent);  
+                $linko[] = $this->generateLinks($value->id, $value->menu_name, $value->route, $value->slug, $value->icon, $value->description, $value->parent);
             }
 
             $sub_links = $linko;
-            
+
             $links = [
                 'id' => $linkid,
                 'name' => $link_name,
@@ -119,7 +119,7 @@ class MenuController extends Controller
     public function linkGenerator()
     {
         $links = [];
-        
+
         // Get permissions from staff roles
         if (Session::has('staff_id')) {
             $access = getAllAccess();
@@ -127,13 +127,13 @@ class MenuController extends Controller
         }
 
         $lo = [];
-        
+
         foreach ($links as $key => $value) {
             $lox[] = $value->link_name;
             $lo[] = $this->generateLinks($value->id, $value->menu_name, $value->route, $value->slug, $value->icon, $value->description, $value->parent);
         }
-        
-        return response()->json(['message' => 'success', 'data' => $lo], 200);
+
+        return response()->json(['message' => 'Success', 'data' => $lo], 200);
     }
 
     public function singleLinkGenerator($parent_id)
@@ -146,14 +146,14 @@ class MenuController extends Controller
             $links = RolePermission::whereIn('id', $access)->where(['status' => 'active', 'is_menu' => 'yes', 'id' => $parent_id, 'type' => 'staff'])->orderBy('order', 'ASC')->first();
 
             if (!$links) {
-                return response()->json(['message' => 'success', 'data' => []], 200);
+                return response()->json(['message' => 'Success', 'data' => []], 200);
             }
         }
 
         $lo = [];
         $lo = $this->generateLinks($links->id, $links->menu_name, $links->route, $links->slug, $links->icon, $links->description, $links->parent);
 
-        return response()->json(['message' => 'success', 'data' => $lo], 200);
+        return response()->json(['message' => 'Success', 'data' => $lo], 200);
     }
 
     /**
@@ -268,57 +268,58 @@ class MenuController extends Controller
     {
     }
 
-    public function adminAccessControls($access=null){
-        if(!empty($access)){
+    public function adminAccessControls($access = null)
+    {
+        if (!empty($access)) {
             $packageAccess = $access;
-        }else{
+        } else {
             $packageAccess = getPackageAccess($access);
         }
-        
-        $accessControls = RolePermission::with(['children' => function($query) use ($packageAccess){
+
+        $accessControls = RolePermission::with(['children' => function ($query) use ($packageAccess) {
             return $query->where(['status' => 'active', 'type' => 'staff'])->whereIn('id', $packageAccess)->orderBy('order', 'asc')->select('id', 'category', 'status', 'type', 'is_menu', 'menu_name', 'description', 'order', 'parent');
-        }])->where(['status'=>'active', 'type'=>'staff'])
+        }])->where(['status' => 'active', 'type' => 'staff'])
             ->orderBy('parent', 'asc')
             ->orderBy('order', 'asc')
             ->whereIn('id', $packageAccess)
-            ->select('id','category', 'status', 'type', 'is_menu', 'menu_name', 'description', 'order','parent');
-           
+            ->select('id', 'category', 'status', 'type', 'is_menu', 'menu_name', 'description', 'order', 'parent');
+
         $controls = clone $accessControls;
         $menus = $controls
             ->where('is_menu', 'yes')->whereNull('parent')
             ->get();
-        
+
         $data = [
             'menus' => $menus,
             'others' => $accessControls->where('is_menu', 'no')->get(),
         ];
-        
+
         return response()->json(['message' => 'Retrieved successfully', 'data' => $data], 200);
     }
 
-    public function getPermissionToResource(Request $request){
-       
+    public function getPermissionToResource(Request $request)
+    {
+
         $data = $this->validate($request, [
             'route_name' => 'required',
         ]);
 
         $name = $data['route_name'];
-        
+
         if (isset($name)) {
             $permCheck = permissionsCheck($name);
-            
+
             if (isset($permCheck)) {
                 if (isset($permCheck['permission']) && $permCheck['permission'] == true) {
                     return response()->json($permCheck, $permCheck['code'] ?? 200);
                 } else {
-                    return response()->json(['message' => $permCheck['permission'], 'data' => []],200);
+                    return response()->json(['message' => $permCheck['permission'], 'data' => []], 200);
                 }
             } else {
                 return response()->json(["message" => false, 'data' => 'Something went wrong while trying to validate access to resource!'], 200);
             }
         } else {
-            return response()->json(["permission" => false,"error" => "Not Permissioned"],200);
+            return response()->json(["permission" => false, "error" => "Not Permissioned"], 200);
         }
-
     }
 }

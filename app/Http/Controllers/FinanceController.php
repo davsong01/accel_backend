@@ -16,7 +16,7 @@ class FinanceController extends Controller
     public function GLAccount(): JsonResponse
     {
         $accounts = ChartOfAccount::with(['account_category', 'account_type'])->paginate(20);
-        return response()->json(['message' => 'success', 'data' => $accounts], 200);
+        return response()->json(['message' => 'Success', 'data' => $accounts], 200);
     }
 
     /**
@@ -25,7 +25,7 @@ class FinanceController extends Controller
     public function GLAccountTransactions(ChartOfAccount $account): JsonResponse
     {
         $transactions = $account->payments()->paginate(20);
-        return response()->json(['message' => 'success', 'data' => $transactions], 200);
+        return response()->json(['message' => 'Success', 'data' => $transactions], 200);
     }
 
      /**

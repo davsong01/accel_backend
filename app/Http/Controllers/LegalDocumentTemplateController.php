@@ -40,6 +40,6 @@ class LegalDocumentTemplateController extends Controller
         ];
 
         $document = LegalDocumentTemplate::create($data);
-        return response()->json(['message' => 'success', 'data' => $document], 200);
+        return response()->json(['message' => 'Success', 'data' => $document], 200);
     }
 }

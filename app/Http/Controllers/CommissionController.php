@@ -16,13 +16,12 @@ class CommissionController extends Controller
      */
     public function index(Request $request)
     {
-        if(!empty($request->paginate) && $request->paginate == 'false'){
+        if (!empty($request->paginate) && $request->paginate == 'false') {
             $commissions = Commission::where('company_id', $this->sessionDetails('company_id'))->get();
-        }else{
+        } else {
             $commissions = Commission::where('company_id', $this->sessionDetails('company_id'))->paginate(20)->withQueryString();
-
         }
-        return response()->json(['message' => 'success', 'data' => $commissions], 200);
+        return response()->json(['message' => 'Success', 'data' => $commissions], 200);
     }
 
     /**
@@ -40,7 +39,7 @@ class CommissionController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => [
-                'required', Rule::unique('commissions')->where(function ($query) {      
+                'required', Rule::unique('commissions')->where(function ($query) {
                     $query->where('company_id', $this->sessionDetails('company_id'));
                 })
             ],
@@ -54,11 +53,11 @@ class CommissionController extends Controller
             ], 412);
         }
 
-        $commission = Commission::updateOrcreate(['name'=>$request->name, 'company_id' => $this->sessionDetails('company_id')],[
+        $commission = Commission::updateOrcreate(['name' => $request->name, 'company_id' => $this->sessionDetails('company_id')], [
             'percentage' => $request->percentage,
             'company_id' => $this->sessionDetails('company_id'),
         ]);
-        
+
         return response()->json(['message' => 'Created successfully', 'data' => $commission], 200);
     }
 
@@ -67,7 +66,7 @@ class CommissionController extends Controller
      */
     public function show(Commission $commission)
     {
-        return response()->json(['message' => 'success', 'data' => $commission], 200);
+        return response()->json(['message' => 'Success', 'data' => $commission], 200);
     }
 
     /**
@@ -113,7 +112,7 @@ class CommissionController extends Controller
      */
     public function destroy(Commission $commission)
     {
-       
+
         if ($this->definedRelations('Commission', $commission) > 0) {
             return response()->json(['message' => 'Unable to delete, resource in use', 'data' => []], 412);
         }
