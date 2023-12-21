@@ -25,6 +25,7 @@ use App\Notifications\StaffNotification;
 use App\Models\LeaveAndAbsenceManagement;
 use App\Models\StaffIdentificationSetting;
 use App\Models\CustomerIdentificationSetting;
+use App\Models\Transaction;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -658,5 +659,13 @@ class Controller extends BaseController
         $month = date('m', strtotime($payment->created_at));
 
         return $rand . $year . $month;
+    }
+
+    public function createTransaction($attributes){
+        if(key_exists('payment_slip', $attributes)){
+            $filepath = $this->uploadProtectedFile($attributes['payment_slip'], 'payment_slips')['filepath'];
+            $attributes['payment_slip'] = $filepath;
+        }
+        return Transaction::create($attributes);
     }
 }
