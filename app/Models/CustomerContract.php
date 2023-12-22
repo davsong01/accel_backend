@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\EstatePropertyTypeDetails;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class CustomerContract extends Model
 {
@@ -117,5 +118,10 @@ class CustomerContract extends Model
         return Attribute::make(
             get: fn (string $value) => date("Y-m-d", strtotime($value)),
         );
+    }
+
+    public function generatedDocument(): HasOne
+    {
+        return $this->hasOne(GeneratedLegalDocument::class, 'contract_id');
     }
 }
