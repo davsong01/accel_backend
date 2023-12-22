@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Validation\Rule;
 use App\Models\CustomerContract;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Validator;
 use App\Models\CustomerIdentificationSetting;
@@ -203,9 +204,16 @@ class CustomerController extends Controller
      */
     public function show($id)
     {
+        if (\Request::route()->getPrefix() == 'api/customer') {
+            $id = Auth::user()->customer->id;
+        }
         $customer = Customer::where('customers.id', $id)
             ->with('user')->first();
-            
+        
+        if(!$customer){
+            return response()->json(['message' => 'Customer does not exist', 'data' => []], 200);
+        }
+
         $customer->customer_id = $customer->id;
 
         return response()->json(['message' => 'Success', 'data' => $customer], 200);

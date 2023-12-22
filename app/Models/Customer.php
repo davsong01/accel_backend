@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\User;
 use App\Models\Payment;
 use App\Models\Property;
+use App\Models\Transaction;
 use App\Models\CustomerRole;
 use App\Models\CustomerContract;
 use App\Models\CustomerProperty;
@@ -60,12 +61,12 @@ class Customer extends Model
 
     public function payments()
     {
-        return $this->hasMany(Transaction::class, 'id', 'customer_id');
+        return $this->hasMany(Transaction::class, 'customer_id');
     }
 
     public function transactions()
     {
-        return $this->hasMany(Transaction::class);
+        return $this->hasMany(Transaction::class, 'customer_id');
     }
 
 }

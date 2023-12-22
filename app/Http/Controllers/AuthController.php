@@ -52,8 +52,6 @@ class AuthController extends Controller
             ], 401);
         }
 
-        
-
         if (\Request::route()->getPrefix() == 'api/customer') {
             if (!$request['email']) {
                 return response()->json([
@@ -62,10 +60,16 @@ class AuthController extends Controller
             }
             $user = User::where('type','customer');
             $user = $user->where('email', $request['email'])->orWhere('customerId', $request['email'])->first();
-
+           
+            if (!$user) {
+                return response()->json([
+                    'error' => 'User does not exist!'
+                ], 412);
+            }
+            
             // Check if customer has made payment for response form
             $payments = $user->customer->payments;
-
+            
             if($payments->count() < 1){
                 return response()->json([
                     'error' => 'You do have not made any form payment!'
@@ -116,7 +120,8 @@ class AuthController extends Controller
         }
 
         if ($user->type == 'customer') {
-            $datax['userInfo']['customer_id'] = $user->customerId;
+            $datax['userInfo']['customerId'] = $user->customerId;
+            $datax['userInfo']['customer_id'] = $user->customer->id;
         }
         
         return response()->json(['data' => $datax, 'message' => Session::all()], 200);

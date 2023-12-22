@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Staff;
 use App\Models\Payment;
+use App\Models\Transaction;
 use Illuminate\Http\Request;
 use App\Models\StaffDocument;
 use App\Models\ResetCodePassword;
@@ -51,7 +52,7 @@ class SelfServiceController extends Controller
 
         $profile_completenes = $this->profileCompletenes();
 
-        // $payments = Payment::where('staff_id', Auth::user()->staff->id)->get();
+        // $payments = Transaction::where('staff_id', Auth::user()->staff->id)->get();
         // dd($payments);
         $birthdays = [];
         $work_anniversary = [];
