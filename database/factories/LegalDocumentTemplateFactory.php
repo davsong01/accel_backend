@@ -23,8 +23,8 @@ class LegalDocumentTemplateFactory extends Factory
             'estate_id' => 5,
             'company_id' => 1,
             'created_by' => 1,
-            'legal_document_type_id' => LegalDocumentType::factory()->create()->id,
-            'property_type_id' => PropertyType::factory()->create()->id,
+            // 'legal_document_type_id' => LegalDocumentType::factory()->create()->id,
+            // 'property_type_id' => PropertyType::factory()->create()->id,
             'file_location' => fake()->url()
         ];
     }
