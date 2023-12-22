@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Currency;
 use App\Models\AccountType;
+use App\Models\Transaction;
 use App\Models\AccountCategory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

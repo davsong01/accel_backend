@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Staff;
 use App\Models\Payment;
 use App\Models\Customer;
+use App\Models\Transaction;
 use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -73,8 +74,8 @@ class CustomerContractController extends Controller
     {
         $generated = GeneratedLegalDocument::with('template')->where('contract_id', $contract->id)->where('customer_id', $contract->customer_id)->get();
         $alldocumts = [];
-        
-        foreach($generated as $generate){
+
+        foreach ($generated as $generate) {
             $alldocumts[$generate->template->legalDocumentType->name] = [
                 'legal_document_template_id' => $generate->template->id,
                 'legal_document_type_id' => $generate->template->legalDocumentType->id,
@@ -88,7 +89,7 @@ class CustomerContractController extends Controller
 
     public function prepareDocumentTypeIds($contract)
     {
-        $documents = LegalDocumentType::where('type', strtoupper($contract->property_type))->get(['id','name','type']);
+        $documents = LegalDocumentType::where('type', strtoupper($contract->property_type))->get(['id', 'name', 'type']);
         $alldocs = [];
         foreach ($documents as $generate) {
             $alldocs[$generate->name] = $generate->id;
@@ -235,12 +236,12 @@ class CustomerContractController extends Controller
 
                     $this->createCustomerContract($data);
                 }
-                
-                if($data['primary_marketer_id']){
+
+                if ($data['primary_marketer_id']) {
                     $data2['type'] = 'primary.marketer.email.for.new.contract';
                     $markerter = Staff::where('id', $data['primary_marketer_id'])->first();
 
-                    if($markerter){
+                    if ($markerter) {
                         $data2['name'] =  $markerter->user->first_name;
                         $data2['customer_details'] = [
                             'customer_name' => $customer->user->first_name . ' ' . $customer->user->last_name,
@@ -249,7 +250,7 @@ class CustomerContractController extends Controller
                         ];
                         $data2['customer_name'] =  $customer->user->first_name;
                         $data2['email'] =  $markerter->user->email;
-        
+
                         $this->logEmail($data2);
                     }
                 }
@@ -407,7 +408,7 @@ class CustomerContractController extends Controller
         }
 
         $data = $validator->valid();
-       
+
         $request['contract_ids'] = json_decode($request['contract_ids'], true);
         $contract_ids = array_column($request['contract_ids'], 'contract_id');
 
@@ -436,7 +437,7 @@ class CustomerContractController extends Controller
             $receipts = [];
             foreach ($form_payment['explanation'] as $key => $form) {
                 $customer_contract_ids = implode(',', $form['contracts']);
-                $payment = Payment::updateOrCreate(['customer_contract_ids' => $customer_contract_ids], [
+                $payment = Transaction::updateOrCreate(['customer_contract_ids' => $customer_contract_ids], [
                     'customer_contract_ids' => $customer_contract_ids,
                     'account_id' => $data['account_id'],
                     'purpose' => 'form_payment',
@@ -630,7 +631,7 @@ class CustomerContractController extends Controller
 
     public function formPaymentHistory($customer_id)
     {
-        $histories = Payment::with('estate:id,name')->where(['customer_id' => $customer_id, 'company_id' => $this->sessionDetails('company_id'), 'purpose' => 'form_payment'])->orderBy('created_at', 'DESC')->get();
+        $histories = Transaction::with('estate:id,name')->where(['customer_id' => $customer_id, 'company_id' => $this->sessionDetails('company_id'), 'purpose' => 'form_payment'])->orderBy('created_at', 'DESC')->get();
 
         $data = [];
 

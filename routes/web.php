@@ -14,7 +14,8 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
-Route::get('/testemailtemplate', function(){
+
+Route::get('/testemailtemplate', function () {
     $data['message'] = 'helllosds';
     $data['company_id'] = 1;
 
@@ -22,15 +23,14 @@ Route::get('/testemailtemplate', function(){
 });
 
 Route::get('/testfile', function () {
-    
 });
 
 Route::get('/testreceipttemplate', function () {
     $data = [];
     $data['company_id'] = 1;
     $data['receipt_no'] = '0001';
-    $payment = App\Models\Payment::find(24);
-    return view('receipts.template1', compact('data','payment'));
+    $payment = App\Models\Transaction::find(24);
+    return view('receipts.template1', compact('data', 'payment'));
 });
 
 Route::get('/cron-process-messages-transaction', [MessageTransactionController::class, 'processMessagesTransaction']);
@@ -45,7 +45,7 @@ Route::get('login', function () {
 Route::get('general-uploads/{filename}', function ($filename) {
     $filename = base64_decode($filename);
     $realpath = base_path() . '/' . $filename;
-    
+
     try {
         return response()->download($realpath);
         //code...
@@ -56,6 +56,3 @@ Route::get('general-uploads/{filename}', function ($filename) {
         ], 200);
     }
 });
-
-
-

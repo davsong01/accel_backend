@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Estate;
 use App\Models\Customer;
 use App\Models\PlotSize;
+use App\Models\Transaction;
 use App\Models\BuildingType;
 use App\Models\GeneratedLegalDocument;
 use Illuminate\Database\Eloquent\Model;
