@@ -311,7 +311,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
             Route::post('template', 'template');
             Route::post('generate', 'generate');
             Route::patch('{document}/regenerate', 'regenerate');
-            Route::get('generated', 'generated');
+            Route::get('estate-contracts', 'estateContracts');
             Route::get('search', 'search');
         });
 
