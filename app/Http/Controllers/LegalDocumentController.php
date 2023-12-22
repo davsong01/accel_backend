@@ -133,7 +133,7 @@ class LegalDocumentController extends Controller
      */
     public function regenerate(Request $request, GeneratedLegalDocument $document): JsonResponse
     {
-        $documentGen = $this->documentGenerator($document->customer->id, $document->template);
+        $documentGen = $this->documentGenerator($document->contract_id, $document->template);
         $document->update([
             'regenerate_count' => $document->regenerate_count + 1,
             'file_location' => $documentGen['filepath'] . $documentGen['filename']
@@ -168,12 +168,12 @@ class LegalDocumentController extends Controller
     }
 
 
-    private function documentGenerator($customer_id, $legalDocumentTemplate)
+    private function documentGenerator($contract_id, $legalDocumentTemplate)
     {
         $file = getEncodedFileRealPath($legalDocumentTemplate->file_location);
 
         $options = $this->setOptions();
-        $values = $this->getOptions($options, $customer_id, $legalDocumentTemplate);
+        $values = $this->getOptions($options, $contract_id, $legalDocumentTemplate);
 
         $filepath = config('app.upload_path') . '/' . $this->getPathToSaveFile('generated-legal-documents') . '/';
         $filename =  uniqid(11) . '.pdf';
