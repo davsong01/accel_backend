@@ -12,7 +12,7 @@ class GeneratedLegalDocument extends Model
 {
     use HasFactory;
 
-    protected $fillable = [ 'estate_id', 'customer_id', 'regenerate_count', 'file_location', 'company_id', 'legal_document_template_id'];
+    protected $fillable = [ 'estate_id', 'regenerate_count', 'file_location', 'company_id', 'legal_document_template_id', 'contract_id'];
     protected $append = ['file_location'];
     
 
