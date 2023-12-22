@@ -316,6 +316,9 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         });
 
         Route::controller(FinanceController::class)->name('finance.')->prefix('finance')->group(function () {
+            Route::get('gl-ledger', 'GLLedger');
+            Route::post('gl-ledger/create', 'createGLLedger');
+            Route::get('gl-ledger/search', 'searchGLLedger');
             Route::get('gl-account', 'GLAccount')->name('gl-account');
             Route::get('gl-account/{account}/transactions', 'GLAccountTransactions')->name('gl-account.transactions');
         });

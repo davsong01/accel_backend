@@ -74,7 +74,7 @@ class CustomerContract extends Model
     
     public function getFormPaymentStatusAttribute()
     {
-        $payment = Payment::where('customer_contract_ids', $this->id)->first();
+        $payment = Transaction::where('customer_contract_ids', $this->id)->first();
         if($payment){
             return 'paid';
         }else{
@@ -85,7 +85,7 @@ class CustomerContract extends Model
 
     public function getFormAmountPaidAttribute()
     {
-        $payment = Payment::where('customer_contract_ids', $this->id)->first();
+        $payment = Transaction::where('customer_contract_ids', $this->id)->first();
         if ($payment) {
             return number_format((float) $payment->amount);
         } else {

@@ -78,16 +78,16 @@ class LegalDocumentController extends Controller
     {
         $params = $request->except('legal_document_template_id');
         $legalDocumentTemplate = LegalDocumentTemplate::where($params)->where('id', $request->input('legal_document_template_id'))->firstOrFail();
-
+        
         $data = null;
-        // if($legalDocumentTemplate->legalDocumentType->name === 'OFFER_LETTER'){
-        $data =  CustomerContract::with(['customer.user'])->where([
-            'estate_id' => $request->input('estate_id'),
-            // 'status' => 'APPROVED',
-            'property_type' =>  strtolower($legalDocumentTemplate->legalDocumentType->type)
-        ])->paginate(20);
-        // }
-        return response()->json(['message' => 'Success', 'data' => $data], 200);
+        if($legalDocumentTemplate->legalDocumentType->name === 'OFFER_LETTER'){
+            $data =  CustomerContract::with(['customer.user', 'customer.generatedLegalDocuments'])->where([
+                'estate_id' => $request->input('estate_id'),
+                'form_payment_status' => 'approved',
+                'property_type' =>  strtolower($legalDocumentTemplate->legalDocumentType->type)
+            ])->paginate(20);
+        }
+        return response()->json(['message' => 'success', 'data' => $data], 200);
     }
 
     /**

@@ -33,6 +33,10 @@ class ChartOfAccount extends Model
     }
 
     public function payments(){
-        return $this->hasMany(Payment::class, 'account_id');
+        return $this->hasMany(Transaction::class, 'account_id');
+    }
+
+    public function transactions(){
+        return $this->hasMany(Transaction::class, 'account_id');
     }
 }

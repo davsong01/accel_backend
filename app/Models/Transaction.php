@@ -11,11 +11,11 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 
-class Payment extends Model
+class Transaction extends Model
 {
     use HasFactory;
     protected $guarded = [];
-    protected $table = 'payments';
+    protected $table = 'transactions';
     protected $appends = ['receipt_location'];
 
     protected function createdAt(): Attribute
@@ -59,7 +59,9 @@ class Payment extends Model
 
     public function getReceiptLocationAttribute()
     {
-        return app('App\Http\Controllers\Controller')->encodeUploadedFile($this->attributes['receipt_location']);
+        if(key_exists('receipt_location', $this->attributes))
+            return app('App\Http\Controllers\Controller')->encodeUploadedFile($this->attributes['receipt_location']);
+        return '';
     }
 
 }
