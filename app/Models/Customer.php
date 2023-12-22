@@ -61,12 +61,12 @@ class Customer extends Model
 
     public function payments()
     {
-        return $this->hasMany(Transaction::class, 'id', 'customer_id');
+        return $this->hasMany(Transaction::class, 'customer_id');
     }
 
     public function transactions()
     {
-        return $this->hasMany(Transaction::class);
+        return $this->hasMany(Transaction::class, 'customer_id');
     }
 
 }

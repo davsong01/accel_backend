@@ -66,10 +66,10 @@ class AuthController extends Controller
                     'error' => 'User does not exist!'
                 ], 412);
             }
-
+            
             // Check if customer has made payment for response form
             $payments = $user->customer->payments;
-
+            
             if($payments->count() < 1){
                 return response()->json([
                     'error' => 'You do have not made any form payment!'

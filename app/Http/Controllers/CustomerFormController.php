@@ -76,8 +76,8 @@ class CustomerFormController extends Controller
 
     public function approveCustomerFormResponse($id)
     {
-        $customer_form = CustomerForm::where('id', $id)->where('company_id', $this->sessionDetails('company_id'))->where('type', 'form2-request')->first();
-
+        $customer_form = CustomerForm::with('customer')->where('id', $id)->where('company_id', $this->sessionDetails('company_id'))->where('type', 'form2-request')->first();
+    
         if (!$customer_form) {
             return response()->json(['message' => 'No records found', 'data' => []], 200);
         }
@@ -90,6 +90,9 @@ class CustomerFormController extends Controller
         }
 
         $customer_form->update(['status' => 'approved']);
+        $customer_form->customer->update([
+            'form_status' => 'Confirmed',
+        ]);
 
         $data['contract_details'] = $this->getFormRequestContractDetails($customer_form, 'approve_contract');
 
@@ -117,7 +120,7 @@ class CustomerFormController extends Controller
             ], 412);
         }
 
-        $customer_form = CustomerForm::where('id', $id)->where('company_id', $this->sessionDetails('company_id'))->where('type', 'form2-request')->first();
+        $customer_form = CustomerForm::with('customer')->where('id', $id)->where('company_id', $this->sessionDetails('company_id'))->where('type', 'form2-request')->first();
 
         if (!$customer_form) {
             return response()->json([
@@ -129,6 +132,10 @@ class CustomerFormController extends Controller
         $customer_form->update([
             'status' => 'declined',
             'reason' => $request->reason
+        ]);
+
+        $customer_form->customer->update([
+            'form_status' => 'Unconfirmed',
         ]);
 
         $data['contract_details'] = $this->getFormRequestContractDetails($customer_form, 'decline_contract', $request->reason);
@@ -350,6 +357,10 @@ class CustomerFormController extends Controller
             $response
         );
 
+        $customer->update([
+            'form_status' => 'Unconfirmed'
+        ]);
+
         return response()->json(['message' => 'Success', 'data' => []], 200);
     }
 
@@ -358,7 +369,7 @@ class CustomerFormController extends Controller
      */
     public function show(CustomerForm $CustomerForm)
     {
-        dd($customerForm);
+        // dd($customerForm);
     }
 
     /**

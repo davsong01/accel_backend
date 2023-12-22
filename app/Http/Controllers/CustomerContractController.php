@@ -469,8 +469,8 @@ class CustomerContractController extends Controller
 
             // Log email
             $data['type'] = 'form.payment';
-            $data['name'] =  $customer->user->first_name;
-            $data['email'] =  $customer->user->email;
+            $data['name'] =  $customer->user->first_name ?? null;
+            $data['email'] =  $customer->user->email ?? null;
             $data['attachments'] = $receipts;
 
             $this->logEmail($data);
