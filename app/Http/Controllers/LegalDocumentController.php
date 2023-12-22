@@ -81,7 +81,7 @@ class LegalDocumentController extends Controller
         
         $data = null;
         if($legalDocumentTemplate->legalDocumentType->name === 'OFFER_LETTER'){
-            $data =  CustomerContract::with(['customer.user:first_name,last_name,id,middle_name,customerId,avatar', 'generatedDocument'])->where([
+            $data =  CustomerContract::with(['customer.user:first_name,last_name,id,middle_name,customerId,avatar', 'generatedDocument', 'location'])->where([
                 'estate_id' => $request->input('estate_id'),
                 'form_approval_status' => 'approved',
             ])->paginate(20);
