@@ -12,9 +12,10 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Validation\Rule;
 use App\Models\CustomerContract;
+use App\Models\LegalDocumentType;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\RedirectResponse;
 use App\Models\GeneratedLegalDocument;
-use App\Models\LegalDocumentType;
 use Illuminate\Support\Facades\Validator;
 
 class CustomerContractController extends Controller
@@ -288,6 +289,7 @@ class CustomerContractController extends Controller
 
         $user = User::updateOrCreate([
             'first_name' => $request['first_name'],
+            'password' => Hash::make($request['password'] ?? '123456789'),
             'email' => $request['email'],
             'gender' => $request['gender'],
             'last_name' => $request['last_name'],

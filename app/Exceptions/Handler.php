@@ -49,9 +49,15 @@ class Handler extends ExceptionHandler
 
         $this->renderable(function (NotFoundHttpException $e,Request $request) {
             if ($request->is('api/*')) {
-                return response()->json([
-                    'message' => 'Record not found.'
-                ], 404);
+                if(env('ENT') == 'local'){
+                    return response()->json([
+                        'message' => $e->getMessage(),
+                    ], 404);
+                }else{
+                    return response()->json([
+                        'message' => 'Record not found.'
+                    ], 404);
+                }
             }
             return null;
         });

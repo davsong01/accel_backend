@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\CompanySetting;
 use App\Models\Customer;
 use Illuminate\Support\Arr;
 use App\Models\CustomerForm;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use App\Models\CompanySetting;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 use App\Models\CustomerContract;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Validation\Rules\File;
 use Illuminate\Support\Facades\Validator;
@@ -35,9 +36,9 @@ class CustomerFormController extends Controller
         }
 
         $forms = CustomerForm::where('company_id', $this->sessionDetails('company_id'))->where('type', $request->type)->select('surname', 'title', 'status', 'no_of_contract', 'first_name', 'middle_name', 'last_name', 'gender', 'created_at', 'id', 'means_of_identification', 'other_details');
-
+        
         if (\Request::route()->getPrefix() == 'api/customer') {
-            $forms = $forms->where('customer_id', auth::user()->customer->id);
+            $forms = $forms->where('customer_id', Auth::user()->customer->id);
         }
 
         if (!empty($request->status)) {
