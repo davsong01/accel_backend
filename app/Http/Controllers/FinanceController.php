@@ -50,7 +50,7 @@ class FinanceController extends Controller
             'type' => 'required|in:CREDIT,DEBIT',
             'transaction_type' => 'required|string',
             'purpose' => 'required|string',
-            'customer_id' => 'exists:customers,id' . $company_id,
+            'customer_id' => 'exists:customers,id,' . $company_id,
             'customer_contract_ids' => 'array',
             'customer_contract_ids.*' => 'exists:contracts,id',
             'account_id' => 'required|exists:accounts,id',
