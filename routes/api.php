@@ -335,6 +335,7 @@ Route::group(['prefix' => 'customer', 'before' => 'customer'], function () {
         Route::get('details/{id}', [CustomerController::class, 'show']);
         Route::post('form-response', [CustomerFormController::class, 'store']);
         Route::get('form-response', [CustomerFormController::class, 'index']);
+        
         Route::get('get-countries', [GeneralController::class, 'getCountries']);
         Route::get('get-states', [GeneralController::class, 'getStates']);
         Route::get('get-lga', [GeneralController::class, 'getLgas']);
