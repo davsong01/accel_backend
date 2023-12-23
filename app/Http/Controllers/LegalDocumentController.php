@@ -112,7 +112,7 @@ class LegalDocumentController extends Controller
         $legalDocumentTemplate = LegalDocumentTemplate::where([
             'legal_document_type_id' => $request->legal_document_type_id,
             'estate_id' => $estate_id,
-            'company_id' => $this->sessionDetails('company_id'),
+            'company_id' => $company_id,
             ])->firstOrFail();
 
         $documentGen = $this->documentGenerator($request->contract_id, $legalDocumentTemplate);
