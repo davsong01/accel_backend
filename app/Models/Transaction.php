@@ -25,6 +25,13 @@ class Transaction extends Model
         );
     }
 
+    protected function customerContractIds(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string $value) => explode(',', $value),
+            set: fn (array $value) => implode(",",$value),
+        );
+    }
     public function estate()
     {
         return $this->belongsTo(Estate::class);
