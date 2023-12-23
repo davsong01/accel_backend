@@ -35,8 +35,14 @@ class CustomerFormController extends Controller
             return response()->json(['message' => 'Successfully retrieved', 'data' => $forms], 200);
         }
 
-        $forms = CustomerForm::where('company_id', $this->sessionDetails('company_id'))->where('type', $request->type)->select('surname', 'title', 'status', 'no_of_contract', 'first_name', 'middle_name', 'last_name', 'gender', 'created_at', 'id', 'means_of_identification', 'other_details');
+        $forms = CustomerForm::where('company_id', $this->sessionDetails('company_id'));
+
+        if (!empty($request->type)) {
+            $forms = $forms->where('type', $request->type);
+        }
         
+        $forms = $forms->select('surname', 'title', 'status', 'no_of_contract', 'first_name', 'middle_name', 'last_name', 'gender', 'created_at', 'id', 'means_of_identification', 'other_details');
+
         if (\Request::route()->getPrefix() == 'api/customer') {
             $forms = $forms->where('customer_id', Auth::user()->customer->id);
         }
@@ -45,7 +51,7 @@ class CustomerFormController extends Controller
             $forms = $forms->where('status', $request->status);
         }
 
-        if ($paginate && $paginate == true) {
+        if ($request->paginate && $request->paginate === true) {
             $forms = $forms->paginate(20)->withQueryString();
         } else {
             $forms = $forms->get();
