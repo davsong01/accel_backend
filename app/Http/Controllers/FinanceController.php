@@ -45,6 +45,7 @@ class FinanceController extends Controller
     public function createGLLedger(Request $request): JsonResponse
     {
         $company_id = $this->sessionDetails('company_id');
+        $estate_id = $this->sessionDetails('estate_id');
 
         $validator = Validator::make($request->all(), [
             'type' => 'required|in:CREDIT,DEBIT',
@@ -52,7 +53,7 @@ class FinanceController extends Controller
             'purpose' => 'required|string',
             'customer_id' => 'exists:customers,id,' . $company_id,
             'customer_contract_ids' => 'array',
-            'customer_contract_ids.*' => 'exists:contracts,id',
+            'customer_contract_ids.*' => 'exists:customer_contracts,id',
             'account_id' => 'required|exists:chart_of_accounts,id',
             'amount' => 'required|numeric',
             'created_at' => 'date|before:tomorrow',
@@ -66,7 +67,10 @@ class FinanceController extends Controller
             ], 412);
         }
 
-        $transaction = $this->createTransaction($validator->validated());
+        $attributes = $validator->validated();
+        $attributes['estate_id'] = $estate_id;
+
+        $transaction = $this->createTransaction($attributes);
         return response()->json(['message' => 'success', 'data' => $transaction], 200);
     }
 
