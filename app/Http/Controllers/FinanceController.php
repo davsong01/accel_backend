@@ -53,7 +53,7 @@ class FinanceController extends Controller
             'customer_id' => 'exists:customers,id,' . $company_id,
             'customer_contract_ids' => 'array',
             'customer_contract_ids.*' => 'exists:contracts,id',
-            'account_id' => 'required|exists:accounts,id',
+            'account_id' => 'required|exists:chart_of_accounts,id',
             'amount' => 'required|numeric',
             'created_at' => 'date|before:tomorrow',
             'payment_slip' => 'file',
