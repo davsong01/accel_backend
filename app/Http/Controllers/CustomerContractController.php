@@ -72,7 +72,7 @@ class CustomerContractController extends Controller
 
     public function generatedDocuments($contract)
     {
-        $generated = GeneratedLegalDocument::with('template')->where('contract_id', $contract->id)->where('customer_id', $contract->customer_id)->get();
+        $generated = GeneratedLegalDocument::with('template')->where('contract_id', $contract->id)->get();
         $alldocumts = [];
 
         foreach ($generated as $generate) {

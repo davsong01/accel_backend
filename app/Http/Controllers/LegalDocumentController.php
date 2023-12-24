@@ -95,11 +95,11 @@ class LegalDocumentController extends Controller
     public function generate(Request $request): JsonResponse
     {
         $company_id = $this->sessionDetails('company_id');
-        $estate_id = $this->sessionDetails('estate_id');
 
         $validator = Validator::make($request->all(), [
             'contract_id' => ['required', 'exists:customer_contracts,id,company_id,' . $company_id],
             'legal_document_type_id' => ['required', 'exists:legal_document_types,id'],
+            'estate_id' => ['required', 'exists:estates,id,company_id,' . $company_id],
         ]);
 
         if ($validator->fails()) {
@@ -111,8 +111,8 @@ class LegalDocumentController extends Controller
 
         $legalDocumentTemplate = LegalDocumentTemplate::where([
             'legal_document_type_id' => $request->legal_document_type_id,
-            'estate_id' => $estate_id,
-            'company_id' => $this->sessionDetails('company_id'),
+            'estate_id' => $request->estate_id,
+            'company_id' => $company_id,
             ])->firstOrFail();
 
         $documentGen = $this->documentGenerator($request->contract_id, $legalDocumentTemplate);
@@ -121,7 +121,7 @@ class LegalDocumentController extends Controller
             'contract_id' => $request->contract_id,
             'legal_document_type_id' => $request->legal_document_type_id,
             'file_location' => $documentGen['filepath'] . $documentGen['filename'],
-            'estate_id' => $legalDocumentTemplate->estate_id,
+            'estate_id' => $request->estate_id,
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 

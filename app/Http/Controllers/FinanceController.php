@@ -34,7 +34,7 @@ class FinanceController extends Controller
      */
     public function GLLedger(): JsonResponse
     {
-        $transactions = Transaction::with(['account', 'staff', 'customer'])->latest()->paginate(20);
+        $transactions = Transaction::with(['account', 'staff:id,user_id', 'staff.user:id,status,type,first_name,middle_name,last_name,phone_number', 'customer:id'])->latest()->paginate(20);
         return response()->json(['message' => 'success', 'data' => $transactions], 200);
     }
 
@@ -50,10 +50,11 @@ class FinanceController extends Controller
             'type' => 'required|in:CREDIT,DEBIT',
             'transaction_type' => 'required|string',
             'purpose' => 'required|string',
-            'customer_id' => 'exists:customers,id,' . $company_id,
+            'customer_id' => 'exists:customers,id,company_id,' . $company_id,
+            'estate_id' => 'required|exists:estates,id,company_id,' . $company_id,
             'customer_contract_ids' => 'array',
-            'customer_contract_ids.*' => 'exists:contracts,id',
-            'account_id' => 'required|exists:accounts,id',
+            'customer_contract_ids.*' => 'exists:customer_contracts,id,customer_id,' . $request->customer_id,
+            'account_id' => 'required|exists:chart_of_accounts,id',
             'amount' => 'required|numeric',
             'created_at' => 'date|before:tomorrow',
             'payment_slip' => 'file',
@@ -66,7 +67,9 @@ class FinanceController extends Controller
             ], 412);
         }
 
-        $transaction = $this->createTransaction($validator->validated());
+        $attributes = $validator->validated();
+
+        $transaction = $this->createTransaction($attributes);
         return response()->json(['message' => 'success', 'data' => $transaction], 200);
     }
 
