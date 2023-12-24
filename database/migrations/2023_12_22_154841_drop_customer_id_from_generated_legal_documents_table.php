@@ -11,9 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('generated_legal_documents', function (Blueprint $table) {
-            $table->dropColumn('customer_id');
-        });
+        if(Schema::hasColumn('generated_legal_documents', 'customer_id')){
+            Schema::table('generated_legal_documents', function (Blueprint $table) {
+                $table->dropColumn('customer_id');
+            });
+        }
     }
 
     /**
