@@ -28,7 +28,7 @@ class Transaction extends Model
     protected function customerContractIds(): Attribute
     {
         return Attribute::make(
-            get: fn (string $value) => explode(',', $value),
+            get: fn (string $value) => strlen(trim($value)) ? explode(',', $value) : null,
             set: fn (array $value) => implode(",",$value),
         );
     }
@@ -68,6 +68,13 @@ class Transaction extends Model
     {
         if(key_exists('receipt_location', $this->attributes))
             return app('App\Http\Controllers\Controller')->encodeUploadedFile($this->attributes['receipt_location']);
+        return '';
+    }
+
+    public function getPaymentSlipAttribute()
+    {
+        if(key_exists('payment_slip', $this->attributes))
+            return app('App\Http\Controllers\Controller')->encodeUploadedFile($this->attributes['payment_slip']);
         return '';
     }
 
