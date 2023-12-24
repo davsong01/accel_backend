@@ -667,6 +667,7 @@ class Controller extends BaseController
             $filepath = $this->uploadProtectedFile($attributes['payment_slip'], 'payment_slips')['filepath'];
             $attributes['payment_slip'] = $filepath;
         }
+        $attributes['staff_id'] = Auth::user()->staff->id;
         return Transaction::create($attributes);
     }
 }
