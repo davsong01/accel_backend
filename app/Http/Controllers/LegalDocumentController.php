@@ -124,7 +124,7 @@ class LegalDocumentController extends Controller
             'estate_id' => $request->estate_id,
             'company_id' => $this->sessionDetails('company_id'),
         ]);
-
+        
         return response()->json(['message' => 'Success', 'data' => $generatedLegalDocument], 200);
     }
 

@@ -237,9 +237,12 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('single-customer-form-payment-details/{customer_id}', [CustomerContractController::class, 'singleCustomerFormDetails']);
         Route::post('customer-form-response', [CustomerFormController::class, 'store'])->name('application.form.submit');
         Route::get('customer-form-response/{id?}', [CustomerFormController::class, 'index']);
+        Route::get('approve-form2-request/{id?}', [CustomerFormController::class, 'approveForm2Request']);
+        Route::post('decline-form2-request/{id?}', [CustomerFormController::class, 'declineForm2Request']);
+
         Route::get('approve-customer-form-response/{id?}', [CustomerFormController::class, 'approveCustomerFormResponse']);
         Route::post('decline-customer-form-response/{id?}', [CustomerFormController::class, 'declineCustomerFormResponse']);
-
+        
         Route::get('form-payment-history/{customer_id}', [CustomerContractController::class, 'formPaymentHistory']);
         Route::post('make-form-payment', [CustomerContractController::class, 'makeFormPayment']);
         Route::get('get-countries', [GeneralController::class, 'getCountries']);
