@@ -29,7 +29,7 @@ class LegalDocumentController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function template(Request $request): JsonResponse
+    public function template(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'estate_id' => ['required', 'exists:estates,id'],
@@ -45,11 +45,12 @@ class LegalDocumentController extends Controller
             ], 412);
         }
 
+        $filepath = $this->uploadProtectedFile($request->file, 'uploaded_legal_document_templates')['filepath'];
         $data = [
             ...$validator->validated(),
             'company_id' => $this->sessionDetails('company_id'),
             'created_by' => Auth::user()->id,
-            'file_location' =>  $this->uploadProtectedFile($request->file, 'uploaded_legal_document_templates')['filepath']
+            'file_location' =>  $filepath
         ];
 
         $document = LegalDocumentTemplate::updateOrcreate([
@@ -58,17 +59,19 @@ class LegalDocumentController extends Controller
             'legal_document_type_id' => $data['legal_document_type_id']
         ], $data);
 
-        return response()->json(['message' => 'Success', 'data' => $document], 200);
+        return response()->download(base_path($filepath));
     }
 
     /**
      * preview a document
      */
-    public function preview(Request $request): JsonResponse
+    public function preview(Request $request)
     {
-        $params = $request->input();
-        $types = LegalDocumentTemplate::where($params)->first();
-        return response()->json(['message' => 'Success', 'data' => $types], 200);
+        $params = $request->input((new LegalDocumentTemplate)->getFillable());
+        $template = LegalDocumentTemplate::where($params)->first();
+        $filepath = base64_decode(substr(stristr($template->file_location, 'uploads/'), 8));
+       
+        return response()->download(base_path($filepath));
     }
 
     /**
@@ -81,18 +84,24 @@ class LegalDocumentController extends Controller
         
         $data = null;
         if($legalDocumentTemplate->legalDocumentType->name === 'OFFER_LETTER'){
-            $data =  CustomerContract::with(['customer.user:first_name,last_name,id,middle_name,customerId,avatar', 'generatedDocument', 'location'])->where([
+            $data =  CustomerContract::with(['customer.user:first_name,last_name,id,middle_name,customerId,avatar', 'generatedDocument' => function ($query) use ($legalDocumentTemplate) {
+                $query->where([
+                    'estate_id' => $legalDocumentTemplate->estate_id,
+                    'legal_document_template_id' => $legalDocumentTemplate->id,
+                ])->first();
+            }, 'location'])->where([
                 'estate_id' => $request->input('estate_id'),
                 'form_approval_status' => 'approved',
             ])->paginate(20);
         }
+        // TODO: condition for other legal document types
         return response()->json(['message' => 'success', 'data' => $data], 200);
     }
 
     /**
      * Generate legal document
      */
-    public function generate(Request $request): JsonResponse
+    public function generate(Request $request)
     {
         $company_id = $this->sessionDetails('company_id');
 
@@ -116,30 +125,34 @@ class LegalDocumentController extends Controller
             ])->firstOrFail();
 
         $documentGen = $this->documentGenerator($request->contract_id, $legalDocumentTemplate);
-
-        $generatedLegalDocument = GeneratedLegalDocument::create([
+        $filepath = $documentGen['filepath'] . $documentGen['filename'];
+        $generatedLegalDocument = GeneratedLegalDocument::updateOrCreate([
             'contract_id' => $request->contract_id,
-            'legal_document_type_id' => $request->legal_document_type_id,
-            'file_location' => $documentGen['filepath'] . $documentGen['filename'],
+            'legal_document_template_id' => $legalDocumentTemplate->id,
             'estate_id' => $request->estate_id,
             'company_id' => $this->sessionDetails('company_id'),
+        ],
+        [
+            'file_location' => $filepath,
         ]);
 
-        return response()->json(['message' => 'Success', 'data' => $generatedLegalDocument], 200);
+        return response()->download(base_path($filepath));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function regenerate(Request $request, GeneratedLegalDocument $document): JsonResponse
+    public function regenerate(Request $request, GeneratedLegalDocument $document)
     {
         $documentGen = $this->documentGenerator($document->contract_id, $document->template);
+        $filepath =  $documentGen['filepath'] . $documentGen['filename'];
+
         $document->update([
             'regenerate_count' => $document->regenerate_count + 1,
-            'file_location' => $documentGen['filepath'] . $documentGen['filename']
+            'file_location' =>$filepath
         ]);
 
-        return response()->json(['message' => 'Success', 'data' => $document], 200);
+        return response()->download(base_path($filepath));
     }
 
     private function setOptions()
