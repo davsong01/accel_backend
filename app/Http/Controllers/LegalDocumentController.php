@@ -66,7 +66,7 @@ class LegalDocumentController extends Controller
      */
     public function preview(Request $request): JsonResponse
     {
-        $params = $request->input();
+        $params = $request->input((new LegalDocumentTemplate)->getFillable());
         $types = LegalDocumentTemplate::where($params)->first();
         return response()->json(['message' => 'Success', 'data' => $types], 200);
     }
