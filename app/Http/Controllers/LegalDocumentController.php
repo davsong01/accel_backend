@@ -81,11 +81,17 @@ class LegalDocumentController extends Controller
         
         $data = null;
         if($legalDocumentTemplate->legalDocumentType->name === 'OFFER_LETTER'){
-            $data =  CustomerContract::with(['customer.user:first_name,last_name,id,middle_name,customerId,avatar', 'generatedDocument', 'location'])->where([
+            $data =  CustomerContract::with(['customer.user:first_name,last_name,id,middle_name,customerId,avatar', 'generatedDocument' => function ($query) use ($legalDocumentTemplate) {
+                $query->where([
+                    'estate_id' => $legalDocumentTemplate->estate_id,
+                    'legal_document_template_id' => $legalDocumentTemplate->id,
+                ])->first();
+            }, 'location'])->where([
                 'estate_id' => $request->input('estate_id'),
                 'form_approval_status' => 'approved',
             ])->paginate(20);
         }
+        // TODO: condition for other legal document types
         return response()->json(['message' => 'success', 'data' => $data], 200);
     }
 
@@ -119,7 +125,7 @@ class LegalDocumentController extends Controller
 
         $generatedLegalDocument = GeneratedLegalDocument::create([
             'contract_id' => $request->contract_id,
-            'legal_document_type_id' => $request->legal_document_type_id,
+            'legal_document_template_id' => $legalDocumentTemplate->id,
             'file_location' => $documentGen['filepath'] . $documentGen['filename'],
             'estate_id' => $request->estate_id,
             'company_id' => $this->sessionDetails('company_id'),
