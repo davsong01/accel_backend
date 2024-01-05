@@ -135,13 +135,8 @@ class LegalDocumentController extends Controller
         [
             'file_location' => $filepath,
         ]);
-<<<<<<< HEAD
-        
-        return response()->json(['message' => 'Success', 'data' => $generatedLegalDocument], 200);
-=======
 
         return response()->download(base_path($filepath));
->>>>>>> b963c7adca4cb6de592995c1526af3e18e56e88d
     }
 
     /**
