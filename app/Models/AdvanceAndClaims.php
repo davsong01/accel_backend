@@ -11,6 +11,10 @@ class AdvanceAndClaims extends Model
     use HasFactory;
     protected $guarded = [];
 
+    public function staff(){
+        return $this->belongsTo(Staff::class, 'staff_id');
+    }
+
     protected function proof(): Attribute
     {
 
