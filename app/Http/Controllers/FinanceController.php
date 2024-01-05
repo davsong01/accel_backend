@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ChartOfAccount;
 use App\Models\Transaction;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -80,12 +81,24 @@ class FinanceController extends Controller
      */
      public function searchGLLedger(Request $request){ 
         $params = $request->only((new Transaction)->getAttributes());
-        $query = Transaction::with(['account', 'staff', 'customer'])->where($params);
+        $query = Transaction::with(['account', 'staff:id,user_id', 'staff.user:id,first_name,middle_name,last_name', 'customer:id,user_id', 'customer.user:id,status,type,first_name,middle_name,last_name'])->where($params);
 
         $from = $request->input('from');
         $to = $request->input('to');
         if($from && $to)
             $query->whereBetween('created_at', [$from, $to]);
+
+        if($request->input('staff_name') && $name = $request->input('staff_name')){
+            $user = User::where('first_name', 'LIKE', '%'.$name.'%')
+            ->orWhere('last_name', 'LIKE', '%'.$name.'%')
+            ->orWhere('middle_name', 'LIKE', '%'.$name.'%')->first();
+            $query->where('staff_id', $user?->id);
+        }
+
+        if($name = $request->input('account_number')){
+            $account = ChartOfAccount::where('account_number', $name)->first();
+            $query->where('account_id', $account?->id);
+        }
 
         $transactions = $query->latest()->paginate(20);
         return response()->json(['message' => 'success', 'data' => $transactions], 200);

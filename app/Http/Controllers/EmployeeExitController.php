@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Carbon\Carbon;
 use App\Models\EmployeeExit;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -136,9 +137,25 @@ class EmployeeExitController extends Controller
 
     public function search(Request $request)
     {
-        $params = $request->input();
+        $params = $request->only((new EmployeeExit)->getFillable());
 
-        $employeeExits = EmployeeExit::where('company_id', $this->sessionDetails('company_id'))->where($params)->orderBy('created_at', 'DESC')->paginate(20);
+        $query = EmployeeExit::with([
+            'staff:id,user_id', 'staff.user:id,first_name,middle_name,last_name',
+        ])->where('company_id', $this->sessionDetails('company_id'))
+        ->where($params)->orderBy('created_at', 'DESC');
+
+        $from = $request->input('from');
+        $to = $request->input('to');
+        if ($from && $to) $query->whereBetween('created_at', [$from, $to]);
+
+        if ($request->input('staff_name') && $name = $request->input('staff_name')) {
+            $user = User::where('first_name', 'LIKE', '%' . $name . '%')
+                ->orWhere('last_name', 'LIKE', '%' . $name . '%')
+                ->orWhere('middle_name', 'LIKE', '%' . $name . '%')->first();
+            $query->where('staff_id', $user?->id);
+        }
+
+        $employeeExits = $query->latest()->paginate(20);
 
         return response()->json(['message' => 'Success', 'data' => $employeeExits], 200);
     }
