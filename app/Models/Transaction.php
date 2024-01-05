@@ -29,7 +29,7 @@ class Transaction extends Model
     {
         return Attribute::make(
             get: fn (string $value) => strlen(trim($value)) ? explode(',', $value) : null,
-            set: fn (array $value) => implode(",",$value),
+            set: fn (mixed $value) => is_array($value) ? implode(",",$value) : $value,
         );
     }
     public function estate()

@@ -414,7 +414,7 @@ class CustomerFormController extends Controller
             $data['type'] = 'form2-request';
             $data['status'] = 'pending';
         }
-
+        
         $data['date_of_birth'] = Carbon::parse($request->date_of_birth);
 
         // Update user
