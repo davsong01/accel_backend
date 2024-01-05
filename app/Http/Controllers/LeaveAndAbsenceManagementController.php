@@ -44,7 +44,7 @@ class LeaveAndAbsenceManagementController extends Controller
                     'first_name' => $lam->staff->user->first_name ?? 'N/A',
                     'middle_name' => $lam->staff->user->middle_name ?? 'N/A',
                     'last_name' => $lam->staff->user-> last_name ?? 'N/A',
-                    'id' => $lam->staff->id,
+                    'id' => $lam->staff->id ?? '',
                 ];
             }
             
@@ -63,7 +63,7 @@ class LeaveAndAbsenceManagementController extends Controller
                     'first_name' => $l->staff->user->first_name ?? 'N/A',
                     'middle_name' => $l->staff->user->middle_name ?? 'N/A',
                     'last_name' => $l->staff->user->last_name ?? 'N/A',
-                    'id' => $l->staff->id,
+                    'id' => $l->staff->id ?? '',
                 ]; 
             }
             
