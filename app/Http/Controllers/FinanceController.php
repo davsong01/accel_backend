@@ -58,6 +58,7 @@ class FinanceController extends Controller
             'amount' => 'required|numeric',
             'created_at' => 'date|before:tomorrow',
             'payment_slip' => 'file',
+            'description' => 'string',
         ]);
 
         if ($validator->fails()) {
