@@ -25,7 +25,7 @@ class CustomerFormController extends Controller
     {
 
         if (!empty($id)) {
-            $forms = CustomerForm::with(['country:id,name', 'state:id,name', 'lga:id,name'])->where('id', $id)->where('company_id', $this->sessionDetails('company_id'))->select('surname', 'title', 'status', 'no_of_contract', 'first_name', 'middle_name', 'last_name', 'gender', 'created_at', 'id', 'marital_status', 'date_of_birth', 'country_id', 'state_id', 'lga_id', 'next_of_kin_information', 'means_of_identification', 'primary_marketer', 'contract_ids', 'other_details', 'customer_id')->first();
+            $forms = CustomerForm::with(['country:id,name', 'state:id,name', 'lga:id,name'])->where('id', $id)->where('company_id', $this->sessionDetails('company_id'))->select('surname', 'title', 'status', 'customer_form_status', 'no_of_contract', 'first_name', 'middle_name', 'last_name', 'gender', 'created_at', 'id', 'marital_status', 'date_of_birth', 'country_id', 'state_id', 'lga_id', 'next_of_kin_information', 'means_of_identification', 'primary_marketer', 'contract_ids', 'other_details', 'customer_id')->first();
 
             if ($forms) {
                 $forms->contract_details = $this->getFormRequestContractDetails($forms);
@@ -41,7 +41,7 @@ class CustomerFormController extends Controller
             $forms = $forms->where('type', $request->type);
         }
         
-        $forms = $forms->select('surname', 'title', 'status', 'no_of_contract', 'first_name', 'middle_name', 'last_name', 'gender', 'created_at', 'id', 'means_of_identification', 'other_details');
+        $forms = $forms->select('surname', 'title', 'status', 'customer_form_status', 'no_of_contract', 'first_name', 'middle_name', 'last_name', 'gender', 'created_at', 'id', 'means_of_identification', 'other_details');
 
         if (\Request::route()->getPrefix() == 'api/customer') {
             $forms = $forms->where('customer_id', Auth::user()->customer->id);
@@ -80,7 +80,7 @@ class CustomerFormController extends Controller
     }
 
 
-    public function approveCustomerFormResponse($id)
+    public function approveForm2Request($id)
     {
         $customer_form = CustomerForm::with('customer')->where('id', $id)->where('company_id', $this->sessionDetails('company_id'))->where('type', 'form2-request')->first();
     
@@ -113,7 +113,7 @@ class CustomerFormController extends Controller
         return response()->json(['message' => 'Successful', 'data' => ['customer_id' => $customer_form->customer_id]], 200);
     }
 
-    public function declineCustomerFormResponse(Request $request, $id)
+    public function declineForm2Request(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
             'reason' => 'required',
@@ -159,6 +159,79 @@ class CustomerFormController extends Controller
     }
 
 
+    public function approveCustomerFormResponse($id)
+    {
+        $customer_form = CustomerForm::with('customer')->where('id', $id)->where('company_id', $this->sessionDetails('company_id'))->where('type', 'customer-response')->first();
+
+        if (!$customer_form) {
+            return response()->json(['message' => 'No record found', 'data' => []], 200);
+        }
+
+        if ($customer_form->customer_form_status == 'declined') {
+            return response()->json([
+                'error' => 'Customer form already declined',
+                'data' => $customer_form->customer_id,
+            ], 422);
+        }
+
+        $customer_form->update(['customer_form_status' => 'approved']);
+        
+        // $data['contract_details'] = $this->getFormRequestContractDetails($customer_form, 'approve_contract');
+
+        // $data['type'] = 'formrequest.approve';
+        // $data['medium'] = 'email';
+        // // $data['user'] = Customer::where('id', 'customer_id')->user;
+        // $data['name'] = $customer_form->first_name ?? '';
+        // $data['email'] = $customer_form->email_address ?? '';
+
+        // $this->logEmail($data);
+
+        return response()->json(['message' => 'Successful', 'data' => ['customer_id' => $customer_form->customer_id]], 200);
+    }
+
+    public function declineCustomerFormResponse(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'reason' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->messages()->first(),
+                'data' => null,
+            ], 412);
+        }
+
+        $customer_form = CustomerForm::with('customer')->where('id', $id)->where('company_id', $this->sessionDetails('company_id'))->where('type', 'customer-response')->first();
+
+        if (!$customer_form) {
+            return response()->json([
+                'error' => 'No record found',
+                'data' => null,
+            ], 422);
+        }
+
+        $customer_form->update([
+            'customer_form_status' => 'declined',
+        ]);
+
+        // $customer_form->customer->update([
+        //     'form_status' => 'Unconfirmed',
+        // ]);
+
+        // $data['contract_details'] = $this->getFormRequestContractDetails($customer_form, 'decline_contract', $request->reason);
+
+        // $data['type'] = 'formrequest.decline';
+        // $data['reason'] = $request->reason;
+        // $data['medium'] = 'email';
+        // // $data['user'] = Customer::where('id', 'customer_id')->user;
+        // $data['name'] = $customer_form->first_name ?? '';
+        // $data['email'] = $customer_form->email_address ?? '';
+
+        // $this->logEmail($data);
+        
+        return response()->json(['message' => 'Successful', 'data' => ['customer_id' => $customer_form->customer_id]], 200);
+    }
 
     /**
      * Store a newly created resource in storage.
@@ -341,7 +414,7 @@ class CustomerFormController extends Controller
             $data['type'] = 'form2-request';
             $data['status'] = 'pending';
         }
-
+        
         $data['date_of_birth'] = Carbon::parse($request->date_of_birth);
 
         // Update user

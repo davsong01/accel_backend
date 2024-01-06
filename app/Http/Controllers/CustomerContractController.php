@@ -637,7 +637,8 @@ class CustomerContractController extends Controller
 
         foreach ($histories as $history) {
             $contracts = [];
-            $h_contracts = !empty($history->customer_contract_ids) ? explode(',', $history->customer_contract_ids) : [];
+            
+            $h_contracts = !empty($history->customer_contract_ids) ? $history->customer_contract_ids : [];
 
             foreach ($h_contracts as $sub) {
                 $cont = CustomerContract::with('building_type_details:id,name', 'plot_size_details:id,size')->where('id', $sub)->select('id', 'building_type', 'plot_size')->first();

@@ -41,10 +41,10 @@ class LeaveAndAbsenceManagementController extends Controller
 
             if (!empty($lam->staff_id)) {
                 $lam->request_by = [
-                    'first_name' => $lam->staff->user->first_name,
-                    'middle_name' => $lam->staff->user->middle_name,
-                    'last_name' => $lam->staff->user->last_name,
-                    'id' => $lam->staff->id,
+                    'first_name' => $lam->staff->user->first_name ?? 'N/A',
+                    'middle_name' => $lam->staff->user->middle_name ?? 'N/A',
+                    'last_name' => $lam->staff->user-> last_name ?? 'N/A',
+                    'id' => $lam->staff->id ?? '',
                 ];
             }
             
@@ -60,10 +60,10 @@ class LeaveAndAbsenceManagementController extends Controller
         foreach($lam as $l){
             if(!empty($l->staff_id)){
                 $l->request_by = [
-                    'first_name' => $l->staff->user->first_name,
-                    'middle_name' => $l->staff->user->middle_name,
-                    'last_name' => $l->staff->user->last_name,
-                    'id' => $l->staff->id,
+                    'first_name' => $l->staff->user->first_name ?? 'N/A',
+                    'middle_name' => $l->staff->user->middle_name ?? 'N/A',
+                    'last_name' => $l->staff->user->last_name ?? 'N/A',
+                    'id' => $l->staff->id ?? '',
                 ]; 
             }
             

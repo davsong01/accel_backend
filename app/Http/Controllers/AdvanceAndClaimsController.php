@@ -37,7 +37,6 @@ class AdvanceAndClaimsController extends Controller
         if (isset($id) && !empty($id)) {
             $aac = $aac->where('id', $id)->first();
             if ($aac) {
-
                 if (!empty($aac->staff_id)) {
                     $aac->request_by = [
                         'first_name' => $aac->staff->user->first_name,
@@ -55,6 +54,7 @@ class AdvanceAndClaimsController extends Controller
         $aac = $aac->orderBy('created_at', 'DESC')->paginate(20)->withQueryString();
 
         foreach($aac as $l){
+           
             if (!empty($l->staff_id)) {
                 $l->request_by = [
                     'first_name' => $l->staff->user->first_name ?? '',
