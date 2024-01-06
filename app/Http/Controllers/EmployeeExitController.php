@@ -137,7 +137,7 @@ class EmployeeExitController extends Controller
 
     public function search(Request $request)
     {
-        $params = $request->only((new EmployeeExit)->getFillable());
+        $params = $request->only(['status']);
 
         $query = EmployeeExit::with([
             'staff:id,user_id', 'staff.user:id,first_name,middle_name,last_name',

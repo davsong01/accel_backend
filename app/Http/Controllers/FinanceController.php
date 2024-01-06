@@ -79,7 +79,8 @@ class FinanceController extends Controller
      * 
      */
      public function searchGLLedger(Request $request){ 
-        $params = $request->only((new Transaction)->getAttributes());
+        $params = $request->only(['type', 'account_id']);
+        
         $query = Transaction::with(['account', 'staff:id,user_id', 'staff.user:id,first_name,middle_name,last_name', 'customer:id,user_id', 'customer.user:id,status,type,first_name,middle_name,last_name'])->where($params);
 
         $from = $request->input('from');
