@@ -53,8 +53,7 @@ class FinanceController extends Controller
             'purpose' => 'required|string',
             'customer_id' => 'exists:customers,id,company_id,' . $company_id,
             'estate_id' => 'required|exists:estates,id,company_id,' . $company_id,
-            'customer_contract_ids' => 'array',
-            'customer_contract_ids.*' => 'exists:customer_contracts,id,customer_id,' . $request->customer_id,
+            'customer_contract_id' => 'exists:customer_contracts,id,customer_id,' . $request->customer_id,
             'account_id' => 'required|exists:chart_of_accounts,id',
             'amount' => 'required|numeric',
             'created_at' => 'date|before:tomorrow',
@@ -93,11 +92,6 @@ class FinanceController extends Controller
             ->orWhere('last_name', 'LIKE', '%'.$name.'%')
             ->orWhere('middle_name', 'LIKE', '%'.$name.'%')->first();
             $query->where('staff_id', $user?->id);
-        }
-
-        if($name = $request->input('account_number')){
-            $account = ChartOfAccount::where('account_number', $name)->first();
-            $query->where('account_id', $account?->id);
         }
 
         $transactions = $query->latest()->paginate(20);
