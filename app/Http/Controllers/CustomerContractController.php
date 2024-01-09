@@ -76,7 +76,7 @@ class CustomerContractController extends Controller
         $alldocumts = [];
 
         foreach ($generated as $generate) {
-            $alldocumts[$generate->template->legalDocumentType->name] = [
+            $alldocumts[$generate->template->legalDocumentType->name][] = [
                 'legal_document_template_id' => $generate->template->id,
                 'legal_document_type_id' => $generate->template->legalDocumentType->id,
                 'legal_document_name' => $generate->template->legalDocumentType->name,
@@ -84,6 +84,7 @@ class CustomerContractController extends Controller
                 'regenerate_count' => $generate->regenerate_count,
             ];
         }
+
         return $alldocumts;
     }
 
