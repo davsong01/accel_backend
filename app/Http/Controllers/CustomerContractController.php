@@ -76,7 +76,7 @@ class CustomerContractController extends Controller
         $alldocumts = [];
 
         foreach ($generated as $generate) {
-            $alldocumts[$generate->template->legalDocumentType->name] = [
+            $alldocumts[$generate->template->legalDocumentType->name][] = [
                 'legal_document_template_id' => $generate->template->id,
                 'legal_document_type_id' => $generate->template->legalDocumentType->id,
                 'legal_document_name' => $generate->template->legalDocumentType->name,
@@ -84,6 +84,7 @@ class CustomerContractController extends Controller
                 'regenerate_count' => $generate->regenerate_count,
             ];
         }
+
         return $alldocumts;
     }
 
@@ -160,7 +161,7 @@ class CustomerContractController extends Controller
             // Add contract
             foreach ($range as $units) {
                 $data['customer_id'] = $data['customer_id'];
-                $data['primary_marketer_id'] = $data['primary_marketer_id'];
+                $data['primary_marketer_id'] = $data['primary_marketer_id'] ?? null;
                 $data['secondary_marketers'] = isset($data['secondary_marketers']) && !empty($data['secondary_marketers']) ? json_encode($data['secondary_marketers']) : json_encode([]);
 
                 $this->createCustomerContract($data);
