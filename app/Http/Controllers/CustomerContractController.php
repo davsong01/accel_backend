@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use Carbon\Carbon;
+use App\Models\City;
 use App\Models\User;
 use App\Models\Staff;
+use App\Models\Estate;
 use App\Models\Payment;
 use App\Models\Customer;
+use App\Models\Location;
 use App\Models\Transaction;
 use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
@@ -126,6 +129,7 @@ class CustomerContractController extends Controller
     public function store(Request $request)
     {
         if (!empty($request->customer_id)) {
+            // Existing customer (and contract)
             $validator = Validator::make($request->all(), [
                 'city_id' => 'required|exists:cities,id,company_id,' . $this->sessionDetails('company_id'),
                 'location_id' => 'required|exists:locations,id,company_id,' . $this->sessionDetails('company_id'),
@@ -166,9 +170,27 @@ class CustomerContractController extends Controller
 
                 $this->createCustomerContract($data);
             }
+            // Send contract email to this existing customer
+            $customer = Customer::where('id', $request->customer_id)->first();
+            $city = City::where('id', $request->city_id)->first();
+            $estate = Estate::where('id', $request->estate_id)->first();
+            $location = Location::where('id', $request->location_id)->first();
+            
+            $data['type'] = 'add.contract.to.existing.customer';
+            $data['name'] =  $customer->user->first_name;
+            $data['email'] =  $customer->user->email;
+            $data['property_type']  = ucfirst($request->property_type);
+            $data['city'] = $city->name;
+            $data['location'] = $location->name;
+            $data['estate'] = $estate->name;
+            $data['no_of_units'] = $request->no_of_units;
+            $data['contract_type'] = ucfirst($data['contract_type']);
 
+            $this->logEmail($data);
             return response()->json(['message' => 'Success', 'data' => ['customer_id' => $data['customer_id']]], 200);
         } else {
+
+            // New customer and contract
             $validator = Validator::make($request->all(), [
                 'city_id' => 'required|exists:cities,id,company_id,' . $this->sessionDetails('company_id'),
                 'location_id' => 'required|exists:locations,id,company_id,' . $this->sessionDetails('company_id'),
@@ -255,7 +277,7 @@ class CustomerContractController extends Controller
                         $this->logEmail($data2);
                     }
                 }
-                // Email Primary Marketer
+                
             } else {
                 return response()->json(['message' => 'Could not create customer', 'data' => null], 422);
             }

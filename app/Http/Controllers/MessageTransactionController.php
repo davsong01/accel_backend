@@ -89,7 +89,7 @@ class MessageTransactionController extends Controller
         $data['schedule_date'] = Carbon::now();
         $data['company_id'] = $this->sessionDetails('company_id');
         $data = Arr::except($data, ['name']);
-
+       
         $mes = MessageTransaction::create($data);
         return $mes;
     }
@@ -164,6 +164,32 @@ class MessageTransactionController extends Controller
                 '</div>';
             }
         }
+
+        if ($data['type'] == 'add.contract.to.existing.customer'){
+            if (isset($data['medium']) && $data['medium'] == 'sms') {
+                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'sms')->where('type', 'add.contract.to.existing.customer')->first();
+                $content = $email_template->content ?? null;
+            } else {
+                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'email')->where('type', 'add.contract.to.existing.customer')->first();
+                $subject = $email_template->subject ?? 'New Contract Added to Your Account';
+                $content = $email_template->content ?? '<strong>Dear ' . $data['name'] . ', </strong><br><br>
+                <div>
+                <p style="text-align:justify !important">This is to inform you that a new contract has been successfully added to your account in our system.
+                <br>Here are the details of the newly added contract:<br><br></p>
+                <p style="text-align:justify !important">
+                <strong>Property Type: </strong>'. $data['property_type'] . '<br>
+                <strong>City: </strong>' . $data['city'] . '<br>
+                <strong>Location: </strong>' . $data['location'] . '<br>
+                <strong>Estate: </strong>' . $data['estate'] . '<br>
+                <strong>No. of Units: </strong>' . $data['no_of_units'] . '<br>
+                <strong>Contract Type: </strong>' . $data['contract_type']. '<br><br>
+                Please review these details and reach out to us for any necessary follow-ups or clarifications.<br>Thank you for your continued trust in our services.<br><br>Best regards,<br><br>'. $this->sessionDetails('company_name').'
+
+                </p>
+                </div>';
+            }
+        }
+        
 
         if ($data['type'] == 'primary.marketer.email.for.new.contract') {
             if (isset($data['medium']) && $data['medium'] == 'sms') {
