@@ -160,7 +160,7 @@ class CustomerContractController extends Controller
             // Add contract
             foreach ($range as $units) {
                 $data['customer_id'] = $data['customer_id'];
-                $data['primary_marketer_id'] = $data['primary_marketer_id'];
+                $data['primary_marketer_id'] = $data['primary_marketer_id'] ?? null;
                 $data['secondary_marketers'] = isset($data['secondary_marketers']) && !empty($data['secondary_marketers']) ? json_encode($data['secondary_marketers']) : json_encode([]);
 
                 $this->createCustomerContract($data);

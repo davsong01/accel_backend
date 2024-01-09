@@ -21,7 +21,7 @@ class CustomerContract extends Model
     use HasFactory;
     protected $table = 'customer_contracts';
     protected $guarded = [];
-    protected $appends = ['form_amount_paid','form_payment_status'];
+    protected $appends = ['form_amount_paid','form_payment_status','contract_name'];
 
     public function customer(){
         return $this->belongsTo(Customer::class, 'customer_id');
@@ -93,6 +93,24 @@ class CustomerContract extends Model
         } else {
             return 0;
         }
+    }
+
+    public function getContractNameAttribute(){
+        $name = '';
+        if($this->property_type == 'building'){
+            if(isset($this->building_type_details->name) && isset($this->estate->name)){
+                $name = $this->building_type_details->name . ' - ' . $this->estate->name;
+            }
+        }
+
+        if ($this->property_type == 'land') {
+            if(isset($this->plot_size_details->size) && isset($this->building_type_details->name) && isset($this->estate->name)){
+                $name = $this->plot_size_details->size . ' - ' . $this->building_type_details->name . ' - ' . $this->estate->name;
+            }
+        }
+
+        return $name;
+
     }
 
     public function primaryMarketer()
