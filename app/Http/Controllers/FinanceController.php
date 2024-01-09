@@ -53,8 +53,7 @@ class FinanceController extends Controller
             'purpose' => 'required|string',
             'customer_id' => 'exists:customers,id,company_id,' . $company_id,
             'estate_id' => 'required|exists:estates,id,company_id,' . $company_id,
-            'customer_contract_ids' => 'array',
-            'customer_contract_ids.*' => 'exists:customer_contracts,id,customer_id,' . $request->customer_id,
+            'customer_contract_id' => 'exists:customer_contracts,id,customer_id,' . $request->customer_id,
             'account_id' => 'required|exists:chart_of_accounts,id',
             'amount' => 'required|numeric',
             'created_at' => 'date|before:tomorrow',
@@ -80,7 +79,8 @@ class FinanceController extends Controller
      * 
      */
      public function searchGLLedger(Request $request){ 
-        $params = $request->only((new Transaction)->getAttributes());
+        $params = $request->only(['type', 'account_id']);
+        
         $query = Transaction::with(['account', 'staff:id,user_id', 'staff.user:id,first_name,middle_name,last_name', 'customer:id,user_id', 'customer.user:id,status,type,first_name,middle_name,last_name'])->where($params);
 
         $from = $request->input('from');
@@ -93,11 +93,6 @@ class FinanceController extends Controller
             ->orWhere('last_name', 'LIKE', '%'.$name.'%')
             ->orWhere('middle_name', 'LIKE', '%'.$name.'%')->first();
             $query->where('staff_id', $user?->id);
-        }
-
-        if($name = $request->input('account_number')){
-            $account = ChartOfAccount::where('account_number', $name)->first();
-            $query->where('account_id', $account?->id);
         }
 
         $transactions = $query->latest()->paginate(20);
