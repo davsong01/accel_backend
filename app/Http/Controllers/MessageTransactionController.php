@@ -150,18 +150,18 @@ class MessageTransactionController extends Controller
         if ($data['type'] == 'user.store') {
             if (isset($data['medium']) && $data['medium'] == 'sms') {
             } else {
-                
                 $subject = 'Welcome to ' . $this->sessionDetails('company_name');
                 $content .= '<strong>Dear ' . $data['name'] . ',</strong><br><br>
                 <div>
-                <p style="text-align:justify !important">Your new customer details have been created. Please find details below: <br><br>
-                First Name: ' . $data['first_name'] . '<br>
-                Last Name: ' . $data['last_name'] . '<br>
-                Email: ' . $data['email'] . '<br>
-                Customer Id: ' . $data['customer_id'] . '<br>'.
-
-                // Password: ' . '123456789' . '<br><br> Please click the login button below to login to your personalized dashboard using your email/staff Id and password above. Thank you <br><br><a href="' . url('/') . '"><button style="' . $button_style . '">LOGIN</button></a></p>
-                '</div>';
+                <p style="text-align:justify !important">We are pleased to inform you that your details have been successfully added to our system. We are thrilled to have you with us.<br><br>Here are the details of your contract:
+                 <strong>Property Type: </strong>' . $data['property_type'] . '<br>
+                <strong>City: </strong>' . $data['city'] . '<br>
+                <strong>Location: </strong>' . $data['location'] . '<br>
+                <strong>Estate: </strong>' . $data['estate'] . '<br>
+                <strong>No. of Units: </strong>' . $data['no_of_units'] . '<br>
+                <strong>Contract Type: </strong>' . $data['contract_type'] . '<br><br>
+               <br><br>Please review the contract details and let us know if there are any discrepancies or if you need further clarification.<br><br>Your Customer ID is: '. $data['customer_id'].
+                '<br><br>Thank you for choosing '. $this->sessionDetails('company_name'). 'We look forward to serving you.<br><br>Best Regards,<br>'. $this->sessionDetails('company_name').'</div>';
             }
         }
 
@@ -189,32 +189,75 @@ class MessageTransactionController extends Controller
                 </div>';
             }
         }
-        
 
+        if ($data['type'] == 'send.email.to.secondary.subscriber') {
+            if (isset($data['medium']) && $data['medium'] == 'sms') {
+                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'sms')->where('type', 'send.email.to.secondary.subscriber')->first();
+                $content = $email_template->content ?? null;
+            } else {
+                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'email')->where('type', 'send.email.to.secondary.subscriber')->first();
+                $subject = $email_template->subject ?? 'Welcome to Your Joint Property Ownership';
+                $content = $email_template->content ?? '<strong>Dear ' . $data['name'] . ', </strong><br><br>
+                <div>
+                <p style="text-align:justify !important">We are delighted to inform you that you have been added as a joint owner of a property with '. $this->sessionDetails('company_name') . '. This is a significant step, and we are glad to have you on board.<br><br>As a joint owner, you now share rights and responsibilities related to the property. This includes the ability to make decisions regarding the use, maintenance, and sale of the property. <br><br>Here are some of the details of your property:<br>
+                <strong>Property Type: </strong>' . $data['property_type'] . '<br>
+                <strong>City: </strong>' . $data['city'] . '<br>
+                <strong>Location: </strong>' . $data['location'] . '<br>
+                <strong>Estate: </strong>' . $data['estate'] . '<br>
+                <strong>No. of Units: </strong>' . $data['no_of_units'] . '<br>
+                <strong>Contract Type: </strong>' . $data['contract_type'] . '<br><br>
+                If you have any questions or need further clarification, please do not hesitate to contact us. Our team is always ready to assist you.<br><br>Thank you for choosing us. We look forward to serving you.
+                <br><br>Best regards,<br><br>' . $this->sessionDetails('company_name') . '
+                </p>
+                </div>';
+            }
+        }
+        
         if ($data['type'] == 'primary.marketer.email.for.new.contract') {
             if (isset($data['medium']) && $data['medium'] == 'sms') {
                 $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'sms')->where('type', 'primary.marketer.email.for.new.contract')->first();
-                $content = $email_template->content ?? null;
-
-                if (!empty($content)) {
-                    $content .= $content;
-                } else {
-                    $content .= 'Hello, your password reset link is: ' . url('/') . '/reset-password?token=' . $data['token'];
-                }
+                
             } else {
                 $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'email')->where('type', 'primary.marketer.email.for.new.contract')->first();
-                $subject = $email_template->subject ?? null;
-                $content = $email_template->content ?? null;
-
-                $subject = $subject ?? 'You are now a new primary marketer';
-                $content .= $content ?? '<strong>Dear ' . $data['name'] . ', </strong><br><br>
+                $subject = $email_template->subject ?? 'New Contract Added to Your Client\'s Account';
+                $content = $email_template->content ?? '<strong>Dear ' . $data['name'] . ', </strong><br><br>
                 <div>
-                <p style="text-align:justify !important">You are now the primary marketter for a new customer on ' . $this->sessionDetails('company_name') . '. please find customer details below<br><br>
+                <p style="text-align:justify !important">This is to inform you that a new contract has been successfully added to the account of your client, ' . $data['customer_name'] . '. Here are the details of the customer\'s contract:<br><br>
                Name: '. $data['customer_details']['customer_name'] . '<br> 
                Phone Number: '. $data['customer_details']['customer_phone'] . '<br> 
-               Customer ID: '. $data['customer_details']['customerId'] . '<br> <br>' .
+               Customer ID: '. $data['customer_details']['customerId'] . '<br> <br>
+                <strong>Property Type: </strong>' . $data['property_type'] . '<br>
+                <strong>City: </strong>' . $data['city'] . '<br>
+                <strong>Location: </strong>' . $data['location'] . '<br>
+                <strong>Estate: </strong>' . $data['estate'] . '<br>
+                <strong>No. of Units: </strong>' . $data['no_of_units'] . '<br>
+                <strong>Contract Type: </strong>' . $data['contract_type'] . '<br><br>Please ensure to review these details and reach out to the customer for any necessary follow-ups or clarifications. <br><br>Thank you for your attention to this matter.<br><br>Best regards,
+                <br><br>'. $this->sessionDetails('company_name').'</p>
+                </div>';
+            }
+        }
 
-                ' Thank you <br><br></p>
+        if ($data['type'] == 'primary.marketer.email.for.new.customer') {
+            if (isset($data['medium']) && $data['medium'] == 'sms') {
+                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'sms')->where('type', 'primary.marketer.email.for.new.customer')->first();
+                $content = $email_template->content ?? null;
+
+            } else {
+                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'email')->where('type', 'primary.marketer.email.for.new.customer')->first();
+                $subject = $email_template->subject ?? 'New Customer Added Successfully';
+                $content = $email_template->content ?? '<strong>Dear ' . $data['name'] . ', </strong><br><br>
+                <div>
+                <p style="text-align:justify !important">This is to inform you that a new contract has been successfully added to the account of your client, ' . $data['customer_name'] . '. Here are the details of the customer\'s contract:<br><br>
+               Name: ' . $data['customer_details']['customer_name'] . '<br> 
+               Phone Number: ' . $data['customer_details']['customer_phone'] . '<br> 
+               Customer ID: ' . $data['customer_details']['customerId'] . '<br> <br>
+                <strong>Property Type: </strong>' . $data['property_type'] . '<br>
+                <strong>City: </strong>' . $data['city'] . '<br>
+                <strong>Location: </strong>' . $data['location'] . '<br>
+                <strong>Estate: </strong>' . $data['estate'] . '<br>
+                <strong>No. of Units: </strong>' . $data['no_of_units'] . '<br>
+                <strong>Contract Type: </strong>' . $data['contract_type'] . '<br><br>Please ensure to review these details and reach out to the customer for any necessary follow-ups or clarifications. <br><br>Thank you for your attention to this matter.<br><br>Best regards,
+                <br><br>' . $this->sessionDetails('company_name') . '</p>
                 </div>';
             }
         }
@@ -254,7 +297,7 @@ class MessageTransactionController extends Controller
                 $subject = $subject ?? 'Receipt for Form payment';
                 $content .= $content ?? '<strong>Dear ' . $data['name'] . ',</strong><br>
                 <div>
-                <p style="text-align:justify !important"></p>
+                <p style="text-align:justify !important">We appreciate your business with ${Company Name}. Attached is the receipt for your records.<br><br>If you have any questions or concerns, feel free to reach out to our customer support.<br><br>Best regards,<br><br>'. $this->sessionDetails('company_name').'</p>
                 </div>';
             }
         }
