@@ -69,10 +69,11 @@ class TransactionPurposeController extends Controller
      */
     public function update(Request $request, TransactionPurpose $purpose)
     {
+
         $company_id = $this->sessionDetails('company_id'); 
         $validator = Validator::make($request->all(), [
             'name' => 'required|string',
-            'transaction_type_id' => 'required|exists:transaction_types,id,company_id,' . $company_id,
+            'transaction_type_id' => 'exists:transaction_types,id,company_id,' . $company_id,
         ]);
 
         if ($validator->fails()) {
@@ -82,9 +83,9 @@ class TransactionPurposeController extends Controller
             ], 412);
         }
 
-        $purpose->with(['transactionType'])->update($validator->validated());
+        $purpose->update($validator->validated());
 
-        return response()->json(['message' => 'Updated successfully', 'data' => $purpose], 200);
+        return response()->json(['message' => 'Updated successfully', 'data' => $purpose->load(['transactionType'])], 200);
     }
 
     /**
