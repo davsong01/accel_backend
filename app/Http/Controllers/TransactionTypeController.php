@@ -39,7 +39,7 @@ class TransactionTypeController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string',
             'customer_details' => 'in:Required,Not Required',
-            'customer_contract_details' => 'in:Required,Not Required',
+            'customer_contract_details' => 'in:Required,Not Required|required_with:customer_details',
             'staff_details' => 'in:Required,Not Required',
         ]);
 
