@@ -132,8 +132,6 @@ class Controller extends BaseController
                 $contract['i_form_payment']['form_amount'] = $contract['form_payment'];
             }
 
-
-
             $contract['i_form_payment']['contracts'] =  array_values($s_ids);
             $form_payment[$contract['estate_id']] = $contract['i_form_payment'];
         }
