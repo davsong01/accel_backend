@@ -26,7 +26,11 @@ class FinanceController extends Controller
     public function GLAccountTransactions(ChartOfAccount $account): JsonResponse
     {
         $transactions = $account->payments()->paginate(20);
-        return response()->json(['message' => 'Success', 'data' => $transactions], 200);
+        return response()->json(['message' => 'Success', 
+        'data' => [
+            'account' => $account->load(['account_category', 'account_type']),
+            'transactions' => $transactions
+            ]], 200);
     }
 
      /**
@@ -49,8 +53,8 @@ class FinanceController extends Controller
 
         $validator = Validator::make($request->all(), [
             'type' => 'required|in:CREDIT,DEBIT',
-            'transaction_type' => 'required|string',
-            'purpose' => 'required|string',
+            'transaction_type_id' => 'required|exists:transaction_types,id',
+            'transaction_purpose_id' => 'required|exists:transaction_purposes,id,transaction_type_id,' . $request->transaction_type_id,
             'customer_id' => 'exists:customers,id,company_id,' . $company_id,
             'estate_id' => 'required|exists:estates,id,company_id,' . $company_id,
             'customer_contract_id' => 'exists:customer_contracts,id,customer_id,' . $request->customer_id,
