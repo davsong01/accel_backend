@@ -14,7 +14,7 @@ class TransactionTypeController extends Controller
      */
     public function index(): JsonResponse
     {
-        $list = TransactionType::where('company_id', $this->sessionDetails('company_id'))->latest()->paginate(20);
+        $list = TransactionType::with(['purposes'])->where('company_id', $this->sessionDetails('company_id'))->latest()->paginate(20);
         return response()->json(['message' => 'Success', 'data' => $list], 200);
     }
 
@@ -25,7 +25,7 @@ class TransactionTypeController extends Controller
     {
         $name = $request->input('name');
 
-        $query = TransactionType::where('company_id', $this->sessionDetails('company_id'))
+        $query = TransactionType::with(['purposes'])->where('company_id', $this->sessionDetails('company_id'))
         ->where('name', 'LIKE', "%$name%")->latest()->paginate(20);
 
         return response()->json(['message' => 'Success', 'data' => $query], 200);
@@ -38,7 +38,7 @@ class TransactionTypeController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string',
-            'customer_details' => 'in:Required,Not Required',
+            'customer_details' => $request->customer_contract_details === 'Required' ? ['required', 'in:Required'] : ['in:Required,Not Required'],
             'customer_contract_details' => 'in:Required,Not Required',
             'staff_details' => 'in:Required,Not Required',
         ]);
@@ -61,7 +61,7 @@ class TransactionTypeController extends Controller
      */
     public function show(Request $request, TransactionType $type)
     {
-        return response()->json(['message' => 'Updated successfully', 'data' => $type], 200);
+        return response()->json(['message' => 'Updated successfully', 'data' => $type->load(['purposes'])], 200);
     }
 
     /**
@@ -85,7 +85,7 @@ class TransactionTypeController extends Controller
 
         $type->update($validator->validated());
 
-        return response()->json(['message' => 'Updated successfully', 'data' => $type], 200);
+        return response()->json(['message' => 'Updated successfully', 'data' => $type->load('purposes')], 200);
     }
 
     /**
