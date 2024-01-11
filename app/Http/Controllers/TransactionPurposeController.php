@@ -61,7 +61,7 @@ class TransactionPurposeController extends Controller
      */
     public function show(Request $request, TransactionPurpose $purpose)
     {
-        return response()->json(['message' => 'Updated successfully', 'data' => $purpose], 200);
+        return response()->json(['message' => 'Updated successfully', 'data' => $purpose->load(['transactionType'])], 200);
     }
 
     /**
