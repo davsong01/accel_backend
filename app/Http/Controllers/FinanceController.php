@@ -56,7 +56,7 @@ class FinanceController extends Controller
             'transaction_type_id' => 'required|exists:transaction_types,id',
             'transaction_purpose_id' => 'required|exists:transaction_purposes,id,transaction_type_id,' . $request->transaction_type_id,
             'customer_id' => 'exists:customers,id,company_id,' . $company_id,
-            'estate_id' => 'required|exists:estates,id,company_id,' . $company_id,
+            'estate_id' => 'exists:estates,id,company_id,' . $company_id,
             'customer_contract_id' => 'exists:customer_contracts,id,customer_id,' . $request->customer_id,
             'account_id' => 'required|exists:chart_of_accounts,id',
             'amount' => 'required|numeric',
