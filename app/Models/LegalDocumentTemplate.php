@@ -13,14 +13,21 @@ class LegalDocumentTemplate extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['estate_id', 'company_id', 'created_by', 'legal_document_type_id', 'property_type_id', 'file_location'];
+    protected $fillable = ['estate_id', 'company_id', 'created_by', 'legal_document_type_id', 'property_type_id', 'file_location', 'template_sample'];
+    protected $appends = ['template_sample_location'];
 
     protected function fileLocation(): Attribute
     {
         return Attribute::make(
-            get: fn (string $value) => url('/') . '/api/uploads/' . base64_encode($value),
+            get: fn (string $value) => url('/') . '/api/uploads/' . base64_encode($value ?: $this->template_sample),
         );
     }
+
+    protected function getTemplateSampleLocationAttribute()
+    {
+       return url('/') . '/api/uploads/' . base64_encode($this->template_sample);
+    }
+
     /**
      * Get the estate for the legal document template.
      */
