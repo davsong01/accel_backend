@@ -35,7 +35,7 @@ class LegalDocumentTemplateSeeder extends Seeder
                         'created_by' => User::where('company_id', $estate->company->id)->first()->id,
                         'legal_document_type_id' => $legalDocumentType->id,
                         'property_type_id' => $legalDocumentType->property_type_id,
-                        'file_location' => 'uploads/legal_document_samples/' . SAMPLE_LEGAL_DOCUMENTS[$legalDocumentType->id],
+                        'template_sample' => 'uploads/legal_document_samples/' . SAMPLE_LEGAL_DOCUMENTS[$legalDocumentType->id],
                     ]);
                 }
             }
