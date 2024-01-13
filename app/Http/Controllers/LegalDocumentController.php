@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Validator;
 class LegalDocumentController extends Controller
 {
     /**
-     * 
+     *
      */
     public function type(Request $request)
     {
@@ -67,10 +67,14 @@ class LegalDocumentController extends Controller
      */
     public function preview(Request $request)
     {
+        $company_id = $this->sessionDetails('company_id');
         $params = $request->input((new LegalDocumentTemplate)->getFillable());
-        $template = LegalDocumentTemplate::where($params)->first();
-        $filepath = base64_decode(substr(stristr($template->file_location, 'uploads/'), 8));
-       
+
+        $template = LegalDocumentTemplate::where('company_id', $company_id)->where($params)->first();
+        $is_sample = request()->routeIs('template.preview.sample');
+
+        $filepath = base64_decode(substr(stristr($is_sample ? $template->template_sample_location : $template->file_location, 'uploads/'), 8));
+
         return response()->download(base_path($filepath));
     }
 
@@ -81,9 +85,9 @@ class LegalDocumentController extends Controller
     {
         $params = $request->only((new LegalDocumentTemplate)->getFillable());
         $legalDocumentTemplate = LegalDocumentTemplate::where($params)->firstOrFail();
-        
+
         $data = null;
-        if($legalDocumentTemplate->legalDocumentType->name === 'OFFER_LETTER'){
+        // if($legalDocumentTemplate->legalDocumentType->name === 'OFFER_LETTER'){
             $data =  CustomerContract::with(['customer.user:first_name,last_name,id,middle_name,customerId,avatar', 'generatedDocument' => function ($query) use ($legalDocumentTemplate) {
                 $query->where([
                     'estate_id' => $legalDocumentTemplate->estate_id,
@@ -91,9 +95,9 @@ class LegalDocumentController extends Controller
                 ])->first();
             }, 'location'])->where([
                 'estate_id' => $request->input('estate_id'),
-                'form_approval_status' => 'approved',
+                // 'form_approval_status' => 'approved',
             ])->paginate(20);
-        }
+        // }
         // TODO: condition for other legal document types
         return response()->json(['message' => 'success', 'data' => $data], 200);
     }
@@ -135,6 +139,12 @@ class LegalDocumentController extends Controller
         [
             'file_location' => $filepath,
         ]);
+
+        // update regenerate_count
+        if($generatedLegalDocument->created_at->diffForHumans() !== $generatedLegalDocument->updated_at->diffForHumans()){
+            $generatedLegalDocument->regenerate_count++;
+            $generatedLegalDocument->save();
+        }
 
         return response()->download(base_path($filepath));
     }
