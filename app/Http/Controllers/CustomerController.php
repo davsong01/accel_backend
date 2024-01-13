@@ -342,7 +342,7 @@ class CustomerController extends Controller
         ]);
 
         $next_of_kin = json_encode([
-            'nok_first_name' => isset($data['next_of_kin_information']['nok_first_name']) ? $data['next_of_kin_information']['nok_first_name'] : ($old_next_of_kin['nok_first_name'] ?? ''),
+            'nok_first_name' => isset($data['nok_first_name']) ? $data['nok_first_name'] : ($old_next_of_kin['nok_first_name'] ?? ''),
             'nok_last_name' => isset($data['nok_last_name']) ? $data['nok_last_name'] : ($old_next_of_kin['nok_last_name'] ?? ''),
             'nok_phone_number' => isset($data['nok_phone_number']) ? $data['nok_phone_number'] : ($old_next_of_kin['nok_phone_number'] ?? ''),
             'nok_house_address' => isset($data['nok_house_address']) ? $data['nok_house_address'] : ($old_next_of_kin['nok_house_address'] ?? ''),
