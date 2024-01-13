@@ -243,7 +243,6 @@ class CustomerFormController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'title' => 'nullable',
             'surname' => 'nullable',
             'first_name' => 'nullable',
             'middle_name' => 'nullable',
@@ -257,9 +256,9 @@ class CustomerFormController extends Controller
             'house_address' => 'nullable',
             'alternate_number' => 'nullable',
 
-            'lga_id' => 'required|exists:lgas,id',
+            'lga_id' => 'nullable|exists:lgas,id',
             'country_id' => 'required|exists:countries,id',
-            'state_id' => 'required|exists:states,id',
+            'state_id' => 'nullable|exists:states,id',
 
             // Next of kin information
             'nok_first_name' => 'nullable',
@@ -277,8 +276,15 @@ class CustomerFormController extends Controller
             'id_card' => 'nullable|image|max:2048',
             'signature' => 'nullable|image|max:2048',
 
+            // Additional details
+            'title' => 'nullable',
+            "alternate_number" => 'nullable',
+            "alternate_email" => 'nullable',
+            "residential_address" => 'nullable',
+            "office_address" => 'nullable',
+            "marital_status" => 'nullable',
+
             // 'bypass_approval' => 'nullable',
-            'marital_status' => 'nullable',
             'customer_id' => 'required|exists:customers,id,company_id,' . $this->sessionDetails('company_id'),
 
             // Contracts
@@ -294,9 +300,7 @@ class CustomerFormController extends Controller
 
         $customer_contract_ids = [];
         if (!empty($request->contract)) {
-
             $contracts = $this->cleanJsonInput($request->contract);
-
             foreach ($contracts as $cont) {
                 // Make each contract a request
                 $contract_validator = Validator::make($cont, [
@@ -369,7 +373,6 @@ class CustomerFormController extends Controller
             $data['secondary_marketers'] = json_encode($request->secondary_marketers);
         }
 
-
         // To be used in customer form
         $data['next_of_kin_information'] = json_encode([
             'nok_first_name' => $data['nok_first_name'] ?? null,
@@ -402,6 +405,13 @@ class CustomerFormController extends Controller
             'phone_number' => $data['phone_number'] ?? null,
             'house_address' => $data['house_address'] ?? null,
             'alternate_phone_number' => $data['alternate_number'] ?? null,
+            
+            // 'title' => $data['title'] ?? null,
+            // 'alternate_number' => $data['alternate_number'] ?? null,
+            // 'alternate_email' => $data['alternate_email'] ?? null,
+            // 'residential_address' => $data['residential_address'] ?? null,
+            // 'office_address' => $data['office_address'] ?? null,
+            // 'marital_status' => $data['marital_status'] ?? null,
         ]);
 
         // End to be used in customer form
@@ -420,8 +430,17 @@ class CustomerFormController extends Controller
         // Update user
         $customer = Customer::where('id', $data['customer_id'])->first();
         $user = $customer->user;
-
+       
         // Update user
+        // $data['additional_details'] = json_encode([
+        //     'title' => $data['title'] ?? null,
+        //     'alternate_number' => $data['alternate_number'] ?? null,
+        //     'alternate_email' => $data['alternate_email'] ?? null,
+        //     'residential_address' => $data['residential_address'] ?? null,
+        //     'office_address' => $data['office_address'] ?? null,
+        //     'marital_status' => $data['marital_status'] ?? null,
+        // ]);
+
         app('App\Http\Controllers\CustomerController')->updateUser($user, $data);
         $data['raw'] = json_encode($request->all());
         $data['contract_ids'] = json_encode($customer_contract_ids);
@@ -448,7 +467,6 @@ class CustomerFormController extends Controller
      */
     public function show(CustomerForm $CustomerForm)
     {
-        // dd($customerForm);
     }
 
     /**

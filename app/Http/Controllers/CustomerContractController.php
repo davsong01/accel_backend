@@ -234,7 +234,6 @@ class CustomerContractController extends Controller
             }
             return response()->json(['message' => 'Success', 'data' => ['customer_id' => $data['customer_id']]], 200);
         } else {
-
             // New customer and contract
             $validator = Validator::make($request->all(), [
                 'city_id' => 'required|exists:cities,id,company_id,' . $this->sessionDetails('company_id'),
@@ -313,7 +312,6 @@ class CustomerContractController extends Controller
                         $email['type'] = 'send.email.to.secondary.subscriber';
                         $email['name'] =  $subscribe->s_name;
                         $email['email'] =  $subscribe->s_email;
-                        // dd($email);
                         $this->logEmail($email);
                     }
                 }
@@ -526,7 +524,6 @@ class CustomerContractController extends Controller
         }
 
         $customer = Customer::where('id', $request->customer_id)->first();
-
         if ($form_payment) {
             $receipts = [];
             foreach ($form_payment['explanation'] as $key => $form) {
@@ -546,7 +543,7 @@ class CustomerContractController extends Controller
                 ]);
 
                 $receipt = $this->generateFormPaymentReceipt($payment);
-
+                
                 $payment->update(['receipt_location' => $receipt['filepath'] ?? null]);
                 $receipts[] = $receipt['filepath'] ?? null;
 
