@@ -343,11 +343,11 @@ class CustomerController extends Controller
 
         $next_of_kin = json_encode([
             'nok_first_name' => isset($data['next_of_kin_information']['nok_first_name']) ? $data['next_of_kin_information']['nok_first_name'] : ($old_next_of_kin['nok_first_name'] ?? ''),
-            'nok_last_name' => isset($data['next_of_kin_information']['nok_last_name']) ? $data['next_of_kin_information']['nok_last_name'] : ($old_next_of_kin['nok_last_name'] ?? ''),
-            'nok_phone_number' => isset($data['next_of_kin_information']['nok_phone_number']) ? $data['next_of_kin_information']['nok_phone_number'] : ($old_next_of_kin['nok_phone_number'] ?? ''),
-            'nok_house_address' => isset($data['next_of_kin_information']['nok_house_address']) ? $data['next_of_kin_information']['nok_house_address'] : ($old_next_of_kin['nok_house_address'] ?? ''),
-            'nok_email_address' => isset($data['next_of_kin_information']['nok_email_address']) ? $data['next_of_kin_information']['nok_email_address'] : ($old_next_of_kin['nok_email_address'] ?? ''),
-            'nok_relationship' => isset($data['next_of_kin_information']['nok_relationship']) ? $data['next_of_kin_information']['nok_relationship'] : ($old_next_of_kin['nok_relationship'] ?? ''),
+            'nok_last_name' => isset($data['nok_last_name']) ? $data['nok_last_name'] : ($old_next_of_kin['nok_last_name'] ?? ''),
+            'nok_phone_number' => isset($data['nok_phone_number']) ? $data['nok_phone_number'] : ($old_next_of_kin['nok_phone_number'] ?? ''),
+            'nok_house_address' => isset($data['nok_house_address']) ? $data['nok_house_address'] : ($old_next_of_kin['nok_house_address'] ?? ''),
+            'nok_email_address' => isset($data['nok_email_address']) ? $data['nok_email_address'] : ($old_next_of_kin['nok_email_address'] ?? ''),
+            'nok_relationship' => isset($data['nok_relationship']) ? $data['nok_relationship'] : ($old_next_of_kin['nok_relationship'] ?? ''),
         ]);
 
         $user->update([

@@ -509,7 +509,7 @@ class CustomerContractController extends Controller
             $ids[] = $a;
         });
 
-
+        dd($ids);
         $form_payment = $this->generateFormPayment($ids, $request->customer_id);
 
         if ($request->amount != $form_payment['form_payment']) {

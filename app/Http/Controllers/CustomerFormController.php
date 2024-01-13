@@ -162,7 +162,7 @@ class CustomerFormController extends Controller
     public function approveCustomerFormResponse($id)
     {
         $customer_form = CustomerForm::with('customer')->where('id', $id)->where('company_id', $this->sessionDetails('company_id'))->where('type', 'customer-response')->first();
-
+        
         if (!$customer_form) {
             return response()->json(['message' => 'No record found', 'data' => []], 200);
         }
