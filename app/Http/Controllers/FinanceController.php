@@ -25,7 +25,7 @@ class FinanceController extends Controller
      */
     public function GLAccountTransactions(ChartOfAccount $account): JsonResponse
     {
-        $transactions = $account->payments()->paginate(20);
+        $transactions = $account->payments()->with(['staff:id,user_id,account_name,account_number'])->paginate(20);
         return response()->json(['message' => 'Success', 
         'data' => [
             'account' => $account->load(['account_category', 'account_type']),
