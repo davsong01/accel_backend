@@ -207,9 +207,9 @@ class CustomerController extends Controller
         if (\Request::route()->getPrefix() == 'api/customer') {
             $id = Auth::user()->customer->id;
         }
+       
         $customer = Customer::where('customers.id', $id)
             ->with('user')->first();
-        
         if(!$customer){
             return response()->json(['message' => 'Customer does not exist', 'data' => []], 200);
         }
@@ -318,19 +318,20 @@ class CustomerController extends Controller
         $old_additional_details = !empty($user->additional_details) ? $user->additional_details : [];
         $old_means_of_identification = !empty($user->means_of_identification) ? $user->means_of_identification : [];
         $old_next_of_kin = !empty($user->next_of_kin) ? $user->next_of_kin : [];
-
+      
         $additional_details = json_encode([
             'title' => !empty($data['title']) ? $data['title'] : ($old_additional_details['title'] ?? ''),
             'alternate_number' => !empty($data['alternate_number']) ? $data['alternate_number'] : ($old_additional_details['alternate_number'] ?? ''),
             'alternate_email' => !empty($data['alternate_email']) ? $data['alternate_email'] : ($old_additional_details['alternate_email'] ?? ''),
             'state' => !empty($data['state_id']) ? $data['state_id'] : ($old_additional_details['state'] ?? ''),
-            'residential_address' => isset($data['contact_details']['house_address']) ? $data['contact_details']['house_address'] : ($old_additional_details['residential_address'] ?? ''),
             'marital_status' => !empty($data['marital_status']) ? $data['marital_status'] : ($old_additional_details['marital_status'] ?? ''),
             'nationality' => !empty($data['country_id']) ? $data['country_id'] : ($old_additional_details['nationality'] ?? ''),
             'lga' => !empty($data['lga_id']) ? $data['lga_id'] : ($old_additional_details['lga'] ?? ''),
-            'office_address' => isset($data['contact_details']['office_address']) ? $data['contact_details']['office_address'] : ($old_additional_details['office_address'] ?? ''),
+            
+            'office_address' => isset($data['office_address']) ? $data['office_address'] : ($old_additional_details['office_address'] ?? ''),
+            'residential_address' => isset($data['residential_address']) ? $data['residential_address'] : ($old_additional_details['residential_address'] ?? ''),
         ]);
-
+       
         $means_of_identification = json_encode([
             'occupation' => isset($data['occupation']) ? $data['occupation'] : ($old_means_of_identification['occupation'] ?? ''),
             'place_of_work' => isset($data['place_of_work']) ? $data['place_of_work'] : ($old_means_of_identification['place_of_work'] ?? ''),
@@ -341,12 +342,12 @@ class CustomerController extends Controller
         ]);
 
         $next_of_kin = json_encode([
-            'nok_first_name' => isset($data['next_of_kin_information']['nok_first_name']) ? $data['next_of_kin_information']['nok_first_name'] : ($old_next_of_kin['nok_first_name'] ?? ''),
-            'nok_last_name' => isset($data['next_of_kin_information']['nok_last_name']) ? $data['next_of_kin_information']['nok_last_name'] : ($old_next_of_kin['nok_last_name'] ?? ''),
-            'nok_phone_number' => isset($data['next_of_kin_information']['nok_phone_number']) ? $data['next_of_kin_information']['nok_phone_number'] : ($old_next_of_kin['nok_phone_number'] ?? ''),
-            'nok_house_address' => isset($data['next_of_kin_information']['nok_house_address']) ? $data['next_of_kin_information']['nok_house_address'] : ($old_next_of_kin['nok_house_address'] ?? ''),
-            'nok_email_address' => isset($data['next_of_kin_information']['nok_email_address']) ? $data['next_of_kin_information']['nok_email_address'] : ($old_next_of_kin['nok_email_address'] ?? ''),
-            'nok_relationship' => isset($data['next_of_kin_information']['nok_relationship']) ? $data['next_of_kin_information']['nok_relationship'] : ($old_next_of_kin['nok_relationship'] ?? ''),
+            'nok_first_name' => isset($data['nok_first_name']) ? $data['nok_first_name'] : ($old_next_of_kin['nok_first_name'] ?? ''),
+            'nok_last_name' => isset($data['nok_last_name']) ? $data['nok_last_name'] : ($old_next_of_kin['nok_last_name'] ?? ''),
+            'nok_phone_number' => isset($data['nok_phone_number']) ? $data['nok_phone_number'] : ($old_next_of_kin['nok_phone_number'] ?? ''),
+            'nok_house_address' => isset($data['nok_house_address']) ? $data['nok_house_address'] : ($old_next_of_kin['nok_house_address'] ?? ''),
+            'nok_email_address' => isset($data['nok_email_address']) ? $data['nok_email_address'] : ($old_next_of_kin['nok_email_address'] ?? ''),
+            'nok_relationship' => isset($data['nok_relationship']) ? $data['nok_relationship'] : ($old_next_of_kin['nok_relationship'] ?? ''),
         ]);
 
         $user->update([

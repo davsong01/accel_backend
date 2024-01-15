@@ -641,6 +641,7 @@ class Controller extends BaseController
         $pathToSave = $this->getPathToSaveFile('receipts') . '/' . $name . '.pdf';
         
         $pdf = PDF::loadView('receipts.template1', compact('payment', 'data'))->setPaper('a4', 'portrait');
+       
         file_put_contents(base_path() . '/' . config('app.upload_path') . '/' . $pathToSave, $pdf->output());
         // Rmember to create a public folder in the root directory if there is a PDF error
 
