@@ -25,7 +25,7 @@ class FinanceController extends Controller
      */
     public function GLAccountTransactions(ChartOfAccount $account): JsonResponse
     {
-        $transactions = $account->payments()->paginate(20);
+        $transactions = $account->payments()->with(['staff:id,user_id,account_name,account_number'])->paginate(20);
         return response()->json(['message' => 'Success', 
         'data' => [
             'account' => $account->load(['account_category', 'account_type']),
@@ -101,6 +101,17 @@ class FinanceController extends Controller
 
         $transactions = $query->latest()->paginate(20);
         return response()->json(['message' => 'success', 'data' => $transactions], 200);
+     }
+
+    /**
+     * Search/filter GL Ledger
+     * 
+     */
+     public function showGLLedger(Transaction $transaction){ 
+
+        $transaction->load(['account', 'staff:id,user_id', 'staff.user:id,first_name,middle_name,last_name', 'customer:id,user_id', 'customer.user:id,status,type,first_name,middle_name,last_name']);
+
+        return response()->json(['message' => 'success', 'data' => $transaction], 200);
      }
 
 }

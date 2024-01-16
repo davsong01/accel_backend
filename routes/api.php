@@ -47,6 +47,7 @@ use App\Http\Controllers\GeneratedLegalDocumentController;
 use App\Http\Controllers\LeaveAndAbsenceManagementController;
 use App\Http\Controllers\LegalDocumentController;
 use App\Http\Controllers\LegalDocumentTemplateController;
+use App\Http\Controllers\LogController;
 use App\Http\Controllers\TransactionPurposeController;
 use App\Http\Controllers\TransactionTypeController;
 use App\Http\Controllers\TransactionTypeDefinitionController;
@@ -325,6 +326,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
             Route::get('gl-ledger', 'GLLedger');
             Route::post('gl-ledger/create', 'createGLLedger');
             Route::get('gl-ledger/search', 'searchGLLedger');
+            Route::get('gl-ledger/{transaction}', 'showGLLedger');
             Route::get('gl-account', 'GLAccount')->name('gl-account');
             Route::get('gl-account/{account}/transactions', 'GLAccountTransactions')->name('gl-account.transactions');
         });
@@ -336,6 +338,8 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
             Route::get('transaction/purpose/search', [TransactionPurposeController::class, 'search']);
             Route::apiResource('transaction/purpose', TransactionPurposeController::class);
         });
+
+        Route::get('audit/log', [LogController::class, 'audit']);
     });
 });
 
