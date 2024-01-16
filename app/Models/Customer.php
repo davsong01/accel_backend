@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Payment;
 use App\Models\Property;
 use App\Models\Transaction;
+use App\Models\CustomerForm;
 use App\Models\CustomerRole;
 use App\Models\CustomerContract;
 use App\Models\CustomerProperty;
@@ -69,24 +70,24 @@ class Customer extends Model
         return $this->hasMany(Transaction::class, 'customer_id');
     }
 
-    public function getIdCardAttribute()
+    public function response_form()
     {
-        if (!empty($this->id_card)) {
-            $id_card = !empty($id_card) ? app('App\Http\Controllers\Controller')->encodeGeneralUploadedFile($this->id_card) : null;
-        }
-
-        return $id_card;
+        return $this->hasOne(CustomerForm::class, 'customer_id');
     }
 
-    public function signature()
+    protected function idCard(): Attribute
     {
-        if (!empty($this->signature)) {
-            $signature = !empty($signature) ? app('App\Http\Controllers\Controller')->encodeGeneralUploadedFile($this->signature) : null;
-        }
-
-        return $signature;
+        return Attribute::make(
+            get: fn (string $value = null) => !empty($value) ? app('App\Http\Controllers\Controller')->encodeGeneralUploadedFile($value) : '',
+        );
     }
 
+    protected function signature(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string $value = null) => !empty($value) ? app('App\Http\Controllers\Controller')->encodeGeneralUploadedFile($value) : '',
+        );
+    }
 
     public function getNextOfKinAttribute()
     {

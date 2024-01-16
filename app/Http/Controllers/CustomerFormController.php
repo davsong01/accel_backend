@@ -28,7 +28,6 @@ class CustomerFormController extends Controller
         
         if (\Request::route()->getPrefix() == 'api/customer') {
             if(Auth::check() ){
-                dd(Auth::user());
                 $customer_id = Auth::user()->customer->id ?? null;
                 $forms = $forms->where('customer_id', $customer_id)->first();
                 $forms->contract_details = $this->formatResponseForm($forms);
@@ -38,7 +37,8 @@ class CustomerFormController extends Controller
         }
         
         if (!empty($id)) {
-            $forms = $forms->where('id')->first();
+            $forms = $forms->where('id', $id)->first();
+            
             if ($forms) {
                 $forms->contract_details = $this->formatResponseForm($forms);
             }
@@ -47,18 +47,12 @@ class CustomerFormController extends Controller
 
         }
 
-        // if(!empty($customer_id)){
-        //     $forms = $forms->where('customer_id', $customer_id)->first();
-        //     if ($forms) {
-        //         $forms->contract_details = $this->formatResponseForm($forms);
-        //     }
-
-        //     return response()->json(['message' => 'Successfully retrieved', 'data' => $forms], 200);
-
-        // }
-
         if (!empty($request->type)) {
-            $forms = $forms->where('type', $request->type);
+            if($request->type == 'form2-request'){
+                $forms = $forms->where('type', $request->type)->where('customer_form_status', 'approved');
+            }else{
+                $forms = $forms->where('type', $request->type);
+            }
         }
        
         if (!empty($request->status)) {
@@ -72,14 +66,9 @@ class CustomerFormController extends Controller
         }
 
         foreach ($forms as $form) {
-            $means_of_identification = !empty($form->means_of_identification) ? json_decode($form->means_of_identification, true) : [];
-            $form['passport_photo'] = !empty($means_of_identification) && isset($means_of_identification['passport_photo']) ?  $this->encodeGeneralUploadedFile($means_of_identification['passport_photo']) : "";
-            unset($form['means_of_identification']);
-            unset($form['other_details']);
-
-            $form->contract_details = $this->getFormRequestContractDetails($form);
-            $form->other_details = !empty($forms->other_details) ? json_decode($form->other_details, true) : [];
+            $form->contract_details = $this->formatResponseForm($form);
         }
+
 
         if (!empty($forms)) {
             return response()->json(['message' => 'Successfully retrieved', 'data' => $forms], 200);
@@ -151,7 +140,7 @@ class CustomerFormController extends Controller
     public function approveForm2Request($id)
     {
         $customer_form = CustomerForm::with('customer')->where('id', $id)->where('company_id', $this->sessionDetails('company_id'))->where('type', 'form2-request')->first();
-    
+        
         if (!$customer_form) {
             return response()->json(['message' => 'No records found', 'data' => []], 200);
         }
@@ -358,7 +347,7 @@ class CustomerFormController extends Controller
             // Contracts
             'contract' => 'required',
         ]);
-
+        
         if ($validator->fails()) {
             return response()->json([
                 'error' => $validator->messages()->first(),
@@ -452,6 +441,14 @@ class CustomerFormController extends Controller
         ]);
 
         $data['company_id'] = $this->sessionDetails('company_id');
+        $data['date_of_birth'] = Carbon::parse($request->date_of_birth);
+
+        // Update user
+        $customer = Customer::where('id', $data['customer_id'])->first();
+        $user = $customer->user;
+        app('App\Http\Controllers\CustomerContractController')->updateUser($user, $data);
+
+        // Update customer contract
         if (\Request::route()->getPrefix() == 'api/customer') {
             $data['type'] = 'customer-response';
             $data['status'] = 'pending';
@@ -459,15 +456,11 @@ class CustomerFormController extends Controller
             $data['type'] = 'form2-request';
             $data['status'] = 'pending';
         }
-        
-        $data['date_of_birth'] = Carbon::parse($request->date_of_birth);
 
-        // Update user
-        $customer = Customer::where('id', $data['customer_id'])->first();
-        $user = $customer->user;
-        
-        app('App\Http\Controllers\CustomerContractController')->updateUser($user, $data);
-       
+        $customer->response_form->update([
+            'type' => $data['type'],
+            'status' => $data['status'],
+        ]);
         // update customer form status
         $customer->update([
             'occupation' => $data['occupation'] ?? $customer->occupation,

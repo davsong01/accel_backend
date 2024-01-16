@@ -45,17 +45,6 @@ class User extends Authenticatable
         return $this->hasOne(Staff::class);
     }
     
-    
-
-    public function getpassportPhotoAttribute()
-    {
-        if (!empty($this->passport_photo)) {
-            $passport_photo ? app('App\Http\Controllers\Controller')->encodeGeneralUploadedFile($this->passport_photo) : null;
-        }
-
-        return $passport_photo;
-    }
-
     public function getNextOfKinAttribute()
     {
         $next_of_kin = !empty($this->attributes['next_of_kin']) ? json_decode($this->attributes['next_of_kin'], true) : [];

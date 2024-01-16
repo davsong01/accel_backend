@@ -579,13 +579,6 @@ class Controller extends BaseController
         $customerDetails = $forms->customer;
         $next_of_kin = !empty($customerDetails->next_of_kin) ? json_decode($customerDetails->next_of_kin, true) : [];
        
-        // $forms->means_of_identification = [
-        //     'passport_photo' => isset($customerDetails->passport_photo) && !empty($customerDetails->passport_photo) ? $this->encodeGeneralUploadedFile($customerDetails->passport_photo) : null,
-        //     'id_card' => isset($customerDetails->id_card) && !empty($customerDetails->id_card) ? $this->encodeGeneralUploadedFile($customerDetails->id_card) : null,
-        //     'signature' => isset($customerDetails->signature) && !empty($customerDetails->signature) ? $this->encodeGeneralUploadedFile($customerDetails->signature) : null,
-        // ];
-
-      
         // Get contracts in prospoect and attach to response form
         $prospectContracts = CustomerContract::
         where('status', 'prospect')
@@ -593,7 +586,7 @@ class Controller extends BaseController
         ->where('company_id', $this->sessionDetails('company_id'))
         ->orderBy('estate_id','DESC')
         ->get();
-        dd($forms->customer_id);
+       
         $contract_details = [];
 
         if(!$prospectContracts){
