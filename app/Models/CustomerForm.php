@@ -31,20 +31,6 @@ class CustomerForm extends Model
             get: fn (string $value) => date("M jS, Y", strtotime($value)),
         );
     }
-
-    public function country(){
-        return $this->belongsTo(Country::class);
-    }
-
-    public function state()
-    {
-        return $this->belongsTo(States::class);
-    }
-
-    public function lga()
-    {
-        return $this->belongsTo(Lga::class);
-    }
     
     public function customer()
     {

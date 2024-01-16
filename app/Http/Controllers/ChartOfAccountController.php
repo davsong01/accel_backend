@@ -110,7 +110,7 @@ class ChartOfAccountController extends Controller
             'account_category_id' => 'required|exists:account_categories,id,company_id,' . $this->sessionDetails('company_id'),
             'currency' => 'required',
             'name' => 'required',
-            'input_method' => 'required|in:direct,manual',
+            'input_method' => 'required|in:direct,indirect',
             'account_number' => 'nullable',
             'status' => 'required|in:active,inactive',
         ]);

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('property_types', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('company_id')->constrained();
+            $table->foreignId('company_id');
             $table->string('type');
             $table->timestamps();
         });

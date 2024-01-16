@@ -29,7 +29,7 @@ Route::get('/testreceipttemplate', function () {
     $data = [];
     $data['company_id'] = 1;
     $data['receipt_no'] = '0001';
-    $payment = App\Models\Transaction::find(24);
+    $payment = App\Models\Transaction::find(37);
     return view('receipts.template1', compact('data', 'payment'));
 });
 

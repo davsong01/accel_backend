@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('legal_document_types', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('company_id')->constrained();
-            $table->foreignId('property_type_id')->constrained();
+            $table->foreignId('company_id');
+            $table->foreignId('property_type_id');
             $table->string('type');
             $table->timestamps();
         });

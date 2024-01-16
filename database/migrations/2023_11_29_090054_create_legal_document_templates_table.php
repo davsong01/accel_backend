@@ -15,17 +15,17 @@ return new class extends Migration
             $table->id();
             $table->foreignId(
                 'estate_id'
-            )->constrained();
+            );
             $table->foreignId(
                 'company_id'
-            )->constrained();
+            );
             $table->foreignId(
                 'created_by'
-            )->constrained('users');
+            );
             $table->foreignId('legal_document_type_id')
-            ->constrained();
+            ;
             $table->foreignId('property_type_id')
-            ->constrained();
+            ;
             $table->string('file_location');
             $table->timestamps();
         });

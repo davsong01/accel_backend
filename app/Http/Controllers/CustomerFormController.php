@@ -23,30 +23,43 @@ class CustomerFormController extends Controller
      */
     public function index(Request $request, $id = null, $paginate = true)
     {
-
+        // Returns customer details and contract details for admin
+        $forms = CustomerForm::with(['customer'])->where('company_id', $this->sessionDetails('company_id'));
+        
+        if (\Request::route()->getPrefix() == 'api/customer') {
+            if(Auth::check() ){
+                $customer_id = Auth::user()->customer->id ?? null;
+                $forms = $forms->where('customer_id', $customer_id)->first();
+                $forms->contract_details = $this->formatResponseForm($forms);
+            }
+            
+            return response()->json(['message' => 'Successfully retrieved', 'data' => $forms], 200);
+        }
+        
         if (!empty($id)) {
-            $forms = CustomerForm::with(['country:id,name', 'state:id,name', 'lga:id,name'])->where('id', $id)->where('company_id', $this->sessionDetails('company_id'))->select('surname', 'title', 'status', 'customer_form_status', 'no_of_contract', 'first_name', 'middle_name', 'last_name', 'gender', 'created_at', 'id', 'marital_status', 'date_of_birth', 'country_id', 'state_id', 'lga_id', 'next_of_kin_information', 'means_of_identification', 'primary_marketer', 'contract_ids', 'other_details', 'customer_id')->first();
-
+            $forms = $forms->where('id')->first();
             if ($forms) {
-                $forms->contract_details = $this->getFormRequestContractDetails($forms);
-                $forms->other_details = !empty($forms->other_details) ? json_decode($forms->other_details, true) : [];
+                $forms->contract_details = $this->formatResponseForm($forms);
             }
 
             return response()->json(['message' => 'Successfully retrieved', 'data' => $forms], 200);
+
         }
 
-        $forms = CustomerForm::where('company_id', $this->sessionDetails('company_id'));
+        // if(!empty($customer_id)){
+        //     $forms = $forms->where('customer_id', $customer_id)->first();
+        //     if ($forms) {
+        //         $forms->contract_details = $this->formatResponseForm($forms);
+        //     }
+
+        //     return response()->json(['message' => 'Successfully retrieved', 'data' => $forms], 200);
+
+        // }
 
         if (!empty($request->type)) {
             $forms = $forms->where('type', $request->type);
         }
-        
-        $forms = $forms->select('surname', 'title', 'status', 'customer_form_status', 'no_of_contract', 'first_name', 'middle_name', 'last_name', 'gender', 'created_at', 'id', 'means_of_identification', 'other_details');
-
-        if (\Request::route()->getPrefix() == 'api/customer') {
-            $forms = $forms->where('customer_id', Auth::user()->customer->id);
-        }
-
+       
         if (!empty($request->status)) {
             $forms = $forms->where('status', $request->status);
         }
@@ -62,6 +75,9 @@ class CustomerFormController extends Controller
             $form['passport_photo'] = !empty($means_of_identification) && isset($means_of_identification['passport_photo']) ?  $this->encodeGeneralUploadedFile($means_of_identification['passport_photo']) : "";
             unset($form['means_of_identification']);
             unset($form['other_details']);
+
+            $form->contract_details = $this->getFormRequestContractDetails($form);
+            $form->other_details = !empty($forms->other_details) ? json_decode($form->other_details, true) : [];
         }
 
         if (!empty($forms)) {
@@ -70,6 +86,57 @@ class CustomerFormController extends Controller
             return response()->json(['message' => 'No records found', 'data' => $forms], 200);
         }
     }
+    // public function index(Request $request, $id = null, $paginate = true)
+    // {
+        
+    //     if (!empty($id)) {
+    //         $forms = CustomerForm::with(['country:id,name', 'state:id,name', 'lga:id,name'])->where('id', $id)->where('company_id', $this->sessionDetails('company_id'))->select('surname', 'title', 'status', 'customer_form_status', 'no_of_contract', 'first_name', 'middle_name', 'last_name', 'gender', 'created_at', 'id', 'marital_status', 'date_of_birth', 'country_id', 'state_id', 'lga_id', 'next_of_kin_information', 'means_of_identification', 'primary_marketer', 'contract_ids', 'other_details', 'customer_id')->first();
+    //         dd($forms);
+    //         if ($forms) {
+    //             $forms->contract_details = $this->getFormRequestContractDetails($forms);
+    //             $forms->other_details = !empty($forms->other_details) ? json_decode($forms->other_details, true) : [];
+    //         }
+    //         return response()->json(['message' => 'Successfully retrieved', 'data' => $forms], 200);
+    //     }
+
+    //     $forms = CustomerForm::with(['country:id,name', 'state:id,name', 'lga:id,name'])->where('company_id', $this->sessionDetails('company_id'));
+
+    //     if (!empty($request->type)) {
+    //         $forms = $forms->where('type', $request->type);
+    //     }
+        
+    //     $forms = $forms->select('surname', 'title', 'status', 'customer_form_status', 'no_of_contract', 'first_name', 'middle_name', 'last_name', 'gender', 'created_at', 'id', 'means_of_identification', 'other_details');
+
+    //     if (\Request::route()->getPrefix() == 'api/customer') {
+    //         $forms = $forms->where('customer_id', Auth::user()->customer->id);
+    //     }
+
+    //     if (!empty($request->status)) {
+    //         $forms = $forms->where('status', $request->status);
+    //     }
+
+    //     if ($request->paginate && $request->paginate === true) {
+    //         $forms = $forms->paginate(20)->withQueryString();
+    //     } else {
+    //         $forms = $forms->get();
+    //     }
+
+    //     foreach ($forms as $form) {
+    //         $means_of_identification = !empty($form->means_of_identification) ? json_decode($form->means_of_identification, true) : [];
+    //         $form['passport_photo'] = !empty($means_of_identification) && isset($means_of_identification['passport_photo']) ?  $this->encodeGeneralUploadedFile($means_of_identification['passport_photo']) : "";
+    //         unset($form['means_of_identification']);
+    //         unset($form['other_details']);
+
+    //         $form->contract_details = $this->getFormRequestContractDetails($form);
+    //         $form->other_details = !empty($forms->other_details) ? json_decode($form->other_details, true) : [];
+    //     }
+
+    //     if (!empty($forms)) {
+    //         return response()->json(['message' => 'Successfully retrieved', 'data' => $forms], 200);
+    //     } else {
+    //         return response()->json(['message' => 'No records found', 'data' => $forms], 200);
+    //     }
+    // }
 
     /**
      * Show the form for creating a new resource.
