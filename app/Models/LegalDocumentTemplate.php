@@ -25,7 +25,7 @@ class LegalDocumentTemplate extends Model
 
     protected function getTemplateSampleLocationAttribute()
     {
-       return url('/') . '/api/uploads/' . base64_encode($this->template_sample);
+       return  $this->template_sample ? url('/') . '/api/uploads/' . base64_encode($this->template_sample) : $this->file_location;
     }
 
     /**
