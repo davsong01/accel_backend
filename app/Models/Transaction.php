@@ -25,13 +25,11 @@ class Transaction extends Model
         );
     }
 
-    protected function customerContractIds(): Attribute
+    public function contracts()
     {
-        return Attribute::make(
-            get: fn (string $value) => strlen(trim($value)) ? explode(',', $value) : null,
-            set: fn (mixed $value) => is_array($value) ? implode(",",$value) : $value,
-        );
+        return $this->hasMany(CustomerContract::class, 'form_payment_transaction_id','transaction_id');
     }
+
     public function estate()
     {
         return $this->belongsTo(Estate::class);
@@ -45,11 +43,6 @@ class Transaction extends Model
     public function staff()
     {
         return $this->belongsTo(Staff::class);
-    }
-
-    public function contract()
-    {
-        return $this->belongsTo(CustomerContract::class, 'customer_contract_ids');
     }
 
     public function account()

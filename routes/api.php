@@ -6,6 +6,7 @@ use App\Models\AdvanceAndClaims;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Route;
 use App\Models\LeaveAndAbsenceSetting;
+use App\Http\Controllers\LogController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CityController;
 use App\Http\Controllers\MenuController;
@@ -16,6 +17,7 @@ use App\Http\Controllers\BranchController;
 use App\Http\Controllers\EstateController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\GeneralController;
 use App\Http\Controllers\JobRoleController;
 use App\Http\Controllers\JobTypeController;
@@ -32,24 +34,23 @@ use App\Http\Controllers\BuildingTypeController;
 use App\Http\Controllers\CustomerFormController;
 use App\Http\Controllers\EmployeeExitController;
 use App\Http\Controllers\EstateSettingController;
+use App\Http\Controllers\LegalDocumentController;
 use App\Http\Controllers\ChartOfAccountController;
 use App\Http\Controllers\CompanySettingController;
 use App\Http\Controllers\SpecialRequestController;
 use App\Http\Controllers\AccountCategoryController;
 use App\Http\Controllers\CompanyDocumentController;
+use App\Http\Controllers\ContractPaymentController;
+use App\Http\Controllers\TransactionTypeController;
 use App\Http\Controllers\AdvanceAndClaimsController;
 use App\Http\Controllers\CustomerContractController;
+use App\Http\Controllers\TransactionPurposeController;
 use App\Http\Controllers\PropertyTypeDetailsController;
 use App\Http\Controllers\AccountClassificationController;
-use App\Http\Controllers\EstateConstructionSettingController;
-use App\Http\Controllers\FinanceController;
-use App\Http\Controllers\GeneratedLegalDocumentController;
-use App\Http\Controllers\LeaveAndAbsenceManagementController;
-use App\Http\Controllers\LegalDocumentController;
 use App\Http\Controllers\LegalDocumentTemplateController;
-use App\Http\Controllers\LogController;
-use App\Http\Controllers\TransactionPurposeController;
-use App\Http\Controllers\TransactionTypeController;
+use App\Http\Controllers\GeneratedLegalDocumentController;
+use App\Http\Controllers\EstateConstructionSettingController;
+use App\Http\Controllers\LeaveAndAbsenceManagementController;
 use App\Http\Controllers\TransactionTypeDefinitionController;
 
 /*
@@ -250,12 +251,18 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         
         Route::get('form-payment-history/{customer_id}', [CustomerContractController::class, 'formPaymentHistory']);
         Route::post('make-form-payment', [CustomerContractController::class, 'makeFormPayment']);
+        Route::post('make-contract-payment', [CustomerContractController::class, 'makeContractPayment']);
+        Route::get('customer-payment-history/{customer_id}', [CustomerContractController::class, 'customerPaymentHistory']);
         Route::get('get-countries', [GeneralController::class, 'getCountries']);
         Route::get('get-states', [GeneralController::class, 'getStates']);
         Route::get('get-lga', [GeneralController::class, 'getLgas']);
         Route::get('get-banks', [GeneralController::class, 'getBanks']);
         Route::get('get-pfas', [GeneralController::class, 'getPfas']);
         Route::get('get-currencies', [GeneralController::class, 'getCurrencies']);
+
+        // Contract payments
+        
+        Route::resource('contract-payment', ContractPaymentController::class);
 
         // Self Service
         Route::group(['prefix' => 'self-service', 'before' => 'self-service'], function () {

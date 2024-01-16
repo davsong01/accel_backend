@@ -31,7 +31,8 @@ class CustomerContractController extends Controller
     public function index(Request $request, $customer_id)
     {
         $contracts = CustomerContract::with('property_type_details:type,id,estate_price,settings_and_excavation,infrastructural_fee', 'city:name,id', 'estate:name,id', 'location:name,id', 'building_type:id,name', 'plot_size:id,size')->where('customer_id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->select(['id', 'primary_marketer_id', 'property_type_id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'subscribers', 'contract_type', 'property_type', 'transaction_date', 'created_at'])->where('status', 'prospect');
-        
+
+
         if (!empty($request->contract_type)) {
             $contracts = $contracts->where('contract_type', $request->contract_type);
         }
@@ -124,6 +125,28 @@ class CustomerContractController extends Controller
         //
     }
 
+    public function customerPaymentHistory(Request $request, $customer_id)
+    {
+        $histories = Transaction::with(['contracts:id,form_payment_transaction_id,contract_payment_transaction_id,property_type,estate_id,plot_size,building_type', 'estate:id,name'])->where('customer_id', $customer_id)->orderBy('created_at','DESC');
+        $contract_id = $request->contract_id;
+
+        if(!empty($request->contract_id)){
+            // Get contract 
+            $contract = CustomerContract::where('id', $contract_id)->first();
+            
+            $histories = $histories->where(function($query) use ($contract){
+                $query->where('transaction_id', $contract->contract_payment_transaction_id)
+                ->orWhere('transaction_id', $contract->form_payment_transaction_id)
+                ->get();
+            });
+           
+        }
+        // ->where(['customer_id' => $customer_id, 'company_id' => $this->sessionDetails('company_id'), 'purpose' => 'form_payment'])->whereHas('contracts')->orderBy('created_at', 'DESC')->get();
+        $data = [];
+        $histories = $histories->paginate(20)->withQueryString();
+        
+        return response()->json(['message' => 'Success', 'data' => $histories], 200);
+    }
     /**
      * Store a newly created resource in storage.
      */
@@ -545,8 +568,8 @@ class CustomerContractController extends Controller
      */
     public function show($contract_id)
     {
-        $contract = CustomerContract::with('property_type_details:type,id,estate_price,settings_and_excavation,infrastructural_fee', 'city:name,id', 'estate:name,id', 'location:name,id', 'building_type:id,name', 'plot_size:id,size')->where('id', $contract_id)->select(['id', 'property_type_id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'subscribers', 'contract_type', 'property_type', 'primary_marketer_id'])->orderBy('created_at', 'DESC')->where('company_id', $this->sessionDetails('company_id'))->first();
-
+        $contract = CustomerContract::with('property_type_details:type,id,estate_price,settings_and_excavation,infrastructural_fee', 'city:name,id', 'estate:name,id', 'location:name,id', 'building_type:id,name', 'plot_size:id,size')->where('id', $contract_id)->select(['id', 'property_type_id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'company_id','subscribers', 'contract_type', 'property_type', 'primary_marketer_id'])->orderBy('created_at', 'DESC')->where('company_id', $this->sessionDetails('company_id'))->first();
+        
         if ($contract) {
             $contract->subscribers = !empty($contract->subscribers) ? json_decode($contract->subscribers) : '';
             $contract->primary_marketer = $contract->primaryMarketer($contract);
@@ -692,6 +715,28 @@ class CustomerContractController extends Controller
         return response()->json(['message' => 'Success', 'data' => null], 200);
     }
 
+    public function makeContractPayment(Request $request){
+        $validator = Validator::make($request->all(), [
+            'contract_ids' => 'required',
+            'account_id' => 'required|exists:chart_of_accounts,id,company_id,' . $this->sessionDetails('company_id'),
+            'payment_slip' => 'nullable',
+            'description' => 'nullable',
+            'amount' => 'required',
+            'customer_id' => 'required',
+            'transaction_date' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->messages()->first(),
+                'data' => null,
+            ], 412);
+        }
+
+        $data = $valida;
+    }
+    
+
     public function sanitizeContractsByEstateIds($allData, $customer_id){
         // Get all customer contract for this estate
         $contracts = CustomerContract::where('customer_id', $customer_id)->where('estate_id', $allData['estate_id'])->where('status','lead');
@@ -831,7 +876,7 @@ class CustomerContractController extends Controller
             'subscribers' => 'nullable',
         ]);
 
-        if(iset($request->secondary_marketers) && in_array($request->primary_marketer_id, $request->secondary_marketers)){
+        if(isset($request->secondary_marketers) && in_array($request->primary_marketer_id, $request->secondary_marketers)){
             return response()->json([
                 'error' => 'Primary Marketer cannot be a secondary marketer at the same time, please check input',
                 'data' => null,
@@ -844,7 +889,7 @@ class CustomerContractController extends Controller
                 'data' => null,
             ], 412);
         }
-
+        
         $CustomerContract->update([
             'customer_id' => $request->customer_id,
             'city_id' => $request->city_id,
@@ -855,7 +900,7 @@ class CustomerContractController extends Controller
             'property_type' => $request->property_type,
             'property_type_id' => $request->property_type_id,
             'subscribers' => $request->has('subscribers') ? $request->subscribers : $CustomerContract->subscribers,
-            'status' => 'lead',
+            // 'status' => 'lead',
             'contract_type' => $request->contract_type,
             'company_id' => $this->sessionDetails('company_id'),
         ]);
@@ -959,21 +1004,19 @@ class CustomerContractController extends Controller
 
     public function formPaymentHistory($customer_id)
     {
-        $histories = Transaction::with('estate:id,name')->where(['customer_id' => $customer_id, 'company_id' => $this->sessionDetails('company_id'), 'purpose' => 'form_payment'])->orderBy('created_at', 'DESC')->get();
 
+        $histories = Transaction::with(['contracts','estate:id,name'])->where(['customer_id' => $customer_id, 'company_id' => $this->sessionDetails('company_id'), 'purpose' => 'form_payment'])->whereHas('contracts')->orderBy('created_at', 'DESC')->get();
+       
         $data = [];
 
         foreach ($histories as $history) {
             $contracts = [];
-            
-            $h_contracts = !empty($history->customer_contract_ids) ? $history->customer_contract_ids : [];
-
-            foreach ($h_contracts as $sub) {
-                $cont = CustomerContract::with('building_type_details:id,name', 'plot_size_details:id,size')->where('id', $sub)->select('id', 'building_type', 'plot_size')->first();
+            foreach ($history->contracts as $sub) {
                 $contracts[] = [
-                    'id' => $cont->id,
-                    'plot_size' => $cont->plot_size_details,
-                    'building_type' => $cont->building_type_details,
+                    'id' => $sub->id,
+                    'contract_name' => $sub->contract_name,
+                    'plot_size' => $sub->plot_size_details,
+                    'building_type' => $sub->building_type_details,
                 ];
             }
 
