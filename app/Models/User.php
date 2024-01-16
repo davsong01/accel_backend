@@ -20,7 +20,7 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $guarded = [];
-    protected $append = ['id_card', 'signature','next_of_kin'];
+    protected $append = ['next_of_kin'];
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -45,14 +45,7 @@ class User extends Authenticatable
         return $this->hasOne(Staff::class);
     }
     
-    public function getIdCardsAttribute()
-    {
-        if(!empty($this->id_card)){
-            $id_card ? app('App\Http\Controllers\Controller')->encodeGeneralUploadedFile($this->id_card) : null;
-        }
-        
-        return $id_card;
-    }
+    
 
     public function getpassportPhotoAttribute()
     {
@@ -62,16 +55,6 @@ class User extends Authenticatable
 
         return $passport_photo;
     }
-
-    public function signature()
-    {
-        if (!empty($this->signature)) {
-            $signature ? app('App\Http\Controllers\Controller')->encodeGeneralUploadedFile($this->signature) : null;
-        }
-
-        return $signature;
-    }
-
 
     public function getNextOfKinAttribute()
     {

@@ -238,7 +238,9 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::resource('account', AccountController::class);
 
         Route::get('single-customer-form-payment-details/{customer_id}', [CustomerContractController::class, 'singleCustomerFormDetails']);
+        // Submit application form 2
         Route::post('customer-form-response', [CustomerFormController::class, 'store'])->name('application.form.submit');
+        
         Route::get('customer-form-response/{id?}', [CustomerFormController::class, 'index']);
         Route::get('approve-form2-request/{id?}', [CustomerFormController::class, 'approveForm2Request']);
         Route::post('decline-form2-request/{id?}', [CustomerFormController::class, 'declineForm2Request']);

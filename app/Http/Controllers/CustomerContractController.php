@@ -392,6 +392,87 @@ class CustomerContractController extends Controller
         return $user;
     }
 
+    public function updateUser($user, $data)
+    {
+        // $old_additional_details = !empty($user->additional_details) ? $user->additional_details : [];
+        // $old_means_of_identification = !empty($user->means_of_identification) ? $user->means_of_identification : [];
+        $old_next_of_kin = !empty($user->next_of_kin) ? $user->next_of_kin : [];
+       
+
+        // $additional_details = json_encode([
+        //     'title' => !empty($data['title']) ? $data['title'] : ($old_additional_details['title'] ?? ''),
+        //     'alternate_number' => !empty($data['alternate_number']) ? $data['alternate_number'] : ($old_additional_details['alternate_number'] ?? ''),
+        //     'alternate_email' => !empty($data['alternate_email']) ? $data['alternate_email'] : ($old_additional_details['alternate_email'] ?? ''),
+        //     'state' => !empty($data['state_id']) ? $data['state_id'] : ($old_additional_details['state'] ?? ''),
+        //     'marital_status' => !empty($data['marital_status']) ? $data['marital_status'] : ($old_additional_details['marital_status'] ?? ''),
+        //     'nationality' => !empty($data['country_id']) ? $data['country_id'] : ($old_additional_details['nationality'] ?? ''),
+        //     'lga' => !empty($data['lga_id']) ? $data['lga_id'] : ($old_additional_details['lga'] ?? ''),
+
+        //     'office_address' => isset($data['office_address']) ? $data['office_address'] : ($old_additional_details['office_address'] ?? ''),
+        //     'residential_address' => isset($data['residential_address']) ? $data['residential_address'] : ($old_additional_details['residential_address'] ?? ''),
+        // ]);
+
+        // $means_of_identification = json_encode([
+        //     'occupation' => isset($data['occupation']) ? $data['occupation'] : ($old_means_of_identification['occupation'] ?? ''),
+        //     'place_of_work' => isset($data['place_of_work']) ? $data['place_of_work'] : ($old_means_of_identification['place_of_work'] ?? ''),
+        //     'id_card_type' => isset($data['id_card_type']) ? $data['id_card_type'] : ($old_means_of_identification['id_card_type'] ?? ''),
+        //     'passport_photo' => isset($data['passport_photo']) ? $data['passport_photo'] : ($old_means_of_identification['passport_photo'] ?? ''),
+        //     'id_card' => isset($data['id_card']) ? $data['id_card'] : ($old_means_of_identification['id_card'] ?? ''),
+        //     'signature' => isset($data['signature']) ? $data['signature'] : ($old_means_of_identification['signature'] ?? ''),
+        // ]);
+
+        $next_of_kin = json_encode([
+            'nok_first_name' => isset($data['nok_first_name']) ? $data['nok_first_name'] : ($old_next_of_kin['nok_first_name'] ?? ''),
+            'nok_last_name' => isset($data['nok_last_name']) ? $data['nok_last_name'] : ($old_next_of_kin['nok_last_name'] ?? ''),
+            'nok_phone_number' => isset($data['nok_phone_number']) ? $data['nok_phone_number'] : ($old_next_of_kin['nok_phone_number'] ?? ''),
+            'nok_house_address' => isset($data['nok_house_address']) ? $data['nok_house_address'] : ($old_next_of_kin['nok_house_address'] ?? ''),
+            'nok_email_address' => isset($data['nok_email_address']) ? $data['nok_email_address'] : ($old_next_of_kin['nok_email_address'] ?? ''),
+            'nok_relationship' => isset($data['nok_relationship']) ? $data['nok_relationship'] : ($old_next_of_kin['nok_relationship'] ?? ''),
+        ]);
+
+  
+    // "date_of_birth" 
+    // "gender" => "male"
+    // "email" => "victor@consode.com"
+    // "username"
+    //     avatar
+    //     next_of_kin
+
+    //     alternate_number" => null
+    // "alternate_email" => null
+    // "marital_status" => null
+    // "country_id" => null
+    // "state_id" => null
+    // "lga_id" => null
+    // "office_address"
+
+        $user->update([
+            'title' => $data['title'] ?? $user->title,
+            'first_name' => $data['first_name'] ?? $user->first_name,
+            'middle_name' => $data['middle_name'] ?? $user->middle_name,
+            'last_name' => $data['last_name'] ?? $user->last_name,
+            'phone_number' => $data['phone_number'] ?? $user->phone_number,
+            'residential_address' => $data['residential_address'] ?? $user->residential_address,
+            
+            'branch_id' => $data['branch_id'] ?? $user->branch_id,
+            'email' => $data['email'] ?? $user->email,
+            'date_of_birth' => (isset($data['date_of_birth']) && !empty($data['date_of_birth'])) ? Carbon::parse($data['date_of_birth']) : $user->date_of_birth,
+            'gender' => $data['gender'] ?? $user->gender,
+            'email' => $data['email'] ?? $user->email,
+            'username' => $data['username'] ?? $user->username,
+            'avatar' =>  (isset($data['passport_photo']) && !empty($data['passport_photo'])) ? $data['passport_photo'] : $user->passport_photo,
+            'next_of_kin' => $next_of_kin ?? $old_next_of_kin,
+            'alternate_number' => $data['alternate_number'] ?? $user->alternate_number,
+            'alternate_email' => $data['alternate_email'] ?? $user->alternate_email,
+            'marital_status' => $data['marital_status'] ?? $user->marital_status,
+            'country_id' => $data['country_id'] ?? $user->country_id,
+            'state_id' => $data['state_id'] ?? $user->state_id,
+            'lga_id' => $data['lga_id'] ?? $user->lga_id,
+        ]);
+        
+        return $user;
+    }
+
 
     public function createCustomer($data)
     {

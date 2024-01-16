@@ -28,6 +28,7 @@ class CustomerFormController extends Controller
         
         if (\Request::route()->getPrefix() == 'api/customer') {
             if(Auth::check() ){
+                dd(Auth::user());
                 $customer_id = Auth::user()->customer->id ?? null;
                 $forms = $forms->where('customer_id', $customer_id)->first();
                 $forms->contract_details = $this->formatResponseForm($forms);
@@ -308,7 +309,7 @@ class CustomerFormController extends Controller
         if (\Request::route()->getPrefix() == 'api/customer') {
             $request['customer_id'] = auth()->user()->customer->id;
         }
-
+       
         $validator = Validator::make($request->all(), [
             'surname' => 'nullable',
             'first_name' => 'nullable',
@@ -368,6 +369,7 @@ class CustomerFormController extends Controller
         $customer_contract_ids = [];
         if (!empty($request->contract)) {
             $contracts = $this->cleanJsonInput($request->contract);
+            
             foreach ($contracts as $cont) {
                 // Make each contract a request
                 $contract_validator = Validator::make($cont, [
@@ -410,11 +412,10 @@ class CustomerFormController extends Controller
                     ], 412);
                 }
 
-
                 $update = $validator->valid();
                 $update['contract'] = $cont;
                 $cont['transaction_date'] = Carbon::parse($request->transaction_date);
-
+                
                 // Update the contract
                 $customer_contract_ids[] = $cont['contract_id'];
                 app('App\Http\Controllers\CustomerContractController')->updateCustomerContract($cont, $cont['contract_id'], $request->customer_id);
@@ -440,7 +441,7 @@ class CustomerFormController extends Controller
             $data['secondary_marketers'] = json_encode($request->secondary_marketers);
         }
 
-        // To be used in customer form
+        // Update customer
         $data['next_of_kin_information'] = json_encode([
             'nok_first_name' => $data['nok_first_name'] ?? null,
             'nok_last_name' => $data['nok_last_name'] ?? null,
@@ -449,39 +450,6 @@ class CustomerFormController extends Controller
             'nok_email_address' => $data['nok_email_address'] ?? null,
             'nok_relationship' => $data['nok_relationship'] ?? null,
         ]);
-
-        $data['means_of_identification'] = json_encode([
-            'occupation' => $data['occupation'] ?? null,
-            'place_of_work' => $data['place_of_work'] ?? null,
-            'id_card_type' => $data['id_card_type'] ?? null, // multiple
-            'passport_photo' => $data['passport_photo'] ?? null,
-            'id_card' => $data['id_card'] ?? null,
-            'signature' => $data['signature'] ?? null,
-        ]);
-
-        $data['other_details'] = json_encode([
-            'property_price' => $data['property_price'] ?? null,
-            'infrastuctural_fee' => $data['infrastuctural_fee'] ?? null,
-            'net_property_fee' => $data['net_property_fee'] ?? null,
-            'setting_and_excavation_fee' => $data['setting_and_excavation_fee'] ?? null,
-            'discount' => $data['discount'] ?? null,
-            'description' => $data['description'] ?? null,
-        ]);
-
-        $data['contact_details'] = json_encode([
-            'phone_number' => $data['phone_number'] ?? null,
-            'house_address' => $data['house_address'] ?? null,
-            'alternate_phone_number' => $data['alternate_number'] ?? null,
-            
-            // 'title' => $data['title'] ?? null,
-            // 'alternate_number' => $data['alternate_number'] ?? null,
-            // 'alternate_email' => $data['alternate_email'] ?? null,
-            // 'residential_address' => $data['residential_address'] ?? null,
-            // 'office_address' => $data['office_address'] ?? null,
-            // 'marital_status' => $data['marital_status'] ?? null,
-        ]);
-
-        // End to be used in customer form
 
         $data['company_id'] = $this->sessionDetails('company_id');
         if (\Request::route()->getPrefix() == 'api/customer') {
@@ -497,32 +465,17 @@ class CustomerFormController extends Controller
         // Update user
         $customer = Customer::where('id', $data['customer_id'])->first();
         $user = $customer->user;
+        
+        app('App\Http\Controllers\CustomerContractController')->updateUser($user, $data);
        
-        // Update user
-        // $data['additional_details'] = json_encode([
-        //     'title' => $data['title'] ?? null,
-        //     'alternate_number' => $data['alternate_number'] ?? null,
-        //     'alternate_email' => $data['alternate_email'] ?? null,
-        //     'residential_address' => $data['residential_address'] ?? null,
-        //     'office_address' => $data['office_address'] ?? null,
-        //     'marital_status' => $data['marital_status'] ?? null,
-        // ]);
-
-        app('App\Http\Controllers\CustomerController')->updateUser($user, $data);
-        $data['raw'] = json_encode($request->all());
-        $data['contract_ids'] = json_encode($customer_contract_ids);
-        $data['no_of_contract'] = count($customer_contract_ids);
-
-        $data['company_id'] = $this->sessionDetails('company_id');
-
-        $response = Arr::only($data, ['contract_ids', 'customer_id', 'title', 'type', 'status', 'no_of_contract', 'surname', 'first_name', 'middle_name', 'last_name', 'gender', 'date_of_birth', 'marital_status', 'lga_id', 'country_id', 'state_id', 'email_address', 'contact_details', 'next_of_kin_information', 'means_of_identification', 'branch_id', 'other_details', 'primary_marketer', 'secondary_marketers', 'raw', 'company_id', 'no_of_contract', 'contact_details', 'no_of_contracts']);
-
-        CustomerForm::updateOrCreate(
-            ['customer_id' => $response['customer_id'], 'company_id' => $response['company_id']],
-            $response
-        );
-
+        // update customer form status
         $customer->update([
+            'occupation' => $data['occupation'] ?? $customer->occupation,
+            'place_of_work' => $data['place_of_work'] ?? $customer->place_of_work,
+            'id_card_type' => $data['id_card_type'] ?? $customer->id_card_type,
+            'id_card' => $data['id_card'] ?? $customer->id_card,
+            'signature' => $data['signature'] ?? $customer->signature,
+            'office_address' => $data['office_address'] ?? $customer->office_address,
             'form_status' => 'Unconfirmed'
         ]);
 
