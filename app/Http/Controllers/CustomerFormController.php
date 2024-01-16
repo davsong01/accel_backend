@@ -21,18 +21,18 @@ class CustomerFormController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request, $id = null, $paginate = true)
+    public function index(Request $request, $id = null, $customer_id = null)
     {
         // Returns customer details and contract details for admin
         $forms = CustomerForm::with(['customer'])->where('company_id', $this->sessionDetails('company_id'));
         
         if (\Request::route()->getPrefix() == 'api/customer') {
+
             if(Auth::check() ){
                 $customer_id = Auth::user()->customer->id ?? null;
                 $forms = $forms->where('customer_id', $customer_id)->first();
                 $forms->contract_details = $this->formatResponseForm($forms);
             }
-            
             return response()->json(['message' => 'Successfully retrieved', 'data' => $forms], 200);
         }
         
