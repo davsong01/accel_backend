@@ -103,4 +103,15 @@ class FinanceController extends Controller
         return response()->json(['message' => 'success', 'data' => $transactions], 200);
      }
 
+    /**
+     * Search/filter GL Ledger
+     * 
+     */
+     public function showGLLedger(Transaction $transaction){ 
+
+        $transaction->load(['account', 'staff:id,user_id', 'staff.user:id,first_name,middle_name,last_name', 'customer:id,user_id', 'customer.user:id,status,type,first_name,middle_name,last_name']);
+
+        return response()->json(['message' => 'success', 'data' => $transaction], 200);
+     }
+
 }
