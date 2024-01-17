@@ -429,6 +429,12 @@ class CustomerFormController extends Controller
             $data['status'] = 'pending';
         }
 
+        if (\Request::route()->getPrefix() != 'api/customer') {
+            $customer->response_form->update([
+                'customer_form_status' => 'approved',
+            ]);
+        }
+
         $customer->response_form->update([
             'type' => $data['type'],
             'status' => $data['status'],
