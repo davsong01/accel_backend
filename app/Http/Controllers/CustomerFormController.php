@@ -132,7 +132,7 @@ class CustomerFormController extends Controller
         // $data['user'] = Customer::where('id', 'customer_id')->user;
         $data['name'] = $customer_form->first_name ?? '';
         $data['email'] = $customer_form->email_address ?? '';
-        
+
         $this->logEmail($data);
 
         return response()->json(['message' => 'Successful', 'data' => ['customer_id' => $customer_form->customer_id]], 200);
@@ -169,7 +169,7 @@ class CustomerFormController extends Controller
             'form_status' => 'Unconfirmed',
         ]);
 
-        $data['contract_details'] = $this->getFormRequestContractDetails($customer_form, 'decline_contract', $request->reason);
+        $data['contract_details'] = $this->formatResponseForm($customer_form, 'decline_contract', $request->reason);
 
         $data['type'] = 'formrequest.decline';
         $data['reason'] = $request->reason;
