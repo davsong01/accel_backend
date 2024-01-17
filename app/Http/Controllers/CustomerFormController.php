@@ -49,6 +49,7 @@ class CustomerFormController extends Controller
 
         if (!empty($request->type)) {
             if($request->type == 'form2-request'){
+                // $forms = $forms->where('type', $request->type)->where('customer_form_status', 'approved');
                 $forms = $forms->where('type', $request->type)->where('customer_form_status', 'approved');
             }else{
                 $forms = $forms->where('type', $request->type);
@@ -231,7 +232,10 @@ class CustomerFormController extends Controller
             ], 422);
         }
 
-        $customer_form->update(['customer_form_status' => 'approved']);
+        $customer_form->update([
+            'customer_form_status' => 'approved',
+            'type' => 'form2-request'
+        ]);
         
         // $data['contract_details'] = $this->getFormRequestContractDetails($customer_form, 'approve_contract');
 
@@ -270,6 +274,7 @@ class CustomerFormController extends Controller
 
         $customer_form->update([
             'customer_form_status' => 'declined',
+            'type' => 'customer-response'
         ]);
 
         // $customer_form->customer->update([
