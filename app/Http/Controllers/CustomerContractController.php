@@ -280,7 +280,7 @@ class CustomerContractController extends Controller
                 'gender' => 'required|in:male,female',
                 'email' => [
                     'required', 'email', Rule::unique('users')->where(function ($query) {
-                        $query->where('company_id', $this->sessionDetails('company_id'));
+                        $query->where('company_id', $this->sessionDetails('company_id'))->where('type', 'customer');
                     })
                 ],
                 'phone_number' => 'required',
