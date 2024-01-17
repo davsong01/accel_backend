@@ -25,6 +25,13 @@ class CustomerForm extends Model
         );
     }
 
+    protected function updatedAt(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string $value) => date("M jS, Y", strtotime($value)),
+        );
+    }
+
     protected function dateOfBirth(): Attribute
     {
         return Attribute::make(
