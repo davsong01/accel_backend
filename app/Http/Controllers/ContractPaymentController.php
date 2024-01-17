@@ -122,6 +122,7 @@ class ContractPaymentController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
+        // Generate payment receipt
         $contract->update([
             'no_of_months' => $request->no_of_months ?? 1,
             'allow_installment' => $request->allow_installment ?? 0
