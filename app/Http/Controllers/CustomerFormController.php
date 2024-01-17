@@ -77,58 +77,7 @@ class CustomerFormController extends Controller
             return response()->json(['message' => 'No records found', 'data' => $forms], 200);
         }
     }
-    // public function index(Request $request, $id = null, $paginate = true)
-    // {
-        
-    //     if (!empty($id)) {
-    //         $forms = CustomerForm::with(['country:id,name', 'state:id,name', 'lga:id,name'])->where('id', $id)->where('company_id', $this->sessionDetails('company_id'))->select('surname', 'title', 'status', 'customer_form_status', 'no_of_contract', 'first_name', 'middle_name', 'last_name', 'gender', 'created_at', 'id', 'marital_status', 'date_of_birth', 'country_id', 'state_id', 'lga_id', 'next_of_kin_information', 'means_of_identification', 'primary_marketer', 'contract_ids', 'other_details', 'customer_id')->first();
-    //         dd($forms);
-    //         if ($forms) {
-    //             $forms->contract_details = $this->getFormRequestContractDetails($forms);
-    //             $forms->other_details = !empty($forms->other_details) ? json_decode($forms->other_details, true) : [];
-    //         }
-    //         return response()->json(['message' => 'Successfully retrieved', 'data' => $forms], 200);
-    //     }
-
-    //     $forms = CustomerForm::with(['country:id,name', 'state:id,name', 'lga:id,name'])->where('company_id', $this->sessionDetails('company_id'));
-
-    //     if (!empty($request->type)) {
-    //         $forms = $forms->where('type', $request->type);
-    //     }
-        
-    //     $forms = $forms->select('surname', 'title', 'status', 'customer_form_status', 'no_of_contract', 'first_name', 'middle_name', 'last_name', 'gender', 'created_at', 'id', 'means_of_identification', 'other_details');
-
-    //     if (\Request::route()->getPrefix() == 'api/customer') {
-    //         $forms = $forms->where('customer_id', Auth::user()->customer->id);
-    //     }
-
-    //     if (!empty($request->status)) {
-    //         $forms = $forms->where('status', $request->status);
-    //     }
-
-    //     if ($request->paginate && $request->paginate === true) {
-    //         $forms = $forms->paginate(20)->withQueryString();
-    //     } else {
-    //         $forms = $forms->get();
-    //     }
-
-    //     foreach ($forms as $form) {
-    //         $means_of_identification = !empty($form->means_of_identification) ? json_decode($form->means_of_identification, true) : [];
-    //         $form['passport_photo'] = !empty($means_of_identification) && isset($means_of_identification['passport_photo']) ?  $this->encodeGeneralUploadedFile($means_of_identification['passport_photo']) : "";
-    //         unset($form['means_of_identification']);
-    //         unset($form['other_details']);
-
-    //         $form->contract_details = $this->getFormRequestContractDetails($form);
-    //         $form->other_details = !empty($forms->other_details) ? json_decode($form->other_details, true) : [];
-    //     }
-
-    //     if (!empty($forms)) {
-    //         return response()->json(['message' => 'Successfully retrieved', 'data' => $forms], 200);
-    //     } else {
-    //         return response()->json(['message' => 'No records found', 'data' => $forms], 200);
-    //     }
-    // }
-
+    
     /**
      * Show the form for creating a new resource.
      */
@@ -137,6 +86,24 @@ class CustomerFormController extends Controller
         //
     }
 
+    /*****
+     * Nudge customer to re fill customer form
+     */
+
+     public function nudgeCustomer($customer_id){
+        $customer = Customer::with('user')->where('id', $customer_id)->first();
+        $data['type'] = 'nudge.customer';
+        $data['medium'] = 'email';
+        // $data['user'] = Customer::where('id', 'customer_id')->user;
+        $data['name'] = $customer->user->first_name;
+        $data['customerId'] = $customer->user->customerId;
+        $data['email'] = $customer->user->email;
+       
+        $this->logEmail($data);
+
+        return response()->json(['message' => 'Customer nudged successfully', 'data' => []], 200);
+
+     }
 
     public function approveForm2Request($id)
     {
@@ -158,14 +125,14 @@ class CustomerFormController extends Controller
             'form_status' => 'Confirmed',
         ]);
 
-        $data['contract_details'] = $this->getFormRequestContractDetails($customer_form, 'approve_contract');
+        $data['contract_details'] = $this->formatResponseForm($customer_form, 'approve_contract');
 
         $data['type'] = 'formrequest.approve';
         $data['medium'] = 'email';
         // $data['user'] = Customer::where('id', 'customer_id')->user;
         $data['name'] = $customer_form->first_name ?? '';
         $data['email'] = $customer_form->email_address ?? '';
-
+        
         $this->logEmail($data);
 
         return response()->json(['message' => 'Successful', 'data' => ['customer_id' => $customer_form->customer_id]], 200);

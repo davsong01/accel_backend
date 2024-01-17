@@ -130,6 +130,21 @@ class MessageTransactionController extends Controller
             }
         }
 
+        if ($data['type'] == 'nudge.customer') {
+            if (isset($data['medium']) && $data['medium'] == 'sms') {
+                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'sms')->where('type', ' nudge.customer')->first();
+            }else {
+                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'email')->where('type', ' nudge.customer')->first();
+                $subject = $email_template->subject ?? null;
+                $content = $email_template->content ?? '<strong>Dear ' . $data['name'] . ',</strong><br><br>
+                <div><p style="text-align:justify !important">Please login to fill your application form: <br><br>
+                Email: ' . $data['email'] . '<br>
+                Customer ID: ' . $data['customerId'] . '<br>
+                Password: ' . '123456789' . '<br><br> Please click the login button below to login to your personalized dashboard using your email/customer ID and your password. Thank you <br><br><a href="' . url('/') . '/customer-login"><button style="' . $button_style . '">LOGIN</button></a></p>
+                </div>';
+            }
+        }
+    
         if ($data['type'] == 'staff.store') {
             if (isset($data['medium']) && $data['medium'] == 'sms') {
                
@@ -301,7 +316,7 @@ class MessageTransactionController extends Controller
                 </div>';
             }
         }
-        
+
         return [
             'subject' => $subject,
             'content' => $content,

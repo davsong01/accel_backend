@@ -259,6 +259,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('get-banks', [GeneralController::class, 'getBanks']);
         Route::get('get-pfas', [GeneralController::class, 'getPfas']);
         Route::get('get-currencies', [GeneralController::class, 'getCurrencies']);
+        Route::get('nudge-customer/{customer_id}', [CustomerFormController::class, 'nudgeCustomer']);
 
         // Contract payments
         
