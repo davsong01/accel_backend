@@ -241,7 +241,7 @@ class ContractPaymentController extends Controller
 
 
         // Log Email
-        
+
         return response()->json(['message' => 'Payment successful', 'data' => []], 200);
     
     }
@@ -290,7 +290,7 @@ class ContractPaymentController extends Controller
             $balance = ($property_price - $discount) - $data['amount'];
            
             // Store Payment
-            $payment = ContractPayment::updateOrCreate(['customer_id' => $data['customer_id'], 'customer_id' => $data['customer_id'], 'no_of_months' => $data['no_of_months'], 'company_id' => $this->sessionDetails('company_id')],[
+            $payment = ContractPayment::updateOrCreate(['customer_id' => $data['customer_id'], 'contract_id' => $contract->id, 'no_of_months' => $data['no_of_months'], 'company_id' => $this->sessionDetails('company_id')],[
                 'contract_id' => $contract->id,
                 'contract_value' => $property_price,
                 'amount' => $data['amount'],
