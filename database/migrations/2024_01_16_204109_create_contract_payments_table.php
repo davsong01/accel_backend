@@ -31,12 +31,12 @@ return new class extends Migration
             });
         }
 
-        if (!Schema::hasColumns('customer_contracts', ['allow_installment', 'no_of_months'])) {
-            Schema::table('customer_contracts', function (Blueprint $table) {
-                $table->integer('allow_installment')->default(0);
-                $table->integer('no_of_months')->nullable();
-            });
-        }    
+        // if (!Schema::hasColumns('customer_contracts', ['allow_installment', 'no_of_months'])) {
+        //     Schema::table('customer_contracts', function (Blueprint $table) {
+        //         $table->integer('allow_installment')->default(0);
+        //         $table->integer('no_of_months')->nullable();
+        //     });
+        // }    
     }
 
     /**

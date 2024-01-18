@@ -13,15 +13,23 @@ return new class extends Migration
     {
         if (!Schema::hasColumn('contract_payments', 'property_net_fee')) {
             Schema::table('contract_payments', function (Blueprint $table) {
-                $table->double('property_net_fee',11,2)->nullable()->after('contract_value');;
+                $table->double('property_net_fee', 11, 2)->nullable()->after('contract_value');;
             });
         }
 
-        if (!Schema::hasColumn('contract_payments', 'dicount_applied')) {
+        if (!Schema::hasColumn('contract_payments', 'discount_applied')) {
             Schema::table('contract_payments', function (Blueprint $table) {
-                $table->double('dicount_applied', 11, 2)->nullable()->after('property_net_fee');;
+                $table->double('discount_applied', 11, 2)->nullable()->after('property_net_fee');;
             });
         }
+
+        if (!Schema::hasColumn('contract_payments', 'contract_id')) {
+            Schema::table('contract_payments', function (Blueprint $table) {
+                $table->integer('contract_id')->nullable()->after('id');;
+            });
+        }
+
+        
     }
 
     /**
@@ -29,9 +37,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        if (Schema::hasColumn('contract_payments', 'dicount_applied')) {
+        if (Schema::hasColumn('contract_payments', 'discount_applied')) {
             Schema::table('contract_payments', function (Blueprint $table) {
-                $table->dropColumn('dicount_applied');
+                $table->dropColumn('discount_applied');
             });
         }
 

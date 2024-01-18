@@ -95,8 +95,12 @@ class Controller extends BaseController
         return $amount;
     }
 
-    public function generateTransactionId(){
-        return  'AC-' . time() . rand(1111111111, 9999999999);
+    public function generateTransactionId($prefix=null){
+        if(!empty($prefix)){
+            return  $prefix.'-' . time() . rand(1111111111, 9999999999);
+        }else{
+            return  time() . rand(1111111111, 9999999999);
+        }
     }
     // public function generateFormPayment(array $contract_ids, $customer_id)
     // {
