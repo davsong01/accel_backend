@@ -259,8 +259,7 @@ class ContractPaymentController extends Controller
             $discount = $contract->discount ?? 0;
             $property_price = $contract->property_type_details->estate_price;
             $amount_to_pay = $property_price - $discount;
-            \Log::info([$discount, $amount_to_pay]);
-           
+            
             // Get amount
             if ($data['allow_installment'] == 1) {
                 $no_of_months = $data['no_of_months'] ?? 1;
@@ -336,11 +335,12 @@ class ContractPaymentController extends Controller
                 'type' => 'credit',
                 'company_id' => $this->sessionDetails('company_id'),
             ]);
-
+            
             // Generate payment receipt
             $contract->update([
                 'contract_payment_transaction_id' => $payment->transaction_id,
-                'status' => $contract_status
+                'status' => 'subscriber',
+                'contract_status' => $contract_status,
             ]);
 
             return $payment;
@@ -348,7 +348,6 @@ class ContractPaymentController extends Controller
             // Do something with the commission from contract here
         } catch (\Throwable $th) {
             //throw $th;
-            \Log::error($th);
             dd($th->getMessage().$th->getLine());
             $res = [
                 'status' => 'error',
