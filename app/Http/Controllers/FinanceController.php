@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ChartOfAccount;
 use App\Models\Transaction;
 use App\Models\User;
+use App\Services\LogService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -61,7 +62,7 @@ class FinanceController extends Controller
             'account_id' => 'required|exists:chart_of_accounts,id',
             'amount' => 'required|numeric',
             'created_at' => 'date|before:tomorrow',
-            'payment_slip' => 'file',
+            'payment_slip' => 'file|mimetypes:image/*,application/pdf',
             'description' => 'string',
         ]);
 
@@ -75,6 +76,7 @@ class FinanceController extends Controller
         $attributes = $validator->validated();
 
         $transaction = $this->createTransaction($attributes);
+        LogService::admin(auth()->user()->id, $request->customer_id, 'New transaction entry', 'CREATE');
         return response()->json(['message' => 'success', 'data' => $transaction], 200);
     }
 
