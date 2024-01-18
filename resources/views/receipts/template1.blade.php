@@ -4,7 +4,7 @@
 
     $company_id = \Session::get('company_id') ?? 1;
     $companySetting = CompanySetting::where('company_id', $company_id)->first();
-    
+
     //  <p class="address">{{ $companySetting->address }}</p>
     //                     {{-- <p class="phone">{{ $companySetting->address }}</p> --}}
     //                     <span class="web">{{ $companySetting->website }}</span>
@@ -140,13 +140,13 @@
 {{ $payment->transaction_id }}
 <br /><br />
 <span class="text-header">Contract</span>
-${contract}
+{{$contract->contract_name}}
 <br /><br />
 <span class="text-header">Contract Status</span>
-${contract_status}
+{{ ucfirst($contract->contract_status)}}
 <br /><br />
-<span class="text-header">Payment Bank</span>
-${payment_bank}
+{{-- <span class="text-header">Payment Bank</span>
+${payment_bank} --}}
 </pre>
         </td>
         <td align="right" style="width: 40%">
@@ -156,13 +156,14 @@ ${payment_bank}
 {{ $payment->customer->user->first_name .' '.$payment->customer->user->first_name. ' '.$payment->customer->user->last_name}}
 <br /><br />
 <span class="text-header">Property Location</span>
-${property_location}
+{{$contract->location->name}}
 <br /><br />
+{{-- {{dd($contract->primaryMarketer())}} --}}
 <span class="text-header">Marketer</span>
-${markerter}
+{{ $contract->primaryMarketer()['first_name'] . ' ' .  $contract->primaryMarketer()['last_name'] }}
 <br /><br />
 <span class="text-header">Payment Purpose</span>
-${payment_purpose}
+{{ucwords(str_replace("_"," ", $payment->transaction->purpose))}}
 </pre>
         </td>
       </tr>
@@ -172,22 +173,27 @@ ${payment_purpose}
   <br />
 
   <div class="invoice">
-    <h5>Receipt No. ${receipt_no}</h5>
+    <h5>Receipt No. {{ $payment->transaction_id . '-'.$payment->id}}</h5>
     <table width="100%">
       <thead>
         <tr>
           <th align="left">S/N</th>
           <th align="left">Transaction Date & Time</th>
           <th align="left">Description</th>
-          <th align="left">Price</th>
+          <th align="left">Property Price</th>
+          <th align="left">Discount Applied</th>
+          <th align="left">Amount Paid</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td>${s/n}</td>
-          <td>${transaction_date}</td>
-          <td>${description}</td>
-          <td>${price}</td>
+          <td>1</td>
+          <td>{{$payment->created_at->format('jS F, Y, h:iA')}}</td>
+          <td>{{$payment->description}}</td>
+          <td>{{ $companySetting->currencyData->symbol.number_format($payment->contract_value) }}</td>
+          <td>{{ $companySetting->currencyData->symbol.number_format($payment->discount_applied ?? 0) }}</td>
+          <td>{{ $companySetting->currencyData->symbol.number_format($payment->amount) }}</td>
+          <td></td>
         </tr>
       </tbody>
     </table>
@@ -198,12 +204,11 @@ ${payment_purpose}
       <tr>
         <td align="right" style="width: 40%">
           <pre>
-
-              <span style="border-bottom: 1px solid black; padding-bottom: 0.5rem;">  Previous Amount Paid ${previous_amountPaid}</span>
+              {{-- <span style="border-bottom: 1px solid black; padding-bottom: 0.5rem;">Previous Amount Paid <strong>${previous_amountPaid}</strong></span> --}}
+              {{-- <br /><br /> --}}
+              <span style="border-bottom: 1px solid black; padding-bottom: 0.5rem;">Balance <strong>{{ $companySetting->currencyData->symbol.number_format($payment->balance) }}</strong></span>
               <br /><br />
-              <span style="border-bottom: 1px solid black; padding-bottom: 0.5rem;">To Balance ${to_balance}</span>
-              <br /><br />
-            Current Amount Paid ${current_amountPaid}
+            Current Amount Paid <strong>{{ $companySetting->currencyData->symbol.number_format($payment->amount) }}</strong>
           </pre>
         </td>
       </tr>
@@ -219,14 +224,14 @@ ${payment_purpose}
 
     <br /><br />
     Payment received by
-    ${payment_receivedBy}
+    <strong>{{ $payment->transaction->staff->user->first_name . ' ' . $payment->transaction->staff->user->last_name }}</strong>
     </pre>
         </td>
 
         <td align="right" style="width: 40%; padding-top: 4rem">
           <pre>
                   Branch
-                  ${city}
+                  <strong>{{ $payment->branch->name}}</strong>
                     </pre>
         </td>
       </tr>

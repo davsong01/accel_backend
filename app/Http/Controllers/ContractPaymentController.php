@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use PDF;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use App\Models\ContractPayment;
@@ -235,13 +236,18 @@ class ContractPaymentController extends Controller
                 'balance' => $res->balance,
                 'no_of_months' => $res->no_of_months,
                 'payment_slip' => $res->filename,
+                'receipt_location' => $res->receipt_location,
             ];
             
         }
 
-
-        // Log Email
-
+        // Log Email of receipt and provisional letter
+        $data['type'] = 'contract.payment';
+        $data['name'] =  $contractX->customer->user->first_name;
+        $data['email'] =  $contractX->customer->user->email;
+        $data['attachments'] = array_column($payments, 'receipt_location');
+        
+        $this->logEmail($data);
         return response()->json(['message' => 'Payment successful', 'data' => []], 200);
     
     }
@@ -289,7 +295,7 @@ class ContractPaymentController extends Controller
             }
 
             $balance = ($property_price - $discount) - $data['amount'];
-           
+            
             // Store Payment
             $payment = ContractPayment::updateOrCreate(['customer_id' => $data['customer_id'], 'contract_id' => $contract->id, 'no_of_months' => $data['no_of_months'], 'company_id' => $this->sessionDetails('company_id')],[
                 'contract_id' => $contract->id,
@@ -306,11 +312,12 @@ class ContractPaymentController extends Controller
                 'payment_slip' => $filename,
                 'property_net_fee' => $property_price - $discount,
                 'discount_applied' => $discount,
+
                 'company_id' => $this->sessionDetails('company_id')
             ]);
 
             // Create Payment thread
-            ContractPaymentThread::updateOrCreate(['contract_payments_id' => $payment->id, 'company_id' => $this->sessionDetails('company_id')], [
+            $payment_thread = ContractPaymentThread::updateOrCreate(['contract_payments_id' => $payment->id, 'company_id' => $this->sessionDetails('company_id')], [
                 'contract_payments_id' => $payment->id,
                 'amount' => $data['amount'],
                 'transaction_id' => $payment->transaction_id . 'CPT',
@@ -335,20 +342,25 @@ class ContractPaymentController extends Controller
                 'type' => 'credit',
                 'company_id' => $this->sessionDetails('company_id'),
             ]);
-            
+
             // Generate payment receipt
+            // if (env('ENT') == 'local') {
+                $receipt = $this->generateContracPaymentReceipt($payment, $contract);
+                $payment->update(['receipt_location' => $receipt['filepath'] ?? null]);
+                $payment_thread->update(['receipt_location' => $receipt['filepath'] ?? null]);
+            // }
+            
             $contract->update([
                 'contract_payment_transaction_id' => $payment->transaction_id,
                 'status' => 'subscriber',
                 'contract_status' => $contract_status,
             ]);
-
+           
             return $payment;
             
             // Do something with the commission from contract here
         } catch (\Throwable $th) {
             //throw $th;
-            dd($th->getMessage().$th->getLine());
             $res = [
                 'status' => 'error',
                 'message' => 'An error occurred when making payment for: '.$contract->contract_name,
@@ -358,6 +370,24 @@ class ContractPaymentController extends Controller
         return $res;
     }
 
+    public function generateContracPaymentReceipt($payment, $contract)
+    {
+        $name = $payment->transaction_id;
+        $data['receipt_no'] = $name;
+        $pathToSave = $this->getPathToSaveFile('receipts') . '/' . $name . '.pdf';
+
+        $pdf = PDF::loadView('receipts.template1', compact('payment', 'data','contract'))->setPaper('a4', 'portrait');
+
+        file_put_contents(base_path() . '/' . config('app.upload_path') . '/' . $pathToSave, $pdf->output());
+        // Rmember to create a public folder in the root directory if there is a PDF error
+
+        return [
+            'receipt_no' => $name . '.pdf',
+            'filename' => $name . '.pdf',
+            'filepath' => config('app.upload_path') . '/' . $pathToSave
+        ];
+    }
+    
     /**
      * Display the specified resource.
      */
