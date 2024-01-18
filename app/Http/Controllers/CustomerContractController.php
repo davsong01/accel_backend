@@ -557,6 +557,7 @@ class CustomerContractController extends Controller
             'subscribers' => !empty($data['subscribers']) ? json_encode($data['subscribers']) : $contract->subscribers,
             'contract_type' => !empty($data['contract_type']) ? $data['contract_type'] : $contract->contract_type,
             'transaction_date' => !empty($data['transaction_date']) ? $data['transaction_date'] : $contract->transaction_date,
+            'discount' => !empty($data['discount']) ? $data['discount'] : $contract->discount,
         ]);
 
         return;
@@ -732,7 +733,11 @@ class CustomerContractController extends Controller
             ], 412);
         }
 
-        $data = $valida;
+        
+        // Get contract
+        // Check if discount
+        // Get settings for the contract
+        $data = $validator->valid();
     }
     
 
@@ -753,95 +758,6 @@ class CustomerContractController extends Controller
        
         return $selected;
     }
-
-    // public function makeFormPayment(Request $request)
-    // {
-    //     $validator = Validator::make($request->all(), [
-    //         'contract_ids' => 'required',
-    //         'account_id' => 'required|exists:chart_of_accounts,id,company_id,' . $this->sessionDetails('company_id'),
-    //         'payment_slip' => 'nullable',
-    //         'description' => 'nullable',
-    //         'amount' => 'required',
-    //         'customer_id' => 'required',
-    //         'transaction_date' => 'required'
-    //     ]);
-
-    //     if ($validator->fails()) {
-    //         return response()->json([
-    //             'error' => $validator->messages()->first(),
-    //             'data' => null,
-    //         ], 412);
-    //     }
-
-    //     $data = $validator->valid();
-
-    //     $request['contract_ids'] = json_decode($request['contract_ids'], true);
-    //     $contract_ids = array_column($request['contract_ids'], 'contract_id');
-
-    //     $ids = [];
-    //     array_walk_recursive($contract_ids, function ($a) use (&$ids) {
-    //         $ids[] = $a;
-    //     });
-
-        
-    //     $form_payment = $this->generateFormPayment($ids, $request->customer_id);
-
-    //     if ($request->amount != $form_payment['form_payment']) {
-    //         return response()->json([
-    //             'error' => 'Amount does not correspond with selected contract. Amount should be exactly ' . $form_payment['form_payment'],
-    //             'data' => null,
-    //         ], 412);
-    //     }
-
-    //     if (!empty($request->payment_slip)) {
-    //         $filename = $this->uploadFile($request->payment_slip, 'payments');
-    //     }
-
-    //     $customer = Customer::where('id', $request->customer_id)->first();
-    //     if ($form_payment) {
-    //         $receipts = [];
-    //         foreach ($form_payment['explanation'] as $key => $form) {
-    //             $customer_contract_ids = implode(',', $form['contracts']);
-    //             $payment = Transaction::updateOrCreate(['customer_contract_ids' => $customer_contract_ids], [
-    //                 'customer_contract_ids' => $customer_contract_ids,
-    //                 'account_id' => $data['account_id'],
-    //                 'purpose' => 'form_payment',
-    //                 'payment_slip' => $filename ?? null,
-    //                 'description' => $data['description'],
-    //                 'amount' => $form['form_amount'],
-    //                 'staff_id' => auth()->user()->staff->id,
-    //                 'type' => 'credit',
-    //                 'estate_id' => $key,
-    //                 'customer_id' => $data['customer_id'],
-    //                 'company_id' => $this->sessionDetails('company_id'),
-    //             ]);
-
-    //             $receipt = $this->generateFormPaymentReceipt($payment);
-                
-    //             $payment->update(['receipt_location' => $receipt['filepath'] ?? null]);
-    //             $receipts[] = $receipt['filepath'] ?? null;
-
-    //             foreach ($form['contracts'] as $contract) {
-    //                 CustomerContract::where('id', $contract)->update([
-    //                     'status' => 'prospect',
-    //                     'transaction_date' => Carbon::parse($request->transaction_date)
-    //                 ]);
-    //             }
-
-    //             $customer->form_status = 'Not Filled';
-    //             $customer->save();
-    //         }
-
-    //         // Log email
-    //         $data['type'] = 'form.payment';
-    //         $data['name'] =  $customer->user->first_name ?? null;
-    //         $data['email'] =  $customer->user->email ?? null;
-    //         $data['attachments'] = $receipts;
-
-    //         $this->logEmail($data);
-    //     }
-    //     return response()->json(['message' => 'Success', 'data' => null], 200);
-    // }
 
     /**
      * Show the form for editing the specified resource.

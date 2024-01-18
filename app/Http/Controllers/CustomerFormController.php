@@ -31,6 +31,7 @@ class CustomerFormController extends Controller
             if(Auth::check() ){
                 $customer_id = Auth::user()->customer->id ?? null;
                 $forms = $forms->where('customer_id', $customer_id)->first();
+                
                 $forms->contract_details = $this->formatResponseForm($forms);
             }
             return response()->json(['message' => 'Successfully retrieved', 'data' => $forms], 200);
@@ -38,7 +39,7 @@ class CustomerFormController extends Controller
         
         if (!empty($id)) {
             $forms = $forms->where('id', $id)->first();
-            
+
             if ($forms) {
                 $forms->contract_details = $this->formatResponseForm($forms);
             }
@@ -344,11 +345,10 @@ class CustomerFormController extends Controller
                         })
                     ],
                     // Other details
-                    'property_price' => 'nullable',
-                    'infrastuctural_fee' => 'nullable',
-                    // 'net_property_fee' => 'nullable',
+                    'property_price' => 'nullable|numeric',
+                    'infrastuctural_fee' => 'nullable|numeric',
                     'setting_and_excavation_fee' => 'nullable',
-                    // 'discount' => 'nullable',
+                    'discount' => 'nullable|numeric',
                     'description' => 'nullable',
 
                     // Marketer

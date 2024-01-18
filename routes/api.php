@@ -251,7 +251,6 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
 
         Route::get('form-payment-history/{customer_id}', [CustomerContractController::class, 'formPaymentHistory']);
         Route::post('make-form-payment', [CustomerContractController::class, 'makeFormPayment']);
-        Route::post('make-contract-payment', [CustomerContractController::class, 'makeContractPayment']);
         Route::get('customer-payment-history/{customer_id}', [CustomerContractController::class, 'customerPaymentHistory']);
         Route::get('get-countries', [GeneralController::class, 'getCountries']);
         Route::get('get-states', [GeneralController::class, 'getStates']);
@@ -262,7 +261,6 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('nudge-customer/{customer_id}', [CustomerFormController::class, 'nudgeCustomer']);
 
         // Contract payments
-        
         Route::resource('contract-payment', ContractPaymentController::class);
 
         // Self Service

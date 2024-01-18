@@ -94,7 +94,6 @@ class CustomerContract extends Model
 
     public function getContractNameAttribute(){
         $name = '';
-    //    dd($this->property_type, $this->plot_size_details);
         if($this->property_type == 'building'){
             if(isset($this->building_type_details->name) && isset($this->estate->name)){
                 $name = $this->building_type_details->name . ' - ' . $this->estate->name;
