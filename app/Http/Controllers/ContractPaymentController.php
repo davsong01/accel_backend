@@ -203,7 +203,7 @@ class ContractPaymentController extends Controller
                 'allow_installment' => 'required|In:0,1',
                 'no_of_months' => 'nullable',
                 'amount' => 'required',
-                'contract_id' => 'required|exists:customer_contracts,id,status,prospect,form_approval_status,approved,company_id,' . $this->sessionDetails('company_id'),'customer_id',$request->customer_id,
+                'contract_id' => 'required|exists:customer_contracts,id,form_approval_status,approved,company_id,' . $this->sessionDetails('company_id'),'customer_id',$request->customer_id,
             ]);
 
             if ($contract_validator->fails()) {
@@ -266,7 +266,7 @@ class ContractPaymentController extends Controller
                 $no_of_months = $data['no_of_months'] ?? 1;
                 $caliberation = $amount_to_pay / $no_of_months;
                 $amount_to_pay = $caliberation;
-               
+                $contract_status = 'ongoing';
                 // dd($caliberation, $no_of_months, $data['amount']);
                 if ($data['amount'] < $caliberation) {
                     $res = [
@@ -276,6 +276,8 @@ class ContractPaymentController extends Controller
 
                     return $res;
                 }
+            }else{
+                $contract_status = 'completed';
             }
             
             if ($amount_to_pay != $data['amount']) {
@@ -338,6 +340,7 @@ class ContractPaymentController extends Controller
             // Generate payment receipt
             $contract->update([
                 'contract_payment_transaction_id' => $payment->transaction_id,
+                'status' => $contract_status
             ]);
 
             return $payment;
