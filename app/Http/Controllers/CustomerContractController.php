@@ -680,11 +680,11 @@ class CustomerContractController extends Controller
                 'company_id' => $this->sessionDetails('company_id'),
             ]);
 
-            if(env('ENT') !== 'local'){
+            // if(env('ENT') !== 'local'){
                 $receipt = $this->generateFormPaymentReceipt($payment);
                 $payment->update(['receipt_location' => $receipt['filepath'] ?? null]);
                 $receipts[] = $receipt['filepath'] ?? null;
-            }
+            // }
            
             // Move contract to prospect
             foreach($contract['contract_ids'] as $ids){
