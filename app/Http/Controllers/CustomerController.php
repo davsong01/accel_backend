@@ -207,14 +207,16 @@ class CustomerController extends Controller
             $id = Auth::user()->customer->id;
         }
        
-        $customer = Customer::where('customers.id', $id)
-            ->with('user')->first();
+        $customer = Customer::with(['user'])->where('id', $id)
+            ->first()->load('user', 'user.state', 'user.country','user.lga');
+           
         if(!$customer){
             return response()->json(['message' => 'Customer does not exist', 'data' => []], 200);
         }
 
         $customer->customer_id = $customer->id;
-
+      
+        // $chartOfAccount->load('currency', 'account_category:id,name', 'account_type:id,type')]
         return response()->json(['message' => 'Success', 'data' => $customer], 200);
     }
 

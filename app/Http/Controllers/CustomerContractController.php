@@ -696,9 +696,12 @@ class CustomerContractController extends Controller
             }
         }
         
-        $customer->form_status = 'Not Filled';
-        $customer->save();
+        if(empty($customer->form_status)){
+            $customer->form_status = 'Not Filled';
+            $customer->save();
 
+        }
+        
         // Create customer response form with selected data
         CustomerForm::updateOrCreate(
             ['customer_id' => $customer->id, 'company_id' => $this->sessionDetails('company_id')],
