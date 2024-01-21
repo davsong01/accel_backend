@@ -131,31 +131,31 @@ class ContractPaymentController extends Controller
             
             // Get amount
             if ($data['allow_installment'] == 1) {
-                $no_of_months = $data['no_of_months'] ?? 1;
-                $caliberation = $amount_to_pay / $no_of_months;
-                $amount_to_pay = $caliberation;
+                // $no_of_months = $data['no_of_months'] ?? 1;
+                // $caliberation = $amount_to_pay / $no_of_months;
+                // $amount_to_pay = $caliberation;
                 $contract_status = 'ongoing';
                 // dd($caliberation, $no_of_months, $data['amount']);
-                if ($data['amount'] < $caliberation) {
-                    $res = [
-                        'status' => 'error',
-                        'message' => 'Amount must be equal to or greater than the first instalmental payment of ' . number_format($caliberation) . ' for '.$contract->contract_name,
-                    ];
+                // if ($data['amount'] < $caliberation) {
+                //     $res = [
+                //         'status' => 'error',
+                //         'message' => 'Amount must be equal to or greater than the first instalmental payment of ' . number_format($caliberation) . ' for '.$contract->contract_name,
+                //     ];
 
-                    return $res;
-                }
+                //     return $res;
+                // }
             }else{
                 $contract_status = 'completed';
             }
             
-            if ($amount_to_pay != $data['amount']) {
-                $res = [
-                    'status' => 'error',
-                    'message' => 'Please check Net Property Fee for ' . $contract->contract_name . ' It should be exactly: ' . $amount_to_pay,
-                ];
+            // if ($amount_to_pay != $data['amount']) {
+            //     $res = [
+            //         'status' => 'error',
+            //         'message' => 'Please check Net Property Fee for ' . $contract->contract_name . ' It should be exactly: ' . $amount_to_pay,
+            //     ];
 
-                return $res;
-            }
+            //     return $res;
+            // }
 
             $balance = ($property_price - $discount) - $data['amount'];
             
@@ -207,11 +207,11 @@ class ContractPaymentController extends Controller
             ]);
 
             // Generate payment receipt
-            // if (env('ENT') == 'local') {
+            if (env('ENT') != 'local') {
                 $receipt = $this->generateContracPaymentReceipt($payment, $contract);
                 $payment->update(['receipt_location' => $receipt['filepath'] ?? null]);
                 $payment_thread->update(['receipt_location' => $receipt['filepath'] ?? null]);
-            // }
+            }
             
             $contract->update([
                 'contract_payment_transaction_id' => $payment->transaction_id,

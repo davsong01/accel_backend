@@ -460,7 +460,6 @@ class Controller extends BaseController
         $job_information_max_percent = 15;
         $others_max_percent = 85;
 
-        $additional_details = !empty($user->additional_details) ? $user->additional_details : [];
         $nok_details = !empty($user->next_of_kin) ? Auth::user()->next_of_kin : [];
 
         $job_information = [
