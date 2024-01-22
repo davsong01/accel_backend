@@ -7,7 +7,9 @@ use App\Models\Transaction;
 use Illuminate\Http\Request;
 use App\Models\ContractPayment;
 use App\Models\CustomerContract;
+use App\Models\SeInfrastructure;
 use App\Models\ContractPaymentThread;
+use App\Models\SeInfrastructureThread;
 use Illuminate\Support\Facades\Validator;
 
 class ContractPaymentController extends Controller
@@ -281,5 +283,107 @@ class ContractPaymentController extends Controller
     public function destroy(ContractPayment $contractPayment)
     {
         //
+    }
+
+    public function seEscavationSetting(CustomerContract $contract)
+    {
+        return response()->json(['message' => 'Success', 'data' => $contract->property_type_details], 200);
+    }
+
+    public function makeSettingAndEscavationPayment(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'account_id' => 'required|exists:chart_of_accounts,id,company_id,' . $this->sessionDetails('company_id'),
+            'contract_id' => 'required|exists:customer_contracts,id,company_id,' . $this->sessionDetails('company_id'),
+            'amount' => 'required',
+            'type' => 'required|in:SE,INFRASTRUTURE',
+            'payment_slip' => 'nullable',
+            'description' => 'nullable',
+            'transaction_date' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->messages()->first(),
+                'data' => null,
+            ], 412);
+        }
+
+
+        // Get contract
+        $contract = CustomerContract::where('id', $request->contract_id)->first();
+
+        if ($request->type == 'SE') {
+            $fee = $contract->property_type_details->settings_and_excavation;
+            $purpose = 'setting_and_escavation';
+        } else {
+            $fee = $contract->property_type_details->infrastructural_fee;
+            $purpose = 'infrastructural_fee';
+        }
+
+        if ($request->amount > $fee) {
+            return response()->json([
+                'error' => 'Cannot pay more than set price',
+                'data' => null,
+            ], 412);
+        }
+
+        $balance = $fee - $request->amount;
+        $transaction_id = $this->generateTransactionId();
+        if ($request->payment_slip) {
+            $filename = $this->uploadFile($request->payment_slip, 'payments');
+        } else {
+            $filename = null;
+        }
+
+        $payment = SeInfrastructure::updateOrCreate(['contract_id' => $request->contract_id,'amount'=>$request->amount, 'company_id' => $this->sessionDetails('company_id')], [
+            'contract_id' => $contract->id,
+            'amount' => $request->amount,
+            'balance' => $balance,
+            'customer_id' => $contract->customer_id,
+            'transaction_id' => $transaction_id,
+            'type' =>$request->type,
+            'account_id' => $request->account_id,
+            'payment_slip' => $filename,
+            'infrastructure_fee' => $fee,
+            'company_id' => $this->sessionDetails('company_id')
+        ]);
+       
+        // Create Payment thread
+        $payment_thread = SeInfrastructureThread::updateOrCreate(['se_infrastructures_id' => $payment->id, 'company_id' => $this->sessionDetails('company_id')], [
+            'se_infrastructures_id' => $payment->id,
+            'amount' => $request->amount,
+            'customer_id' => $contract->customer_id,
+            'branch_id' => $this->sessionDetails('branch_id'),
+            'account_id' => $request->account_id,
+            'transaction_id' => $payment->transaction_id,
+            'payment_slip' => $filename,
+            'company_id' => $this->sessionDetails('company_id')
+        ]);
+
+        // Transaction
+        Transaction::updateOrCreate(['customer_id' => $payment->customer_id, 'transaction_id' => $payment->transaction_id, 'company_id' => $this->sessionDetails('company_id')], [
+            'customer_id' => $payment->customer_id,
+            'amount' => $payment->amount,
+            'transaction_id' => $payment->transaction_id,
+            'account_id' => $payment->account_id,
+            'purpose' => $purpose,
+            'payment_slip' => $filename,
+            'description' => null,
+            'staff_id' => auth()->user()->staff->id,
+            'type' => 'credit',
+            'company_id' => $this->sessionDetails('company_id'),
+        ]);
+
+        // Generate payment receipt, stop here todat
+        // if (env('ENT') != 'local') {
+        //     $receipt = $this->generateContracPaymentReceipt($payment, $contract);
+        //     $payment->update(['receipt_location' => $receipt['filepath'] ?? null]);
+        //     $payment_thread->update(['receipt_location' => $receipt['filepath'] ?? null]);
+        // }
+
+
+        return response()->json(['message' => 'Success', 'data' => []], 200);
+
     }
 }

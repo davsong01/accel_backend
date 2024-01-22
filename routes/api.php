@@ -262,6 +262,8 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
 
         // Contract payments
         Route::resource('contract-payment', ContractPaymentController::class);
+        Route::post('setting-excavation-payment', [ContractPaymentController::class, 'makeSettingAndEscavationPayment']);
+        Route::get('get-se-escavation-setting/{contract}', [ContractPaymentController::class, 'seEscavationSetting']);
 
         // Self Service
         Route::group(['prefix' => 'self-service', 'before' => 'self-service'], function () {

@@ -120,6 +120,7 @@ class CustomerController extends Controller
         })->withCount('contracts')->where('company_id', $this->sessionDetails('company_id'))
             ->orderBy('customers.created_at', 'DESC');
 
+        
         if (!empty($request->name)) {
             $subscriber = $subscriber->whereHas('user', function ($query) use ($request) {
                 $query->where('first_name', 'LIKE', "%{$request->name}%")
@@ -129,6 +130,19 @@ class CustomerController extends Controller
                     });
             });
         }
+
+        if(!empty($request->type)){
+            $subscriber = $subscriber->whereHas('contracts', function ($query) use ($request) {
+                $query->where('contract_status', $request->type);
+            });
+
+            // $subscriber = $subscriber->with(['contracts'=>function($query) use ($request){
+            //     $query->where('contract_status', $request->type);
+            // }]);
+
+
+        }
+
 
         $subscriber = $subscriber->paginate(20)->withQueryString();
 

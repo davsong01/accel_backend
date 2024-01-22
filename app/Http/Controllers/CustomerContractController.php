@@ -416,32 +416,8 @@ class CustomerContractController extends Controller
 
     public function updateUser($user, $data)
     {
-        // $old_additional_details = !empty($user->additional_details) ? $user->additional_details : [];
-        // $old_means_of_identification = !empty($user->means_of_identification) ? $user->means_of_identification : [];
         $old_next_of_kin = !empty($user->next_of_kin) ? $user->next_of_kin : [];
        
-
-        // $additional_details = json_encode([
-        //     'title' => !empty($data['title']) ? $data['title'] : ($old_additional_details['title'] ?? ''),
-        //     'alternate_number' => !empty($data['alternate_number']) ? $data['alternate_number'] : ($old_additional_details['alternate_number'] ?? ''),
-        //     'alternate_email' => !empty($data['alternate_email']) ? $data['alternate_email'] : ($old_additional_details['alternate_email'] ?? ''),
-        //     'state' => !empty($data['state_id']) ? $data['state_id'] : ($old_additional_details['state'] ?? ''),
-        //     'marital_status' => !empty($data['marital_status']) ? $data['marital_status'] : ($old_additional_details['marital_status'] ?? ''),
-        //     'nationality' => !empty($data['country_id']) ? $data['country_id'] : ($old_additional_details['nationality'] ?? ''),
-        //     'lga' => !empty($data['lga_id']) ? $data['lga_id'] : ($old_additional_details['lga'] ?? ''),
-
-        //     'office_address' => isset($data['office_address']) ? $data['office_address'] : ($old_additional_details['office_address'] ?? ''),
-        //     'residential_address' => isset($data['residential_address']) ? $data['residential_address'] : ($old_additional_details['residential_address'] ?? ''),
-        // ]);
-
-        // $means_of_identification = json_encode([
-        //     'occupation' => isset($data['occupation']) ? $data['occupation'] : ($old_means_of_identification['occupation'] ?? ''),
-        //     'place_of_work' => isset($data['place_of_work']) ? $data['place_of_work'] : ($old_means_of_identification['place_of_work'] ?? ''),
-        //     'id_card_type' => isset($data['id_card_type']) ? $data['id_card_type'] : ($old_means_of_identification['id_card_type'] ?? ''),
-        //     'passport_photo' => isset($data['passport_photo']) ? $data['passport_photo'] : ($old_means_of_identification['passport_photo'] ?? ''),
-        //     'id_card' => isset($data['id_card']) ? $data['id_card'] : ($old_means_of_identification['id_card'] ?? ''),
-        //     'signature' => isset($data['signature']) ? $data['signature'] : ($old_means_of_identification['signature'] ?? ''),
-        // ]);
 
         $next_of_kin = json_encode([
             'nok_first_name' => isset($data['nok_first_name']) ? $data['nok_first_name'] : ($old_next_of_kin['nok_first_name'] ?? ''),
@@ -451,22 +427,6 @@ class CustomerContractController extends Controller
             'nok_email_address' => isset($data['nok_email_address']) ? $data['nok_email_address'] : ($old_next_of_kin['nok_email_address'] ?? ''),
             'nok_relationship' => isset($data['nok_relationship']) ? $data['nok_relationship'] : ($old_next_of_kin['nok_relationship'] ?? ''),
         ]);
-
-  
-    // "date_of_birth" 
-    // "gender" => "male"
-    // "email" => "victor@consode.com"
-    // "username"
-    //     avatar
-    //     next_of_kin
-
-    //     alternate_number" => null
-    // "alternate_email" => null
-    // "marital_status" => null
-    // "country_id" => null
-    // "state_id" => null
-    // "lga_id" => null
-    // "office_address"
 
         $user->update([
             'title' => $data['title'] ?? $user->title,
@@ -718,32 +678,6 @@ class CustomerContractController extends Controller
         return response()->json(['message' => 'Success', 'data' => null], 200);
     }
 
-    public function makeContractPayment(Request $request){
-        $validator = Validator::make($request->all(), [
-            'contract_ids' => 'required',
-            'account_id' => 'required|exists:chart_of_accounts,id,company_id,' . $this->sessionDetails('company_id'),
-            'payment_slip' => 'nullable',
-            'description' => 'nullable',
-            'amount' => 'required',
-            'customer_id' => 'required',
-            'transaction_date' => 'required'
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'error' => $validator->messages()->first(),
-                'data' => null,
-            ], 412);
-        }
-
-        
-        // Get contract
-        // Check if discount
-        // Get settings for the contract
-        $data = $validator->valid();
-    }
-    
-
     public function sanitizeContractsByEstateIds($allData, $customer_id){
         // Get all customer contract for this estate
         $contracts = CustomerContract::where('customer_id', $customer_id)->where('estate_id', $allData['estate_id'])->where('status','lead');
@@ -960,4 +894,6 @@ class CustomerContractController extends Controller
 
         return response()->json(['message' => 'Success', 'data' => $data], 200);
     }
+
+   
 }
