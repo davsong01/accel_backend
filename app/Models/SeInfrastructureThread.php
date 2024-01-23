@@ -9,5 +9,4 @@ class SeInfrastructureThread extends Model
 {
     use HasFactory;
     protected $guarded = [];
-
 }

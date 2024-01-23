@@ -2,7 +2,6 @@
 
 use App\Models\Role;
 use App\Models\Package;
-use App\Models\StaffRole;
 use App\Models\RolePermission;
 use App\Models\LegalDocumentType;
 use App\Models\LegalDocumentTemplate;
@@ -187,6 +186,24 @@ if (!function_exists("permissionsCheck")) {
             'permission' => $permissionx,
             'error' => $error,
             'code' => $code,
+        ];
+    }
+}
+
+if (!function_exists("generateGenericPaymentReceipt")) {
+    function generateGenericPaymentReceipt($payment, $contract){
+        $name = $payment->transaction_id;
+        $data['receipt_no'] = $name;
+        $pathToSave = app('App\Http\Controllers\Controller')->getPathToSaveFile('receipts') . '/' . $name . '.pdf';
+        
+        $pdf = \PDF::loadView('receipts.generic-payment', compact('payment', 'data', 'contract'))->setPaper('a4', 'portrait');
+        
+        file_put_contents(base_path() . '/' . config('app.upload_path') . '/' . $pathToSave, $pdf->output());
+        // Rmember to create a public folder in the root directory if there is a PDF error
+        return [
+            'receipt_no' => $name . '.pdf',
+            'filename' => $name . '.pdf',
+            'filepath' => config('app.upload_path') . '/' . $pathToSave
         ];
     }
 }

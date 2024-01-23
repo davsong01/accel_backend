@@ -27,7 +27,6 @@ class ContractPaymentController extends Controller
      */
     public function create()
     {
-        
     }
 
     /**
@@ -43,7 +42,7 @@ class ContractPaymentController extends Controller
             'description' => 'nullable',
             'payment_slip' => 'nullable',
         ]);
-        
+
 
         if ($validator->fails()) {
             return response()->json([
@@ -54,22 +53,22 @@ class ContractPaymentController extends Controller
 
 
         $contract_ids = json_decode($request['contract_ids'], true);
-        
-        if(count($contract_ids) < 1){
+
+        if (count($contract_ids) < 1) {
             return response()->json([
                 'error' => 'Please select one or more contracts to pay for',
                 'data' => null,
             ], 412);
         }
-        
+
         $payments = [];
 
-        foreach($contract_ids as $contract){
+        foreach ($contract_ids as $contract) {
             $contract_validator = Validator::make($contract, [
                 'allow_installment' => 'required|In:0,1',
                 'no_of_months' => 'nullable',
                 'amount' => 'required',
-                'contract_id' => 'required|exists:customer_contracts,id,form_approval_status,approved,company_id,' . $this->sessionDetails('company_id'),'customer_id',$request->customer_id,
+                'contract_id' => 'required|exists:customer_contracts,id,form_approval_status,approved,company_id,' . $this->sessionDetails('company_id'), 'customer_id', $request->customer_id,
             ]);
 
             if ($contract_validator->fails()) {
@@ -79,13 +78,13 @@ class ContractPaymentController extends Controller
                 ], 412);
             }
 
-            $contractX = CustomerContract::where('id',$contract['contract_id'])->where('customer_id', $request->customer_id)->where('company_id', $this->sessionDetails('company_id'))->first();
+            $contractX = CustomerContract::where('id', $contract['contract_id'])->where('customer_id', $request->customer_id)->where('company_id', $this->sessionDetails('company_id'))->first();
 
             $contract = array_merge($contract, $request->all());
-            
+
             $res = $this->processContractPayment($contractX, $contract);
-           
-            if(isset($res['status']) && $res['status'] == 'error'){
+
+            if (isset($res['status']) && $res['status'] == 'error') {
                 return response()->json(['error' => $res['message'], 'data' => []], 200);
             }
 
@@ -103,7 +102,6 @@ class ContractPaymentController extends Controller
                 'payment_slip' => $res->filename,
                 'receipt_location' => $res->receipt_location,
             ];
-            
         }
 
         // Log Email of receipt and provisional letter
@@ -111,26 +109,26 @@ class ContractPaymentController extends Controller
         $data['name'] =  $contractX->customer->user->first_name;
         $data['email'] =  $contractX->customer->user->email;
         $data['attachments'] = array_column($payments, 'receipt_location');
-        
+
         $this->logEmail($data);
         return response()->json(['message' => 'Payment successful', 'data' => []], 200);
-    
     }
-    
-    public function processContractPayment($contract, $data){
+
+    public function processContractPayment($contract, $data)
+    {
         try {
             $transaction_id = $this->generateTransactionId('CT');
-            
+
             if (!empty($data['payment_slip'])) {
                 $filename = $this->uploadFile($data['payment_slip'], 'payments');
             } else {
                 $filename = null;
             }
-            
+
             $discount = $contract->discount ?? 0;
             $property_price = $contract->property_type_details->estate_price;
             $amount_to_pay = $property_price - $discount;
-            
+
             // Get amount
             if ($data['allow_installment'] == 1) {
                 // $no_of_months = $data['no_of_months'] ?? 1;
@@ -146,10 +144,10 @@ class ContractPaymentController extends Controller
 
                 //     return $res;
                 // }
-            }else{
+            } else {
                 $contract_status = 'completed';
             }
-            
+
             // if ($amount_to_pay != $data['amount']) {
             //     $res = [
             //         'status' => 'error',
@@ -160,9 +158,9 @@ class ContractPaymentController extends Controller
             // }
 
             $balance = ($property_price - $discount) - $data['amount'];
-            
+
             // Store Payment
-            $payment = ContractPayment::updateOrCreate(['customer_id' => $data['customer_id'], 'contract_id' => $contract->id, 'no_of_months' => $data['no_of_months'], 'company_id' => $this->sessionDetails('company_id')],[
+            $payment = ContractPayment::updateOrCreate(['customer_id' => $data['customer_id'], 'contract_id' => $contract->id, 'no_of_months' => $data['no_of_months'], 'company_id' => $this->sessionDetails('company_id')], [
                 'contract_id' => $contract->id,
                 'contract_value' => $property_price,
                 'amount' => $data['amount'],
@@ -210,38 +208,38 @@ class ContractPaymentController extends Controller
 
             // Generate payment receipt
             if (env('ENT') != 'local') {
-                $receipt = $this->generateContracPaymentReceipt($payment, $contract);
+                $receipt = $this->generateContractPaymentReceipt($payment, $contract);
                 $payment->update(['receipt_location' => $receipt['filepath'] ?? null]);
                 $payment_thread->update(['receipt_location' => $receipt['filepath'] ?? null]);
             }
-            
+
             $contract->update([
                 'contract_payment_transaction_id' => $payment->transaction_id,
                 'status' => 'subscriber',
                 'contract_status' => $contract_status,
             ]);
-           
+
             return $payment;
-            
+
             // Do something with the commission from contract here
         } catch (\Throwable $th) {
             //throw $th;
             $res = [
                 'status' => 'error',
-                'message' => 'An error occurred when making payment for: '.$contract->contract_name,
+                'message' => 'An error occurred when making payment for: ' . $contract->contract_name,
             ];
         }
 
         return $res;
     }
 
-    public function generateContracPaymentReceipt($payment, $contract)
+    public function generateContractPaymentReceipt($payment, $contract)
     {
         $name = $payment->transaction_id;
         $data['receipt_no'] = $name;
         $pathToSave = $this->getPathToSaveFile('receipts') . '/' . $name . '.pdf';
 
-        $pdf = PDF::loadView('receipts.contract-payment', compact('payment', 'data','contract'))->setPaper('a4', 'portrait');
+        $pdf = PDF::loadView('receipts.contract-payment', compact('payment', 'data', 'contract'))->setPaper('a4', 'portrait');
 
         file_put_contents(base_path() . '/' . config('app.upload_path') . '/' . $pathToSave, $pdf->output());
         // Rmember to create a public folder in the root directory if there is a PDF error
@@ -252,7 +250,7 @@ class ContractPaymentController extends Controller
             'filepath' => config('app.upload_path') . '/' . $pathToSave
         ];
     }
-    
+
     /**
      * Display the specified resource.
      */
@@ -336,19 +334,19 @@ class ContractPaymentController extends Controller
             $filename = null;
         }
 
-        $payment = SeInfrastructure::updateOrCreate(['contract_id' => $request->contract_id,'amount'=>$request->amount, 'company_id' => $this->sessionDetails('company_id')], [
+        $payment = SeInfrastructure::updateOrCreate(['contract_id' => $request->contract_id, 'amount' => $request->amount, 'company_id' => $this->sessionDetails('company_id')], [
             'contract_id' => $contract->id,
             'amount' => $request->amount,
             'balance' => $balance,
             'customer_id' => $contract->customer_id,
             'transaction_id' => $transaction_id,
-            'type' =>$request->type,
+            'type' => $request->type,
             'account_id' => $request->account_id,
             'payment_slip' => $filename,
             'infrastructure_fee' => $fee,
             'company_id' => $this->sessionDetails('company_id')
         ]);
-       
+
         // Create Payment thread
         $payment_thread = SeInfrastructureThread::updateOrCreate(['se_infrastructures_id' => $payment->id, 'company_id' => $this->sessionDetails('company_id')], [
             'se_infrastructures_id' => $payment->id,
@@ -376,14 +374,20 @@ class ContractPaymentController extends Controller
         ]);
 
         // Generate payment receipt, stop here todat
-        // if (env('ENT') != 'local') {
-        //     $receipt = $this->generateContracPaymentReceipt($payment, $contract);
-        //     $payment->update(['receipt_location' => $receipt['filepath'] ?? null]);
-        //     $payment_thread->update(['receipt_location' => $receipt['filepath'] ?? null]);
-        // }
+        $contract->fee = $payment->infrastructure_fee;
+        $receipt = generateGenericPaymentReceipt($payment, $contract);
+        
+        $payment->update(['receipt_location' => $receipt['filepath'] ?? null]);
+        $payment_thread->update(['receipt_location' => $receipt['filepath'] ?? null]);
+        
+        $data['type'] = 'se.escavation.payment';
+        $data['element'] = $request->type;
+        $data['name'] =  $payment->customer->user->first_name;
+        $data['email'] =  $payment->customer->user->email;
+        $data['attachments'] = $receipt['filepath'];
 
+        $this->logEmail($data);
 
         return response()->json(['message' => 'Success', 'data' => []], 200);
-
     }
 }

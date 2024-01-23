@@ -132,19 +132,53 @@ class MessageTransactionController extends Controller
 
         if ($data['type'] == 'nudge.customer') {
             if (isset($data['medium']) && $data['medium'] == 'sms') {
-                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'sms')->where('type', ' nudge.customer')->first();
+                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'sms')->where('type', 'nudge.customer')->first();
             }else {
-                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'email')->where('type', ' nudge.customer')->first();
-                $subject = $email_template->subject ?? null;
+                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'email')->where('type', 'nudge.customer')->first();
+                $subject = $email_template->subject ?? 'Complete Your Application Form';
                 $content = $email_template->content ?? '<strong>Dear ' . $data['name'] . ',</strong><br><br>
-                <div><p style="text-align:justify !important">Please login to fill your application form: <br><br>
+                <div><p style="text-align:justify !important">I hope this email finds you well. We appreciate your interest in '. $this->sessionDetails('company_name'). ' and are excited to have you on board.<br><br>There are some sections of the application form we want you to fill out to ensure that we have all the necessary information to provide you with the best possible experience. <br><br>To expedite the process, here are the details to access your application form:<br><br>
+
+                Please login to fill your application form: <br><br>
+                Url: <a href="' . $url . '/customer-login">' . $url . '/customer-login'.'</a><br>
                 Email: ' . $data['email'] . '<br>
                 Customer ID: ' . $data['customerId'] . '<br>
-                Password: ' . '123456789' . '<br><br> Please click the login button below to login to your personalized dashboard using your email/customer ID and your password. Thank you <br><br><a href="' . $url . '/customer-login"><button style="' . $button_style . '">LOGIN</button></a></p>
+                Password: ' . 'Your set password' . '<br><br> If you encounter any challenges or have questions while filling out the form, please don\'t hesitate to contact us. Thank you for your prompt attention to this matter. We value your partnership and look forward to serving you.<br><br>Best regards,<br><br>'.$this->sessionDetails('company_name').'</p>
                 </div>';
             }
         }
+
+        if ($data['type'] == 'se.escavation.payment') {
+            if (isset($data['medium']) && $data['medium'] == 'sms') {
+                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'sms')->where('type', 'se.escavation.payment')->first();
+            } else {
+                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'email')->where('type', 'se.escavation.payment')->first();
+
+                $subject = $email_template->subject ?? 'Payment Confirmation';
+                $content = $email_template->content ?? '<strong>Dear ' . $data['name'] . ',</strong><br>
+                <div>
+                <p style="text-align:justify !important">We are delighted to inform you that your payment for '.$data['element'] . ' has been successfully processed. Attached to this email is your payment receipt<br><br>Best regards,<br><br>' . $this->sessionDetails('company_name') . '</p>
+                </div>';
+            }
+        }
+
+        if ($data['type'] == 'nudge.admin') {
+            if (isset($data['medium']) && $data['medium'] == 'sms') {
+                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'sms')->where('type', 'nudge.admin')->first();
+            } else {
+                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'email')->where('type', 'nudge.admin')->first();
+
+                $subject = $email_template->subject ?? 'Your Attention is Needed';
+                $content = $email_template->content ?? '<strong>Dear ' . $data['name'] . ',</strong><br>
+                <div>
+                <p style="text-align:justify !important">Could you please take a moment to look into '.$data['form']->form_name. '<br><br>Your timely review and feedback are essential for us to proceed smoothly.<br><br>Thank you for your prompt attention to this matter.<br><br>Please click the button below to attend to this form<br><br><a href="' . $url . '/customer-form-response/' . $data['form']->id.'"><button style="' . $button_style . '">CHECK IT OUT</button></a><br><br>Best regards,<br><br>' . $this->sessionDetails('company_name') . '</p>
+                </div>';
+            }
+        }
+
+        
     
+        
         if ($data['type'] == 'staff.store') {
             if (isset($data['medium']) && $data['medium'] == 'sms') {
                

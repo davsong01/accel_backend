@@ -17,7 +17,7 @@ class CustomerForm extends Model
     protected $guarded = [];
 
     protected $table = 'customer_forms';
-    protected $appends = ['lga','country','state'];
+    protected $appends = ['lga','country','state','form_name'];
 
     public function getLgaAttribute()
     {
@@ -27,6 +27,11 @@ class CustomerForm extends Model
     public function getCountryAttribute()
     {
         return $this->customer->user->country;
+    }
+
+    public function getFormNameAttribute()
+    {
+        return 'Form-'.$this->id;
     }
 
     public function getStateAttribute()

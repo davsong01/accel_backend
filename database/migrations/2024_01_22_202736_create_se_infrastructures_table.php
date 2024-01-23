@@ -22,7 +22,8 @@ return new class extends Migration
             $table->integer('account_id')->nullable();
             $table->integer('customer_id')->nullable();
             $table->string('payment_slip')->nullable();
-
+            $table->string('receipt_location')->nullable();
+            
             $table->integer('company_id')->nullable();
             $table->timestamps();
         });
