@@ -120,6 +120,8 @@ class AuthController extends Controller
         }
 
         if ($user->type == 'customer') {
+            \Session::put('customer_id', $user->customer->id);
+
             $datax['userInfo']['customerId'] = $user->customerId;
             $datax['userInfo']['customer_id'] = $user->customer->id;
         }

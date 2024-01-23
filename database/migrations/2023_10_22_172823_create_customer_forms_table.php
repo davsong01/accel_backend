@@ -34,9 +34,9 @@ return new class extends Migration
                 $table->string('email_address')->nullable();
                 $table->text('contact_details')->nullable();
                 $table->text('next_of_kin_information')->nullable();
-                $table->text('means_of_identification')->nullable();
+                // $table->text('means_of_identification')->nullable();
                 $table->integer('branch_id')->nullable();
-                $table->text('other_details')->nullable();
+                // $table->text('other_details')->nullable();
                 $table->datetime('transaction_date')->nullable();
                 $table->text('marketers')->nullable();
                 $table->integer('bypass_approval')->nullable();

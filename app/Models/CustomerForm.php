@@ -17,8 +17,31 @@ class CustomerForm extends Model
     protected $guarded = [];
 
     protected $table = 'customer_forms';
+    protected $appends = ['lga','country','state'];
+
+    public function getLgaAttribute()
+    {
+        return $this->customer->user->lga;
+    }
+
+    public function getCountryAttribute()
+    {
+        return $this->customer->user->country;
+    }
+
+    public function getStateAttribute()
+    {
+        return $this->customer->user->state;
+    }
 
     protected function createdAt(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string $value) => date("M jS, Y", strtotime($value)),
+        );
+    }
+
+    protected function updatedAt(): Attribute
     {
         return Attribute::make(
             get: fn (string $value) => date("M jS, Y", strtotime($value)),
@@ -30,20 +53,6 @@ class CustomerForm extends Model
         return Attribute::make(
             get: fn (string $value) => date("M jS, Y", strtotime($value)),
         );
-    }
-
-    public function country(){
-        return $this->belongsTo(Country::class);
-    }
-
-    public function state()
-    {
-        return $this->belongsTo(States::class);
-    }
-
-    public function lga()
-    {
-        return $this->belongsTo(Lga::class);
     }
     
     public function customer()

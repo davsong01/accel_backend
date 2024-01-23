@@ -88,60 +88,74 @@ class Controller extends BaseController
         return $buildAmount;
     }
 
-    public function generateFormPayment(array $contract_ids, $customer_id)
+    public function generateFormPayment(int $estate_id)
     {
-        $contracts = [];
-        $ids = [];
-        $estates = [];
-
-        foreach ($contract_ids as $contract_id) {
-            // Get estates
-            $est = CustomerContract::select('estate_id')->where('id', $contract_id)
-                ->where('customer_id', $customer_id)
-                ->where('company_id', $this->sessionDetails('company_id'))->value('estate_id');
-
-            if (!empty($est)) {
-                $estates[] = $est;
-                $ids[] = $contract_id;
-            }
-        }
-
-        $estateContracts = [];
-
-        foreach ($estates as $e) {
-            // Get the contracts for each estate
-            $es = Estate::where('id', $e)->first();
-
-            $estateContracts[$e] = [
-                'estate_id' => $es->id,
-                'form_payment' => $es->form_amount,
-                'contracts' => $es->contracts($customer_id)
-            ];
-        }
-
-        $form_payment = [];
-
-        foreach ($estateContracts as $contract) {
-
-            $contract['i_form_payment'] = [];
-            $s_ids = array_intersect($contract['contracts'], $ids);
-            if (array_diff($contract['contracts'], $ids)) {
-                $dif = (count($contract['contracts']) - count(array_diff($contract['contracts'], $ids)));
-                $contract['i_form_payment']['form_amount'] = $dif *  $contract['form_payment'];
-            } else {
-                $contract['i_form_payment']['form_amount'] = $contract['form_payment'];
-            }
-
-            $contract['i_form_payment']['contracts'] =  array_values($s_ids);
-            $form_payment[$contract['estate_id']] = $contract['i_form_payment'];
-        }
-
-        $amount = array_sum(array_column($form_payment, 'form_amount'));
-        return [
-            'form_payment' => $amount,
-            'explanation' => $form_payment
-        ];
+        // Expects an array of estate ids with their sub array of contract ids
+        $amount = Estate::where('id', $estate_id)->first()->form_amount;
+        return $amount;
     }
+
+    public function generateTransactionId($prefix=null){
+        if(!empty($prefix)){
+            return  $prefix.'-' . time() . rand(1111111111, 9999999999);
+        }else{
+            return  time() . rand(1111111111, 9999999999);
+        }
+    }
+    // public function generateFormPayment(array $contract_ids, $customer_id)
+    // {
+    //     $contracts = [];
+    //     $ids = [];
+    //     $estates = [];
+
+    //     foreach ($contract_ids as $contract_id) {
+    //         // Get estates
+    //         $est = CustomerContract::select('estate_id')->where('id', $contract_id)
+    //             ->where('customer_id', $customer_id)
+    //             ->where('company_id', $this->sessionDetails('company_id'))->value('estate_id');
+
+    //         if (!empty($est)) {
+    //             $estates[] = $est;
+    //             $ids[] = $contract_id;
+    //         }
+    //     }
+
+    //     $estateContracts = [];
+
+    //     foreach ($estates as $e) {
+    //         // Get the contracts for each estate
+    //         $es = Estate::where('id', $e)->first();
+
+    //         $estateContracts[$e] = [
+    //             'estate_id' => $es->id,
+    //             'form_payment' => $es->form_amount,
+    //             'contracts' => $es->contracts($customer_id)
+    //         ];
+    //     }
+
+    //     $form_payment = [];
+
+    //     foreach ($estateContracts as $contract) {
+
+    //         $contract['i_form_payment'] = [];
+    //         $s_ids = array_intersect($contract['contracts'], $ids);
+    //         if (array_diff($contract['contracts'], $ids)) {
+    //             $dif = (count($contract['contracts']) - count(array_diff($contract['contracts'], $ids)));
+    //             $contract['i_form_payment']['form_amount'] = $dif *  $contract['form_payment'];
+    //         } else {
+    //             $contract['i_form_payment']['form_amount'] = $contract['form_payment'];
+    //         }
+
+    //         $contract['i_form_payment']['contracts'] =  array_values($s_ids);
+    //         $form_payment[$contract['estate_id']] = $contract['i_form_payment'];
+    //     }
+
+    //     $amount = array_sum(array_column($form_payment, 'form_amount'));
+    //     return [
+    //         'form_payment' => $amount,
+    //         'explanation' => $form_payment
+    //     ];
+    // }
 
     public function generateStaffId($date_of_employment = null, $internal = false)
     {
@@ -446,7 +460,6 @@ class Controller extends BaseController
         $job_information_max_percent = 15;
         $others_max_percent = 85;
 
-        $additional_details = !empty($user->additional_details) ? $user->additional_details : [];
         $nok_details = !empty($user->next_of_kin) ? Auth::user()->next_of_kin : [];
 
         $job_information = [
@@ -563,26 +576,31 @@ class Controller extends BaseController
         return $input;
     }
 
-    public function getFormRequestContractDetails($forms, $modify = false, $reason = '')
+    public function formatResponseForm($forms, $modify = false, $reason = '')
     {
-
-        $forms->next_of_kin_information = !empty($forms->next_of_kin_information) ? json_decode($forms->next_of_kin_information, true) : [];
-
-        $means_of_identification = !empty($forms->means_of_identification) ? json_decode($forms->means_of_identification, true) : [];
-
-        $means_of_identification['passport_photo'] = isset($means_of_identification['passport_photo']) && !empty($means_of_identification['passport_photo']) ? $this->encodeGeneralUploadedFile($means_of_identification['passport_photo']) : null;
-        $means_of_identification['id_card'] = isset($means_of_identification['id_card']) && !empty($means_of_identification['id_card']) ? $this->encodeUploadedFile($means_of_identification['id_card']) : null;
-        $means_of_identification['signature'] = isset($means_of_identification['signature']) && !empty($means_of_identification['signature']) ? $this->encodeUploadedFile($means_of_identification['signature']) : null;
-        $forms->means_of_identification = $means_of_identification;
-
+        $userDetails = $forms->customer->user;
+        $customerDetails = $forms->customer;
+        $next_of_kin = !empty($customerDetails->next_of_kin) ? json_decode($customerDetails->next_of_kin, true) : [];
+       
+        // Get contracts in prospoect and attach to response form
+        $prospectContracts = CustomerContract::
+        where('status', 'prospect')
+        ->where('customer_id', $forms->customer_id)
+        ->where('company_id', $this->sessionDetails('company_id'))
+        ->orderBy('estate_id','DESC')
+        ->get();
+       
         $contract_details = [];
 
-        $contract_ids = (isset($forms->contract_ids) && !empty($forms->contract_ids)) ? json_decode($forms->contract_ids, true) : null;
-
-        if (!empty($contract_ids)) {
-            foreach ($contract_ids as $value) {
-                $contract = CustomerContract::with('customer', 'property_type_details:type,id,estate_price,settings_and_excavation,infrastructural_fee', 'city:name,id', 'estate:name,id', 'location:name,id', 'building_type:id,name', 'plot_size:id,size', 'plotSize:id,size')->where('customer_id', $forms->customer_id)->where('id', $value)->where('company_id', $this->sessionDetails('company_id'))->select(['id', 'customer_id', 'primary_marketer_id', 'property_type_id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'subscribers', 'contract_type', 'property_type_id', 'form_approval_status', 'transaction_date', 'reason', 'created_at'])->first();
-
+        if(!$prospectContracts){
+            return $contract_details;
+        }    
+        if (!empty($prospectContracts)) {
+            foreach ($prospectContracts as $contract) {
+                if(!$contract){
+                    return [];
+                }
+              
                 if (!empty($contract->form_payment_status) && $contract->form_payment_status == 'paid') {
                     if ($modify && $modify == 'approve_contract') {
                         $this->approveCustomerContract($contract);
@@ -592,10 +610,9 @@ class Controller extends BaseController
                 if ($modify && $modify == 'decline_contract') {
                     $this->declineCustomerContract($contract, $reason);
                 }
-
+             
                 $contract_details[] = [
                     'id' => $contract->id,
-
                     'customer_id' => $contract->customer_id,
                     'subscribers' => !empty($contract->subscribers) ? json_decode($contract->subscribers) : '',
                     'contract_type' => $contract->contract_type,
@@ -611,11 +628,14 @@ class Controller extends BaseController
                     // 'discount' => number_format((float) $contract->discount),
                     'transaction_date' => $contract->transaction_date,
                     'primary_marketer' => $contract->primaryMarketer($contract),
-                    'settings_and_escavation' => $contract->property_type_details->settings_and_excavation
+                    'settings_and_escavation' => $contract->property_type_details->settings_and_excavation,
+                    'contract_name' => $contract->contract_name,
+                    // 'form_amount_paid' => $contract->form_amount_paid,
+                    'form_payment_status' => $contract->form_payment_status,
                 ];
             }
         }
-
+        
         return $contract_details;
     }
 
@@ -636,11 +656,12 @@ class Controller extends BaseController
 
     public function generateFormPaymentReceipt($payment)
     {
-        $name = $this->generateReceiptNumber($payment) . '_' . $payment->id;
+        $name = $payment->transaction_id;
         $data['receipt_no'] = $name;
         $pathToSave = $this->getPathToSaveFile('receipts') . '/' . $name . '.pdf';
         
-        $pdf = PDF::loadView('receipts.template1', compact('payment', 'data'))->setPaper('a4', 'portrait');
+        $pdf = PDF::loadView('receipts.form-payment', compact('payment', 'data'))->setPaper('a4', 'portrait');
+        
         file_put_contents(base_path() . '/' . config('app.upload_path') . '/' . $pathToSave, $pdf->output());
         // Rmember to create a public folder in the root directory if there is a PDF error
 

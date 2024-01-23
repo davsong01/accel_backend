@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ChartOfAccount;
 use App\Models\Transaction;
 use App\Models\User;
+use App\Services\LogService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -25,7 +26,7 @@ class FinanceController extends Controller
      */
     public function GLAccountTransactions(ChartOfAccount $account): JsonResponse
     {
-        $transactions = $account->payments()->paginate(20);
+        $transactions = $account->payments()->with(['staff:id,user_id,account_name,account_number'])->paginate(20);
         return response()->json(['message' => 'Success', 
         'data' => [
             'account' => $account->load(['account_category', 'account_type']),
@@ -61,7 +62,7 @@ class FinanceController extends Controller
             'account_id' => 'required|exists:chart_of_accounts,id',
             'amount' => 'required|numeric',
             'created_at' => 'date|before:tomorrow',
-            'payment_slip' => 'file',
+            'payment_slip' => 'file|mimetypes:image/*,application/pdf',
             'description' => 'string',
         ]);
 
@@ -75,6 +76,7 @@ class FinanceController extends Controller
         $attributes = $validator->validated();
 
         $transaction = $this->createTransaction($attributes);
+        LogService::admin(auth()->user()->id, $request->customer_id, 'New transaction entry', 'CREATE');
         return response()->json(['message' => 'success', 'data' => $transaction], 200);
     }
 
@@ -101,6 +103,17 @@ class FinanceController extends Controller
 
         $transactions = $query->latest()->paginate(20);
         return response()->json(['message' => 'success', 'data' => $transactions], 200);
+     }
+
+    /**
+     * Search/filter GL Ledger
+     * 
+     */
+     public function showGLLedger(Transaction $transaction){ 
+
+        $transaction->load(['account', 'staff:id,user_id', 'staff.user:id,first_name,middle_name,last_name', 'customer:id,user_id', 'customer.user:id,status,type,first_name,middle_name,last_name']);
+
+        return response()->json(['message' => 'success', 'data' => $transaction], 200);
      }
 
 }

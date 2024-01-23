@@ -113,6 +113,7 @@ class SelfServiceController extends Controller
     public function myWorkProfile()
     {
         $sController = new StaffController();
+ 
         return $sController->getSingleStaffProfile(Auth::user()->staff->id, 'internal');
     }
 

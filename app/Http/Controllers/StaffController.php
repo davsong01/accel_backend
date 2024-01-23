@@ -293,7 +293,7 @@ class StaffController extends Controller
         } else {
             $staff = Staff::where('id', $request->staff_id)->where('company_id', $this->sessionDetails('company_id'))->first();
             $user = $staff->user;
-            $updateUser = Arr::only($data, ['email', 'additional_details', 'first_name', 'middle_name', 'last_name', 'username', 'phone_number', 'gender', 'next_of_kin', 'branch_id', 'date_of_birth']);
+            $updateUser = Arr::only($data, ['email','first_name', 'middle_name', 'last_name', 'username', 'phone_number', 'gender', 'next_of_kin', 'branch_id', 'date_of_birth']);
             $updateStaff = Arr::only($data, ['jobtype_id', 'date_of_employment', 'department_id', 'jobrole_id', 'commission_id', 'bank_id', 'pfa_id', 'account_name', 'account_name', 'account_number', 'sort_code', 'swift_code', 'nhf_number']);
 
             $user->update($updateUser);
@@ -319,7 +319,7 @@ class StaffController extends Controller
             ->leftjoin("job_roles", "staff.jobrole_id", "=", "job_roles.id")
             ->leftjoin("branches", "users.branch_id", "=", "branches.id")
             ->leftjoin("departments", "staff.department_id", "=", "departments.id")
-            ->select("users.status", "staff.created_at", "users.first_name", "users.username", "users.last_name", "users.email", "staff.id AS staff_id", "users.type", "users.company_id", "staff.jobtype_id", "users.id AS user_id", "staff.date_of_employment", "branches.id AS branch_id", "branches.name AS branch_name", "departments.id AS department_id", "departments.name AS department_name", "job_roles.id AS job_role_id", "job_roles.name AS job_role_name", "job_types.id AS job_type_id", "job_types.name AS job_type_name", "users.additional_details", "users.next_of_kin", "users.date_of_birth", "bank_id", "pfa_id", "account_name", "account_number", "sort_code", "swift_code")
+            ->select("users.status", "staff.created_at", "users.first_name", "users.username", "users.last_name", "users.email", "staff.id AS staff_id", "users.type", "users.company_id", "staff.jobtype_id", "users.id AS user_id", "staff.date_of_employment", "branches.id AS branch_id", "branches.name AS branch_name", "departments.id AS department_id", "departments.name AS department_name", "job_roles.id AS job_role_id", "job_roles.name AS job_role_name", "job_types.id AS job_type_id", "job_types.name AS job_type_name", "users.next_of_kin", "users.date_of_birth", "bank_id", "pfa_id", "account_name", "account_number", "sort_code", "swift_code")
             ->first();
 
         if (!$staff) {
@@ -586,42 +586,45 @@ class StaffController extends Controller
 
     public function getSingleStaffProfile($staff_id, $internal = null)
     {
-        $staff = Staff::with('roles')->where(['staff.id' => $staff_id])
-            ->leftjoin("users", "staff.user_id", "=", "users.id")->where(['users.status' => 'active', 'type' => 'staff'])
-            ->leftjoin("job_types", "staff.jobtype_id", "=", "job_types.id")
-            ->leftjoin("job_roles", "staff.jobrole_id", "=", "job_roles.id")
-            ->leftjoin("branches", "staff.branch_id", "=", "branches.id")
-            ->leftjoin("departments", "staff.department_id", "=", "departments.id")
-            ->leftjoin("commissions", "staff.commission_id", "=", "commissions.id")
-            ->select("staff.id AS staff_id", "users.status", "users.staff_id as employee_id", "staff.created_at", "users.first_name", "users.username", "users.last_name", "users.middle_name", "users.avatar", "users.phone_number", "users.email", "staff.id AS staff_id", "users.type", "users.company_id", "staff.jobtype_id", "users.id AS user_id", "staff.date_of_employment", "staff.branch_id AS branch_id", "branches.name AS branch_name", "departments.id AS department_id", "departments.name AS department_name", "job_roles.id AS job_role_id", "job_roles.name AS job_role_name", "job_types.id AS job_type_id", "job_types.name AS job_type_name", "users.additional_details", "users.next_of_kin", "users.date_of_birth AS date_of_birth", "users.gender", "staff.commission_id AS commission_id", "commissions.name AS commission_name", "commissions.percentage",)
-            ->first();
+        $staff = Staff::with(['job_type','department','roles', 'job_role','user'=>function($query){
+            $query->where('type', 'staff')->where('status', 'active');
+        }])->first();
 
-
+       
+        // ->leftjoin("users", "staff.user_id", "=", "users.id")->where(['users.status' => 'active', 'type' => 'staff'])
+        //     ->leftjoin("job_types", "staff.jobtype_id", "=", "job_types.id")
+        //     ->leftjoin("job_roles", "staff.jobrole_id", "=", "job_roles.id")
+        //     ->leftjoin("branches", "staff.branch_id", "=", "branches.id")
+        //     ->leftjoin("departments", "staff.department_id", "=", "departments.id")
+        //     ->leftjoin("commissions", "staff.commission_id", "=", "commissions.id")
+        //     ->select("staff.id AS staff_id", "users.status", "users.staff_id as employee_id", "staff.created_at", "users.first_name", "users.username", "users.last_name", "users.middle_name", "users.avatar", "users.phone_number", "users.email", "staff.id AS staff_id", "users.type", "users.company_id", "staff.jobtype_id", "users.id AS user_id", "staff.date_of_employment", "staff.branch_id AS branch_id", "branches.name AS branch_name", "departments.id AS department_id", "departments.name AS department_name", "job_roles.id AS job_role_id", "job_roles.name AS job_role_name", "job_types.id AS job_type_id", "job_types.name AS job_type_name", "users.next_of_kin", "users.date_of_birth AS date_of_birth", "users.gender", "staff.commission_id AS commission_id", "commissions.name AS commission_name", "commissions.percentage",)
+        //     ->first();
+       
         $profile_completenes = $this->profileCompletenes($staff);
-        $additional_details = !empty($staff->additional_details) ? json_decode($staff->additional_details, true) : [];
-        $next_of_kin = !empty($staff->next_of_kin) ? json_decode($staff->next_of_kin, true) : [];
-
+    
+        // $additional_details = !empty($staff->additional_details) ? json_decode($staff->additional_details, true) : [];
+        $next_of_kin = $staff->user->next_of_kin;
+       
         $time = Carbon::parse($staff->date_of_employment)->diff(Carbon::now());
         $time_in_company = ($time->y > 0 ? $time->y . ($time->y > 1 ? 'years, ' : 'year, ') : '') .  ($time->m > 0 ? ($time->m > 1 ? $time->m . ' months' : $time->m . ' month') : 'Less than a month');
         $my_anniversary = Carbon::parse($staff->date_of_employment)->format('jS\\, F');
-        $data['staff_id'] = $staff->staff_id;
-        $data['employee_id'] = $staff->employee_id;
+        $data['staff_id'] = $staff->user->staff_id;
+        // $data['employee_id'] = $staff->employee_id;
         $data['profile_completenes'] = $profile_completenes;
 
         $employment_date = $staff->date_of_employment ? date("jS\\, F Y", strtotime($staff->date_of_employment)) : '';
-        $date_of_birth = $staff->date_of_birth ? date("jS\\, F Y", strtotime($staff->date_of_employment)) : '';
-
+        $date_of_birth = $staff->user->date_of_birth ? date("jS\\, F Y", strtotime($staff->user->date_of_birth)) : '';
         $data['job_information'] = [
-            'job_type' => [
-                'id' => $staff->job_type_id ?? '',
-                'name' => $staff->job_type_name ?? '',
+            'jobtype' => [
+                'id' => $staff->job_type->id ?? '',
+                'name' => $staff->job_type->name ?? '',
             ],
             'employment_date' => $employment_date,
             'time_in_company' => $time_in_company,
             'work_anniversary' => $my_anniversary,
             'department' => [
-                'id' => $staff->department_id ?? '',
-                'name' => $staff->department_name ?? ''
+                'id' => $staff->department->id ?? '',
+                'name' => $staff->department->name ?? ''
             ],
             'job_role' => [
                 'id' => $staff->job_role_id ?? '',
@@ -636,29 +639,39 @@ class StaffController extends Controller
                 'name' => $staff->branch_name ?? '',
             ]
         ];
-
+       
         $data['personal_information'] = [
-            'first_name' => $staff->first_name ?? '',
-            'middle_name' => $staff->middle_name ?? '',
-            'last_name' => $staff->last_name ?? '',
+            'first_name' => $staff->user->first_name ?? '',
+            'middle_name' => $staff->user->middle_name ?? '',
+            'last_name' => $staff->user->last_name ?? '',
             'username' => $staff->user->username ?? '',
             'email' => $staff->user->email ?? '',
             'phone_number' => $staff->user->phone_number ?? '',
             'gender' => $staff->user->gender ?? '',
-            'marital_status' => $additional_details['marital_status'] ?? '',
+            'marital_status' => $staff->user->marital_status ?? '',
             'dob' => $date_of_birth,
-            'avatar' => !empty($staff->avatar) ? $this->encodeGeneralUploadedFile($staff->avatar) : '',
+            'avatar' => !empty($staff->user->avatar) ? $this->encodeGeneralUploadedFile($staff->user->avatar) : '',
         ];
 
         $data['contact_and_additional_information'] = [
-            'residential_address' => $additional_details['residential_address'] ?? '',
-            'alternate_email' => $additional_details['alternate_email'] ?? '',
-            'alternate_number' => $additional_details['alternate_number'] ?? '',
-            'state' => !empty($additional_details['state']) ? $this->getStateDetails($additional_details['state']) : '',
-            'lga' => !empty($additional_details['lga']) ? $this->getLgaDetails($additional_details['lga']) : '',
-            'nationality' => !empty($additional_details['nationality']) ? $this->getCountryDetails($additional_details['nationality']) : '',
-        ];
+            'residential_address' => $staff->user->residential_address ?? '',
+            'alternate_email' => $staff->user->alternate_email ?? '',
+            'alternate_number' => $staff->user->alternate_number ?? '',
+            'state' => [
+                'id' => $staff->user->state-> id ?? null,
+                'name' => $staff->user->state->name ?? null
+            ],
+            'lga' => [
+                'id' => $staff->user->lga->id ?? null,
+                'name' => $staff->user->lga-> name ?? null
+            ],
 
+            'nationality' => [
+                'id' => $staff->user->country->id ?? null,
+                'name' => $staff->user->country-> name ?? null
+            ],
+        ];
+       
         $data['next_of_kin_information'] = [
             'first_name' => $next_of_kin['nok_first_name'] ?? '',
             'last_name' => $next_of_kin['nok_last_name'] ?? '',

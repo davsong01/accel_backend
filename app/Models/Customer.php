@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Payment;
 use App\Models\Property;
 use App\Models\Transaction;
+use App\Models\CustomerForm;
 use App\Models\CustomerRole;
 use App\Models\CustomerContract;
 use App\Models\CustomerProperty;
@@ -67,6 +68,32 @@ class Customer extends Model
     public function transactions()
     {
         return $this->hasMany(Transaction::class, 'customer_id');
+    }
+
+    public function response_form()
+    {
+        return $this->hasOne(CustomerForm::class, 'customer_id');
+    }
+
+    protected function idCard(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string $value = null) => !empty($value) ? app('App\Http\Controllers\Controller')->encodeGeneralUploadedFile($value) : '',
+        );
+    }
+
+    protected function signature(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string $value = null) => !empty($value) ? app('App\Http\Controllers\Controller')->encodeGeneralUploadedFile($value) : '',
+        );
+    }
+
+    public function getNextOfKinAttribute()
+    {
+        $next_of_kin = !empty($this->attributes['next_of_kin']) ? json_decode($this->attributes['next_of_kin'], true) : [];
+
+        return $next_of_kin;
     }
 
 }

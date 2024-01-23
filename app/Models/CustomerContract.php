@@ -13,15 +13,17 @@ use App\Models\GeneratedLegalDocument;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\EstatePropertyTypeDetails;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\SoftDeletes; 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class CustomerContract extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
     protected $table = 'customer_contracts';
     protected $guarded = [];
-    protected $appends = ['form_amount_paid','form_payment_status','contract_name'];
+    protected $appends = ['form_payment_status','contract_name'];
+    protected $prepends = ['contract_name'];
 
     public function customer(){
         return $this->belongsTo(Customer::class, 'customer_id');
@@ -30,6 +32,11 @@ class CustomerContract extends Model
     public function location()
     {
         return $this->belongsTo(Location::class);
+    }
+
+    public function form_transactions()
+    {
+        return $this->hasMany(Transaction::class, 'transaction_id','form_payment_transaction_id' );
     }
 
     public function estate()
@@ -73,27 +80,17 @@ class CustomerContract extends Model
         return $this->belongsTo(EstatePropertyTypeDetails::class, 'property_type_id');
     }
 
-    
     public function getFormPaymentStatusAttribute()
     {
-        $payment = Transaction::where('customer_contract_ids', $this->id)->first();
+        $payment = Transaction::where('transaction_id', $this->form_payment_transaction_id)->first();
+        
         if($payment){
             return 'paid';
         }else{
             return 'unpaid';
-        }
-       
+        }  
     }
 
-    public function getFormAmountPaidAttribute()
-    {
-        $payment = Transaction::where('customer_contract_ids', $this->id)->first();
-        if ($payment) {
-            return number_format((float) $payment->amount);
-        } else {
-            return 0;
-        }
-    }
 
     public function getContractNameAttribute(){
         $name = '';
@@ -104,11 +101,11 @@ class CustomerContract extends Model
         }
 
         if ($this->property_type == 'land') {
-            if(isset($this->plot_size_details->size) && isset($this->building_type_details->name) && isset($this->estate->name)){
-                $name = $this->plot_size_details->size . ' - ' . $this->building_type_details->name . ' - ' . $this->estate->name;
+            if(isset($this->plot_size_details->size) || isset($this->building_type_details->name) || isset($this->estate->name)){
+                $name = $this->plot_size_details->size ?? null . ' - ' . $this->building_type_details->name . ' - ' . $this->estate->name;
             }
         }
-
+        
         return $name;
 
     }

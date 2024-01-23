@@ -101,7 +101,7 @@ class MessageTransactionController extends Controller
 
     public function getMessageContent($data){
         $company_setting = CompanySetting::where('company_id', $this->sessionDetails('company_id'))->first();
-        
+        $url = $company_setting->website;
         $button_style = "background: ".$company_setting->primary_color. ";text-decoration: none; padding: 10px;color: white;border: none;color: white;border-radius: 5px;";
         $all = [];
         $content = "";
@@ -115,7 +115,7 @@ class MessageTransactionController extends Controller
                 if(!empty($content)){
                     $content .= $content;
                 }else{
-                    $content .= 'Hello, your password reset link is: ' . url('/') . '/reset-password?token=' . $data['token'];
+                    $content .= 'Hello, your password reset link is: ' . $url . '/reset-password?token=' . $data['token'];
                 }
             }else{
                 $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'email')->where('type', 'password-reset')->first();
@@ -125,11 +125,26 @@ class MessageTransactionController extends Controller
                 $subject = $subject ?? 'Password Reset Link';
                 $content .= $content ?? '<strong>Dear ' . $data['name'] . ', </strong><br><br>
                 <div>
-                <p style="text-align:justify !important">You asked for a password RESET mail on '.$this->sessionDetails('company_name'). '. Please click the button below to reset your password. Thank you <br><br><a href="' . url('/') . '/reset-password?token=' . $data['token'] . '"><button style="background: green;text-decoration: none;padding: 10px;color: white;">RESET PASSWORD</button></a></p>
+                <p style="text-align:justify !important">You asked for a password RESET mail on '.$this->sessionDetails('company_name'). '. Please click the button below to reset your password. Thank you <br><br><a href="' . $url . '/reset-password?token=' . $data['token'] . '"><button style="background: green;text-decoration: none;padding: 10px;color: white;">RESET PASSWORD</button></a></p>
                 </div>';
             }
         }
 
+        if ($data['type'] == 'nudge.customer') {
+            if (isset($data['medium']) && $data['medium'] == 'sms') {
+                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'sms')->where('type', ' nudge.customer')->first();
+            }else {
+                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'email')->where('type', ' nudge.customer')->first();
+                $subject = $email_template->subject ?? null;
+                $content = $email_template->content ?? '<strong>Dear ' . $data['name'] . ',</strong><br><br>
+                <div><p style="text-align:justify !important">Please login to fill your application form: <br><br>
+                Email: ' . $data['email'] . '<br>
+                Customer ID: ' . $data['customerId'] . '<br>
+                Password: ' . '123456789' . '<br><br> Please click the login button below to login to your personalized dashboard using your email/customer ID and your password. Thank you <br><br><a href="' . $url . '/customer-login"><button style="' . $button_style . '">LOGIN</button></a></p>
+                </div>';
+            }
+        }
+    
         if ($data['type'] == 'staff.store') {
             if (isset($data['medium']) && $data['medium'] == 'sms') {
                
@@ -142,7 +157,7 @@ class MessageTransactionController extends Controller
                 Last Name: ' . $data['user']['last_name'] . '<br>
                 Email: ' . $data['user']['email'] . '<br>
                 Staff Id: ' . $data['user']['staff_id'] . '<br>
-                Password: ' . '123456789' . '<br><br> Please click the login button below to login to your personalized dashboard using your email/staff Id and password above. Thank you <br><br><a href="' . url('/') . '"><button style="'.$button_style.'">LOGIN</button></a></p>
+                Password: ' . '123456789' . '<br><br> Please click the login button below to login to your personalized dashboard using your email/staff Id and password above. Thank you <br><br><a href="' . $url . '"><button style="'.$button_style.'">LOGIN</button></a></p>
                 </div>';
             }
         }
@@ -291,17 +306,26 @@ class MessageTransactionController extends Controller
             if (isset($data['medium']) && $data['medium'] == 'sms') {
             } else {
                 $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'email')->where('type', 'form.payment')->first();
-                $subject = $email_template->subject ?? null;
-                $content = $email_template->content ?? null;
-
-                $subject = $subject ?? 'Receipt for Form payment';
-                $content .= $content ?? '<strong>Dear ' . $data['name'] . ',</strong><br>
+                $subject = $email_template->subject ?? 'Receipt for Form payment';
+                $content = $email_template->content ?? '<strong>Dear ' . $data['name'] . ',</strong><br>
                 <div>
                 <p style="text-align:justify !important">We appreciate your business with ${Company Name}. Attached is the receipt for your records.<br><br>If you have any questions or concerns, feel free to reach out to our customer support.<br><br>Best regards,<br><br>'. $this->sessionDetails('company_name').'</p>
                 </div>';
             }
         }
-        
+
+        if ($data['type'] == 'contract.payment') {
+            if (isset($data['medium']) && $data['medium'] == 'sms') {
+            } else {
+                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'email')->where('type', 'contract.payment')->first();
+                $subject = $email_template->subject ?? 'Payment Confirmation';
+                $content = $email_template->content ?? '<strong>Dear ' . $data['name'] . ',</strong><br>
+                <div>
+                <p style="text-align:justify !important">We are delighted to inform you that your first installment payment for your chosen property has been successfully processed. Congratulations on taking the initial step towards property ownership with '. $this->sessionDetails('company_name') . '.<br><br>You will receive a separate email with an official receipt for your first and subsequent installment payments. <br><br>Please visit our office to pick up your Provisional Allocation Letter, and if you have any questions, do not hesitate to contact our support team/contact person.<br><br>We look forward to creating a rewarding experience for you as a property owner.<br><br>Best regards,<br><br>' . $this->sessionDetails('company_name') . '</p>
+                </div>';
+            }
+        }
+
         return [
             'subject' => $subject,
             'content' => $content,

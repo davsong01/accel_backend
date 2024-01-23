@@ -21,32 +21,42 @@ class CustomerFormController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request, $id = null, $paginate = true)
+    public function index(Request $request, $id = null, $customer_id = null)
     {
+        // Returns customer details and contract details for admin
+        $forms = CustomerForm::with(['customer'])->where('company_id', $this->sessionDetails('company_id'));
+        
+        if (\Request::route()->getPrefix() == 'api/customer') {
 
+            if(Auth::check() ){
+                $customer_id = Auth::user()->customer->id ?? null;
+                $forms = $forms->where('customer_id', $customer_id)->first();
+                
+                $forms->contract_details = $this->formatResponseForm($forms);
+            }
+            return response()->json(['message' => 'Successfully retrieved', 'data' => $forms], 200);
+        }
+        
         if (!empty($id)) {
-            $forms = CustomerForm::with(['country:id,name', 'state:id,name', 'lga:id,name'])->where('id', $id)->where('company_id', $this->sessionDetails('company_id'))->select('surname', 'title', 'status', 'customer_form_status', 'no_of_contract', 'first_name', 'middle_name', 'last_name', 'gender', 'created_at', 'id', 'marital_status', 'date_of_birth', 'country_id', 'state_id', 'lga_id', 'next_of_kin_information', 'means_of_identification', 'primary_marketer', 'contract_ids', 'other_details', 'customer_id')->first();
+            $forms = $forms->where('id', $id)->first();
 
             if ($forms) {
-                $forms->contract_details = $this->getFormRequestContractDetails($forms);
-                $forms->other_details = !empty($forms->other_details) ? json_decode($forms->other_details, true) : [];
+                $forms->contract_details = $this->formatResponseForm($forms);
             }
 
             return response()->json(['message' => 'Successfully retrieved', 'data' => $forms], 200);
-        }
 
-        $forms = CustomerForm::where('company_id', $this->sessionDetails('company_id'));
+        }
 
         if (!empty($request->type)) {
-            $forms = $forms->where('type', $request->type);
+            if($request->type == 'form2-request'){
+                // $forms = $forms->where('type', $request->type)->where('customer_form_status', 'approved');
+                $forms = $forms->where('type', $request->type)->where('customer_form_status', 'approved');
+            }else{
+                $forms = $forms->where('type', $request->type);
+            }
         }
-        
-        $forms = $forms->select('surname', 'title', 'status', 'customer_form_status', 'no_of_contract', 'first_name', 'middle_name', 'last_name', 'gender', 'created_at', 'id', 'means_of_identification', 'other_details');
-
-        if (\Request::route()->getPrefix() == 'api/customer') {
-            $forms = $forms->where('customer_id', Auth::user()->customer->id);
-        }
-
+       
         if (!empty($request->status)) {
             $forms = $forms->where('status', $request->status);
         }
@@ -58,11 +68,9 @@ class CustomerFormController extends Controller
         }
 
         foreach ($forms as $form) {
-            $means_of_identification = !empty($form->means_of_identification) ? json_decode($form->means_of_identification, true) : [];
-            $form['passport_photo'] = !empty($means_of_identification) && isset($means_of_identification['passport_photo']) ?  $this->encodeGeneralUploadedFile($means_of_identification['passport_photo']) : "";
-            unset($form['means_of_identification']);
-            unset($form['other_details']);
+            $form->contract_details = $this->formatResponseForm($form);
         }
+
 
         if (!empty($forms)) {
             return response()->json(['message' => 'Successfully retrieved', 'data' => $forms], 200);
@@ -70,7 +78,7 @@ class CustomerFormController extends Controller
             return response()->json(['message' => 'No records found', 'data' => $forms], 200);
         }
     }
-
+    
     /**
      * Show the form for creating a new resource.
      */
@@ -79,11 +87,29 @@ class CustomerFormController extends Controller
         //
     }
 
+    /*****
+     * Nudge customer to re fill customer form
+     */
+
+     public function nudgeCustomer($customer_id){
+        $customer = Customer::with('user')->where('id', $customer_id)->first();
+        $data['type'] = 'nudge.customer';
+        $data['medium'] = 'email';
+        // $data['user'] = Customer::where('id', 'customer_id')->user;
+        $data['name'] = $customer->user->first_name;
+        $data['customerId'] = $customer->user->customerId;
+        $data['email'] = $customer->user->email;
+       
+        $this->logEmail($data);
+
+        return response()->json(['message' => 'Customer nudged successfully', 'data' => []], 200);
+
+     }
 
     public function approveForm2Request($id)
     {
         $customer_form = CustomerForm::with('customer')->where('id', $id)->where('company_id', $this->sessionDetails('company_id'))->where('type', 'form2-request')->first();
-    
+        
         if (!$customer_form) {
             return response()->json(['message' => 'No records found', 'data' => []], 200);
         }
@@ -100,7 +126,7 @@ class CustomerFormController extends Controller
             'form_status' => 'Confirmed',
         ]);
 
-        $data['contract_details'] = $this->getFormRequestContractDetails($customer_form, 'approve_contract');
+        $data['contract_details'] = $this->formatResponseForm($customer_form, 'approve_contract');
 
         $data['type'] = 'formrequest.approve';
         $data['medium'] = 'email';
@@ -144,7 +170,7 @@ class CustomerFormController extends Controller
             'form_status' => 'Unconfirmed',
         ]);
 
-        $data['contract_details'] = $this->getFormRequestContractDetails($customer_form, 'decline_contract', $request->reason);
+        $data['contract_details'] = $this->formatResponseForm($customer_form, 'decline_contract', $request->reason);
 
         $data['type'] = 'formrequest.decline';
         $data['reason'] = $request->reason;
@@ -162,7 +188,7 @@ class CustomerFormController extends Controller
     public function approveCustomerFormResponse($id)
     {
         $customer_form = CustomerForm::with('customer')->where('id', $id)->where('company_id', $this->sessionDetails('company_id'))->where('type', 'customer-response')->first();
-
+        
         if (!$customer_form) {
             return response()->json(['message' => 'No record found', 'data' => []], 200);
         }
@@ -174,7 +200,10 @@ class CustomerFormController extends Controller
             ], 422);
         }
 
-        $customer_form->update(['customer_form_status' => 'approved']);
+        $customer_form->update([
+            'customer_form_status' => 'approved',
+            'type' => 'form2-request'
+        ]);
         
         // $data['contract_details'] = $this->getFormRequestContractDetails($customer_form, 'approve_contract');
 
@@ -213,6 +242,7 @@ class CustomerFormController extends Controller
 
         $customer_form->update([
             'customer_form_status' => 'declined',
+            'type' => 'customer-response'
         ]);
 
         // $customer_form->customer->update([
@@ -241,9 +271,8 @@ class CustomerFormController extends Controller
         if (\Request::route()->getPrefix() == 'api/customer') {
             $request['customer_id'] = auth()->user()->customer->id;
         }
-
+       
         $validator = Validator::make($request->all(), [
-            'title' => 'nullable',
             'surname' => 'nullable',
             'first_name' => 'nullable',
             'middle_name' => 'nullable',
@@ -257,9 +286,9 @@ class CustomerFormController extends Controller
             'house_address' => 'nullable',
             'alternate_number' => 'nullable',
 
-            'lga_id' => 'required|exists:lgas,id',
+            'lga_id' => 'nullable|exists:lgas,id',
             'country_id' => 'required|exists:countries,id',
-            'state_id' => 'required|exists:states,id',
+            'state_id' => 'nullable|exists:states,id',
 
             // Next of kin information
             'nok_first_name' => 'nullable',
@@ -277,14 +306,21 @@ class CustomerFormController extends Controller
             'id_card' => 'nullable|image|max:2048',
             'signature' => 'nullable|image|max:2048',
 
+            // Additional details
+            'title' => 'nullable',
+            "alternate_number" => 'nullable',
+            "alternate_email" => 'nullable',
+            "residential_address" => 'nullable',
+            "office_address" => 'nullable',
+            "marital_status" => 'nullable',
+
             // 'bypass_approval' => 'nullable',
-            'marital_status' => 'nullable',
             'customer_id' => 'required|exists:customers,id,company_id,' . $this->sessionDetails('company_id'),
 
             // Contracts
             'contract' => 'required',
         ]);
-
+        
         if ($validator->fails()) {
             return response()->json([
                 'error' => $validator->messages()->first(),
@@ -294,9 +330,8 @@ class CustomerFormController extends Controller
 
         $customer_contract_ids = [];
         if (!empty($request->contract)) {
-
             $contracts = $this->cleanJsonInput($request->contract);
-
+            
             foreach ($contracts as $cont) {
                 // Make each contract a request
                 $contract_validator = Validator::make($cont, [
@@ -310,11 +345,10 @@ class CustomerFormController extends Controller
                         })
                     ],
                     // Other details
-                    'property_price' => 'nullable',
-                    'infrastuctural_fee' => 'nullable',
-                    // 'net_property_fee' => 'nullable',
+                    'property_price' => 'nullable|numeric',
+                    'infrastuctural_fee' => 'nullable|numeric',
                     'setting_and_excavation_fee' => 'nullable',
-                    // 'discount' => 'nullable',
+                    'discount' => 'nullable|numeric',
                     'description' => 'nullable',
 
                     // Marketer
@@ -339,11 +373,10 @@ class CustomerFormController extends Controller
                     ], 412);
                 }
 
-
                 $update = $validator->valid();
                 $update['contract'] = $cont;
                 $cont['transaction_date'] = Carbon::parse($request->transaction_date);
-
+                
                 // Update the contract
                 $customer_contract_ids[] = $cont['contract_id'];
                 app('App\Http\Controllers\CustomerContractController')->updateCustomerContract($cont, $cont['contract_id'], $request->customer_id);
@@ -369,8 +402,7 @@ class CustomerFormController extends Controller
             $data['secondary_marketers'] = json_encode($request->secondary_marketers);
         }
 
-
-        // To be used in customer form
+        // Update customer
         $data['next_of_kin_information'] = json_encode([
             'nok_first_name' => $data['nok_first_name'] ?? null,
             'nok_last_name' => $data['nok_last_name'] ?? null,
@@ -380,33 +412,15 @@ class CustomerFormController extends Controller
             'nok_relationship' => $data['nok_relationship'] ?? null,
         ]);
 
-        $data['means_of_identification'] = json_encode([
-            'occupation' => $data['occupation'] ?? null,
-            'place_of_work' => $data['place_of_work'] ?? null,
-            'id_card_type' => $data['id_card_type'] ?? null, // multiple
-            'passport_photo' => $data['passport_photo'] ?? null,
-            'id_card' => $data['id_card'] ?? null,
-            'signature' => $data['signature'] ?? null,
-        ]);
-
-        $data['other_details'] = json_encode([
-            'property_price' => $data['property_price'] ?? null,
-            'infrastuctural_fee' => $data['infrastuctural_fee'] ?? null,
-            'net_property_fee' => $data['net_property_fee'] ?? null,
-            'setting_and_excavation_fee' => $data['setting_and_excavation_fee'] ?? null,
-            'discount' => $data['discount'] ?? null,
-            'description' => $data['description'] ?? null,
-        ]);
-
-        $data['contact_details'] = json_encode([
-            'phone_number' => $data['phone_number'] ?? null,
-            'house_address' => $data['house_address'] ?? null,
-            'alternate_phone_number' => $data['alternate_number'] ?? null,
-        ]);
-
-        // End to be used in customer form
-
         $data['company_id'] = $this->sessionDetails('company_id');
+        $data['date_of_birth'] = Carbon::parse($request->date_of_birth);
+
+        // Update user
+        $customer = Customer::where('id', $data['customer_id'])->first();
+        $user = $customer->user;
+        app('App\Http\Controllers\CustomerContractController')->updateUser($user, $data);
+
+        // Update customer contract
         if (\Request::route()->getPrefix() == 'api/customer') {
             $data['type'] = 'customer-response';
             $data['status'] = 'pending';
@@ -414,29 +428,25 @@ class CustomerFormController extends Controller
             $data['type'] = 'form2-request';
             $data['status'] = 'pending';
         }
-        
-        $data['date_of_birth'] = Carbon::parse($request->date_of_birth);
 
-        // Update user
-        $customer = Customer::where('id', $data['customer_id'])->first();
-        $user = $customer->user;
+        if (\Request::route()->getPrefix() != 'api/customer') {
+            $customer->response_form->update([
+                'customer_form_status' => 'approved',
+            ]);
+        }
 
-        // Update user
-        app('App\Http\Controllers\CustomerController')->updateUser($user, $data);
-        $data['raw'] = json_encode($request->all());
-        $data['contract_ids'] = json_encode($customer_contract_ids);
-        $data['no_of_contract'] = count($customer_contract_ids);
-
-        $data['company_id'] = $this->sessionDetails('company_id');
-
-        $response = Arr::only($data, ['contract_ids', 'customer_id', 'title', 'type', 'status', 'no_of_contract', 'surname', 'first_name', 'middle_name', 'last_name', 'gender', 'date_of_birth', 'marital_status', 'lga_id', 'country_id', 'state_id', 'email_address', 'contact_details', 'next_of_kin_information', 'means_of_identification', 'branch_id', 'other_details', 'primary_marketer', 'secondary_marketers', 'raw', 'company_id', 'no_of_contract', 'contact_details', 'no_of_contracts']);
-
-        CustomerForm::updateOrCreate(
-            ['customer_id' => $response['customer_id'], 'company_id' => $response['company_id']],
-            $response
-        );
-
+        $customer->response_form->update([
+            'type' => $data['type'],
+            'status' => $data['status'],
+        ]);
+        // update customer form status
         $customer->update([
+            'occupation' => $data['occupation'] ?? $customer->occupation,
+            'place_of_work' => $data['place_of_work'] ?? $customer->place_of_work,
+            'id_card_type' => $data['id_card_type'] ?? $customer->id_card_type,
+            'id_card' => $data['id_card'] ?? $customer->id_card,
+            'signature' => $data['signature'] ?? $customer->signature,
+            'office_address' => $data['office_address'] ?? $customer->office_address,
             'form_status' => 'Unconfirmed'
         ]);
 
@@ -448,7 +458,6 @@ class CustomerFormController extends Controller
      */
     public function show(CustomerForm $CustomerForm)
     {
-        // dd($customerForm);
     }
 
     /**

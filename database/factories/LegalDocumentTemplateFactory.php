@@ -25,7 +25,7 @@ class LegalDocumentTemplateFactory extends Factory
             'created_by' => 1,
             // 'legal_document_type_id' => LegalDocumentType::factory()->create()->id,
             // 'property_type_id' => PropertyType::factory()->create()->id,
-            'file_location' => fake()->url()
+            // 'file_location' => fake()->url()
         ];
     }
 }

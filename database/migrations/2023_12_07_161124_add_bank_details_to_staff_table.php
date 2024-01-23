@@ -12,15 +12,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasColumn('staff', 'bank_id','account_name','account_number','sort_code','swift_code','nhf_number','pfa_id')) {
+        if (!Schema::hasColumn('staff', 'bank_id','account_name','account_number','sort_code','swift_code','nhf_number','pfa_id','commission_id')) {
             Schema::table('staff', function (Blueprint $table) {
-                $table->integer('bank_id')->nullable()->after('commission_id');
+                $table->integer('bank_id')->nullable();
                 $table->integer('pfa_id')->nullable();
                 $table->string('account_name')->nullable();
                 $table->string('account_number')->nullable();
                 $table->string('sort_code')->nullable();
                 $table->string('swift_code')->nullable();
                 $table->string('nhf_number')->nullable();
+                $table->integer('commission_id')->nullable();
             });
         }
     }

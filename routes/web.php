@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\MessageTransactionController;
 use App\Mail\MessageTransactionMail;
+use App\Models\CustomerContract;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -29,8 +30,10 @@ Route::get('/testreceipttemplate', function () {
     $data = [];
     $data['company_id'] = 1;
     $data['receipt_no'] = '0001';
-    $payment = App\Models\Transaction::find(24);
-    return view('receipts.template1', compact('data', 'payment'));
+
+    $payment = App\Models\ContractPayment::find(12);
+    $contract = CustomerContract::where('id',165)->first();
+    return view('receipts.template1', compact('data', 'payment','contract'));
 });
 
 Route::get('/cron-process-messages-transaction', [MessageTransactionController::class, 'processMessagesTransaction']);
