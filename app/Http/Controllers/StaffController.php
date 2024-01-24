@@ -46,8 +46,8 @@ class StaffController extends Controller
             ->join("departments", "staff.department_id", "=", "departments.id")
             ->leftjoin("job_roles", "staff.jobrole_id", "=", "job_roles.id")
             ->leftjoin("job_types", "staff.jobtype_id", "=", "job_types.id")
-            ->select("staff.id AS staff_id", "users.id As user_id", "users.status", "staff.created_at", "users.first_name", "users.middle_name", "users.last_name", "users.email", "users.type", "users.company_id", "job_roles.name AS job_role", "job_types.name AS job_type", "departments.name AS department", "users.type", "users.phone_number", "users.gender", "staff.jobtype_id AS jobtype_id", "staff.jobrole_id AS jobrole_id", "staff.department_id AS department_id")->orderBy("staff.created_at", "desc");
-
+            ->select("staff.id AS staff_id", "users.id As user_id", "users.status", "staff.created_at", "users.first_name", "users.middle_name", "users.last_name", "users.email", "users.type", "users.company_id", "job_roles.name AS job_role", "job_types.name AS job_type", "departments.name AS department", "users.type", "users.phone_number", "users.gender","users.avatar", "staff.jobtype_id AS jobtype_id", "staff.jobrole_id AS jobrole_id", "staff.department_id AS department_id")->orderBy("staff.created_at", "desc");
+       
         if (!empty($request->name)) {
             $staff = $staff->where('first_name', 'LIKE', "%{$request->name}%")
                 ->orWhere(function ($staff) use ($request) {
@@ -78,6 +78,10 @@ class StaffController extends Controller
             $staff = $staff->paginate(20)->withQueryString();
         }
 
+        foreach ($staff as $st) {
+            $st->avatar = !empty($st) ? app('App\Http\Controllers\Controller')->encodeGeneralUploadedFile($st) : '';
+        }
+        
         return response()->json(['message' => 'Success', 'data' => $staff], 200);
     }
 
