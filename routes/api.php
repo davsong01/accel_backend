@@ -268,6 +268,9 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('get-se-escavation-setting/{contract}', [ContractPaymentController::class, 'seEscavationSetting']);
         Route::post('allocate-contract', [ContractAllocationController::class, 'allocateContract']);
 
+        Route::get('staff-deals/{staff_id}', [StaffController::class, 'staffDeals']);
+
+
         // Self Service
         Route::group(['prefix' => 'self-service', 'before' => 'self-service'], function () {
             Route::get('dashboard', [SelfServiceController::class, 'dashboard']);

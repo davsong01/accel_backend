@@ -96,14 +96,18 @@ class CustomerContract extends Model
         $name = '';
         if($this->property_type == 'building'){
             if(isset($this->building_type_details->name) && isset($this->estate->name)){
-                $name = $this->building_type_details->name . ' - ' . $this->estate->name;
+                $name = $this->building_type_details->name;
             }
+
+            $name = ' - '.$name.$this->estate->name;
         }
 
         if ($this->property_type == 'land') {
             if(isset($this->plot_size_details->size) || isset($this->building_type_details->name) || isset($this->estate->name)){
-                $name = $this->plot_size_details->size ?? null . ' - ' . $this->building_type_details->name . ' - ' . $this->estate->name;
+                $name = $this->plot_size_details->size ?? null . ' - ' . $this->building_type_details->name . ' - ';
             }
+            $name = $name . ' - ' . $this->estate->name;
+
         }
         
         return $name;
@@ -130,6 +134,13 @@ class CustomerContract extends Model
     }
 
     protected function createdAt(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string $value) => date("Y-m-d", strtotime($value)),
+        );
+    }
+
+    protected function updatedAt(): Attribute
     {
         return Attribute::make(
             get: fn (string $value) => date("Y-m-d", strtotime($value)),

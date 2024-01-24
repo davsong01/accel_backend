@@ -8,6 +8,7 @@ use App\Models\Staff;
 use App\Models\StaffRole;
 use Illuminate\Support\Arr;
 use App\Imports\StaffImport;
+use App\Models\CustomerContract;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
@@ -697,6 +698,26 @@ class StaffController extends Controller
         } else {
             return response()->json(['message' => $res['message'], 'data' => $res['data']], $res['code'] ?? 200);
         }
+    }
+
+    public function staffDeals(Request $request, $staff_id){
+        $deals = CustomerContract::join('customers','customers.id','=','customer_contracts.customer_id')
+        ->join('users','users.id','=','customers.user_id')
+        ->where('primary_marketer_id', $staff_id)->orderBy('customer_contracts.updated_at','desc')
+        ->select('customer_contracts.building_type', 'customer_contracts.estate_id', 'customer_contracts.contract_status','customer_contracts.id','customer_contracts.plot_size', 'customer_contracts.updated_at','customer_contracts.updated_at', 'customer_contracts.created_at','customer_contracts.property_type', 'customer_contracts.primary_marketer_id', 'users.first_name', 'users.middle_name', 'users.last_name');
+ 
+        if(!empty($request->status)){
+            if($request->status == 'open'){
+                $deals = $deals->where('contract_status', '!=','closed');
+            }else{
+                $deals = $deals->where('contract_status','closed');
+            }
+        }
+
+        $deals = $deals->get();
+
+        // $deals = $deals->load('customer.user');
+        return response()->json(['message' => 'Retrieved successfully', 'data' => $deals], 200);    
     }
 
     public function sampleBulkStaff()
