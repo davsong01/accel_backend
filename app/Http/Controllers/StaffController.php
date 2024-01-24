@@ -590,9 +590,9 @@ class StaffController extends Controller
 
     public function getSingleStaffProfile($staff_id, $internal = null)
     {
-        $staff = Staff::with(['job_type','department','roles', 'job_role','user'=>function($query){
+        $staff = Staff::with(['job_type','department','roles', 'job_role'])->whereHas('user', function($query){
             $query->where('type', 'staff')->where('status', 'active');
-        }])->first();
+        })->where('id', $staff_id)->first();
 
        
         // ->leftjoin("users", "staff.user_id", "=", "users.id")->where(['users.status' => 'active', 'type' => 'staff'])
