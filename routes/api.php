@@ -44,6 +44,7 @@ use App\Http\Controllers\ContractPaymentController;
 use App\Http\Controllers\TransactionTypeController;
 use App\Http\Controllers\AdvanceAndClaimsController;
 use App\Http\Controllers\CustomerContractController;
+use App\Http\Controllers\ContractAllocationController;
 use App\Http\Controllers\TransactionPurposeController;
 use App\Http\Controllers\PropertyTypeDetailsController;
 use App\Http\Controllers\AccountClassificationController;
@@ -265,6 +266,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::resource('contract-payment', ContractPaymentController::class);
         Route::post('setting-excavation-payment', [ContractPaymentController::class, 'makeSettingAndEscavationPayment']);
         Route::get('get-se-escavation-setting/{contract}', [ContractPaymentController::class, 'seEscavationSetting']);
+        Route::post('allocate-contract', [ContractAllocationController::class, 'allocateContract']);
 
         // Self Service
         Route::group(['prefix' => 'self-service', 'before' => 'self-service'], function () {

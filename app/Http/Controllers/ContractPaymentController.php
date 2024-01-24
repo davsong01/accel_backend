@@ -311,6 +311,13 @@ class ContractPaymentController extends Controller
         // Get contract
         $contract = CustomerContract::where('id', $request->contract_id)->first();
 
+        if($contract->contract_status != 'allocated'){
+            return response()->json([
+                'error' => 'Please check that the status of this contract is: allocated!',
+                'data' => null,
+            ], 412);
+        }
+
         if ($request->type == 'SE') {
             $fee = $contract->property_type_details->settings_and_excavation;
             $purpose = 'setting_and_escavation';

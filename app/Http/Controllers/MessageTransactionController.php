@@ -176,9 +176,21 @@ class MessageTransactionController extends Controller
             }
         }
 
-        
-    
-        
+        if ($data['type'] == 'allocation.email') {
+            if (isset($data['medium']) && $data['medium'] == 'sms') {
+                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'sms')->where('type', 'allocation.email')->first();
+            } else {
+                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'email')->where('type', 'allocation.email')->first();
+
+                $subject = $email_template->subject ?? 'Congratulations on Completing Your Property Payment';
+                $content = $email_template->content ?? '<strong>Dear ' . $data['name'] . ',</strong><br>
+                <div>
+                <p style="text-align:justify !important">Warmest congratulations! <br><br>We are thrilled to inform you that your final payment for your property has been successfully received, marking an important milestone and officially becoming a property owner with ' . $this->sessionDetails('company_name') . '<br><br>Find attached to this email a copy of your payment receipt. Please visit our office to pick up your Allocation Letter, other documents, timelines, and requirements needed will be communicated on your visit. If you have any questions, please contact our support team/contact person.<br><br>Once again, congratulations on this remarkable achievement.<br><br>Best regards,<br><br>' . $this->sessionDetails('company_name') . '</p>
+                </div>';
+            }
+        }
+
+                
         if ($data['type'] == 'staff.store') {
             if (isset($data['medium']) && $data['medium'] == 'sms') {
                
