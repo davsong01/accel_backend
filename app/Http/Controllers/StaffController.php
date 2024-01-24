@@ -79,7 +79,7 @@ class StaffController extends Controller
         }
 
         foreach ($staff as $st) {
-            $st->avatar = !empty($st) ? app('App\Http\Controllers\Controller')->encodeGeneralUploadedFile($st) : '';
+            $st->avatar = $st->user->avatar;
         }
         
         return response()->json(['message' => 'Success', 'data' => $staff], 200);
@@ -594,7 +594,6 @@ class StaffController extends Controller
             $query->where('type', 'staff')->where('status', 'active');
         })->where('id', $staff_id)->first();
 
-       
         // ->leftjoin("users", "staff.user_id", "=", "users.id")->where(['users.status' => 'active', 'type' => 'staff'])
         //     ->leftjoin("job_types", "staff.jobtype_id", "=", "job_types.id")
         //     ->leftjoin("job_roles", "staff.jobrole_id", "=", "job_roles.id")
@@ -654,9 +653,9 @@ class StaffController extends Controller
             'gender' => $staff->user->gender ?? '',
             'marital_status' => $staff->user->marital_status ?? '',
             'dob' => $date_of_birth,
-            'avatar' => !empty($staff->user->avatar) ? $this->encodeGeneralUploadedFile($staff->user->avatar) : '',
+            'avatar' => $staff->user->avatar,
         ];
-
+       
         $data['contact_and_additional_information'] = [
             'residential_address' => $staff->user->residential_address ?? '',
             'alternate_email' => $staff->user->alternate_email ?? '',
