@@ -708,9 +708,9 @@ class StaffController extends Controller
  
         if(!empty($request->status)){
             if($request->status == 'open'){
-                $deals = $deals->where('contract_status', '!=','closed');
+                $deals = $deals->whereNull('contract_status')->orWhere('contract_status','ongoing');
             }else{
-                $deals = $deals->where('contract_status','closed');
+                $deals = $deals->whereIn('contract_status',['allocated','completed','closed']);
             }
         }
 

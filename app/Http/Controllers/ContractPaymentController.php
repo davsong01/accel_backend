@@ -224,9 +224,10 @@ class ContractPaymentController extends Controller
             // Do something with the commission from contract here
         } catch (\Throwable $th) {
             //throw $th;
+            \Log::info(['File' => 'ContractPaymentController', 'message' => $th->getMessage(), 'Line' => $th->getLine()]);
             $res = [
                 'status' => 'error',
-                'message' => 'An error occurred when making payment for: ' . $contract->contract_name,
+                'message' => 'An error occurred when making payment for: ' . $contract->contract_name. ' Error: '. $th->getMessage(),
             ];
         }
 
