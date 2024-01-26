@@ -16,6 +16,7 @@ return new class extends Migration
                 $table->id();
                 $table->double('amount', 11, 2);
                 $table->double('balance', 11, 2);
+                $table->double('discount_applied', 11, 2);
                 $table->string('transaction_id')->nullable();
                 $table->integer('account_id')->nullable();
                 $table->integer('customer_id')->nullable();
