@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\EstateSettings;
+use App\Services\LogService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Validator;
 
@@ -70,6 +71,7 @@ class EstateSettingController extends Controller
             $estateSettings->update($data);
         }
         
+        LogService::admin(auth()->user()->id, null, 'Update an estate setting form expiry (' . $estateSettings->id .')', 'UPDATE');
         return response()->json(['message' => 'Estate settings updated succesfully', 'data' => null], 200);
     }
 
