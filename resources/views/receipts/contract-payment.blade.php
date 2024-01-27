@@ -4,10 +4,6 @@
 
     $company_id = \Session::get('company_id') ?? 1;
     $companySetting = CompanySetting::where('company_id', $company_id)->first();
-
-    //  <p class="address">{{ $companySetting->address }}</p>
-    //                     {{-- <p class="phone">{{ $companySetting->address }}</p> --}}
-    //                     <span class="web">{{ $companySetting->website }}</span>
 ?>
 
 <!DOCTYPE html>
@@ -198,7 +194,6 @@ ${payment_bank} --}}
       </tbody>
     </table>
   </div>
-
   <div class="information1">
     <table width="100%">
       <tr>
@@ -223,17 +218,19 @@ ${payment_bank} --}}
 
 
     <br /><br />
-    Payment received by
+    Payment received by 
     <strong>{{ $payment->transaction->staff->user->first_name . ' ' . $payment->transaction->staff->user->last_name }}</strong>
     </pre>
         </td>
 
+        @if(isset($payment->branch))
         <td align="right" style="width: 40%; padding-top: 4rem">
           <pre>
                   Branch
                   <strong>{{ $payment->branch->name}}</strong>
                     </pre>
         </td>
+        @endif
       </tr>
     </table>
   </div>

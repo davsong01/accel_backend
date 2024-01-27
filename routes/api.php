@@ -44,6 +44,7 @@ use App\Http\Controllers\ContractPaymentController;
 use App\Http\Controllers\TransactionTypeController;
 use App\Http\Controllers\AdvanceAndClaimsController;
 use App\Http\Controllers\CustomerContractController;
+use App\Http\Controllers\ContractAllocationController;
 use App\Http\Controllers\TransactionPurposeController;
 use App\Http\Controllers\PropertyTypeDetailsController;
 use App\Http\Controllers\AccountClassificationController;
@@ -260,11 +261,16 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('get-pfas', [GeneralController::class, 'getPfas']);
         Route::get('get-currencies', [GeneralController::class, 'getCurrencies']);
         Route::get('nudge-customer/{customer_id}', [CustomerFormController::class, 'nudgeCustomer']);
+        Route::get('nudge-admin/{form_id}', [CustomerFormController::class, 'nudgeAdmin']);
 
         // Contract payments
         Route::resource('contract-payment', ContractPaymentController::class);
         Route::post('setting-excavation-payment', [ContractPaymentController::class, 'makeSettingAndEscavationPayment']);
         Route::get('get-se-escavation-setting/{contract}', [ContractPaymentController::class, 'seEscavationSetting']);
+        Route::post('allocate-contract', [ContractAllocationController::class, 'allocateContract']);
+
+        Route::get('staff-deals/{staff_id}', [StaffController::class, 'staffDeals']);
+
 
         // Self Service
         Route::group(['prefix' => 'self-service', 'before' => 'self-service'], function () {

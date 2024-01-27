@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\JobType;
 use App\Models\StaffRole;
 use Illuminate\Support\Carbon;
+use App\Models\CustomerContract;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\LeaveAndAbsenceManagement;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -84,6 +85,5 @@ class Staff extends Model
     {
         return $this->belongsTo(Pfa::class, 'pfa_id');
     }
-    
 
 }

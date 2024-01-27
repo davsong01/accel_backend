@@ -21,6 +21,8 @@ return new class extends Migration
             $table->integer('account_id')->nullable();
             $table->integer('branch_id')->nullable();
             $table->integer('company_id')->nullable();
+            $table->string('receipt_location')->nullable();
+
             
             $table->timestamps();
         });

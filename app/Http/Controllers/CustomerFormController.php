@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Staff;
 use App\Models\Customer;
 use Illuminate\Support\Arr;
 use App\Models\CustomerForm;
@@ -92,7 +93,7 @@ class CustomerFormController extends Controller
      * Nudge customer to re fill customer form
      */
 
-     public function nudgeCustomer($customer_id){
+    public function nudgeCustomer($customer_id){
         $customer = Customer::with('user')->where('id', $customer_id)->first();
         $data['type'] = 'nudge.customer';
         $data['medium'] = 'email';
@@ -100,12 +101,44 @@ class CustomerFormController extends Controller
         $data['name'] = $customer->user->first_name;
         $data['customerId'] = $customer->user->customerId;
         $data['email'] = $customer->user->email;
-       
+        
         $this->logEmail($data);
 
         return response()->json(['message' => 'Customer nudged successfully', 'data' => []], 200);
 
-     }
+    }
+
+    public function nudgeAdmin($form_id)
+    {
+        $notifiableIds = [1];
+        $form = CustomerForm::where('id', $form_id)->first();
+       
+        $staffs = Staff::whereIn('id',$notifiableIds)->get();
+        
+        foreach($staffs as $staff){
+            $data['type'] = 'nudge.admin';
+            $data['medium'] = 'email';
+            // $data['user'] = Customer::where('id', 'customer_id')->user;
+            $data['name'] = $staff->user->first_name;
+            $data['email'] = $staff->user->email;
+            $data['form'] = $form;
+    
+            $this->logEmail($data);
+            $data = [
+                'title' => 'Your Attention is needed for: '.$form->form_name,
+                'content' => 'Could you please take a moment to look into the form response: ' . $form->form_name,
+                'link' => $this->sessionDetails('company_url') . '/customer-form-response/' . $form->id,
+                'user_type' => 'staff',
+                'staff_id' => $staff->id,
+                'company_id' => $this->sessionDetails('company_id')
+            ];
+
+            $this->notify($data);
+        }
+
+
+        return response()->json(['message' => 'Admin nudged successfully', 'data' => []], 200);
+    }
 
     public function approveForm2Request($id)
     {
@@ -169,7 +202,7 @@ class CustomerFormController extends Controller
         ]);
 
         $customer_form->customer->update([
-            'form_status' => 'Unconfirmed',
+            'form_status' => 'Declined',
         ]);
 
         $data['contract_details'] = $this->formatResponseForm($customer_form, 'decline_contract', $request->reason);
@@ -177,7 +210,6 @@ class CustomerFormController extends Controller
         $data['type'] = 'formrequest.decline';
         $data['reason'] = $request->reason;
         $data['medium'] = 'email';
-        // $data['user'] = Customer::where('id', 'customer_id')->user;
         $data['name'] = $customer_form->first_name ?? '';
         $data['email'] = $customer_form->email_address ?? '';
 
@@ -454,6 +486,34 @@ class CustomerFormController extends Controller
             'office_address' => $data['office_address'] ?? $customer->office_address,
             'form_status' => 'Unconfirmed'
         ]);
+
+        // Log email for admin
+        if (\Request::route()->getPrefix() == 'api/customer') {
+            $notifiableIds = [1];
+            $notify = Staff::whereIn('id', $notifiableIds)->get();
+    
+            foreach($notify as $staff){
+                $data['type'] = 'nudge.admin';
+                $data['medium'] = 'email';
+ 
+                $data['name'] = $staff->user->first_name;
+                $data['email'] = $staff->user->email;
+                $data['form'] = $customer->response_form;
+
+                $this->logEmail($data);
+                $data = [
+                    'title' => 'Your Attention is needed for: ' . $customer->response_form->form_name,
+                    'content' => 'Could you please take a moment to look into the form response: ' . $customer->response_form->form_name,
+                    'link' => $this->sessionDetails('company_url') . '/customer-form-response/' . $customer->response_form->id,
+                    'user_type' => 'staff',
+                    'staff_id' => $staff->id,
+                    'company_id' => $this->sessionDetails('company_id')
+                ];
+
+                $this->notify($data);
+            }
+
+        }
 
         LogService::admin(auth()->user()->id, $customer->user->id, 'Update customer form (' . $customer->response_form->id .')', 'UPDATE');
         return response()->json(['message' => 'Success', 'data' => []], 200);

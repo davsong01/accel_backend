@@ -8,6 +8,7 @@ use App\Models\Staff;
 use App\Models\StaffRole;
 use Illuminate\Support\Arr;
 use App\Imports\StaffImport;
+use App\Models\CustomerContract;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
@@ -47,8 +48,8 @@ class StaffController extends Controller
             ->join("departments", "staff.department_id", "=", "departments.id")
             ->leftjoin("job_roles", "staff.jobrole_id", "=", "job_roles.id")
             ->leftjoin("job_types", "staff.jobtype_id", "=", "job_types.id")
-            ->select("staff.id AS staff_id", "users.id As user_id", "users.status", "staff.created_at", "users.first_name", "users.middle_name", "users.last_name", "users.email", "users.type", "users.company_id", "job_roles.name AS job_role", "job_types.name AS job_type", "departments.name AS department", "users.type", "users.phone_number", "users.gender", "staff.jobtype_id AS jobtype_id", "staff.jobrole_id AS jobrole_id", "staff.department_id AS department_id")->orderBy("staff.created_at", "desc");
-
+            ->select("staff.id AS staff_id", "users.id As user_id", "users.status", "staff.created_at", "users.first_name", "users.middle_name", "users.last_name", "users.email", "users.type", "users.company_id", "job_roles.name AS job_role", "job_types.name AS job_type", "departments.name AS department", "users.type", "users.phone_number", "users.gender","users.avatar", "staff.jobtype_id AS jobtype_id", "staff.jobrole_id AS jobrole_id", "staff.department_id AS department_id")->orderBy("staff.created_at", "desc");
+       
         if (!empty($request->name)) {
             $staff = $staff->where('first_name', 'LIKE', "%{$request->name}%")
                 ->orWhere(function ($staff) use ($request) {
@@ -79,6 +80,10 @@ class StaffController extends Controller
             $staff = $staff->paginate(20)->withQueryString();
         }
 
+        foreach ($staff as $st) {
+            $st->avatar = $st->user->avatar;
+        }
+        
         return response()->json(['message' => 'Success', 'data' => $staff], 200);
     }
 
@@ -598,11 +603,10 @@ class StaffController extends Controller
 
     public function getSingleStaffProfile($staff_id, $internal = null)
     {
-        $staff = Staff::with(['job_type','department','roles', 'job_role','user'=>function($query){
+        $staff = Staff::with(['job_type','department','roles', 'job_role'])->whereHas('user', function($query){
             $query->where('type', 'staff')->where('status', 'active');
-        }])->first();
+        })->where('id', $staff_id)->first();
 
-       
         // ->leftjoin("users", "staff.user_id", "=", "users.id")->where(['users.status' => 'active', 'type' => 'staff'])
         //     ->leftjoin("job_types", "staff.jobtype_id", "=", "job_types.id")
         //     ->leftjoin("job_roles", "staff.jobrole_id", "=", "job_roles.id")
@@ -662,9 +666,9 @@ class StaffController extends Controller
             'gender' => $staff->user->gender ?? '',
             'marital_status' => $staff->user->marital_status ?? '',
             'dob' => $date_of_birth,
-            'avatar' => !empty($staff->user->avatar) ? $this->encodeGeneralUploadedFile($staff->user->avatar) : '',
+            'avatar' => $staff->user->avatar,
         ];
-
+       
         $data['contact_and_additional_information'] = [
             'residential_address' => $staff->user->residential_address ?? '',
             'alternate_email' => $staff->user->alternate_email ?? '',
@@ -706,6 +710,26 @@ class StaffController extends Controller
         } else {
             return response()->json(['message' => $res['message'], 'data' => $res['data']], $res['code'] ?? 200);
         }
+    }
+
+    public function staffDeals(Request $request, $staff_id){
+        $deals = CustomerContract::join('customers','customers.id','=','customer_contracts.customer_id')
+        ->join('users','users.id','=','customers.user_id')
+        ->where('primary_marketer_id', $staff_id)->orderBy('customer_contracts.updated_at','desc')
+        ->select('customer_contracts.building_type', 'customer_contracts.estate_id', 'customer_contracts.contract_status','customer_contracts.id','customer_contracts.plot_size', 'customer_contracts.updated_at','customer_contracts.updated_at', 'customer_contracts.created_at','customer_contracts.property_type', 'customer_contracts.primary_marketer_id', 'users.first_name', 'users.middle_name', 'users.last_name');
+ 
+        if(!empty($request->status)){
+            if($request->status == 'open'){
+                $deals = $deals->whereNull('contract_status')->orWhere('contract_status','ongoing');
+            }else{
+                $deals = $deals->whereIn('contract_status',['allocated','completed','closed']);
+            }
+        }
+
+        $deals = $deals->get();
+
+        // $deals = $deals->load('customer.user');
+        return response()->json(['message' => 'Retrieved successfully', 'data' => $deals], 200);    
     }
 
     public function sampleBulkStaff()
