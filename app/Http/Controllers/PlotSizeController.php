@@ -10,6 +10,7 @@ use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\RedirectResponse;
 use App\Models\EstatePropertyTypeDetails;
+use App\Services\LogService;
 use Illuminate\Support\Facades\Validator;
 
 
@@ -58,6 +59,7 @@ class PlotSizeController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
+        LogService::admin(auth()->user()->id, null, 'Create a plot size (' . $plot->id  . ')' , 'CREATE');
         return response()->json(['message' => 'Created successfully', 'data' => $plot], 200);
     }
 
@@ -119,6 +121,7 @@ class PlotSizeController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
+        LogService::admin(auth()->user()->id, null, 'Update a location size (' . $plotsize->id  . ')' , 'UPDATE');
         return response()->json(['message' => 'Updated Successfully.', 'data' => $plotsize], 200);
     }
 
@@ -132,6 +135,8 @@ class PlotSizeController extends Controller
         if ($this->definedRelations('PlotSize', $plotsize) > 0) {
             return response()->json(['message' => 'Unable to delete, resource in use', 'data' => null], 412);
         }
+
+        LogService::admin(auth()->user()->id, null, 'Delete a plot size (' . $plotsize->id  . ')' , 'DELETE');
 
         $plotsize->delete();
         return response()->json(['message' => 'Deleted Successfully.', 'data' => null], 200);

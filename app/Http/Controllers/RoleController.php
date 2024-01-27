@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Role;
 use App\Models\StaffRole;
+use App\Services\LogService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Http\RedirectResponse;
@@ -72,7 +73,7 @@ class RoleController extends Controller
             $access_control = implode(',', $allowed);
         }
 
-        Role::updateOrcreate(
+        $role = Role::updateOrcreate(
             ['name' => $request->name, 'company_id' => $this->sessionDetails('company_id'), 'type' => $request->type],
             [
                 'access' => $access_control,
@@ -80,6 +81,7 @@ class RoleController extends Controller
             ]
         );
 
+        LogService::admin(auth()->user()->id, null, 'Create or update a role (' . $role->id  . ')' , 'CREATE');
         return response()->json(['message' => 'Created successfully', 'data' => []], 200);
     }
 
@@ -145,6 +147,7 @@ class RoleController extends Controller
             'type' => $request->type,
         ]);
 
+        LogService::admin(auth()->user()->id, null, 'Update a role (' . $role->id  . ')' , 'UPDATE');
         return response()->json(['message' => 'Role Updated Succesfully', 'data' => $role], 200);
     }
 
@@ -158,6 +161,8 @@ class RoleController extends Controller
         if ($roles > 0) {
             return response()->json(['message' => 'Unable to delete, resource in use', 'data' => []], 412);
         }
+
+        LogService::admin(auth()->user()->id, null, 'Delete a role (' . $role->id  . ')' , 'DELETE');
 
         $role->delete();
         return response()->json(['message' => 'Deleted Successfully.', 'data' => null], 200);

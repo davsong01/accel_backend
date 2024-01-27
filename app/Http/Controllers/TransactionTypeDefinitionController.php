@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Http\RedirectResponse;
 use App\Models\TransactionTypeDefinition;
+use App\Services\LogService;
 use Illuminate\Support\Facades\Validator;
 
 class TransactionTypeDefinitionController extends Controller
@@ -51,6 +52,7 @@ class TransactionTypeDefinitionController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
+        LogService::admin(auth()->user()->id, null, 'Create or update transaction type definition (' . $ttd->id  . ')' , 'CREATE');
         return response()->json(['message' => 'Created successfully', 'data' => $ttd], 200);
     }
 
@@ -99,6 +101,7 @@ class TransactionTypeDefinitionController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
+        LogService::admin(auth()->user()->id, null, 'Update transaction type definition (' . $transactionTypeDefinition->id  . ')' , 'UPDATE');
         return response()->json(['message' => 'Updated successfully', 'data' => $transactionTypeDefinition], 200);
     }
 
@@ -107,6 +110,8 @@ class TransactionTypeDefinitionController extends Controller
      */
     public function destroy(TransactionTypeDefinition $transactionTypeDefinition)
     {
+        LogService::admin(auth()->user()->id, null, 'Delete transaction type definition (' . $transactionTypeDefinition->id  . ')' , 'DELETE');
+
         $transactionTypeDefinition->delete();
         return response()->json(['message' => 'Deleted Successfully.', 'data' => null], 200);
     }

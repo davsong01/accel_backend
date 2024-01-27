@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\TransactionPurpose;
+use App\Services\LogService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -52,6 +53,7 @@ class TransactionPurposeController extends Controller
         $attributes = [...$validator->validated(), 'company_id' => $company_id];
         $created = TransactionPurpose::create($attributes);
 
+        LogService::admin(auth()->user()->id, null, 'Create transaction purpose (' . $created->id  . ')' , 'CREATE');
         return response()->json(['message' => 'Created successfully', 'data' => $created], 200);
     }
 
@@ -85,6 +87,8 @@ class TransactionPurposeController extends Controller
 
         $purpose->update($validator->validated());
 
+        LogService::admin(auth()->user()->id, null, 'Update transaction purpose (' . $purpose->id  . ')' , 'UPDATE');
+
         return response()->json(['message' => 'Updated successfully', 'data' => $purpose->load(['transactionType'])], 200);
     }
 
@@ -93,6 +97,8 @@ class TransactionPurposeController extends Controller
      */
     public function destroy(TransactionPurpose $purpose)
     {
+        LogService::admin(auth()->user()->id, null, 'Delete transaction purpose (' . $purpose->id  . ')' , 'DELETE');
+
         $purpose->delete();
         return response()->json(['message' => 'Deleted Successfully.', 'data' => null], 200);
     }
