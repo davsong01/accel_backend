@@ -125,13 +125,13 @@ class CustomerContractController extends Controller
 
     public function customerPaymentHistory(Request $request, $customer_id)
     {
-        $histories = Transaction::with(['contracts:id,form_payment_transaction_id,contract_payment_transaction_id,property_type,estate_id,plot_size,building_type', 'estate:id,name'])->where('customer_id', $customer_id)->orderBy('created_at','DESC');
+        $histories = Transaction::with(['contracts:id,property_type_id,form_payment_transaction_id,contract_payment_transaction_id,property_type,estate_id,plot_size,building_type', 'estate:id,name'])->where('customer_id', $customer_id)->orderBy('created_at','DESC');
         $contract_id = $request->contract_id;
-
+       
         if(!empty($request->contract_id)){
             // Get contract 
             $contract = CustomerContract::where('id', $contract_id)->first();
-            
+           
             $histories = $histories->where(function($query) use ($contract){
                 $query->where('transaction_id', $contract->contract_payment_transaction_id)
                 ->orWhere('transaction_id', $contract->form_payment_transaction_id)
@@ -860,7 +860,6 @@ class CustomerContractController extends Controller
 
     public function formPaymentHistory($customer_id)
     {
-
         $histories = Transaction::with(['contracts','estate:id,name'])->where(['customer_id' => $customer_id, 'company_id' => $this->sessionDetails('company_id'), 'purpose' => 'form_payment'])->whereHas('contracts')->orderBy('created_at', 'DESC')->get();
        
         $data = [];
@@ -893,6 +892,4 @@ class CustomerContractController extends Controller
 
         return response()->json(['message' => 'Success', 'data' => $data], 200);
     }
-
-   
 }

@@ -22,7 +22,7 @@ class CustomerController extends Controller
 
     public function index(Request $request)
     {
-        $customers = Customer::with(['user','contracts:id,status,customer_id'])->withCount('contracts')
+        $customers = Customer::with(['user', 'contracts:id,property_type_id,status,customer_id'])->withCount('contracts')
             ->where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'DESC');
        
         if (!empty($request->name)) {
@@ -32,7 +32,7 @@ class CustomerController extends Controller
                         $query->where('last_name', 'LIKE', "%{$request->name}%")
                             ->orWhere('middle_name', 'LIKE', "%{$request->name}%");
                     });
-            })->with(['user', 'contracts:id,status,customer_id'])
+            })->with(['user', 'contracts:id,property_type_id,status,customer_id'])
                 ->withCount('contracts')
                 ->where('company_id', $this->sessionDetails('company_id'))
                 ->orderBy('customers.created_at', 'DESC');
@@ -131,14 +131,12 @@ class CustomerController extends Controller
 
     public function getSubscribers(Request $request)
     {
-        
         if (!empty($request->type)) {
             $subscribers = Customer::with(['user:id,avatar,first_name,last_name,status,gender,phone_number'])->whereHas('contracts', function ($q) use ($request) {
                 $q->where('status', 'subscriber')->where('contract_status', $request->type);
             })->withCount(['contracts' => function ($q)  use ($request) {
                 $q->where('status', 'subscriber')->where('contract_status',$request->type);
             }])->orderBy('customers.created_at', 'DESC');
-
         }else{
             $subscribers = Customer::with(['user:id,avatar,first_name,last_name,status,gender,phone_number'])->whereHas('contracts', function ($q) {
                 $q->where('status', 'subscriber');
@@ -163,10 +161,32 @@ class CustomerController extends Controller
             });
         }
 
-
         $subscribers = $subscribers->paginate(20)->withQueryString();
+        
+        foreach($subscribers as $sub){
+            if($sub->contracts_count > 0){
+                $sub->percentage_paid = $this->percentageCount($sub->contracts);
+            }
+        }
 
         return response()->json(['message' => 'Success', 'data' => $subscribers], 200);
+    }
+
+    public function percentageCount($contracts){
+        $total_fee = 0;
+        $paid = 0;
+        $percentage = 0;
+
+        foreach($contracts as $contract){
+            if ($contract->contract_status == 'ongoing') {
+                $total_fee += $contract->contract_payment->property_net_fee;
+                $paid += $contract->contract_payment->amount;
+            }
+        }
+
+        
+        $percentage = ($paid/$total_fee) * 100;
+        return number_format($percentage, 2);
     }
 
     public function getProspects(Request $request)

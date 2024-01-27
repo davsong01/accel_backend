@@ -29,6 +29,16 @@ class ContractPaymentController extends Controller
     {
     }
 
+    public function contractPaymentHistory($contract_id){
+        $paymentHistory = ContractPayment::where('contract_id', $contract_id)->first();
+        $history = [
+            'contract_id' => $contract_id,
+            'payment_history' => $paymentHistory->payment_thread,
+        ];
+
+        return response()->json(['message' => 'Succee', 'data' => $history], 200);
+        
+    }
     /**
      * Store a newly created resource in storage.
      */
@@ -145,7 +155,7 @@ class ContractPaymentController extends Controller
                 //     return $res;
                 // }
             } else {
-                $contract_status = 'completed';
+                $contract_status = 'paid';
             }
 
             // if ($amount_to_pay != $data['amount']) {
@@ -312,9 +322,9 @@ class ContractPaymentController extends Controller
         // Get contract
         $contract = CustomerContract::where('id', $request->contract_id)->first();
 
-        if($contract->contract_status != 'allocated'){
+        if($contract->contract_status != 'completed'){
             return response()->json([
-                'error' => 'Please check that the status of this contract is: allocated!',
+                'error' => 'Please check that the status of this contract is: completed!',
                 'data' => null,
             ], 412);
         }
@@ -380,6 +390,8 @@ class ContractPaymentController extends Controller
             'type' => 'credit',
             'company_id' => $this->sessionDetails('company_id'),
         ]);
+
+        $contract->update(['contract_status' => 'closed']);
 
         // Generate payment receipt, stop here todat
         $contract->fee = $payment->infrastructure_fee;

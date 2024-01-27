@@ -28,9 +28,9 @@ class ContractAllocationController extends Controller
 
         $contract = CustomerContract::where('id', $request->contract_id)->first();
         
-        if($contract->contract_status != 'completed'){
+        if($contract->contract_status != 'paid'){
             return response()->json([
-                'error' => 'This contract is not yet completed, please try again later',
+                'error' => 'This contract is not yet paid for completely, please try again later',
                 'data' => [],
             ], 412);
         }
@@ -45,7 +45,7 @@ class ContractAllocationController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
-        $contract->update(['contract_status' => 'allocated']);
+        $contract->update(['contract_status' => 'completed']);
         // Send allocation mail
         $data['type'] = 'allocation.email';
         $data['name'] =  $contract->customer->user->first_name;

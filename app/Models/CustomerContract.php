@@ -9,13 +9,14 @@ use App\Models\Customer;
 use App\Models\PlotSize;
 use App\Models\Transaction;
 use App\Models\BuildingType;
+use App\Models\ContractPayment;
 use App\Models\GeneratedLegalDocument;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\EstatePropertyTypeDetails;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\SoftDeletes; 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class CustomerContract extends Model
 {
@@ -42,6 +43,11 @@ class CustomerContract extends Model
     public function estate()
     {
         return $this->belongsTo(Estate::class);
+    }
+
+    public function contract_payment()
+    {
+        return $this->hasOne(ContractPayment::class, 'contract_id')->select('id','contract_id','amount','property_net_fee');
     }
 
     public function building_type()
@@ -91,24 +97,13 @@ class CustomerContract extends Model
         }  
     }
 
-
     public function getContractNameAttribute(){
         $name = '';
         if($this->property_type == 'building'){
-            // if(isset($this->building_type_details->name) && isset($this->estate->name)){
-            //     $name = $this->building_type_details->name;
-            // }
-
-            // $name = ' - '.$name.$this->estate->name;
             $name = $this->property_type_details->building_details->name . ' - ' . $this->estate->name;
-
         }
 
         if ($this->property_type == 'land') {
-            // if(isset($this->property_type_details->plot_details->size) || isset($this->building_type_details->name) || isset($this->estate->name)){
-            //     $name = $this->plot_size_details->size ?? null . ' - ' . $this->building_type_details->name . ' - ';
-            // }
-            // $name = $name . ' - ' . $this->estate->name;
             $name = $this->property_type_details->plot_details->size .' - '. $this->property_type_details->building_details->name . ' - '. $this->estate->name;
 
         }
@@ -154,4 +149,5 @@ class CustomerContract extends Model
     {
         return $this->hasOne(GeneratedLegalDocument::class, 'contract_id');
     }
+
 }
