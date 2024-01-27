@@ -358,6 +358,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         });
 
         Route::get('audit/log', [LogController::class, 'audit']);
+        Route::get('audit/log/search', [LogController::class, 'search']);
     });
 });
 

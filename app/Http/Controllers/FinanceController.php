@@ -119,7 +119,7 @@ class FinanceController extends Controller
             $user = User::where('first_name', 'LIKE', '%'.$name.'%')
             ->orWhere('last_name', 'LIKE', '%'.$name.'%')
             ->orWhere('middle_name', 'LIKE', '%'.$name.'%')->first();
-            $query->where('staff_id', $user?->id)->where('staff_id', '!==', null);
+            $query->where('staff_id', $user?->id)->where('staff_id', '!=', null);
         }
 
         $transactions = $query->latest()->paginate(20);
