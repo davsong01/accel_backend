@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Models\ChartOfAccount;
+use App\Services\LogService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Validator;
 
@@ -15,7 +16,7 @@ class ChartOfAccountController extends Controller
      */
     public function index(Request $request)
     {
-        $coa = ChartOfAccount::with('currency', 'account_category:id,name', 'account_type:id,type')->where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'desc');
+        $coa = ChartOfAccount::with('currency', 'account_category:id,name', 'account_type:id,type')->where('status', 'active')->where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'desc');
 
         if (!empty($request->status)) {
             $coa = $coa->where('status', $request->status);
@@ -28,7 +29,7 @@ class ChartOfAccountController extends Controller
 
     public function modifyChartOfAccount($id)
     {
-        $coa = ChartOfAccount::where('company_id', $this->sessionDetails('company_id'))->where('id', $id)->first();
+        $coa = ChartOfAccount::where('status', 'active')->where('company_id', $this->sessionDetails('company_id'))->where('id', $id)->first();
         if ($coa) {
             if ($coa->status == 'active') {
                 $coa->update(['status' => 'inactive']);
@@ -36,6 +37,8 @@ class ChartOfAccountController extends Controller
                 $coa->update(['status' => 'active']);
             }
         }
+
+        LogService::admin(auth()->user()->id, NULL, 'Modify chart of account status ('. $coa->id .')', 'UPDATE');
         return response()->json(['message' => 'Successfully updated', 'data' => []], 200);
     }
 
@@ -77,6 +80,7 @@ class ChartOfAccountController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
+        LogService::admin(auth()->user()->id, NULL, 'Create chart of account status ('. $account_class->id .')', 'CREATE');
         return response()->json(['message' => 'Created successfully', 'data' => $account_class], 200);
     }
 
@@ -133,6 +137,7 @@ class ChartOfAccountController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
+        LogService::admin(auth()->user()->id, NULL, 'Update a chart of account status ('. $chartOfAccount->id .')', 'UPDATE');
         return response()->json(['message' => 'Updated successfully', 'data' => []], 200);
     }
 
@@ -141,6 +146,8 @@ class ChartOfAccountController extends Controller
      */
     public function destroy(ChartOfAccount $chartOfAccount)
     {
+        LogService::admin(auth()->user()->id, NULL, 'Delete chart of account status ('. $chartOfAccount->id .')', 'DELETE');
+
         $chartOfAccount->delete();
         return response()->json(['message' => 'Deleted Successfully.', 'data' => []], 200);
     }
