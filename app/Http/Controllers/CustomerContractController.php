@@ -30,17 +30,16 @@ class CustomerContractController extends Controller
      */
     public function index(Request $request, $customer_id)
     {
-        $contracts = CustomerContract::with('property_type_details:type,id,estate_price,settings_and_excavation,infrastructural_fee', 'city:name,id', 'estate:name,id', 'location:name,id', 'building_type:id,name', 'plot_size:id,size')->where('customer_id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->select(['id', 'primary_marketer_id', 'property_type_id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'subscribers', 'contract_type', 'property_type', 'transaction_date', 'created_at','form_payment_transaction_id', 'contract_payment_transaction_id','discount']);
-
-        if (!empty($request->contract_type)) {
-            $contracts = $contracts->where('contract_type', $request->contract_type);
-        }
-        // ->groupBy('estate_id')
-        $contracts = $contracts->orderBy('created_at', 'DESC')
-            ->get();
-
+        $contracts = CustomerContract::with('property_type_details', 'city:name,id', 'estate:name,id', 'location:name,id', 'building_type:id,name', 'plot_size:id,size')->where('customer_id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->select(['id', 'primary_marketer_id', 'property_type_id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'subscribers', 'contract_type', 'property_type', 'transaction_date', 'created_at','form_payment_transaction_id', 'contract_payment_transaction_id','discount']);
+       
         $allContracts = [];
-        if ($contracts) {
+        if ($contracts->exists()) {
+            if (!empty($request->contract_type)) {
+                $contracts = $contracts->where('contract_type', $request->contract_type);
+            }
+            // ->groupBy('estate_id')
+            $contracts = $contracts->orderBy('created_at', 'DESC')
+                ->get();
             // get the customer
             $customer = Customer::withCount(['singleContract', 'jointContract', 'contracts'])->where('id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->first();
 
@@ -727,7 +726,7 @@ class CustomerContractController extends Controller
 
             'subscribers' => 'nullable',
             'discount' => 'nullable',
-            'commission' => 'nullable',
+            // 'commission' => 'nullable',
         ]);
 
         if(isset($request->secondary_marketers) && in_array($request->primary_marketer_id, $request->secondary_marketers)){
@@ -754,7 +753,7 @@ class CustomerContractController extends Controller
             'property_type' => $request->property_type,
             'property_type_id' => $request->property_type_id,
             'discount' => $request->discount,
-            'commission' => $request->commission,
+            // 'commission' => $request->commission,
             'subscribers' => $request->has('subscribers') ? $request->subscribers : $CustomerContract->subscribers,
             // 'status' => 'lead',
             'primary_marketer_id' => $request->primary_marketer_id,

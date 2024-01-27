@@ -95,18 +95,21 @@ class CustomerContract extends Model
     public function getContractNameAttribute(){
         $name = '';
         if($this->property_type == 'building'){
-            if(isset($this->building_type_details->name) && isset($this->estate->name)){
-                $name = $this->building_type_details->name;
-            }
+            // if(isset($this->building_type_details->name) && isset($this->estate->name)){
+            //     $name = $this->building_type_details->name;
+            // }
 
-            $name = ' - '.$name.$this->estate->name;
+            // $name = ' - '.$name.$this->estate->name;
+            $name = $this->property_type_details->building_details->name . ' - ' . $this->estate->name;
+
         }
 
         if ($this->property_type == 'land') {
-            if(isset($this->plot_size_details->size) || isset($this->building_type_details->name) || isset($this->estate->name)){
-                $name = $this->plot_size_details->size ?? null . ' - ' . $this->building_type_details->name . ' - ';
-            }
-            $name = $name . ' - ' . $this->estate->name;
+            // if(isset($this->property_type_details->plot_details->size) || isset($this->building_type_details->name) || isset($this->estate->name)){
+            //     $name = $this->plot_size_details->size ?? null . ' - ' . $this->building_type_details->name . ' - ';
+            // }
+            // $name = $name . ' - ' . $this->estate->name;
+            $name = $this->property_type_details->plot_details->size .' - '. $this->property_type_details->building_details->name . ' - '. $this->estate->name;
 
         }
         
