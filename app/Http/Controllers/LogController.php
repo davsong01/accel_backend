@@ -13,7 +13,7 @@ class LogController extends Controller
      */
     public function audit(): JsonResponse
     {
-        $logs = AdminLog::with(['createdBy:id,type,status,first_name,last_name,middle_name,title', 'causee:id,type,status,first_name,last_name,middle_name,title'])->paginate(20);
+        $logs = AdminLog::with(['createdBy:id,type,status,first_name,last_name,middle_name,title,avatar', 'causee:id,type,status,first_name,last_name,middle_name,title,avatar'])->paginate(20);
         return response()->json(['message' => 'Success', 'data' => $logs], 200);
     }
 }
