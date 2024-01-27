@@ -9,6 +9,7 @@ use App\Http\Requests\LoginRequest;
 use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\RegisterRequest;
+use App\Services\LogService;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Exists;
@@ -30,6 +31,8 @@ class AuthController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
 
         $cookie = cookie('token', $token, 60 * 24); // 1 day
+
+        LogService::admin($user->id, NULL, 'New user registration ('. $user->id . ')', 'CREATE');
 
         return response()->json([
             'user' => new UserResource($user),
@@ -126,6 +129,7 @@ class AuthController extends Controller
             $datax['userInfo']['customer_id'] = $user->customer->id;
         }
         
+        LogService::admin($user->id, NULL, 'New Login ('. $user->id . ')', 'UPDATE');
         return response()->json(['data' => $datax, 'message' => Session::all()], 200);
     }
 

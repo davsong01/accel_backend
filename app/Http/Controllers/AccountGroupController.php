@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AccountGroup;
+use App\Services\LogService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Validation\Rule;
@@ -46,6 +47,8 @@ class AccountGroupController extends Controller
                 $account_group->update(['status' => 'active']);
             }
         }
+
+        LogService::admin(auth()->user()->id, null, 'Modify account group(' . $account_group->id . ')', 'UPDATE');
         return response()->json(['message' => 'Successfully updated', 'data' => []], 200);
     }
 
@@ -76,6 +79,7 @@ class AccountGroupController extends Controller
 
         $account_group = AccountGroup::updateOrCreate(['name' => $request->name, 'company_id' => $this->sessionDetails('company_id')], []);
 
+        LogService::admin(auth()->user()->id, null, 'Create or update an account group(' . $account_group->id . ')', 'CREATE');
         return response()->json(['message' => 'Created successfully', 'data' => $account_group], 200);
     }
 
@@ -120,7 +124,8 @@ class AccountGroupController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
-        return response()->json(['message' => 'Account Group Updated Succesfully', 'data' => $accountGroup], 200);
+        LogService::admin(auth()->user()->id, null, 'Update an account group(' . $accountGroup->id . ')', 'UPDATE');
+        return response()->json(['message' => 'Account Group Updated Successfully', 'data' => $accountGroup], 200);
     }
 
     /**
@@ -131,6 +136,8 @@ class AccountGroupController extends Controller
         if ($this->definedRelations('AccountGroup', $accountGroup) > 0) {
             return response()->json(['message' => 'Unable to delete, resource in use', 'data' => []], 412);
         }
+
+        LogService::admin(auth()->user()->id, null, 'Delete an account group(' . $accountGroup->id . ')', 'DELETE');
 
         $accountGroup->delete();
         return response()->json(['message' => 'Deleted Successfully.', 'data' => []], 200);

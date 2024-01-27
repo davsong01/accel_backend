@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Validation\Rule;
 use App\Models\AccountClassification;
+use App\Services\LogService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Validator;
 
@@ -53,6 +54,7 @@ class AccountClassificationController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
+        LogService::admin(auth()->user()->id, null, 'Create or update an account classification(' . $account_class->id . ')', 'CREATE');
         return response()->json(['message' => 'Created successfully', 'data' => $account_class], 200);
     }
 
@@ -97,6 +99,7 @@ class AccountClassificationController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
+        LogService::admin(auth()->user()->id, null, 'Update an account classification(' . $accountClassification->id . ')', 'UPDATE');
         return response()->json(['message' => 'Updated successfully', 'data' => $accountClassification], 200);
     }
 
@@ -105,6 +108,8 @@ class AccountClassificationController extends Controller
      */
     public function destroy(AccountClassification $accountClassification)
     {
+
+        LogService::admin(auth()->user()->id, null, 'Delete an account classification(' . $accountClassification->id . ')', 'DELETE');
         $accountClassification->delete();
         return response()->json(['message' => 'Deleted Successfully.', 'data' => null], 200);
     }
