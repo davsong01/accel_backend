@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Validator;
 use App\Models\CustomerIdentificationSetting;
+use App\Services\LogService;
 
 class CustomerController extends Controller
 {
@@ -323,8 +324,8 @@ class CustomerController extends Controller
 
         $data['company_id'] = $this->sessionDetails('company_id');
 
-        CustomerIdentificationSetting::updateOrCreate(['company_id' => $data['company_id']], $data);
-
+        $cis = CustomerIdentificationSetting::updateOrCreate(['company_id' => $data['company_id']], $data);
+        LogService::admin(auth()->user()->id, null, 'Create or update a customer contract (' . $cis->id .')', 'CREATE');
         return response()->json(['message' => 'Successful', 'data' => $request['order_of_appearance']], 200);
     }
 

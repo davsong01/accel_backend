@@ -10,6 +10,7 @@ use App\Imports\BuildingTypeImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\RedirectResponse;
 use App\Models\EstatePropertyTypeDetails;
+use App\Services\LogService;
 use Illuminate\Support\Facades\Validator;
 
 
@@ -57,6 +58,7 @@ class BuildingTypeController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
+        LogService::admin(auth()->user()->id, NULL, 'Create a building type ('. $building_type->id . ')', 'CREATE');
         return response()->json(['message' => 'Created successfully', 'data' => $building_type], 200);
     }
 
@@ -72,7 +74,8 @@ class BuildingTypeController extends Controller
 
         Excel::import(new BuildingTypeImport(), request()->file('file'));
 
-        return response()->json(['message' => 'Building Type Added Succesfully', 'data' => null], 200);
+        LogService::admin(auth()->user()->id, NULL, 'Import a bulking building type ('.')', 'CREATE');
+        return response()->json(['message' => 'Building Type Added Successfully', 'data' => null], 200);
     }
 
     public function sampleBulkBuildingType()
@@ -119,6 +122,7 @@ class BuildingTypeController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
+        LogService::admin(auth()->user()->id, NULL, 'Update a building type ('. $buildingType->id .')', 'UPDATE');
         return response()->json(['message' => 'Updated Successfully.', 'data' => $buildingType], 200);
     }
 
@@ -132,6 +136,8 @@ class BuildingTypeController extends Controller
         if ($count > 0) {
             return response()->json(['message' => 'Unable to delete, resource in use', 'data' => null], 412);
         }
+
+        LogService::admin(auth()->user()->id, NULL, 'Delete a building type ('.$buildingType->id .')', 'DELETE');
 
         $buildingType->delete();
         return response()->json(['message' => 'Deleted Successfully.', 'data' => null], 200);

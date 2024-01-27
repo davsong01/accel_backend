@@ -10,6 +10,7 @@ use App\Models\CustomerContract;
 use App\Models\SeInfrastructure;
 use App\Models\ContractPaymentThread;
 use App\Models\SeInfrastructureThread;
+use App\Services\LogService;
 use Illuminate\Support\Facades\Validator;
 
 class ContractPaymentController extends Controller
@@ -103,6 +104,8 @@ class ContractPaymentController extends Controller
                 'payment_slip' => $res->filename,
                 'receipt_location' => $res->receipt_location,
             ];
+
+            LogService::admin(auth()->user()->id, NULL, 'Update a company\'s contract, contract payment, contract payment thread and transaction ('. $contractX->id .')', 'UPDATE');
             
         }
 

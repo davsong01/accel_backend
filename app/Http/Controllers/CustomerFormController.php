@@ -11,6 +11,7 @@ use App\Models\CompanySetting;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 use App\Models\CustomerContract;
+use App\Services\LogService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Validation\Rules\File;
@@ -136,6 +137,7 @@ class CustomerFormController extends Controller
 
         $this->logEmail($data);
 
+        LogService::admin(auth()->user()->id, $customer_form->customer->user->id, 'Approve customer form 2 request (' . $customer_form->id .')', 'UPDATE');
         return response()->json(['message' => 'Successful', 'data' => ['customer_id' => $customer_form->customer_id]], 200);
     }
 
@@ -181,6 +183,7 @@ class CustomerFormController extends Controller
 
         $this->logEmail($data);
 
+        LogService::admin(auth()->user()->id, $customer_form->customer->user->id, 'Decline customer form 2 request (' . $customer_form->id .')', 'UPDATE');
         return response()->json(['message' => 'Successful', 'data' => ['customer_id' => $customer_form->customer_id]], 200);
     }
 
@@ -214,6 +217,8 @@ class CustomerFormController extends Controller
         // $data['email'] = $customer_form->email_address ?? '';
 
         // $this->logEmail($data);
+
+        LogService::admin(auth()->user()->id, $customer_form->customer->user->id, 'Approve customer form 2 response (' . $customer_form->id .')', 'UPDATE');
 
         return response()->json(['message' => 'Successful', 'data' => ['customer_id' => $customer_form->customer_id]], 200);
     }
@@ -259,7 +264,7 @@ class CustomerFormController extends Controller
         // $data['email'] = $customer_form->email_address ?? '';
 
         // $this->logEmail($data);
-        
+        LogService::admin(auth()->user()->id, $customer_form->customer->user->id, 'Decline customer form 2 response (' . $customer_form->id .')', 'UPDATE');
         return response()->json(['message' => 'Successful', 'data' => ['customer_id' => $customer_form->customer_id]], 200);
     }
 
@@ -450,6 +455,7 @@ class CustomerFormController extends Controller
             'form_status' => 'Unconfirmed'
         ]);
 
+        LogService::admin(auth()->user()->id, $customer->user->id, 'Update customer form (' . $customer->response_form->id .')', 'UPDATE');
         return response()->json(['message' => 'Success', 'data' => []], 200);
     }
 

@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Company;
+use App\Models\Staff;
 use App\Models\StaffRole;
+use App\Services\LogService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Http\RedirectResponse;
@@ -117,6 +119,7 @@ class CompanyController extends Controller
             'company_id' => $company->id,
         ]);
 
+        LogService::admin(auth()->user()->id, NULL, 'Create a company ('. $company->id .')', 'CREATE');
         return response()->json(['message' => 'Created Successfully.', 'data' => []], 200);
 
     }
@@ -170,6 +173,7 @@ class CompanyController extends Controller
             'status' => $request->status,
         ]);
 
+        LogService::admin(auth()->user()->id, NULL, 'Update a company ('. $company->id .')', 'UPDATE');
         return response()->json(['message' => 'Updated Successfully.', 'data' => []], 200);
 
     }

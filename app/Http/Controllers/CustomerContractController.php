@@ -21,6 +21,7 @@ use App\Models\LegalDocumentType;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\RedirectResponse;
 use App\Models\GeneratedLegalDocument;
+use App\Services\LogService;
 use Illuminate\Support\Facades\Validator;
 
 class CustomerContractController extends Controller
@@ -255,6 +256,8 @@ class CustomerContractController extends Controller
                     $this->logEmail($email);
                 }
             }
+
+            LogService::admin(auth()->user()->id, $customer->user->id, 'Create a customer contract', 'CREATE');
             return response()->json(['message' => 'Success', 'data' => ['customer_id' => $data['customer_id']]], 200);
         } else {
             // New customer and contract
@@ -375,6 +378,7 @@ class CustomerContractController extends Controller
                 return response()->json(['message' => 'Could not create customer', 'data' => null], 422);
             }
 
+            LogService::admin(auth()->user()->id, $customer->user->id, 'Create a customer contract', 'CREATE');
             return response()->json(['message' => 'Success', 'data' => ['customer_id' => $customer->id]], 200);
         }
 
@@ -411,6 +415,7 @@ class CustomerContractController extends Controller
 
         $user->update(['customerId' => $this->generateCustomerId(false)]);
     
+        LogService::admin(auth()->user()->id, $user->id, 'Create or update a user', 'CREATE');
         return $user;
     }
 
@@ -451,7 +456,8 @@ class CustomerContractController extends Controller
             'state_id' => $data['state_id'] ?? $user->state_id,
             'lga_id' => $data['lga_id'] ?? $user->lga_id,
         ]);
-        
+
+        LogService::admin(auth()->user()->id, $user->id, 'Update a user', 'UPDATE');
         return $user;
     }
 
@@ -471,6 +477,7 @@ class CustomerContractController extends Controller
             'office_address' => $data['office_address'] ?? null,
         ]);
         
+        LogService::admin(auth()->user()->id, $customer->user->id, 'Create or update a customer', 'CREATE');
         return $customer;
     }
 
@@ -493,6 +500,7 @@ class CustomerContractController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
+        LogService::admin(auth()->user()->id, NULL, 'Create or update a customer contract (' . $contract->id .')', 'CREATE');
         return $contract;
     }
 
@@ -520,6 +528,7 @@ class CustomerContractController extends Controller
             'discount' => !empty($data['discount']) ? $data['discount'] : $contract->discount,
         ]);
 
+        LogService::admin(auth()->user()->id, NULL, 'Update a customer contract (' . $contract->id .')', 'UPDATE');
         return;
     }
 
@@ -762,7 +771,9 @@ class CustomerContractController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
-        return response()->json(['message' => 'Succesfully updated', 'data' => ['contract_id' => $CustomerContract->id, 'customer_id' => $request->customer_id]], 200);
+        $customer = Customer::where('id', $request->customer_id)->first();
+        LogService::admin(auth()->user()->id, $customer->user->id, 'Update a customer contract (' . $CustomerContract->id .')', 'UPDATE');
+        return response()->json(['message' => 'Successfully updated', 'data' => ['contract_id' => $CustomerContract->id, 'customer_id' => $request->customer_id]], 200);
     }
 
     /**
@@ -777,8 +788,11 @@ class CustomerContractController extends Controller
         }
 
         $customer_id = $contract->customer_id;
+
+        $customer = Customer::where('id', $customer_id)->first();
+        LogService::admin(auth()->user()->id, $customer->user->id, 'Update a customer contract (' . $contract->id .')', 'UPDATE');
         $contract->delete();
-        return response()->json(['message' => 'Succesfully deleted', 'data' => ['customer_id' => $customer_id]], 200);
+        return response()->json(['message' => 'Successfully deleted', 'data' => ['customer_id' => $customer_id]], 200);
     }
 
     public function singleCustomerFormDetails(Request $request, $customer_id)

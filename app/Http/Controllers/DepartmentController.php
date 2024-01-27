@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Validation\Rule;
 use App\Imports\DepartmentImport;
+use App\Services\LogService;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Validator;
@@ -59,6 +60,7 @@ class DepartmentController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
+        LogService::admin(auth()->user()->id, NULL, 'Create or update a company department (' . $department->id .')', 'CREATE');
         return response()->json(['message' => 'Created successfully', 'data' => $department], 200);
     }
 
@@ -103,7 +105,8 @@ class DepartmentController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
-        return response()->json(['message' => 'Department Updated Succesfully', 'data' => $department], 200);
+        LogService::admin(auth()->user()->id, NULL, 'Update a company department (' . $department->id .')', 'UPDATE');
+        return response()->json(['message' => 'Department Updated Successfully', 'data' => $department], 200);
     }
 
     /**
@@ -115,6 +118,7 @@ class DepartmentController extends Controller
             return response()->json(['message' => 'Unable to delete, resource in use', 'data' => []], 412);
         }
 
+        LogService::admin(auth()->user()->id, NULL, 'Delete a company department (' . $department->id .')', 'DELETE');
         $department->delete();
         return response()->json(['message' => 'Deleted Successfully.', 'data' => null], 200);
     }
