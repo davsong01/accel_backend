@@ -7,6 +7,7 @@ use App\Models\Company;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Models\CompanySetting;
+use App\Services\LogService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Validator;
 
@@ -52,6 +53,7 @@ class CompanySettingController extends Controller
             ]);
         }
 
+        LogService::admin(auth()->user()->id, NULL, 'Create a company\'s settings ('. $companySetting->id .')', 'CREATE');
         return response()->json(['message' => 'Success', 'data' => $companySetting], 200);
     }
 
@@ -85,6 +87,39 @@ class CompanySettingController extends Controller
     public function edit(CompanySetting $companySetting)
     {
         //
+    }
+
+    /**
+     * Update company's application settings
+     */
+
+    public function applicationSettings(Request $request)
+    {
+        $companySetting = CompanySetting::where('company_id', '!=', NULL)
+        ->where('company_id', $this->sessionDetails('company_id'))
+        ->select('no_of_login_attempt', 'session_ttl')->first();
+
+        if (!$companySetting)
+            return response()->json(['message' => 'Company not found', 'data' => []], 200);
+
+        if ($request->method() != 'GET') {
+            $validator = Validator::make($request->all(), [
+                'no_of_login_attempt' => ['required', 'numeric', 'min:' . PHP_INT_MIN, 'max:' . PHP_INT_MAX],
+                'session_ttl' => ['required', 'numeric', 'min:' . PHP_INT_MIN, 'max:' . PHP_INT_MAX],
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'error' => $validator->messages()->first(),
+                    'data' => null,
+                ], 412);
+            }
+
+            $companySetting->update($validator->validated());
+        }
+
+        LogService::admin(auth()->user()->id, NULL, 'Update a company\'s application settings ('. $companySetting->id .')', 'UPDATE');
+        return response()->json(['message' => 'Success', 'data' => $companySetting], 200);
     }
 
     /**
@@ -151,6 +186,7 @@ class CompanySettingController extends Controller
             $companySetting->update($data);
         }
 
+        LogService::admin(auth()->user()->id, NULL, 'Update a company\'s profile ('. $companySetting->id .')', 'UPDATE');
         return response()->json(['message' => 'Company settings updated succesfully', 'data' => null], 200);
     }
 
