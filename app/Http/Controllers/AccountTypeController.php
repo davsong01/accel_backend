@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AccountType;
+use App\Services\LogService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Http\RedirectResponse;
@@ -36,6 +37,8 @@ class AccountTypeController extends Controller
                 $account_type->update(['status' => 'active']);
             }
         }
+
+        LogService::admin(auth()->user()->id, null, 'Modify an account type(' . $account_type->id . ')', 'UPDATE');
         return response()->json(['message' => 'Successfully updated', 'data' => []], 200);
     }
 
@@ -70,6 +73,7 @@ class AccountTypeController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
+        LogService::admin(auth()->user()->id, null, 'Create an account type(' . $account_type->id . ')', 'CREATE');
         return response()->json(['message' => 'Created successfully', 'data' => $account_type], 200);
     }
 
@@ -115,6 +119,7 @@ class AccountTypeController extends Controller
             'account_category_id' => $request->account_category_id
         ]);
 
+        LogService::admin(auth()->user()->id, null, 'Update an account type(' . $account_type->id . ')', 'UPDATE');
         return response()->json(['message' => 'Updated Successfully.', 'data' => $account_type], 200);
     }
 
@@ -127,6 +132,8 @@ class AccountTypeController extends Controller
         // if ($count > 0) {
         //     return response()->json(['message' => 'Unable to delete, resource in use', 'data' => null], 412);
         // }
+        LogService::admin(auth()->user()->id, null, 'Delete an account type(' . $account_type->id . ')', 'DELETE');
+
         $account_type->delete();
         return response()->json(['message' => 'Deleted Successfully.', 'data' => null], 200);
     }

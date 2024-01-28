@@ -10,6 +10,7 @@ use App\Models\AdvanceAndClaims;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\RedirectResponse;
 use App\Models\AdvanceAndClaimsSetting;
+use App\Services\LogService;
 use Illuminate\Support\Facades\Validator;
 
 class AdvanceAndClaimsController extends Controller
@@ -160,7 +161,7 @@ class AdvanceAndClaimsController extends Controller
             $status = 'approved';
         }
 
-        AdvanceAndClaims::create([
+        $advance_and_claims = AdvanceAndClaims::create([
             'type' => $request->type,
             'purpose' => $request->purpose,
             'staff_id' => $request->staff_id ?? Auth::user()->staff->id, 
@@ -174,6 +175,7 @@ class AdvanceAndClaimsController extends Controller
             'company_id' => $this->sessionDetails('company_id')
         ]);
 
+        LogService::admin(auth()->user()->id, NULL, 'Create an advance and claims ('. $advance_and_claims->id . ')', 'CREATE');
         return response()->json(['message' => 'Created successfully', 'data' => null], 200);
 
     }
@@ -207,6 +209,8 @@ class AdvanceAndClaimsController extends Controller
         ];
         
         $this->notify($data);
+
+        LogService::admin(auth()->user()->id, $lam->staff->user_id, 'Approved an advance and claims ('. $lam->id . ')', 'UPDATE');
         return response()->json(['message' => 'Approved successfully', 'data' => $lam], 200);
     }
 
@@ -225,6 +229,7 @@ class AdvanceAndClaimsController extends Controller
 
         $this->notify($data);
 
+        LogService::admin(auth()->user()->id, $lam->staff->user_id, 'Decline an advance and claims ('. $lam->id . ')', 'UPDATE');
         return response()->json(['message' => 'Declined successfully', 'data' => $lam], 200);
     }
 
@@ -249,6 +254,7 @@ class AdvanceAndClaimsController extends Controller
             'period' => $request->period
         ]);
 
+        LogService::admin(auth()->user()->id, NULL, 'Create or update an advance and claims settings ('. $setting->id . ')', 'UPDATE');
         return response()->json(['message' => 'Updated successfully', 'data' => null], 200);
     }
 

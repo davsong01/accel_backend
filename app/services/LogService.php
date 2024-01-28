@@ -15,7 +15,7 @@ class LogService
      * @param string $title Title of action being carried out. 
      * @param string $crud_type Action type in UPDATE, CREATE or DELETE 
      */
-    static function admin(int $user_id, int $cuasee_id, string $title, string $crud_type)
+    static function admin(int $user_id, int | null $cuasee_id, string $title, string $crud_type)
     {
         AdminLog::create([
             'created_by' => $user_id,

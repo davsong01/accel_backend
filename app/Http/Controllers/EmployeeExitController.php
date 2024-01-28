@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use Carbon\Carbon;
 use App\Models\EmployeeExit;
+use App\Models\Staff;
 use App\Models\User;
+use App\Services\LogService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -80,7 +82,7 @@ class EmployeeExitController extends Controller
         $last_day = Carbon::parse($request->last_day_of_work);
         $resignation_letter = !empty($request->resignation_letter) ? $this->uploadFile($request->resignation_letter, 'exits') : null;
 
-        EmployeeExit::updateOrCreate(['staff_id' => $request->staff_id ?? $staff_id, 'type' => $request->type], [
+        $ee = EmployeeExit::updateOrCreate(['staff_id' => $request->staff_id ?? $staff_id, 'type' => $request->type], [
             'last_day_work' => $last_day,
             'reason' => $request->reason,
             'file' => $resignation_letter,
@@ -88,6 +90,8 @@ class EmployeeExitController extends Controller
             'company_id' => $this->sessionDetails('company_id')
         ]);
 
+        $staff = Staff::find($request->staff_id ?? $staff_id);
+        LogService::admin(auth()->user()->id, $staff->user->id, 'Create or update an employee exit, '.  $request->reason .' (' . $ee->id .')', 'CREATE');
         return response()->json(['message' => 'Success', 'data' => []], 200);
     }
 
@@ -124,6 +128,8 @@ class EmployeeExitController extends Controller
         }
 
         $employeeExit->update($validator->validated());
+
+        LogService::admin(auth()->user()->id, $employeeExit->staff->user->id, 'Update an employee exit to '. $request->status .'(' . $employeeExit->id .')', 'UPDATE');
         return response()->json(['message' => 'Successfully updated', 'data' => $employeeExit], 200);
     }
 

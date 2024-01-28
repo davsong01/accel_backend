@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Models\CompanyDocument;
+use App\Services\LogService;
 use Illuminate\Validation\Rule;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Validator;
@@ -62,6 +63,8 @@ class CompanyDocumentController extends Controller
         }
 
         $document = CompanyDocument::create($data);
+
+        LogService::admin(auth()->user()->id, NULL, 'Create a company\'s document ('. $document->id .')', 'CREATE');
         return response()->json(['message' => 'Success', 'data' => $document], 200);
     }
 
@@ -113,6 +116,7 @@ class CompanyDocumentController extends Controller
 
         $companyDocument->update($data);
 
+        LogService::admin(auth()->user()->id, NULL, 'Update a company\'s document ('. $companyDocument->id .')', 'UPDATE');
         return response()->json(['message' => 'Success', 'data' => null], 200);
     }
 
@@ -122,6 +126,9 @@ class CompanyDocumentController extends Controller
     public function destroy(CompanyDocument $companyDocument)
     {
         $this->deleteImage($companyDocument->file);
+
+        LogService::admin(auth()->user()->id, NULL, 'Delete a company\'s document ('. $companyDocument->id .')', 'DELETE');
+
         $companyDocument->delete();
         return response()->json(['message' => 'Success', 'data' => null], 200);
     }

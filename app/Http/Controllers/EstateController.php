@@ -14,6 +14,7 @@ use Illuminate\Http\RedirectResponse;
 use App\Models\EstatePropertyTypeDetails;
 use App\Models\LegalDocumentTemplate;
 use App\Models\LegalDocumentType;
+use App\Services\LogService;
 use Illuminate\Support\Facades\Validator;
 
 class EstateController extends Controller
@@ -234,6 +235,7 @@ class EstateController extends Controller
             }
         }
 
+        LogService::admin(auth()->user()->id, null, 'Create an estate (' . $estate->id .')', 'CREATE');
         return response()->json(['message' => 'Created successfully', 'data' => $estate], 200);
     }
 
@@ -268,7 +270,8 @@ class EstateController extends Controller
             "company_id" => $this->sessionDetails('company_id') ?? null
         ]);
 
-        return response()->json(['message' => 'Estate Property Type added Succesfully', 'data' => $p_type], 200);
+        LogService::admin(auth()->user()->id, null, 'Create or update an estate property type details (' . $p_type->id .')', 'CREATE');
+        return response()->json(['message' => 'Estate Property Type added Successfully', 'data' => $p_type], 200);
     }
 
     /**
@@ -349,6 +352,8 @@ class EstateController extends Controller
                 ]);
             }
         }
+
+        LogService::admin(auth()->user()->id, null, 'Update an estate (' . $estate->id .')', 'UPDATE');
         return response()->json(['message' => 'Updated Successfully.', 'data' => $estate], 200);
     }
 
@@ -357,6 +362,8 @@ class EstateController extends Controller
      */
     public function destroy(Estate $estate)
     {
+        LogService::admin(auth()->user()->id, null, 'Delete an estate (' . $estate->id .')', 'DELETE');
+
         $estate->delete();
         return response()->json(['message' => 'Deleted Successfully.', 'data' => null], 200);
     }
@@ -388,6 +395,7 @@ class EstateController extends Controller
             "infrastructural_fee" => $request->infrastructural_fee
         ]);
 
+        LogService::admin(auth()->user()->id, null, 'Update an estate property type details (' . $property_type->id .')', 'UPDATE');
         return response()->json(['message' => 'Updated Successfully.', 'data' => $property_type], 200);
     }
 
@@ -400,6 +408,7 @@ class EstateController extends Controller
             $property_type->update(['status' => 1]);
         }
 
+        LogService::admin(auth()->user()->id, null, 'Change an estate property type status (' . $property_type->id .')', 'UPDATE');
         return response()->json(['message' => 'Updated Successfully.', 'data' => $property_type], 200);
     }
 
@@ -412,6 +421,7 @@ class EstateController extends Controller
             $estate->update(['status' => 1]);
         }
 
+        LogService::admin(auth()->user()->id, null, 'Change an estate status (' . $estate->id .')', 'UPDATE');
         return response()->json(['message' => 'Updated Successfully.', 'data' => $estate], 200);
     }
 
@@ -430,6 +440,7 @@ class EstateController extends Controller
 
         $estateSettings = EstateSettings::where('company_id', $this->sessionDetails('company_id'))->update(['form_expiry_date' => $request->form_expiry]);
 
+        LogService::admin(auth()->user()->id, null, 'Update an estate setting form expiry (' . $estateSettings->id .')', 'UPDATE');
         return response()->json(['message' => 'Updated Successfully.', 'data' => null], 200);
     }
 

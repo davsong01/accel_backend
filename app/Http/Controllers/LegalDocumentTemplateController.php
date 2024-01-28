@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\LegalDocumentTemplate;
+use App\Services\LogService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
@@ -40,6 +41,8 @@ class LegalDocumentTemplateController extends Controller
         ];
 
         $document = LegalDocumentTemplate::create($data);
+
+        LogService::admin(auth()->user()->id, null, 'Create a legal document type (' . $document->id  . ')' , 'CREATE');
         return response()->json(['message' => 'Success', 'data' => $document], 200);
     }
 }

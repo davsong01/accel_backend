@@ -9,6 +9,7 @@ use App\Models\LegalDocumentTemplate;
 use App\Models\LegalDocumentType;
 use App\Models\User;
 use App\Services\GeneratedDocumentService;
+use App\Services\LogService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -59,6 +60,7 @@ class LegalDocumentController extends Controller
             'legal_document_type_id' => $data['legal_document_type_id']
         ], $data);
 
+        LogService::admin(auth()->user()->id, null, 'Update or create a legal document type (' . $document->id  . ')' , 'CREATE');
         return response()->download(base_path($filepath));
     }
 
@@ -141,6 +143,7 @@ class LegalDocumentController extends Controller
             $generatedLegalDocument->save();
         }
 
+        LogService::admin(auth()->user()->id, null, 'Update a generated legal document (' . $generatedLegalDocument->id  . ')' , 'UPDATE');
         return response()->download(base_path($filepath));
     }
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Account;
+use App\Services\LogService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Validation\Rule;
@@ -60,6 +61,7 @@ class AccountController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
+        LogService::admin(auth()->user()->id, null, 'Create or update an account(' . $account->id . ')', 'CREATE');
         return response()->json(['message' => 'Created successfully', 'data' => $account], 200);
     }
 
@@ -112,6 +114,7 @@ class AccountController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
+        LogService::admin(auth()->user()->id, null, 'Update an account(' . $account->id . ')', 'UPDATE');
         return response()->json(['message' => 'Created successfully', 'data' => $account], 200);
     }
 
@@ -120,6 +123,8 @@ class AccountController extends Controller
      */
     public function destroy(Account $account)
     {
+        LogService::admin(auth()->user()->id, null, 'Delete an account(' . $account->id . ')', 'DELETE');
+
         $account->delete();
         return response()->json(['message' => 'Deleted Successfully.', 'data' => null], 200);
     }

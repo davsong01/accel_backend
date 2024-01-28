@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\City;
 use App\Models\Estate;
+use App\Services\LogService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Validation\Rule;
@@ -53,7 +54,8 @@ class CityController extends Controller
             'name' => $request->name,
             'company_id' => $this->sessionDetails('company_id'),
         ]);
-
+        
+        LogService::admin(auth()->user()->id, NULL, 'Create a city ('. $city->id .')', 'CREATE');
         return response()->json(['message' => 'Created successfully', 'data' => $city], 200);
     }
 
@@ -93,6 +95,7 @@ class CityController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
+        LogService::admin(auth()->user()->id, NULL, 'Update a city ('. $city->id .')', 'UPDATE');
         return response()->json(['message' => 'Updated Successfully.', 'data' => $city], 200);
     }
 
@@ -106,6 +109,9 @@ class CityController extends Controller
         if ($count > 0) {
             return response()->json(['message' => 'Unable to delete, resource in use', 'data' => null], 412);
         }
+
+        LogService::admin(auth()->user()->id, NULL, 'Delete a city ('. $city->id .')', 'DELETE');
+
         $city->delete();
         return response()->json(['message' => 'Deleted Successfully.', 'data' => null], 200);
     }

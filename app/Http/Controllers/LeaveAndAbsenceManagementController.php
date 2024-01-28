@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\RedirectResponse;
 use App\Models\LeaveAndAbsenceSetting;
 use App\Models\LeaveAndAbsenceManagement;
+use App\Services\LogService;
 use Illuminate\Support\Facades\Validator;
 
 
@@ -197,6 +198,7 @@ class LeaveAndAbsenceManagementController extends Controller
 
         $this->notify($data);
 
+        LogService::admin(auth()->user()->id, null, 'Create a leave and absence management (' . $lam->id  . ')' , 'CREATE');
         return response()->json(['message' => 'Created successfully', 'data' => $lam], 200);
     }
 
@@ -228,6 +230,8 @@ class LeaveAndAbsenceManagementController extends Controller
         ];
 
         $this->notify($data);
+
+        LogService::admin(auth()->user()->id, null, 'Approve a leave and absence management (' . $lam->id  . ')' , 'UPDATE');
         return response()->json(['message' => 'Approved successfully', 'data' => $lam], 200);
     }
 
@@ -247,6 +251,7 @@ class LeaveAndAbsenceManagementController extends Controller
 
         $this->notify($data);
 
+        LogService::admin(auth()->user()->id, null, 'Decline a leave and absence management (' . $lam->id  . ')' , 'UPDATE');
         return response()->json(['message' => 'Declined successfully', 'data' => $lam], 200);
     }
 
@@ -279,6 +284,7 @@ class LeaveAndAbsenceManagementController extends Controller
             'period' => $request->period
         ]);
 
+        LogService::admin(auth()->user()->id, null, 'Update or create a leave and absence setting (' . $setting->id  . ')' , 'UPDATE');
         return response()->json(['message' => 'Updated successfully', 'data' => null], 200);
     }
 

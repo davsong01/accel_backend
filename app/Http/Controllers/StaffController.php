@@ -21,6 +21,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Validator;
 use App\Models\StaffIdentificationSetting;
+use App\Services\LogService;
 use League\CommonMark\Extension\SmartPunct\EllipsesParser;
 
 class StaffController extends Controller
@@ -155,7 +156,9 @@ class StaffController extends Controller
             }
         }
 
+        $staff = Staff::find($request->staff_id);
 
+        LogService::admin(auth()->user()->id, $staff->user->id, 'Assign a role to staff' , 'CREATE');
         return response()->json(['message' => 'Created successfully', 'data' => []], 200);
     }
 
@@ -313,6 +316,7 @@ class StaffController extends Controller
             $this->logEmail($data);
         }
 
+        LogService::admin(auth()->user()->id, $staff->user->id, 'Add a staff' , 'CREATE');
         return response()->json(['message' => 'Successful!', 'data' => ['staff_id' => $staff->id]], 200);
     }
 
@@ -451,6 +455,8 @@ class StaffController extends Controller
             'company_id' => $this->sessionDetails('company_id')
         ]);
 
+        LogService::admin(auth()->user()->id, $staff->user->id, 'Update a role to staff' , 'UPDATE');
+
         return response()->json(['message' => 'Successfully updated!', 'data' => ['staff_id' => $request->staff_id]], 200);
     }
 
@@ -519,6 +525,7 @@ class StaffController extends Controller
 
         StaffIdentificationSetting::updateOrCreate(['company_id' => $data['company_id']], $data);
 
+        LogService::admin(auth()->user()->id, null, 'Update staff identification setting' , 'UPDATE');
         return response()->json(['message' => 'Operation successfull', 'data' => $request['order_of_appearance']], 200);
     }
 
@@ -556,6 +563,8 @@ class StaffController extends Controller
 
         StaffDocumentSetting::updateOrCreate($data);
 
+        LogService::admin(auth()->user()->id, null, 'Add staff document setting' , 'CREATE');
+
         return response()->json(['message' => 'Operation Successfull', 'data' => []], 200);
     }
 
@@ -579,11 +588,14 @@ class StaffController extends Controller
 
         $settings = StaffDocumentSetting::where(['id' => $id, 'company_id' => $this->sessionDetails('company_id')])->update($data);
 
+        LogService::admin(auth()->user()->id, null, 'Update staff document settings' , 'UPDATE');
         return response()->json(['message' => 'Operation successfull', 'data' => $settings], 200);
     }
 
     public function deleteStaffDocumentSetting(Request $request, $id)
     {
+        LogService::admin(auth()->user()->id, null, 'Delete staff document settings (' . $id . ')' , 'DELETE');
+
         $settings = StaffDocumentSetting::where(['id' => $id, 'company_id' => $this->sessionDetails('company_id')])->delete();
 
         return response()->json(['message' => 'Operation successfull', 'data' => []], 200);

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ChartOfAccount;
+use App\Models\Customer;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Services\LogService;
@@ -17,7 +18,7 @@ class FinanceController extends Controller
      */
     public function GLAccount(): JsonResponse
     {
-        $accounts = ChartOfAccount::with(['account_category', 'account_type'])->paginate(20);
+        $accounts = ChartOfAccount::with(['account_category', 'account_type'])->where(['status' => 'active'])->latest()->paginate(20);
         return response()->json(['message' => 'Success', 'data' => $accounts], 200);
     }
 
@@ -26,13 +27,31 @@ class FinanceController extends Controller
      */
     public function GLAccountTransactions(ChartOfAccount $account): JsonResponse
     {
-        $transactions = $account->payments()->with(['staff:id,user_id,account_name,account_number'])->paginate(20);
+        $transactions = $account->payments()->with(['staff:id,user_id,account_name,account_number'])->latest()->paginate(20);
         return response()->json(['message' => 'Success', 
         'data' => [
             'account' => $account->load(['account_category', 'account_type']),
             'transactions' => $transactions
             ]], 200);
     }
+
+
+    /**
+     * Search/filter GL Account
+     * 
+     */
+    public function searchGLAccount(Request $request){ 
+        $params = $request->only(['status', 'accounttype_id']);
+        
+        $query = ChartOfAccount::with(['account_category', 'account_type'])->where($params);
+
+        if($account_number = $request->input('account_number'))
+            $query->where('account_number', 'LIKE', '%'.$account_number.'%');
+
+        $accounts = $query->latest()->paginate(20);
+        return response()->json(['message' => 'success', 'data' => $accounts], 200);
+     }
+
 
      /**
      * Display a listing of the GL Ledger.
@@ -76,7 +95,9 @@ class FinanceController extends Controller
         $attributes = $validator->validated();
 
         $transaction = $this->createTransaction($attributes);
-        LogService::admin(auth()->user()->id, $request->customer_id, 'New transaction entry', 'CREATE');
+
+        $customer = Customer::find($request->customer_id);
+        LogService::admin(auth()->user()->id, $customer->user->id, 'New transaction entry (' . $transaction->id .')', 'CREATE');
         return response()->json(['message' => 'success', 'data' => $transaction], 200);
     }
 
@@ -98,7 +119,7 @@ class FinanceController extends Controller
             $user = User::where('first_name', 'LIKE', '%'.$name.'%')
             ->orWhere('last_name', 'LIKE', '%'.$name.'%')
             ->orWhere('middle_name', 'LIKE', '%'.$name.'%')->first();
-            $query->where('staff_id', $user?->id);
+            $query->where('staff_id', $user?->id)->where('staff_id', '!=', null);
         }
 
         $transactions = $query->latest()->paginate(20);

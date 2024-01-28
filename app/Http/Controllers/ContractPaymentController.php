@@ -10,6 +10,7 @@ use App\Models\CustomerContract;
 use App\Models\SeInfrastructure;
 use App\Models\ContractPaymentThread;
 use App\Models\SeInfrastructureThread;
+use App\Services\LogService;
 use Illuminate\Support\Facades\Validator;
 
 class ContractPaymentController extends Controller
@@ -121,6 +122,8 @@ class ContractPaymentController extends Controller
         $data['attachments'] = array_column($payments, 'receipt_location');
 
         $this->logEmail($data);
+
+        LogService::admin(auth()->user()->id, NULL, 'Update a company\'s contract, contract payment, contract payment thread and transaction ('. $contractX->id .')', 'UPDATE');
         return response()->json(['message' => 'Payment successful', 'data' => []], 200);
     }
 

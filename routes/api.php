@@ -163,6 +163,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
 
         Route::resource('company-document', CompanyDocumentController::class);
         Route::get('company-settings', [CompanySettingController::class, 'index']);
+        Route::match(['GET', 'POST', 'PUT', 'PATCH'], 'company-settings/application-settings', [CompanySettingController::class, 'applicationSettings']);
         // Route::get('get-countries-currencies/{country_id?}', [CompanySettingController::class, 'countryAnCurrencies']);
 
         Route::resource('roles', RoleController::class);
@@ -346,6 +347,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
             Route::get('gl-ledger/search', 'searchGLLedger');
             Route::get('gl-ledger/{transaction}', 'showGLLedger');
             Route::get('gl-account', 'GLAccount')->name('gl-account');
+            Route::get('gl-account/search', 'searchGLAccount')->name('gl-account.search');
             Route::get('gl-account/{account}/transactions', 'GLAccountTransactions')->name('gl-account.transactions');
         });
 
@@ -358,6 +360,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         });
 
         Route::get('audit/log', [LogController::class, 'audit']);
+        Route::get('audit/log/search', [LogController::class, 'search']);
     });
 });
 

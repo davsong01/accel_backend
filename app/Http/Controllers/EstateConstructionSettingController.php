@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Http\RedirectResponse;
 use App\Models\EstateConstructionSetting;
+use App\Services\LogService;
 use Illuminate\Support\Facades\Validator;
 
 class EstateConstructionSettingController extends Controller
@@ -56,6 +57,7 @@ class EstateConstructionSettingController extends Controller
             'building_type_id' => $request->building_type_id,
         ]);
 
+        LogService::admin(auth()->user()->id, null, 'Create or update an estate construct settings (' . $setting->id .')', 'CREATE');
         return response()->json(['message' => 'Created successfully', 'data' => $setting], 200);
     }
 
@@ -98,6 +100,7 @@ class EstateConstructionSettingController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
+        LogService::admin(auth()->user()->id, null, 'Update an estate construct settings (' . $estateConstructionSetting->id .')', 'UPDATE');
         return response()->json(['message' => 'Updated Successfully.', 'data' => $estateConstructionSetting], 200);
     }
 
@@ -106,6 +109,8 @@ class EstateConstructionSettingController extends Controller
      */
     public function destroy(EstateConstructionSetting $estateConstructionSetting)
     {
+        LogService::admin(auth()->user()->id, null, 'Delete an estate construct settings (' . $estateConstructionSetting->id .')', 'DELETE');
+
         $estateConstructionSetting->delete();
         return response()->json(['message' => 'Deleted Successfully.', 'data' => null], 200);
     }

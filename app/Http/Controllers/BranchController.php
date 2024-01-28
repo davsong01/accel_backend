@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Branch;
+use App\Services\LogService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Validation\Rule;
@@ -59,6 +60,7 @@ class BranchController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
+        LogService::admin(auth()->user()->id, NULL, 'Create or update a branch ('. $branch->id . ')', 'CREATE');
         return response()->json(['message' => 'Created successfully', 'data' => $branch], 200);
     }
 
@@ -103,6 +105,7 @@ class BranchController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
+        LogService::admin(auth()->user()->id, NULL, 'Update a branch ('. $branch->id . ')', 'UPDATE');
         return response()->json(['message' => 'Updated Successfully.', 'data' => $branch], 200);
     }
 
@@ -111,6 +114,8 @@ class BranchController extends Controller
      */
     public function destroy(Branch $branch)
     {
+        LogService::admin(auth()->user()->id, NULL, 'Delete a branch ('. $branch->id . ')', 'DELETE');
+
         $branch->delete();
         return response()->json(['message' => 'Deleted Successfully.', 'data' => null], 200);
     }

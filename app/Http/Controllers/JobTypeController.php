@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\JobType;
+use App\Services\LogService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Validation\Rule;
@@ -53,6 +54,7 @@ class JobTypeController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
+        LogService::admin(auth()->user()->id, null, 'Create or update a job type (' . $jobtype->id  . ')' , 'CREATE');
         return response()->json(['message' => 'Created successfully', 'data' => $jobtype], 200);
     }
 
@@ -93,6 +95,7 @@ class JobTypeController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
+        LogService::admin(auth()->user()->id, null, 'Update a job role (' . $jobtype->id  . ')' , 'UPDATE');
         return response()->json(['message' => 'Updated successfully', 'data' => $jobtype], 200);
     }
 
@@ -101,6 +104,8 @@ class JobTypeController extends Controller
      */
     public function destroy(JobType $jobtype)
     {
+        LogService::admin(auth()->user()->id, null, 'Update a job type (' . $jobtype->id  . ')' , 'DELETE');
+
         $jobtype->delete();
         return response()->json(['message' => 'Deleted Successfully.', 'data' => $jobtype], 200);
     }

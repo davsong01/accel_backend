@@ -18,6 +18,7 @@ use App\Models\StaffUploadedDocument;
 use App\Http\Controllers\StaffController;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\MessageTransactionController;
+use App\Services\LogService;
 
 class SelfServiceController extends Controller
 {
@@ -150,6 +151,7 @@ class SelfServiceController extends Controller
 
         $user->update(['avatar' => $avatar]);
 
+        LogService::admin(auth()->user()->id, null, 'Add an avatar (' . $user->id  . ')' , 'UPDATE');
         return response()->json(['message' => 'Success', 'data' => Auth::user()->avatar], 200);
     }
 
@@ -173,6 +175,8 @@ class SelfServiceController extends Controller
         }
 
         $user->update(['avatar' => null]);
+
+        LogService::admin(auth()->user()->id, null, 'Delete an avatar (' . $user->id  . ')' , 'UPDATE');
 
         return response()->json(['message' => 'Delete succesful', 'data' => null], 200);
     }
@@ -260,7 +264,8 @@ class SelfServiceController extends Controller
             }
         }
 
-        return response()->json(['message' => 'Upload succesful', 'data' => []], 200);
+        LogService::admin(auth()->user()->id, null, 'Upload documents avatar (' . $setting->id  . ')' , 'UPDATE');
+        return response()->json(['message' => 'Upload successful', 'data' => []], 200);
     }
 
     public function deleteDocument($id)
@@ -273,6 +278,8 @@ class SelfServiceController extends Controller
 
         if ($document) {
             $this->deleteUploadedFile($document->file);
+
+            LogService::admin(auth()->user()->id, null, 'Delete a document an avatar (' . $id  . ')' , 'DELETE');
 
             $document->delete();
             return response()->json(['message' => 'Delete succesful', 'data' => []], 200);
@@ -347,6 +354,7 @@ class SelfServiceController extends Controller
         $mes = new MessageTransactionController();
         $mes->logEmailTransaction($data);
 
+        LogService::admin(auth()->user()->id, null, 'Change password' , 'UPDATE');
         return response()->json(['message' => 'Password reset link has been sent to registered email', 'data' => null], 200);
     }
 
@@ -376,6 +384,7 @@ class SelfServiceController extends Controller
 
         // delete current token 
 
+        LogService::admin($user->id, null, 'Reset password (' . $user->id  . ')' , 'UPDATE');
         $passwordReset->delete();
 
         return response(['message' => 'Password successfully reset', 'data' => null], 200);

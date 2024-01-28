@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\TransactionType;
+use App\Services\LogService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -53,6 +54,8 @@ class TransactionTypeController extends Controller
         $attributes = [...$validator->validated(), 'company_id' => $this->sessionDetails('company_id')];
         $created = TransactionType::create($attributes);
 
+        LogService::admin(auth()->user()->id, null, 'Create transaction type (' . $created->id  . ')' , 'CREATE');
+
         return response()->json(['message' => 'Created successfully', 'data' => $created], 200);
     }
 
@@ -85,6 +88,7 @@ class TransactionTypeController extends Controller
 
         $type->update($validator->validated());
 
+        LogService::admin(auth()->user()->id, null, 'Update transaction type (' . $type->id  . ')' , 'UPDATE');
         return response()->json(['message' => 'Updated successfully', 'data' => $type->load('purposes')], 200);
     }
 
@@ -93,6 +97,8 @@ class TransactionTypeController extends Controller
      */
     public function destroy(TransactionType $type)
     {
+        LogService::admin(auth()->user()->id, null, 'Delete transaction type (' . $type->id  . ')' , 'DELETE');
+
         $type->delete();
         return response()->json(['message' => 'Deleted Successfully.', 'data' => null], 200);
     }

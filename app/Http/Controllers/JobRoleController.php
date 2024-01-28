@@ -6,6 +6,7 @@ use App\Models\JobRole;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Imports\JobRoleImport;
+use App\Services\LogService;
 use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\RedirectResponse;
@@ -62,6 +63,7 @@ class JobRoleController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
+        LogService::admin(auth()->user()->id, null, 'Create or update a job role (' . $jobrole->id  . ')' , 'CREATE');
         return response()->json(['message' => 'Created successfully', 'data' => $jobrole], 200);
     }
 
@@ -114,6 +116,7 @@ class JobRoleController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
+        LogService::admin(auth()->user()->id, null, 'Update a job role (' . $jobrole->id  . ')' , 'UPDATE');
         return response()->json(['message' => 'Updated successfully', 'data' => $jobrole], 200);
     }
 
@@ -122,6 +125,8 @@ class JobRoleController extends Controller
      */
     public function destroy(JobRole $jobrole)
     {
+        LogService::admin(auth()->user()->id, null, 'Delete a job role (' . $jobrole->id  . ')' , 'DELETE');
+
         $jobrole->delete();
         return response()->json(['message' => 'Deleted Successfully.', 'data' => $jobrole], 200);
     }
