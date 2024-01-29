@@ -159,7 +159,7 @@ ${payment_bank} --}}
 {{ $contract->primaryMarketer()['first_name'] . ' ' .  $contract->primaryMarketer()['last_name'] }}
 <br /><br />
 <span class="text-header">Payment Purpose</span>
-{{ucwords(str_replace("_"," ", $payment->transaction->purpose))}}
+{{ucwords(str_replace("_"," ", $payment->transaction->purpose ?? $payment->purpose))}}
 </pre>
         </td>
       </tr>
@@ -184,10 +184,10 @@ ${payment_bank} --}}
       <tbody>
         <tr>
           <td>1</td>
-          <td>{{$payment->created_at->format('jS F, Y, h:iA')}}</td>
+          <td>{{$payment->created_at}}</td>
           <td>{{$payment->description}}</td>
-          <td>{{ $companySetting->currencyData->symbol.number_format($payment->contract_value) }}</td>
-          <td>{{ $companySetting->currencyData->symbol.number_format($payment->discount_applied ?? 0) }}</td>
+          <td>{{ $companySetting->currencyData->symbol.number_format($others['contract_value'] ?? $payment->contract_value) }}</td>
+          <td>{{ $companySetting->currencyData->symbol.number_format($others['discount_applied'] ?? $payment->discount_applied ) }}</td>
           <td>{{ $companySetting->currencyData->symbol.number_format($payment->amount) }}</td>
           <td></td>
         </tr>
@@ -201,9 +201,10 @@ ${payment_bank} --}}
           <pre>
               {{-- <span style="border-bottom: 1px solid black; padding-bottom: 0.5rem;">Previous Amount Paid <strong>${previous_amountPaid}</strong></span> --}}
               {{-- <br /><br /> --}}
-              <span style="border-bottom: 1px solid black; padding-bottom: 0.5rem;">Balance <strong>{{ $companySetting->currencyData->symbol.number_format($payment->balance) }}</strong></span>
-              <br /><br />
             Current Amount Paid <strong>{{ $companySetting->currencyData->symbol.number_format($payment->amount) }}</strong>
+
+            Total Amount Paid <strong>{{ $companySetting->currencyData->symbol.number_format($others['total_amount_paid'] ?? $payment->amount) }}</strong> <br><br>
+            <span style="border-bottom: 1px solid black; padding-bottom: 0.5rem;">Balance <strong>{{ $companySetting->currencyData->symbol.number_format($others['balance'] ?? $payment->balance) }}</strong></span>
           </pre>
         </td>
       </tr>
@@ -215,11 +216,8 @@ ${payment_bank} --}}
       <tr>
         <td align="left" style="width: 40%">
           <pre>
-
-
-    <br /><br />
     Payment received by 
-    <strong>{{ $payment->transaction->staff->user->first_name . ' ' . $payment->transaction->staff->user->last_name }}</strong>
+    <strong>{{ ($payment->transaction->staff->user->first_name ?? $payment->staff_firstname) . ' ' . ($payment->transaction->staff->user->last_name ?? $payment->staff_lasttname) }}</strong>
     </pre>
         </td>
 

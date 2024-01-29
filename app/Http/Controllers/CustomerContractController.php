@@ -590,7 +590,7 @@ class CustomerContractController extends Controller
             $estates = $estate_validator->valid();
 
             $newContracts = $this->sanitizeContractsByEstateIds($estates, $request->customer_id);
-         
+            
             if(!empty($newContracts)){
                 $sanitized[] = [
                     'estate_id' => $data['estate_id'],
@@ -689,14 +689,14 @@ class CustomerContractController extends Controller
     public function sanitizeContractsByEstateIds($allData, $customer_id){
         // Get all customer contract for this estate
         $contracts = CustomerContract::where('customer_id', $customer_id)->where('estate_id', $allData['estate_id'])->where('status','lead');
-
+       
         $selected = null;
         if(!empty($allData['contract_id'])){
             CustomerContract::where('customer_id', $customer_id)->where('estate_id', $allData['estate_id'])->whereNotIn('id', $allData['contract_id'])->delete();
             // delete();
 
             $newContracts = CustomerContract::where('customer_id', $customer_id)->where('estate_id', $allData['estate_id'])->whereIn('id', $allData['contract_id'])->pluck('id')->toArray();
-
+           
             $selected = $newContracts;
             
         }

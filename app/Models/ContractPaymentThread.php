@@ -25,6 +25,16 @@ class ContractPaymentThread extends Model
     //     );
     // }
 
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class);
+    }
+
+    public function transaction()
+    {
+        return $this->hasOne(Transaction::class, 'transaction_id', 'transaction_id');
+    }
+
     protected function createdAt(): Attribute
     {
         return Attribute::make(

@@ -47,7 +47,8 @@ class CustomerContract extends Model
 
     public function contract_payment()
     {
-        return $this->hasOne(ContractPayment::class, 'contract_id')->select('id','contract_id','amount','property_net_fee');
+        return $this->hasOne(ContractPayment::class, 'contract_id');
+        // ->select('id','contract_id','customer_id','amount','property_net_fee','balance','transaction_id');
     }
 
     public function building_type()

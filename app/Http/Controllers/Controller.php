@@ -92,6 +92,7 @@ class Controller extends BaseController
     {
         // Expects an array of estate ids with their sub array of contract ids
         $amount = Estate::where('id', $estate_id)->first()->form_amount;
+        
         return $amount;
     }
 

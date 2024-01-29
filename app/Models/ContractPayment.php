@@ -40,4 +40,11 @@ class ContractPayment extends Model
     {
         return $this->hasMany(ContractPaymentThread::class, 'contract_payments_id');
     }
+
+    protected function createdAt(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string $value) => date("M jS, Y", strtotime($value)),
+        );
+    }
 }

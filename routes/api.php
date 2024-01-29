@@ -270,6 +270,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::post('setting-excavation-payment', [ContractPaymentController::class, 'makeSettingAndEscavationPayment']);
         Route::get('get-se-escavation-setting/{contract}', [ContractPaymentController::class, 'seEscavationSetting']);
         Route::post('allocate-contract', [ContractAllocationController::class, 'allocateContract']);
+        Route::post('continue-payment/{contract_id}', [ContractPaymentController::class, 'continueContractPayment']);
 
         Route::get('staff-deals/{staff_id}', [StaffController::class, 'staffDeals']);
 

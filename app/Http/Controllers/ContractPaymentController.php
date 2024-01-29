@@ -30,7 +30,8 @@ class ContractPaymentController extends Controller
     {
     }
 
-    public function contractPaymentHistory($contract_id){
+    public function contractPaymentHistory($contract_id)
+    {
         $paymentHistory = ContractPayment::where('contract_id', $contract_id)->first();
         $history = [
             'contract_id' => $contract_id,
@@ -38,7 +39,6 @@ class ContractPaymentController extends Controller
         ];
 
         return response()->json(['message' => 'Succee', 'data' => $history], 200);
-        
     }
     /**
      * Store a newly created resource in storage.
@@ -123,8 +123,151 @@ class ContractPaymentController extends Controller
 
         $this->logEmail($data);
 
-        LogService::admin(auth()->user()->id, NULL, 'Update a company\'s contract, contract payment, contract payment thread and transaction ('. $contractX->id .')', 'UPDATE');
+        LogService::admin(auth()->user()->id, NULL, 'Update a company\'s contract, contract payment, contract payment thread and transaction (' . $contractX->id . ')', 'UPDATE');
         return response()->json(['message' => 'Payment successful', 'data' => []], 200);
+    }
+
+    public function continueContractPayment(Request $request, $contract_id)
+    {
+        $validator = Validator::make($request->all(), [
+            'account_id' => 'required|exists:chart_of_accounts,id,company_id,' . $this->sessionDetails('company_id'),
+            'customer_id' => 'required|exists:customers,id,company_id,' . $this->sessionDetails('company_id'),
+            'payment_slip' => 'nullable',
+            'amount' => 'required',
+            'description' => 'nullable',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->messages()->first(),
+                'data' => null,
+            ], 412);
+        }
+        $contract = CustomerContract::where('id', $contract_id)->first();
+        $payment = ContractPayment::where('contract_id', $contract->id)->first();
+
+        if ($payment->balance == 0) {
+            return response()->json([
+                'error' => 'Full payment has already been made for : ' . $contract->contract_name,
+                'data' => null,
+            ], 422);
+        }
+
+        $res = $this->processContinueContractPayment($contract, $request->all(), $payment);
+
+        if (isset($res['status']) && $res['status'] == 'error') {
+            return response()->json(['error' => $res['message'], 'data' => []], 200);
+        }
+
+        // Log email
+        LogService::admin(auth()->user()->id, NULL, 'Update a company\'s contract, contract payment, contract payment thread and transaction (' . $contract->id . ')', 'UPDATE');
+        $this->logContractEmail($contract, $payment);
+        
+        return response()->json(['message' => 'Payment successful', 'data' => []], 200);
+    }
+
+    public function logContractEmail($contract, $payment)
+    {
+        // Log Email of receipt and provisional letter
+        if ($contract->contract_status == 'ongoing') {
+            $data['type'] = 'contract.payment';
+        } else {
+            $data['type'] = 'contract.payment';
+        }
+        $data['name'] =  $contract->customer->user->first_name;
+        $data['email'] =  $contract->customer->user->email;
+        $data['attachments'] = $payment['receipt_location'];
+
+        $this->logEmail($data);
+    }
+
+    public function processContinueContractPayment($contract, $data, $payment)
+    {
+        // try {
+        $transaction_id = $this->generateTransactionId('CTB');
+
+        if (!empty($data['payment_slip'])) {
+            $filename = $this->uploadFile($data['payment_slip'], 'payments');
+        } else {
+            $filename = null;
+        }
+
+        $amount = $data['amount'];
+        $fee = $payment->property_net_fee;
+        $balance = $payment->balance;
+        $newbalance = $fee - ($payment->amount + $data['amount']);
+
+        if ($amount > $balance) {
+            $res = [
+                'status' => 'error',
+                'message' => 'You cannot make payment of more than: ' . $balance . ' for this contract',
+            ];
+
+            return $res;
+        }
+
+        $newbalance = $balance - $amount;
+
+        // Create Payment thread
+        $payment_thread = ContractPaymentThread::create([
+            'contract_payments_id' => $payment->id,
+            'amount' => $data['amount'],
+            'transaction_id' => $transaction_id,
+            'payment_slip' => $filename,
+            'account_id' => $data['account_id'],
+            'branch_id' => $payment->branch_id,
+            'description' => $data['description'],
+            'customer_id' => $data['customer_id'],
+            'company_id' => $this->sessionDetails('company_id')
+        ]);
+
+        $transaction = Transaction::create([
+            'customer_id' => $payment_thread->customer_id,
+            'amount' => $payment_thread->amount,
+            'transaction_id' => $transaction_id,
+            'account_id' => $data['account_id'] ?? $payment_thread->account_id,
+            'purpose' => 'balance_contract_payment',
+            'payment_slip' => $filename,
+            'description' => $payment_thread->description,
+            'staff_id' => auth()->user()->staff->id,
+            'type' => 'credit',
+            'company_id' => $this->sessionDetails('company_id'),
+        ]);
+
+        $payment->update([
+            'amount' => $payment->amount + $data['amount'],
+            'balance' => $newbalance,
+        ]);
+
+        $others['balance'] = $newbalance;
+        $others['contract_value'] = $payment->contract_value;
+        $others['discount_applied'] = $payment->discount_applied;
+        $others['total_amount_paid'] = $fee - $newbalance;
+        
+        // Generate payment receipt
+        $receipt = $this->generateContractPaymentReceipt($payment_thread, $contract, $others);
+        $payment_thread->update(['receipt_location' => $receipt['filepath'] ?? null]);
+        
+        if ($newbalance <= 0) {
+            $contract->update([
+                'contract_status' => 'paid',
+            ]);
+        }
+
+        return $payment;
+
+        // Do something with the commission from contract here
+        // } catch (\Throwable $th) {
+        //     //throw $th;
+        //     dd($th->getMessage());
+        //     $res = [
+        //         'status' => 'error',
+        //         'message' => 'An error occurred when making payment for: ' . $contract->contract_name . ' Error: ' . $th->getMessage(),
+        //     ];
+
+        //     return $res;
+        // }
+
     }
 
     public function processContractPayment($contract, $data)
@@ -218,7 +361,6 @@ class ContractPaymentController extends Controller
                 'type' => 'credit',
                 'company_id' => $this->sessionDetails('company_id'),
             ]);
-
             // Generate payment receipt
             if (env('ENT') != 'local') {
                 $receipt = $this->generateContractPaymentReceipt($payment, $contract);
@@ -240,20 +382,20 @@ class ContractPaymentController extends Controller
             \Log::info(['File' => 'ContractPaymentController', 'message' => $th->getMessage(), 'Line' => $th->getLine()]);
             $res = [
                 'status' => 'error',
-                'message' => 'An error occurred when making payment for: ' . $contract->contract_name. ' Error: '. $th->getMessage(),
+                'message' => 'An error occurred when making payment for: ' . $contract->contract_name . ' Error: ' . $th->getMessage(),
             ];
-        }
 
-        return $res;
+            return $res;
+        }
     }
 
-    public function generateContractPaymentReceipt($payment, $contract)
+    public function generateContractPaymentReceipt($payment, $contract,$others)
     {
-        $name = $payment->transaction_id;
+        $name = $transaction_id ?? $payment->transaction_id;
         $data['receipt_no'] = $name;
         $pathToSave = $this->getPathToSaveFile('receipts') . '/' . $name . '.pdf';
-
-        $pdf = PDF::loadView('receipts.contract-payment', compact('payment', 'data', 'contract'))->setPaper('a4', 'portrait');
+        // dd($payment->customer, $payment->transaction);
+        $pdf = PDF::loadView('receipts.contract-payment', compact('payment', 'data', 'contract','others'))->setPaper('a4', 'portrait');
 
         file_put_contents(base_path() . '/' . config('app.upload_path') . '/' . $pathToSave, $pdf->output());
         // Rmember to create a public folder in the root directory if there is a PDF error
@@ -325,7 +467,7 @@ class ContractPaymentController extends Controller
         // Get contract
         $contract = CustomerContract::where('id', $request->contract_id)->first();
 
-        if($contract->contract_status != 'completed'){
+        if ($contract->contract_status != 'completed') {
             return response()->json([
                 'error' => 'Please check that the status of this contract is: completed!',
                 'data' => null,
@@ -399,10 +541,10 @@ class ContractPaymentController extends Controller
         // Generate payment receipt, stop here todat
         $contract->fee = $payment->infrastructure_fee;
         $receipt = generateGenericPaymentReceipt($payment, $contract);
-        
+
         $payment->update(['receipt_location' => $receipt['filepath'] ?? null]);
         $payment_thread->update(['receipt_location' => $receipt['filepath'] ?? null]);
-        
+
         $data['type'] = 'se.escavation.payment';
         $data['element'] = $request->type;
         $data['name'] =  $payment->customer->user->first_name;
