@@ -53,7 +53,10 @@ class CompanySettingController extends Controller
             ]);
         }
 
-        LogService::admin(auth()->user()->id, NULL, 'Create a company\'s settings ('. $companySetting->id .')', 'CREATE');
+        if(auth::check()){
+            LogService::admin(auth()->user()->id, NULL, 'Create a company\'s settings ('. $companySetting->id .')', 'CREATE');
+        }
+        
         return response()->json(['message' => 'Success', 'data' => $companySetting], 200);
     }
 
