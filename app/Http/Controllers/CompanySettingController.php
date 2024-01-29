@@ -51,12 +51,10 @@ class CompanySettingController extends Controller
                 'primary_color' => 'red',
                 'secondary_color' => '#faaa2c'
             ]);
-        }
 
-        if(auth::check()){
             LogService::admin(auth()->user()->id, NULL, 'Create a company\'s settings ('. $companySetting->id .')', 'CREATE');
         }
-        
+
         return response()->json(['message' => 'Success', 'data' => $companySetting], 200);
     }
 
