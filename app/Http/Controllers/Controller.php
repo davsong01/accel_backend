@@ -158,55 +158,115 @@ class Controller extends BaseController
     //     ];
     // }
 
-    public function generateStaffId($date_of_employment = null, $internal = false)
+    // public function generateStaffId($date_of_employment = null, $internal = false)
+    // {
+    //     $date_of_employment = !empty($date_of_employment) ? Carbon::parse($date_of_employment) : Carbon::today();
+
+    //     $settings = StaffIdentificationSetting::where('company_id', $this->sessionDetails('company_id'))->first();
+
+    //     $lastUser = User::where('company_id', $this->sessionDetails('company_id'))->where('type', 'staff')->latest()->first();
+    //     $lastUserId = $lastUser->id + 1;
+    //     $lastStaffId = $lastUser->staff_id ?? 1;
+
+
+    //     if (!$settings) {
+    //         $id =  sprintf('%06d', $lastUserId);
+    //     } else {
+    //         $id = '';
+
+    //         if ($settings->use_id_generator == 1) {
+    //             if ($settings->id_generator_type == 'employment_year') {
+    //                 $id = $date_of_employment->format('Y') . sprintf('%06d', $lastUserId);
+    //             }
+
+    //             if ($settings->id_generator_type == 'employment_month') {
+    //                 $id = $date_of_employment->format('m') . sprintf('%06d', $lastUserId);
+    //             }
+
+    //             if ($settings->id_generator_type == 'employment_day') {
+    //                 $id = $date_of_employment->format('d') . sprintf('%06d', $lastUserId);
+    //             }
+
+    //             if ($settings->id_generator_type == 'auto_increment_number') {
+    //                 // $id = $date_of_employment->format('d');
+    //                 $digits = $settings->auto_increment_number_digit;
+    //                 $id = $lastUserId + $digits;
+
+    //                 return sprintf('%06d', $id);
+    //             }
+
+    //             if ($settings->id_generator_type == 'random_number') {
+    //                 $count = strlen($lastStaffId);
+    //                 $min = pow(10, $count - 1);
+    //                 $id = mt_rand($min, $min * 9);
+    //             }
+    //         } else {
+    //             $count = strlen($lastStaffId);
+    //             $min = pow(10, $count - 1);
+    //             $id = mt_rand($min, $min * 9);
+    //         }
+    //     }
+
+
+    //     if ($internal && $internal == true) {
+    //         return $id;
+    //     }
+
+    //     return response()->json(['message' => 'Successful', 'data' => $id], 200);
+    // }
+    public function generateStaffId($date_of_employment = null, $isJson = false)
     {
-        $date_of_employment = !empty($date_of_employment) ? Carbon::parse($date_of_employment) : Carbon::today();
+        $created_at = !empty($date_of_employment) ? Carbon::parse($date_of_employment) : Carbon::today();
 
         $settings = StaffIdentificationSetting::where('company_id', $this->sessionDetails('company_id'))->first();
+
         $lastUser = User::where('company_id', $this->sessionDetails('company_id'))->where('type', 'staff')->latest()->first();
         $lastUserId = $lastUser->id + 1;
-        $lastStaffId = $lastUser->staff_id ?? 1;
-
+        $lastStaffId = $lastUser->staff->id ?? 1;
+      
         if (!$settings) {
-            $id =  sprintf('%06d', $lastUserId);
-        } else {
-            $id = '';
-
-            if ($settings->use_id_generator == 1) {
-                if ($settings->id_generator_type == 'employment_year') {
-                    $id = $date_of_employment->format('Y') . sprintf('%06d', $lastUserId);
-                }
-
-                if ($settings->id_generator_type == 'employment_month') {
-                    $id = $date_of_employment->format('m') . sprintf('%06d', $lastUserId);
-                }
-
-                if ($settings->id_generator_type == 'employment_day') {
-                    $id = $date_of_employment->format('d') . sprintf('%06d', $lastUserId);
-                }
-
-                if ($settings->id_generator_type == 'auto_increment_number') {
-                    // $id = $date_of_employment->format('d');
-                    $digits = $settings->auto_increment_number_digit;
-                    $id = $lastUserId + $digits;
-
-                    return sprintf('%06d', $id);
-                }
-
-                if ($settings->id_generator_type == 'random_number') {
-                    $count = strlen($lastStaffId);
-                    $min = pow(10, $count - 1);
-                    $id = mt_rand($min, $min * 9);
-                }
-            } else {
-                $count = strlen($lastStaffId);
-                $min = pow(10, $count - 1);
-                $id = mt_rand($min, $min * 9);
-            }
+            return response()->json(['message' => 'Successful', 'data' => $lastUserId], 200);
         }
 
+        $order_of_appearance = !empty($settings->order_of_appearance) ? json_decode($settings->order_of_appearance, true) : [];
+        $id = "";
 
-        if ($internal && $internal == true) {
+        if ($settings->use_id_generator == 1) {
+            $format = !empty($settings->appearance_format) ? $settings->appearance_format : ' ';
+            
+            foreach ($order_of_appearance as $appearance) {
+                $slash = end($order_of_appearance) != $appearance ? '/' : '';
+                if ($appearance == 'prefix') {
+                    $id .= $settings->prefix . $slash;
+                }
+                
+                if ($appearance == 'registration_year') {
+                    $id .= $created_at->format('Y') . $slash;
+                }
+
+                if ($appearance == 'registration_month') {
+                    $id .= $created_at->format('m') . $slash;
+                }
+
+                if ($appearance == 'auto_increment_number') {
+                    $digits = $settings->auto_increment_number_digit;
+                    $id .= $lastUserId + $digits . $slash;
+                }
+
+                if ($appearance == 'random_number') {
+                    $count = strlen($format);
+                    $min = pow(10, $count - 1);
+                    $id .= mt_rand($min, $min * 9) . $slash;
+                }
+
+            }
+        } else {
+            $count = strlen($lastStaffId);
+            $min = pow(10, $count - 1);
+            $id = mt_rand($min, $min * 9);
+        }
+       
+        if (isset($isJson) && $isJson == false) {
             return $id;
         }
 
@@ -269,7 +329,7 @@ class Controller extends BaseController
             $min = pow(10, $count - 1);
             $id = mt_rand($min, $min * 9);
         }
-
+       
         if (isset($isJson) && $isJson == false) {
             return $id;
         }

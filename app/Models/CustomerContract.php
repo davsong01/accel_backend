@@ -101,11 +101,11 @@ class CustomerContract extends Model
     public function getContractNameAttribute(){
         $name = '';
         if($this->property_type == 'building'){
-            $name = $this->property_type_details->building_details->name . ' - ' . $this->estate->name;
+            $name = $this->property_type_details->building_details->name ?? '' . ' - ' . $this->estate->name;
         }
 
         if ($this->property_type == 'land') {
-            $name = $this->property_type_details->plot_details->size .' - '. $this->property_type_details->building_details->name . ' - '. $this->estate->name;
+            $name = $this->property_type_details->plot_details->size ?? '' .' - '. $this->property_type_details->building_details->name ?? '' . ' - '. $this->estate->name;
 
         }
         
