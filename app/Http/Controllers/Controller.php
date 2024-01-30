@@ -329,7 +329,7 @@ class Controller extends BaseController
             $min = pow(10, $count - 1);
             $id = mt_rand($min, $min * 9);
         }
-       
+        
         if (isset($isJson) && $isJson == false) {
             return $id;
         }
