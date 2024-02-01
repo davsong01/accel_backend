@@ -91,7 +91,7 @@ class EmployeeExitController extends Controller
         ]);
 
         $staff = Staff::find($request->staff_id ?? $staff_id);
-        LogService::admin(auth()->user()->id, $staff->user->id, 'Create or update an employee exit, '.  $request->reason .' (' . $ee->id .')', 'CREATE');
+        LogService::admin(auth()->user()->id, $staff->user->id, 'Create or update an employee exit, ' .  $request->reason . ' (' . $ee->id . ')', 'CREATE');
         return response()->json(['message' => 'Success', 'data' => []], 200);
     }
 
@@ -129,7 +129,7 @@ class EmployeeExitController extends Controller
 
         $employeeExit->update($validator->validated());
 
-        LogService::admin(auth()->user()->id, $employeeExit->staff->user->id, 'Update an employee exit to '. $request->status .'(' . $employeeExit->id .')', 'UPDATE');
+        LogService::admin(auth()->user()->id, $employeeExit->staff->user->id, 'Update an employee exit to ' . $request->status . '(' . $employeeExit->id . ')', 'UPDATE');
         return response()->json(['message' => 'Successfully updated', 'data' => $employeeExit], 200);
     }
 
@@ -144,21 +144,25 @@ class EmployeeExitController extends Controller
     public function search(Request $request)
     {
         $params = $request->only(['status']);
+        $company_id = $this->sessionDetails('company_id');
 
         $query = EmployeeExit::with([
             'staff:id,user_id', 'staff.user:id,first_name,middle_name,last_name',
         ])->where('company_id', $this->sessionDetails('company_id'))
-        ->where($params)->orderBy('created_at', 'DESC');
+            ->where($params)->orderBy('created_at', 'DESC');
 
         $from = $request->input('from');
         $to = $request->input('to');
         if ($from && $to) $query->whereBetween('created_at', [$from, $to]);
 
         if ($request->input('staff_name') && $name = $request->input('staff_name')) {
-            $user = User::where('first_name', 'LIKE', '%' . $name . '%')
+            $users = User::with(['staff'])->where('company_id', $company_id)->whereNotNull('company_id')
+                ->where('first_name', 'LIKE', '%' . $name . '%')
                 ->orWhere('last_name', 'LIKE', '%' . $name . '%')
-                ->orWhere('middle_name', 'LIKE', '%' . $name . '%')->first();
-            $query->where('staff_id', $user?->id);
+                ->orWhere('middle_name', 'LIKE', '%' . $name . '%')->get();
+            $staff_ids = $users->whereNotNull('staff.id')->pluck('staff.id')->toArray();
+
+            $query->whereIn('staff_id', $staff_ids);
         }
 
         $employeeExits = $query->latest()->paginate(20);
