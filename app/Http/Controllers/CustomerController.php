@@ -188,8 +188,10 @@ class CustomerController extends Controller
             }
         }
 
-        
-        $percentage = ($paid/$total_fee) * 100;
+        if ($total_fee > 0) {
+            $percentage = ($paid / $total_fee) * 100;
+        }
+        // $percentage = ($paid/$total_fee) * 100;
         return number_format($percentage, 2);
     }
 
