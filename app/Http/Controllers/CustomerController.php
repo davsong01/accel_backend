@@ -132,6 +132,7 @@ class CustomerController extends Controller
 
     public function getSubscribers(Request $request)
     {
+       
         if (!empty($request->type)) {
             $subscribers = Customer::with(['user:id,avatar,first_name,last_name,status,gender,phone_number'])->whereHas('contracts', function ($q) use ($request) {
                 $q->where('status', 'subscriber')->where('contract_status', $request->type);
@@ -144,6 +145,8 @@ class CustomerController extends Controller
             })->withCount(['contracts' => function ($q) {
                 $q->where('status', 'subscriber');
             }])->orderBy('customers.created_at', 'DESC');
+
+           
         }
 
         // $subscribers = Customer::orderBy('customers.created_at')
@@ -169,7 +172,7 @@ class CustomerController extends Controller
                 $sub->percentage_paid = $this->percentageCount($sub->contracts);
             }
         }
-
+        
         return response()->json(['message' => 'Success', 'data' => $subscribers], 200);
     }
 
