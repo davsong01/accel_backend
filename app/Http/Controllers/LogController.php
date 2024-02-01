@@ -24,7 +24,8 @@ class LogController extends Controller
     public function search(Request $request): JsonResponse
     {
         $params = $request->only(['crud_type']);
-        
+        $company_id = $this->sessionDetails('company_id');
+
         $query =AdminLog::with(['createdBy:id,type,status,first_name,last_name,middle_name,title,avatar', 'causee:id,type,status,first_name,last_name,middle_name,title,avatar'])->where($params);
 
         if($request->input('title') && $title = $request->input('title')){
@@ -43,17 +44,23 @@ class LogController extends Controller
         }
 
         if($request->input('createdBy') && $name = $request->input('createdBy')){
-            $user = User::where('first_name', 'LIKE', '%'.$name.'%')
-            ->orWhere('last_name', 'LIKE', '%'.$name.'%')
-            ->orWhere('middle_name', 'LIKE', '%'.$name.'%')->first();
-            $query->where('user_id', $user?->id)->where('user_id', '!=', null);
+            $users = User::where('company_id', $company_id)->whereNotNull('company_id')
+            ->where('first_name', 'LIKE', '%' . $name . '%')
+            ->orWhere('last_name', 'LIKE', '%' . $name . '%')
+            ->orWhere('middle_name', 'LIKE', '%' . $name . '%')->get();
+            $created_by_ids = $users->whereNotNull('id')->pluck('id')->toArray();
+
+            $query->whereIn('user_id',  $created_by_ids);
         }
 
         if($request->input('causee') && $name = $request->input('causee')){
-            $user = User::where('first_name', 'LIKE', '%'.$name.'%')
-            ->orWhere('last_name', 'LIKE', '%'.$name.'%')
-            ->orWhere('middle_name', 'LIKE', '%'.$name.'%')->first();
-            $query->where('causee_id', $user?->id)->where('causee_id', '!=', null);
+            $users = User::where('company_id', $company_id)->whereNotNull('company_id')
+            ->where('first_name', 'LIKE', '%' . $name . '%')
+            ->orWhere('last_name', 'LIKE', '%' . $name . '%')
+            ->orWhere('middle_name', 'LIKE', '%' . $name . '%')->get();
+            $causees_ids = $users->whereNotNull('id')->pluck('id')->toArray();
+
+            $query->whereIn('causee_id', $causees_ids);
         }
 
         $logs = $query->paginate(20);
