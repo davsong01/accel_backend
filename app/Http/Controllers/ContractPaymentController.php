@@ -45,7 +45,7 @@ class ContractPaymentController extends Controller
      */
     public function store(Request $request)
     {
-        
+
     }
 
     public function contractPayment(Request $request)
@@ -116,7 +116,7 @@ class ContractPaymentController extends Controller
                 'balance' => $res->balance,
                 'no_of_months' => $res->no_of_months,
                 'payment_slip' => $res->filename,
-                'receipt_location' => $res->receipt_location,
+                'receipt_location' => $res->receipt_location ?? null,
             ];
         }
 
@@ -373,7 +373,8 @@ class ContractPaymentController extends Controller
             ];
 
             // Generate payment receipt
-            if (env('ENT') != 'local') {
+
+            if (env('ENT') == 'local') {
                 $receipt = $this->generateContractPaymentReceipt($payment, $contract, $others);
                 $payment->update(['receipt_location' => $receipt['filepath'] ?? null]);
                 $payment_thread->update(['receipt_location' => $receipt['filepath'] ?? null]);
