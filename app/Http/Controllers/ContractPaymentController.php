@@ -361,9 +361,15 @@ class ContractPaymentController extends Controller
                 'type' => 'credit',
                 'company_id' => $this->sessionDetails('company_id'),
             ]);
+
+            $others = [
+                'contract_value' => $payment->contract_value,
+                'discount_applied' => $payment->discount_applied,
+            ];
+            
             // Generate payment receipt
             if (env('ENT') != 'local') {
-                $receipt = $this->generateContractPaymentReceipt($payment, $contract);
+                $receipt = $this->generateContractPaymentReceipt($payment, $contract, $others);
                 $payment->update(['receipt_location' => $receipt['filepath'] ?? null]);
                 $payment_thread->update(['receipt_location' => $receipt['filepath'] ?? null]);
             }
