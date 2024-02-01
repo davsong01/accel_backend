@@ -45,6 +45,11 @@ class ContractPaymentController extends Controller
      */
     public function store(Request $request)
     {
+        
+    }
+
+    public function contractPayment(Request $request)
+    {
         $validator = Validator::make($request->all(), [
             'account_id' => 'required|exists:chart_of_accounts,id,company_id,' . $this->sessionDetails('company_id'),
             'customer_id' => 'required|exists:customers,id,company_id,' . $this->sessionDetails('company_id'),
@@ -361,9 +366,15 @@ class ContractPaymentController extends Controller
                 'type' => 'credit',
                 'company_id' => $this->sessionDetails('company_id'),
             ]);
+
+            $others = [
+                'contract_value' => $payment->contract_value,
+                'discount_applied' => $payment->discount_applied,
+            ];
+
             // Generate payment receipt
             if (env('ENT') != 'local') {
-                $receipt = $this->generateContractPaymentReceipt($payment, $contract);
+                $receipt = $this->generateContractPaymentReceipt($payment, $contract, $others);
                 $payment->update(['receipt_location' => $receipt['filepath'] ?? null]);
                 $payment_thread->update(['receipt_location' => $receipt['filepath'] ?? null]);
             }
@@ -378,13 +389,12 @@ class ContractPaymentController extends Controller
 
             // Do something with the commission from contract here
         } catch (\Throwable $th) {
-            //throw $th;
-            \Log::info(['File' => 'ContractPaymentController', 'message' => $th->getMessage(), 'Line' => $th->getLine()]);
+            // \Log::info(['File' => 'ContractPaymentController', 'message' => $th->getMessage(), 'Line' => $th->getLine()]);
             $res = [
                 'status' => 'error',
                 'message' => 'An error occurred when making payment for: ' . $contract->contract_name . ' Error: ' . $th->getMessage(),
             ];
-
+            
             return $res;
         }
     }

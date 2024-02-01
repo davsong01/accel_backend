@@ -149,7 +149,7 @@ class CustomerContractController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function contractPayment(Request $request)
     {
         if (!empty($request->customer_id)) {
             // Existing customer (and contract)
