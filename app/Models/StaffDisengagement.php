@@ -9,7 +9,7 @@ class StaffDisengagement extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['staff_id', 'created_by', 'reason', 'from', 'to', 'company_id'];
+    protected $fillable = ['staff_id', 'created_by', 'reason', 'from', 'to', 'company_id', 'status'];
 
     public function createdBy(){
        return $this->belongsTo(Staff::class, 'created_by');
