@@ -54,13 +54,18 @@ class CustomerContractController extends Controller
             ];
             $data['contract_count'] = $dataX;
 
+            $data['customer_details'] = [
+                'first_name' => $customerY->user->first_name,
+                'last_name' => $customerY->user->last_name,
+                'middle_name' => $customerY->user->middle_name
+            ];
             foreach ($contracts as $key => $contract) {
                 // $estate->load('city', 'location', 'estate_property_type')
                 $contract->primary_marketer = $contract->primaryMarketer($contract);
                 $contract->subscribers = !empty($contract->subscribers) ? json_decode($contract->subscribers) : '';
                 $contract['location'] = $contract->location->name;
                 $allContracts[$key] = $contract;
-
+                
                 $contract->generated_legal_documents = $this->generatedDocuments($contract);
                 $contract->legal_document_type_ids = $this->prepareDocumentTypeIds($contract);
                 // $allContracts[$key]['form_amount'] = $this->getContractFormAmount($contract, 'single');

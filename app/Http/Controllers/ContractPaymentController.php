@@ -463,8 +463,6 @@ class ContractPaymentController extends Controller
             'amount' => 'required',
             'type' => 'required|in:SE,INFRASTRUTURE',
             'payment_slip' => 'nullable',
-            'description' => 'nullable',
-            'transaction_date' => 'required'
         ]);
 
         if ($validator->fails()) {
