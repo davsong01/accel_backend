@@ -545,7 +545,10 @@ class ContractPaymentController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
-        $contract->update(['contract_status' => 'closed']);
+        $contract->update([
+            'contract_status' => 'closed',
+            'sei_payment_transaction_id' => $payment->transaction_id
+        ]);
 
         // Generate payment receipt, stop here todat
         $contract->fee = $payment->infrastructure_fee;
