@@ -36,9 +36,9 @@ class ChartOfAccountController extends Controller
             } else {
                 $coa->update(['status' => 'active']);
             }
+            LogService::admin(auth()->user()->id, NULL, 'Modify chart of account status ('. $coa->id .')', 'UPDATE');
         }
 
-        LogService::admin(auth()->user()->id, NULL, 'Modify chart of account status ('. $coa->id .')', 'UPDATE');
         return response()->json(['message' => 'Successfully updated', 'data' => []], 200);
     }
 
