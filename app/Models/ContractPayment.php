@@ -15,11 +15,13 @@ class ContractPayment extends Model
 
     protected $guarded = [];
 
-    protected function payment_slip(): Attribute
+    protected $appends = ['payment_slip'];
+
+
+    public function getPaymentSlipAttribute()
     {
-        return Attribute::make(
-            get: fn (string $value = null) => !empty($value) ? app('App\Http\Controllers\Controller')->encodeGeneralUploadedFile($value) : '',
-        );
+        return !empty($this->payment_slip) ? app('App\Http\Controllers\Controller')->encodeGeneralUploadedFile($value) : '';
+
     }
 
     public function customer(){
