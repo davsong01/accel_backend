@@ -149,7 +149,7 @@ class CustomerContractController extends Controller
         // ->where(['customer_id' => $customer_id, 'company_id' => $this->sessionDetails('company_id'), 'purpose' => 'form_payment'])->whereHas('contracts')->orderBy('created_at', 'DESC')->get();
         $data = [];
         $histories = $histories->paginate(20)->withQueryString();
-        
+        // dd($histories);
         return response()->json(['message' => 'Success', 'data' => $histories], 200);
     }
     /**
