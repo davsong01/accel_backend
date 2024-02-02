@@ -701,8 +701,17 @@ class StaffController extends Controller
             'relationship' => $next_of_kin['nok_relationship'] ?? '',
         ];
 
-        $data['bank'] = $staff->bank;
+        $data['bank_information'] = [
+            'account_name' => $staff->account_name,
+            'account_number' => $staff->account_number,
+            'sort_code' => $staff->sort_code,
+            'swift_code' => $staff->swift_code,
+            'hf_number' => $staff->hf_number,
+        ];
 
+        $data['bank'] = $staff->bank;
+        $data['pfa'] = $staff->pfa;
+        
         return response()->json(['message' => 'Success', 'data' => $data], 200);
     }
 
