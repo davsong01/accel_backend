@@ -534,7 +534,7 @@ class ContractPaymentController extends Controller
         // Transaction
         Transaction::updateOrCreate(['customer_id' => $payment->customer_id, 'transaction_id' => $payment->transaction_id, 'company_id' => $this->sessionDetails('company_id')], [
             'customer_id' => $payment->customer_id,
-            'amount' => $payment->amount,
+            'amount' => $request->amount,
             'transaction_id' => $payment->transaction_id,
             'account_id' => $payment->account_id,
             'purpose' => $purpose,
@@ -552,16 +552,20 @@ class ContractPaymentController extends Controller
 
         // Generate payment receipt, stop here todat
         $contract->fee = $payment->infrastructure_fee;
-        $receipt = generateGenericPaymentReceipt($payment, $contract);
+        if(env('ENT' == 'local')){
+            $receipt = generateGenericPaymentReceipt($payment, $contract);
+    
+            $payment->update(['receipt_location' => $receipt['filepath'] ?? null]);
+            $payment_thread->update(['receipt_location' => $receipt['filepath'] ?? null]);
+    
+            $data['attachments'] = $receipt['filepath'];
 
-        $payment->update(['receipt_location' => $receipt['filepath'] ?? null]);
-        $payment_thread->update(['receipt_location' => $receipt['filepath'] ?? null]);
+        }
 
         $data['type'] = 'se.escavation.payment';
         $data['element'] = $request->type;
         $data['name'] =  $payment->customer->user->first_name;
         $data['email'] =  $payment->customer->user->email;
-        $data['attachments'] = $receipt['filepath'];
 
         $this->logEmail($data);
 
