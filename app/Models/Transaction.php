@@ -35,7 +35,7 @@ class Transaction extends Model
         return $this->hasMany(CustomerContract::class, 'contract_payment_transaction_id', 'transaction_id');
     }
 
-    public function sei_payment_transaction_id()
+    public function sei_payment_transactions()
     {
         return $this->hasMany(CustomerContract::class, 'sei_payment_transaction_id', 'transaction_id');
     }
