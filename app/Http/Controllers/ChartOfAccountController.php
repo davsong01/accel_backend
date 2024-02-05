@@ -16,7 +16,7 @@ class ChartOfAccountController extends Controller
      */
     public function index(Request $request)
     {
-        $coa = ChartOfAccount::with('currency', 'account_category:id,name', 'account_type:id,type')->where('status', 'active')->where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'desc');
+        $coa = ChartOfAccount::with('currency', 'account_category:id,name', 'account_type:id,type')->where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'desc');
 
         if (!empty($request->status)) {
             $coa = $coa->where('status', $request->status);
@@ -29,7 +29,7 @@ class ChartOfAccountController extends Controller
 
     public function modifyChartOfAccount($id)
     {
-        $coa = ChartOfAccount::where('status', 'active')->where('company_id', $this->sessionDetails('company_id'))->where('id', $id)->first();
+        $coa = ChartOfAccount::where('company_id', $this->sessionDetails('company_id'))->where('id', $id)->first();
         if ($coa) {
             if ($coa->status == 'active') {
                 $coa->update(['status' => 'inactive']);
