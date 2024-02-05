@@ -54,13 +54,19 @@ class CustomerContractController extends Controller
             ];
             $data['contract_count'] = $dataX;
 
+            $data['customer_details'] = [
+                'id' => $customerY->id,
+                'first_name' => $customerY->user->first_name,
+                'last_name' => $customerY->user->last_name,
+                'middle_name' => $customerY->user->middle_name
+            ];
             foreach ($contracts as $key => $contract) {
                 // $estate->load('city', 'location', 'estate_property_type')
                 $contract->primary_marketer = $contract->primaryMarketer($contract);
                 $contract->subscribers = !empty($contract->subscribers) ? json_decode($contract->subscribers) : '';
                 $contract['location'] = $contract->location->name;
                 $allContracts[$key] = $contract;
-
+                
                 $contract->generated_legal_documents = $this->generatedDocuments($contract);
                 $contract->legal_document_type_ids = $this->prepareDocumentTypeIds($contract);
                 // $allContracts[$key]['form_amount'] = $this->getContractFormAmount($contract, 'single');
@@ -126,10 +132,11 @@ class CustomerContractController extends Controller
 
     public function customerPaymentHistory(Request $request, $customer_id)
     {
-        $histories = Transaction::with(['contracts:id,property_type_id,form_payment_transaction_id,contract_payment_transaction_id,property_type,estate_id,plot_size,building_type', 'estate:id,name'])->where('customer_id', $customer_id)->orderBy('created_at','DESC');
+        $histories = Transaction::with(['form_payment_contracts:id,property_type_id,form_payment_transaction_id,contract_payment_transaction_id,sei_payment_transaction_id,property_type,estate_id,plot_size,building_type', 'property_payment_contracts:id,property_type_id,form_payment_transaction_id,sei_payment_transaction_id,contract_payment_transaction_id,property_type,estate_id,plot_size,building_type', 'estate:id,name', 'sei_payment_transactions:id,property_type_id,form_payment_transaction_id,contract_payment_transaction_id,sei_payment_transaction_id,property_type,estate_id,plot_size,building_type'])->where('customer_id', $customer_id)->orderBy('created_at','DESC');
         $contract_id = $request->contract_id;
-       
-        if(!empty($request->contract_id)){
+        // dd($histories->get(), $customer_id)
+        
+;        if(!empty($request->contract_id)){
             // Get contract 
             $contract = CustomerContract::where('id', $contract_id)->first();
            
@@ -141,9 +148,9 @@ class CustomerContractController extends Controller
            
         }
         // ->where(['customer_id' => $customer_id, 'company_id' => $this->sessionDetails('company_id'), 'purpose' => 'form_payment'])->whereHas('contracts')->orderBy('created_at', 'DESC')->get();
-        $data = [];
+     
         $histories = $histories->paginate(20)->withQueryString();
-        
+        // dd($histories);
         return response()->json(['message' => 'Success', 'data' => $histories], 200);
     }
     /**
