@@ -52,6 +52,7 @@ use App\Http\Controllers\LegalDocumentTemplateController;
 use App\Http\Controllers\GeneratedLegalDocumentController;
 use App\Http\Controllers\EstateConstructionSettingController;
 use App\Http\Controllers\LeaveAndAbsenceManagementController;
+use App\Http\Controllers\StaffDisengagementController;
 use App\Http\Controllers\TransactionTypeDefinitionController;
 
 /*
@@ -360,9 +361,14 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
             Route::get('transaction/purpose/search', [TransactionPurposeController::class, 'search']);
             Route::apiResource('transaction/purpose', TransactionPurposeController::class);
         });
-
+        
         Route::get('audit/log', [LogController::class, 'audit']);
         Route::get('audit/log/search', [LogController::class, 'search']);
+        
+        Route::prefix('hcm')->group(function(){
+            Route::get('staffs/disengagement/search', [StaffDisengagementController::class, 'search']);
+            Route::apiResource('staffs/disengagement', StaffDisengagementController::class);
+        });
     });
 });
 
