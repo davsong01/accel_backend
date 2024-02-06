@@ -298,14 +298,6 @@ class StaffController extends Controller
                 'swift_code' => $data['swift_code'] ?? null,
                 'nhf_number' => $data['nhf_number'] ?? null,
             ]);
-        } else {
-            $staff = Staff::where('id', $request->staff_id)->where('company_id', $this->sessionDetails('company_id'))->first();
-            $user = $staff->user;
-            $updateUser = Arr::only($data, ['email','first_name', 'middle_name', 'last_name', 'username', 'phone_number', 'gender', 'next_of_kin', 'branch_id', 'date_of_birth']);
-            $updateStaff = Arr::only($data, ['jobtype_id', 'date_of_employment', 'department_id', 'jobrole_id', 'commission_id', 'bank_id', 'pfa_id', 'account_name', 'account_name', 'account_number', 'sort_code', 'swift_code', 'nhf_number']);
-
-            $user->update($updateUser);
-            $staff->update($updateStaff);
 
             $data['type'] = 'staff.store';
             $data['medium'] = 'email';
@@ -314,6 +306,16 @@ class StaffController extends Controller
             $data['recipient'] = $user->email ?? 'Staff';
 
             $this->logEmail($data);
+
+
+        } else {
+            $staff = Staff::where('id', $request->staff_id)->where('company_id', $this->sessionDetails('company_id'))->first();
+            $user = $staff->user;
+            $updateUser = Arr::only($data, ['email','first_name', 'middle_name', 'last_name', 'username', 'phone_number', 'gender', 'next_of_kin', 'branch_id', 'date_of_birth']);
+            $updateStaff = Arr::only($data, ['jobtype_id', 'date_of_employment', 'department_id', 'jobrole_id', 'commission_id', 'bank_id', 'pfa_id', 'account_name', 'account_name', 'account_number', 'sort_code', 'swift_code', 'nhf_number']);
+
+            $user->update($updateUser);
+            $staff->update($updateStaff);
         }
 
         LogService::admin(auth()->user()->id, $staff->user->id, 'Add a staff' , 'CREATE');

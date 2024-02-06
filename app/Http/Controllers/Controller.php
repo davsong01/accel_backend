@@ -499,15 +499,24 @@ class Controller extends BaseController
         });
 
         $counter = 0;
+        $used = [];
         foreach ($methods as $meth) {
             $first = 'App\Models';
             $rest = ['where', ['id' => $resource->id]];
             $r = (string) $meth->name;
 
-            $re = call_user_func($first . '\\' . $class . '::' . $rest[0], ...array_slice($rest, 1))->first()->$r->count();
+            $re = call_user_func($first . '\\' . $class . '::' . $rest[0], ...array_slice($rest, 1))->first()->$r;
+            
+            if($re){
+                $re = $re->count();
+                $used[] = $r;
+            }else{
+                $re = 0;
+            }
+           
             $counter = $counter + $re;
         }
-
+        
         return $counter;
     }
 
