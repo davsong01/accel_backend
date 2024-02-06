@@ -18,7 +18,9 @@ class FinanceController extends Controller
      */
     public function GLAccount(): JsonResponse
     {
-        $accounts = ChartOfAccount::with(['account_category', 'account_type'])->where(['status' => 'active'])->latest()->paginate(20);
+        $company_id = $this->sessionDetails('company_id');
+
+        $accounts = ChartOfAccount::with(['account_category', 'account_type'])->where(['status' => 'active', 'company_id' => $company_id])->latest()->paginate(20);
         return response()->json(['message' => 'Success', 'data' => $accounts], 200);
     }
 
@@ -45,8 +47,10 @@ class FinanceController extends Controller
     public function searchGLAccount(Request $request)
     {
         $params = $request->only(['status', 'accounttype_id']);
+        $company_id = $this->sessionDetails('company_id');
 
-        $query = ChartOfAccount::with(['account_category', 'account_type'])->where($params);
+
+        $query = ChartOfAccount::with(['account_category', 'account_type'])->where('company_id', $company_id)->where($params);
 
         if ($account_number = $request->input('account_number'))
             $query->where('account_number', 'LIKE', '%' . $account_number . '%');
@@ -62,7 +66,12 @@ class FinanceController extends Controller
      */
     public function GLLedger(): JsonResponse
     {
-        $transactions = Transaction::with(['account', 'staff:id,user_id', 'staff.user:id,status,type,first_name,middle_name,last_name,phone_number', 'customer:id'])->latest()->paginate(20);
+        $company_id = $this->sessionDetails('company_id');
+
+        $transactions = Transaction::with(['account', 'staff:id,user_id', 'staff.user:id,status,type,first_name,middle_name,last_name,phone_number', 'customer:id'])
+        ->where('company_id', $company_id)
+        ->latest()
+        ->paginate(20);
         return response()->json(['message' => 'success', 'data' => $transactions], 200);
     }
 
@@ -113,7 +122,7 @@ class FinanceController extends Controller
         $params = $request->only(['type', 'account_id']);
         $company_id = $this->sessionDetails('company_id');
 
-        $query = Transaction::with(['account', 'staff:id,user_id', 'staff.user:id,first_name,middle_name,last_name', 'customer:id,user_id', 'customer.user:id,status,type,first_name,middle_name,last_name'])->where($params);
+        $query = Transaction::with(['account', 'staff:id,user_id', 'staff.user:id,first_name,middle_name,last_name', 'customer:id,user_id', 'customer.user:id,status,type,first_name,middle_name,last_name'])->where('company_id', $company_id)->where($params);
 
         $from = $request->input('from');
         $to = $request->input('to');
