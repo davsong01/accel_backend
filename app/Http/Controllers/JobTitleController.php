@@ -7,6 +7,7 @@ use App\Models\JobTitle;
 use App\Services\LogService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 
 class JobTitleController extends Controller
@@ -18,7 +19,7 @@ class JobTitleController extends Controller
     {
         $company_id = $this->sessionDetails('company_id');
 
-        $jobs = JobTitle::where('company_id', $company_id)->latest()->paginate(20);
+        $jobs = JobTitle::with(['department', 'company'])->where('company_id', $company_id)->latest()->paginate(20);
         return response()->json(['message' => 'Success', 'data' => $jobs], 200);
     }
 
@@ -29,9 +30,12 @@ class JobTitleController extends Controller
     {
         $company_id = $this->sessionDetails('company_id');
 
-        $validator = Validator::make($request->all(),[
-            'title' => 'unique:job_titles,title',
-            'department_id' => 'exists:department,id,company_id,' . $company_id,
+        $validator = Validator::make($request->all(), [
+            'title' => ['required', Rule::unique('job_titles')->where(function ($query) use ($request) {
+                $query->where('title', $request->title);
+                $query->where('department_id', $request->department_id);
+            })],
+            'department_id' => 'required|exists:departments,id,company_id,' . $company_id,
         ]);
 
         if ($validator->fails()) {
@@ -42,9 +46,9 @@ class JobTitleController extends Controller
         }
 
         $attributes = [...$validator->validated(), 'company_id' => $company_id];
-        $created = JobTitle::createOrUpdate($attributes);
+        $created = JobTitle::updateOrCreate($attributes);
 
-        LogService::admin(auth()->user()->id, NULL, 'Nxew job title added (' . $created->id . ')', 'CREATE');
+        LogService::admin(auth()->user()->id, NULL, 'New job title added (' . $created->id . ')', 'CREATE');
         return response()->json(['message' => 'success', 'data' => $created], 200);
     }
 
@@ -63,28 +67,29 @@ class JobTitleController extends Controller
 
         Excel::import(new JobTitlesImport, request()->file('job_titles'));
 
-        LogService::admin(auth()->user()->id, NULL, 'Import a bulking building type ('.')', 'CREATE');
+        LogService::admin(auth()->user()->id, NULL, 'Import a bulking job titles', 'CREATE');
         return response()->json(['message' => 'Building Type Added Successfully', 'data' => null], 200);
-         Excel::import(new JobTitlesImport, request()->file('your_file'));
+        Excel::import(new JobTitlesImport, request()->file('your_file'));
     }
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(JobTitle $title)
     {
-        //
+      $title->load(['department', 'company']);
+        return response()->json(['message' => 'success', 'data' => $title], 200);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, JobTitle $jobTitle)
+    public function update(Request $request, JobTitle $title)
     {
         $company_id = $this->sessionDetails('company_id');
 
         $validator = Validator::make($request->all(), [
             'department_id' => 'exists:departments,id,company_id,' . $company_id,
-            'title' => 'unique:job_titles,title,' . $jobTitle->id
+            'title' => 'unique:job_titles,title,' . $title->id
         ]);
 
         if ($validator->fails()) {
@@ -95,20 +100,20 @@ class JobTitleController extends Controller
         }
 
         $attributes = $validator->validated();
-        $jobTitle->update($attributes);
-    
-        LogService::admin(auth()->user()->id, NULL, 'Update a job title (' . $jobTitle->id . ')', 'UPDATE');
-        return response()->json(['message' => 'success', 'data' => $jobTitle], 200);
+        $title->update($attributes);
+
+        LogService::admin(auth()->user()->id, NULL, 'Update a job title (' . $title->id . ')', 'UPDATE');
+        return response()->json(['message' => 'success', 'data' => $title->load(['department', 'company'])], 200);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(JobTitle $jobTitle)
+    public function destroy(JobTitle $title)
     {
-        LogService::admin(auth()->user()->id, NULL, 'Delete a job title (' . $jobTitle->id . ')', 'DELETE');
+        LogService::admin(auth()->user()->id, NULL, 'Delete a job title (' . $title->id . ')', 'DELETE');
 
-        $jobTitle->delete();
+        $title->delete();
         return response()->json(['message' => 'success', 'data' => null], 200);
     }
 }
