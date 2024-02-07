@@ -98,7 +98,7 @@ class CompanySettingController extends Controller
     {
         $companySetting = CompanySetting::where('company_id', '!=', NULL)
         ->where('company_id', $this->sessionDetails('company_id'))
-        ->select('no_of_login_attempt', 'session_ttl')->first();
+       ->first();
 
         if (!$companySetting)
             return response()->json(['message' => 'Company not found', 'data' => []], 200);
@@ -117,10 +117,14 @@ class CompanySettingController extends Controller
             }
 
             $companySetting->update($validator->validated());
+            LogService::admin(auth()->user()->id, NULL, 'Update a company\'s application settings ('. $companySetting->id .')', 'UPDATE');
         }
+        $data = [
+            'session_ttl' => $companySetting->session_ttl,
+            'no_of_login_attempt' => $companySetting->no_of_login_attempt,
+        ];
 
-        LogService::admin(auth()->user()->id, NULL, 'Update a company\'s application settings ('. $companySetting->id .')', 'UPDATE');
-        return response()->json(['message' => 'Success', 'data' => $companySetting], 200);
+        return response()->json(['message' => 'Success', 'data' => $data], 200);
     }
 
     /**
