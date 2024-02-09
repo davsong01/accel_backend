@@ -27,7 +27,6 @@ class AddAccessSeeder extends Seeder
         //  (General Manager)
         //  (General Manager)
        
-
         $newRoles = [
             [
                 'status' => 'active',

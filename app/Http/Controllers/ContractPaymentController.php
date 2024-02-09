@@ -138,7 +138,7 @@ class ContractPaymentController extends Controller
             'account_id' => 'required|exists:chart_of_accounts,id,company_id,' . $this->sessionDetails('company_id'),
             'customer_id' => 'required|exists:customers,id,company_id,' . $this->sessionDetails('company_id'),
             'payment_slip' => 'nullable',
-            'amount' => 'required',
+            'contract_ids' => 'required',
             'description' => 'nullable',
         ]);
 
@@ -148,30 +148,73 @@ class ContractPaymentController extends Controller
                 'data' => null,
             ], 412);
         }
-        $contract = CustomerContract::where('id', $contract_id)->first();
-        $payment = ContractPayment::where('contract_id', $contract->id)->first();
 
-        if ($payment->balance == 0) {
+        $contract_ids = json_decode($request['contract_ids'], true);
+
+        if (count($contract_ids) < 1) {
             return response()->json([
-                'error' => 'Full payment has already been made for : ' . $contract->contract_name,
+                'error' => 'Please select one or more contracts to pay for',
                 'data' => null,
-            ], 422);
+            ], 412);
         }
 
-        $res = $this->processContinueContractPayment($contract, $request->all(), $payment);
+        $payments = [];
 
-        if (isset($res['status']) && $res['status'] == 'error') {
-            return response()->json(['error' => $res['message'], 'data' => []], 200);
+        foreach ($contract_ids as $contract_id) {
+            $contract_validator = Validator::make($contract_id, [
+                'amount' => 'required',
+                'contract_id' => 'required|exists:customer_contracts,id,form_approval_status,approved,company_id,' . $this->sessionDetails('company_id'), 'customer_id', $request->customer_id,
+            ]);
+
+            if ($contract_validator->fails()) {
+                return response()->json([
+                    'error' => $contract_validator->messages()->first(),
+                    'data' => null,
+                ], 412);
+            }
+
+            $contract = CustomerContract::where('id', $contract_id['contract_id'])->first();
+            $payment = ContractPayment::where('contract_id', $contract_id['contract_id'])->first();
+
+            if ($payment->balance == 0) {
+                return response()->json([
+                    'error' => 'Full payment has already been made for : ' . $contract->contract_name,
+                    'data' => null,
+                ], 422);
+            }
+            $request['amount'] = $contract_id['amount'];
+
+            $res = $this->processContinueContractPayment($contract, $request->all(), $payment);
+    
+            if (isset($res['status']) && $res['status'] == 'error') {
+                return response()->json(['error' => $res['message'], 'data' => []], 200);
+            }
+
+            $payments[] = [
+                'contract_id' => $contract->id,
+                'contract_name' => $contract->contract_name,
+                'contract_value' => $res->contract_value,
+                'discount_applied' => $res->discount_applied,
+                'property_net_fee' => $res->property_net_fee,
+                'transaction_id' => $res->transaction_id,
+                'amount' => $res->amount,
+                'description' => $res->description,
+                'balance' => $res->balance,
+                'no_of_months' => $res->no_of_months,
+                'payment_slip' => $res->filename,
+                'receipt_location' => $res->receipt_location ?? null,
+            ];
+    
+            // Log email
+            LogService::admin(auth()->user()->id, NULL, 'Update a company\'s contract, contract payment, contract payment thread and transaction (' . $contract->id . ')', 'UPDATE');
+            
         }
-
-        // Log email
-        LogService::admin(auth()->user()->id, NULL, 'Update a company\'s contract, contract payment, contract payment thread and transaction (' . $contract->id . ')', 'UPDATE');
-        $this->logContractEmail($contract, $payment);
         
+        $this->logContractEmail($contract, $payments);
         return response()->json(['message' => 'Payment successful', 'data' => []], 200);
     }
 
-    public function logContractEmail($contract, $payment)
+    public function logContractEmail($contract, $payments)
     {
         // Log Email of receipt and provisional letter
         if ($contract->contract_status == 'ongoing') {
@@ -181,7 +224,7 @@ class ContractPaymentController extends Controller
         }
         $data['name'] =  $contract->customer->user->first_name;
         $data['email'] =  $contract->customer->user->email;
-        $data['attachments'] = $payment['receipt_location'];
+        $data['attachments'] = array_column($payments, 'receipt_location');;
 
         $this->logEmail($data);
     }
