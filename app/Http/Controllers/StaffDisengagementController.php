@@ -32,12 +32,14 @@ class StaffDisengagementController extends Controller
     {
         $company_id = $this->sessionDetails('company_id');
 
+        $from  = $request->from ?: now();
+
         $validator = Validator::make($request->all(), [
             'reason' => 'required|string',
             'staff_id' => 'required|exists:staff,id,company_id,' . $company_id,
             'status' => 'in:ACTIVE,INACTIVE',
             'from' => 'date',
-            'to' => 'date|required_if:' . $request->until_further_notice . ',false' . '|before:' . $request->from,
+            'to' => 'date|required_if:until_further_notice,false' . '|after:' . $from,
 
         ]);
 
