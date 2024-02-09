@@ -55,6 +55,9 @@ class FinanceController extends Controller
         if ($account_number = $request->input('account_number'))
             $query->where('account_number', 'LIKE', '%' . $account_number . '%');
 
+        if ($name = $request->input('name'))
+            $query->where('name', 'LIKE', '%' . $name . '%');
+
         $accounts = $query->latest()->paginate(20);
         return response()->json(['message' => 'success', 'data' => $accounts], 200);
     }
