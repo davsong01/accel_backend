@@ -59,7 +59,7 @@ class RecipientGroupController extends Controller
         ];
         $created = RecipientGroup::create($attributes);
 
-        LogService::admin($user->id, null, 'Add new recipient location (' . $created->id  . ')', 'CREATE');
+        LogService::admin($user->id, null, 'Add new recipient group (' . $created->id  . ')', 'CREATE');
         return response()->json(['message' => 'Created successfully', 'data' => $created], 200);
     }
 
