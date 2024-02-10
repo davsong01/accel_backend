@@ -59,14 +59,12 @@ class ContractPaymentController extends Controller
             'payment_slip' => 'nullable',
         ]);
 
-
         if ($validator->fails()) {
             return response()->json([
                 'error' => $validator->messages()->first(),
                 'data' => null,
             ], 412);
         }
-
 
         $contract_ids = json_decode($request['contract_ids'], true);
 
@@ -132,7 +130,7 @@ class ContractPaymentController extends Controller
         return response()->json(['message' => 'Payment successful', 'data' => []], 200);
     }
 
-    public function continueContractPayment(Request $request, $contract_id)
+    public function continueContractPayment(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'account_id' => 'required|exists:chart_of_accounts,id,company_id,' . $this->sessionDetails('company_id'),
@@ -291,17 +289,16 @@ class ContractPaymentController extends Controller
         $others['contract_value'] = $payment->contract_value;
         $others['discount_applied'] = $payment->discount_applied;
         $others['total_amount_paid'] = $fee - $newbalance;
-        
-        // Generate payment receipt
-        $receipt = $this->generateContractPaymentReceipt($payment_thread, $contract, $others);
-        $payment_thread->update(['receipt_location' => $receipt['filepath'] ?? null]);
-        
+
         if ($newbalance <= 0) {
             $contract->update([
                 'contract_status' => 'paid',
             ]);
         }
-
+        // Generate payment receipt
+        $receipt = $this->generateContractPaymentReceipt($payment_thread, $contract, $others);
+        $payment_thread->update(['receipt_location' => $receipt['filepath'] ?? null]);
+        
         return $payment;
 
         // Do something with the commission from contract here
@@ -332,37 +329,15 @@ class ContractPaymentController extends Controller
             $discount = $contract->discount ?? 0;
             $property_price = $contract->property_type_details->estate_price;
             $amount_to_pay = $property_price - $discount;
+            $balance = ($property_price - $discount) - $data['amount'];
 
             // Get amount
-            if ($data['allow_installment'] == 1) {
-                // $no_of_months = $data['no_of_months'] ?? 1;
-                // $caliberation = $amount_to_pay / $no_of_months;
-                // $amount_to_pay = $caliberation;
+            if ($balance > 0) {
                 $contract_status = 'ongoing';
-                // dd($caliberation, $no_of_months, $data['amount']);
-                // if ($data['amount'] < $caliberation) {
-                //     $res = [
-                //         'status' => 'error',
-                //         'message' => 'Amount must be equal to or greater than the first instalmental payment of ' . number_format($caliberation) . ' for '.$contract->contract_name,
-                //     ];
-
-                //     return $res;
-                // }
             } else {
                 $contract_status = 'paid';
             }
-
-            // if ($amount_to_pay != $data['amount']) {
-            //     $res = [
-            //         'status' => 'error',
-            //         'message' => 'Please check Net Property Fee for ' . $contract->contract_name . ' It should be exactly: ' . $amount_to_pay,
-            //     ];
-
-            //     return $res;
-            // }
-
-            $balance = ($property_price - $discount) - $data['amount'];
-
+            
             // Store Payment
             $payment = ContractPayment::updateOrCreate(['customer_id' => $data['customer_id'], 'contract_id' => $contract->id, 'no_of_months' => $data['no_of_months'], 'company_id' => $this->sessionDetails('company_id')], [
                 'contract_id' => $contract->id,
@@ -379,7 +354,6 @@ class ContractPaymentController extends Controller
                 'payment_slip' => $filename,
                 'property_net_fee' => $property_price - $discount,
                 'discount_applied' => $discount,
-
                 'company_id' => $this->sessionDetails('company_id')
             ]);
 
@@ -430,7 +404,6 @@ class ContractPaymentController extends Controller
             ]);
 
             return $payment;
-
             // Do something with the commission from contract here
         } catch (\Throwable $th) {
             // \Log::info(['File' => 'ContractPaymentController', 'message' => $th->getMessage(), 'Line' => $th->getLine()]);
