@@ -54,6 +54,7 @@ use App\Http\Controllers\EstateConstructionSettingController;
 use App\Http\Controllers\HCMController;
 use App\Http\Controllers\JobTitleController;
 use App\Http\Controllers\LeaveAndAbsenceManagementController;
+use App\Http\Controllers\RecipientGroupController;
 use App\Http\Controllers\StaffDisengagementController;
 use App\Http\Controllers\TransactionTypeDefinitionController;
 
@@ -373,6 +374,10 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
             Route::apiResource('staffs/disengagement', StaffDisengagementController::class);
             Route::post('job/settings/title/bulk', [JobTitleController::class, 'bulk']);
             Route::apiResource('job/settings/title', JobTitleController::class);
+            Route::prefix('settings/recipients/')->group(function(){
+                Route::get('group/search', [RecipientGroupController::class, 'search']);
+                Route::apiResource('group', RecipientGroupController::class);
+            });
         });
     });
 });
