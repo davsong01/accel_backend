@@ -85,13 +85,15 @@ class LegalDocumentController extends Controller
      */
     public function estateContracts(Request $request): JsonResponse
     {
+        $company_id = $this->sessionDetails('company_id');
+        
         $params = $request->only((new LegalDocumentTemplate)->getFillable());
-        $legalDocumentTemplate = LegalDocumentTemplate::where($params)->firstOrFail();
+        $legalDocumentTemplate = LegalDocumentTemplate::where('company_id', $company_id)->where($params)->firstOrFail();
 
         $data = null;
         if($legalDocumentTemplate->legalDocumentType->name === 'OFFER_LETTER'){
             $data =  CustomerContract::with(['customer.user:first_name,last_name,id,middle_name,customerId,avatar', 'generatedDocument', 'location'])->where([
-                'estate_id' => $request->input('estate_id'),
+                ...($request->input('estate_id') ? ['estate_id' => $request->input('estate_id')]: []),
                 'form_approval_status' => 'approved',
             ])->paginate(20);
         }
