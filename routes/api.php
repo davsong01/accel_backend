@@ -120,6 +120,10 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/get-permission-to-resource', [MenuController::class, 'getPermissionToResource'])->middleware(['auth:sanctum', 'company_check']);
 
+    Route::middleware(['auth:sanctum', 'company_check', 'otherchecks'])->group(function () {
+        Route::post('update-my-profile', [SelfServiceController::class, 'updateMyWorkProfile']);
+    });
+
     Route::middleware(['auth:sanctum', 'company_check', 'user_roles', 'otherchecks'])->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/user', [AuthController::class, 'user']);
@@ -284,7 +288,6 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::group(['prefix' => 'self-service', 'before' => 'self-service'], function () {
             Route::get('dashboard', [SelfServiceController::class, 'dashboard']);
             Route::get('my-profile', [SelfServiceController::class, 'myWorkProfile']);
-            Route::post('update-my-profile', [SelfServiceController::class, 'updateMyWorkProfile']);
             Route::post('add-avatar/{staff_id?}', [SelfServiceController::class, 'addAvatar']);
             Route::get('delete-avatar/{staff_id?}', [SelfServiceController::class, 'deleteAvatar']);
             Route::get('get-avatar/{staff_id}', [SelfServiceController::class, 'getAvatar']);
@@ -374,6 +377,9 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
             Route::apiResource('staffs/disengagement', StaffDisengagementController::class);
             Route::post('job/settings/title/bulk', [JobTitleController::class, 'bulk']);
             Route::apiResource('job/settings/title', JobTitleController::class);
+        });
+
+        Route::prefix('crm')->group(function(){
             Route::prefix('settings/recipients/')->group(function(){
                 Route::get('group/search', [RecipientGroupController::class, 'search']);
                 Route::apiResource('group', RecipientGroupController::class);
