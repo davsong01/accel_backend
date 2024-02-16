@@ -55,6 +55,9 @@ class FinanceController extends Controller
         if ($account_number = $request->input('account_number'))
             $query->where('account_number', 'LIKE', '%' . $account_number . '%');
 
+        if ($name = $request->input('name'))
+            $query->where('name', 'LIKE', '%' . $name . '%');
+
         $accounts = $query->latest()->paginate(20);
         return response()->json(['message' => 'success', 'data' => $accounts], 200);
     }
@@ -104,12 +107,12 @@ class FinanceController extends Controller
             ], 412);
         }
 
-        $attributes = $validator->validated();
+        $attributes = [...$validator->validated(), 'company_id' => $company_id];
 
         $transaction = $this->createTransaction($attributes);
 
         $customer = Customer::find($request->customer_id);
-        LogService::admin(auth()->user()->id, $customer->user->id, 'New transaction entry (' . $transaction->id . ')', 'CREATE');
+        LogService::admin(auth()->user()->id, $customer?->user?->id, 'New transaction entry (' . $transaction->id . ')', 'CREATE');
         return response()->json(['message' => 'success', 'data' => $transaction], 200);
     }
 
