@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\RecipientGroupRequest;
+use App\Models\City;
 use App\Models\Estate;
 use App\Models\Location;
 use App\Models\RecipientGroup;
@@ -10,6 +12,7 @@ use App\Models\User;
 use App\Services\LogService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class RecipientGroupController extends Controller
 {
@@ -25,38 +28,17 @@ class RecipientGroupController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(RecipientGroupRequest $request)
     {
         $company_id = $this->sessionDetails('company_id');
-
-        $validator = Validator::make($request->all(), [
-            'name' => 'string|max:250|min:2',
-            'all_customers' => 'boolean',
-            'customer_status' => 'in:inactive,active',
-            'subscriber_status' => 'in:inactive,active',
-            'completed_subscriber_status' => 'in:inactive,active',
-            'location_ids' => 'array',
-            'location_ids.*' => "exists:locations,id,company_id,$company_id",
-            'estate_ids' => 'array',
-            'estate_ids.*' => "exists:estates,id,company_id,$company_id",
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'error' => $validator->messages()->first(),
-                'data' => null,
-            ], 412);
-        }
-
         $user = auth()->user();
         $admin = Staff::where('user_id', $user->id)->first();
 
-        $attributes = [
-            ...$validator->validated(),
+        $attributes = array_merge($request->validated(), [
             'company_id' => $company_id,
             'created_by' => $admin->id,
+        ]);
 
-        ];
         $created = RecipientGroup::create($attributes);
 
         LogService::admin($user->id, null, 'Add new recipient group (' . $created->id  . ')', 'CREATE');
@@ -74,32 +56,12 @@ class RecipientGroupController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, RecipientGroup $group)
+    public function update(RecipientGroupRequest $request, RecipientGroup $group)
     {
-        $company_id = $this->sessionDetails('company_id');
-
-        $validator = Validator::make($request->all(), [
-            'name' => 'string|max:250|min:2',
-            'all_customers' => 'boolean',
-            'customer_status' => 'in:inactive,active',
-            'subscriber_status' => 'in:inactive,active',
-            'completed_subscriber_status' => 'in:inactive,active',
-            'location_ids' => 'array',
-            'location_ids.*' => "exists:locations,id,company_id,$company_id",
-            'estate_ids' => 'array',
-            'estate_ids.*' => "exists:estates,id,company_id,$company_id",
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'error' => $validator->messages()->first(),
-                'data' => null,
-            ], 412);
-        }
-
         $user = auth()->user();
-
-        $group->update($validator->validated());
+       
+        $attributes = $request->validated();
+        $group->update($attributes);
 
         LogService::admin($user->id, null, 'Updated a recipient group (' . $group->id  . ')', 'UPDATE');
         return response()->json(['message' => 'Updated successfully', 'data' => $group], 200);
@@ -140,6 +102,15 @@ class RecipientGroupController extends Controller
 
             $created_by_ids = $users->whereNotNull('staff.id')->pluck('staff.id')->toArray();
             $query->whereIn('created_by', $created_by_ids);
+        }
+
+        if ($request->input('cities') && $name = $request->input('cities')) {
+            $cities = City::where('company_id', $company_id)->whereNotNull('company_id')
+                ->where('name', 'LIKE', '%' . $name . '%')
+                ->get();
+
+            $cities_ids = $cities->whereNotNull('id')->pluck('id')->toArray();
+            $query->whereJsonContains('city_ids', $cities_ids);
         }
 
         if ($request->input('locations') && $name = $request->input('locations')) {
