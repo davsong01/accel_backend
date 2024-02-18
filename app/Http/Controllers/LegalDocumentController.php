@@ -17,6 +17,18 @@ use Illuminate\Support\Facades\Validator;
 
 class LegalDocumentController extends Controller
 {
+
+     /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        $company_id = $this->sessionDetails('company_id');
+
+        $documents = GeneratedLegalDocument::where('company_id', $company_id)->latest()->paginate(20);
+        return response()->json(['message' => 'Success', 'data' => $documents], 200);
+    }
+
     /**
      *
      */

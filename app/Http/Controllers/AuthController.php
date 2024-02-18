@@ -9,6 +9,7 @@ use App\Http\Requests\LoginRequest;
 use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\RegisterRequest;
+use App\Models\CompanySetting;
 use App\Services\LogService;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
@@ -95,19 +96,23 @@ class AuthController extends Controller
             ], 401);
         }
         
-        $token = $user->createToken('auth_token')->plainTextToken;
         
         $company = Company::where('id', $user->company_id)->first();
-
+        
         if (!$company) {
             return response()->json([
                 'error' => 'Invalid Company details!'
             ], 403);
         }
-
-        // $user->token = $token;
-        $cookie = cookie('token', $token, 60 * 24); // 1 day
         
+        // $user->token = $token;
+        $companySetting = CompanySetting::firstWhere('company_id',$company->id);
+        $oneDay = 60 * 24; // 1 day
+        $ttl = ($companySetting && $companySetting->apply_limits) ? ($companySetting->session_ttl ?? $oneDay) : $oneDay;
+
+        $token = $user->createToken('auth_token', ['*'], now()->addMinute($ttl))->plainTextToken;
+        $cookie = cookie('token', $token);
+   
         $datax = [
             'token' => $token,
             'userInfo' => [
