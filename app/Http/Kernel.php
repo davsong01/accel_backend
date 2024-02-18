@@ -65,5 +65,6 @@ class Kernel extends HttpKernel {
         'company_check' => \App\Http\Middleware\CompanyCheckMiddleware::class,
         'user_roles' => \App\Http\Middleware\UserRoleMiddleware::class,
         'otherchecks' => \App\Http\Middleware\OtherChecksMiddleware::class,
+        'throttle.login' => \App\Http\Middleware\ThrottleLoginMiddleware::class,
     ];
 }
