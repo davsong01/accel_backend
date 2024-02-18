@@ -117,11 +117,14 @@ Route::group(['middleware' => 'throttle:60,1'], function () {
     // [...]
 });
 Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
-    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle.login');
     Route::post('/get-permission-to-resource', [MenuController::class, 'getPermissionToResource'])->middleware(['auth:sanctum', 'company_check']);
 
     Route::middleware(['auth:sanctum', 'company_check', 'otherchecks'])->group(function () {
-        Route::post('update-my-profile', [SelfServiceController::class, 'updateMyWorkProfile']);
+        Route::prefix('self-service')->group(function(){
+
+            Route::post('update-my-profile', [SelfServiceController::class, 'updateMyWorkProfile']);
+        });
     });
 
     Route::middleware(['auth:sanctum', 'company_check', 'user_roles', 'otherchecks'])->group(function () {
@@ -134,6 +137,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
 
         // Staff Module Routes
         // Route::post('filter-customers', [CustomerController::class, 'index']);
+        Route::get('customers/total', [CustomerController::class, 'count']);
         Route::resource('customers', CustomerController::class);
         Route::get('customers-count', [CustomerController::class, 'CustomerCount']);
 
@@ -384,6 +388,18 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
                 Route::get('group/search', [RecipientGroupController::class, 'search']);
                 Route::apiResource('group', RecipientGroupController::class);
             });
+        });
+
+        Route::prefix('rem')->group(function () {
+            Route::get('generated/legal/documents', [LegalDocumentController::class, 'index']);
+        });
+
+        Route::prefix('cities/locations')->group(function(){
+            Route::get('search', [LocationController::class, 'search']);
+        });
+
+        Route::prefix('locations/estates')->group(function(){
+            Route::get('search', [EstateController::class, 'search']);
         });
     });
 });
