@@ -107,6 +107,7 @@ class CompanySettingController extends Controller
             $validator = Validator::make($request->all(), [
                 'no_of_login_attempt' => ['required', 'numeric', 'min:' . PHP_INT_MIN, 'max:' . PHP_INT_MAX],
                 'session_ttl' => ['required', 'numeric', 'min:' . PHP_INT_MIN, 'max:' . PHP_INT_MAX],
+                'apply_limits' => ['nullable', 'boolean'],
             ]);
 
             if ($validator->fails()) {
@@ -122,6 +123,7 @@ class CompanySettingController extends Controller
         $data = [
             'session_ttl' => $companySetting->session_ttl,
             'no_of_login_attempt' => $companySetting->no_of_login_attempt,
+            'apply_limits' => $companySetting->apply_limits,
         ];
 
         return response()->json(['message' => 'Success', 'data' => $data], 200);
