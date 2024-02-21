@@ -11,6 +11,7 @@ use App\Models\Staff;
 use App\Models\User;
 use App\Services\LogService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
@@ -39,7 +40,7 @@ class RecipientGroupController extends Controller
             'created_by' => $admin->id,
         ]);
 
-        $created = RecipientGroup::create($attributes);
+        $created = RecipientGroup::updateOrCreate($attributes);
 
         LogService::admin($user->id, null, 'Add new recipient group (' . $created->id  . ')', 'CREATE');
         return response()->json(['message' => 'Created successfully', 'data' => $created], 200);

@@ -501,8 +501,8 @@ class EstateController extends Controller
             $query->where('name', 'LIKE', '%'. $name .'%');
         }
 
-        // search by city ids
-        if($request->input('location_ids') && $location_ids = $request->input('location_ids')){
+        // search by location ids
+        if($request->input('location_ids') && $location_ids = explode(',', $request->input('location_ids'))){
             $query->whereIn('location_id', $location_ids);
         }
 
@@ -514,7 +514,7 @@ class EstateController extends Controller
             $query->whereBetween('created_at', [$from, $to]);
         }
 
-        // search by city names
+        // search by location names
         if($request->input('location_names') && $location_names = $request->input('location_names')){
             $locations = Location::where('company_id', $company_id)->whereNotNull('company_id')
             ->where('name', 'LIKE', '%' . $location_names . '%')
@@ -524,7 +524,12 @@ class EstateController extends Controller
             $query->whereIn('location_id',  $location_ids);
         }
 
-        $estates = $query->paginate(20);
+        if($request->input('page')){
+            $estates = $query->paginate(20);
+        } else {
+            $estates = $query->get();
+        }
+    
         return response()->json(['message' => 'Success', 'data' => $estates], 200);
     }
 }

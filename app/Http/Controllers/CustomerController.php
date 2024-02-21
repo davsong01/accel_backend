@@ -398,11 +398,8 @@ class CustomerController extends Controller
     {
         $company_id = $this->sessionDetails('company_id');
 
-        Customer::whereHas('contracts', function ($query) {
-            $query->where('status', 'subscriber');
-        })->where('company_id', $this->sessionDetails('company_id'))->count();
         $count = Customer::where('company_id', $company_id)->whereNotNull('company_id')->whereHas('contracts', fn($query) =>
-            $query->whereIn('status', (array) $request->input('status'))
+            $query->whereIn('status',  explode(',', $request->input('status')))
          )->count();
         return response()->json(['message' => 'Successful', 'data' => $count], 200);
     }   
