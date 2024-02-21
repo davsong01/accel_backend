@@ -144,7 +144,7 @@ class LocationController extends Controller
         }
 
         // search by city ids
-        if($request->input('city_ids') && (array) $city_ids = $request->input('city_ids')){
+        if($request->input('city_ids') && $city_ids = explode(',', $request->input('city_ids'))){
             $query->whereIn('city_id', $city_ids);
         }
 
@@ -166,7 +166,11 @@ class LocationController extends Controller
             $query->whereIn('city_id',  $city_ids);
         }
 
-        $locations = $query->paginate(20);
+        if($request->input('page')){
+            $locations = $query->paginate(20);
+        } else {
+            $locations = $query->get();
+        }
         return response()->json(['message' => 'Success', 'data' => $locations], 200);
     }
 }
