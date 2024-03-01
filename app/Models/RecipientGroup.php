@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\HasManyJson;
+use App\Traits\WhereHasManyThrough;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -10,6 +11,7 @@ class RecipientGroup extends Model
 {
     use HasFactory;
     use HasManyJson;
+    use WhereHasManyThrough;
 
     protected $fillable = ['name', 'all_customers', 'location_ids', 'estate_ids', 'city_ids', 'customer_status', 'subscriber_status', 'completed_subscriber_status', 'company_id', 'created_by'];
 
@@ -48,5 +50,10 @@ class RecipientGroup extends Model
     public function cities()
     {
         return $this->hasManyJson(City::class, 'id', 'city_ids');
+    }
+
+    public function recipients()
+    {
+        return $this->whereHasManyThrough(User::class, CustomerContract::class, 'company_id', 'company_id', 'company_id')->whereIn("customer_contracts.location_id",  [10, 60, 70, 10]);
     }
 }
