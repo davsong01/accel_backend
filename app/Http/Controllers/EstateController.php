@@ -17,6 +17,7 @@ use App\Models\LegalDocumentTemplate;
 use App\Models\LegalDocumentType;
 use App\Models\Location;
 use App\Services\LogService;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
 
 class EstateController extends Controller
@@ -511,6 +512,12 @@ class EstateController extends Controller
 
         // search by date range
         if($from && $to){
+            $from = Carbon::parse($request->input('from'));
+
+            $to = Carbon::parse($request->input('to'));
+            if ($to->format('H:i:s') == '00:00:00')
+                $to->endOfDay();
+
             $query->whereBetween('created_at', [$from, $to]);
         }
 
