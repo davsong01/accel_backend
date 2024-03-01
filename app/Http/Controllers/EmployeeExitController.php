@@ -153,7 +153,15 @@ class EmployeeExitController extends Controller
 
         $from = $request->input('from');
         $to = $request->input('to');
-        if ($from && $to) $query->whereBetween('created_at', [$from, $to]);
+        if ($from && $to){
+            $from = Carbon::parse($request->input('from'));
+
+            $to = Carbon::parse($request->input('to'));
+            if ($to->format('H:i:s') == '00:00:00')
+                $to->endOfDay();
+
+            $query->whereBetween('created_at', [$from, $to]);
+        } 
 
         if ($request->input('staff_name') && $name = $request->input('staff_name')) {
             $users = User::with(['staff'])->where('company_id', $company_id)->whereNotNull('company_id')
