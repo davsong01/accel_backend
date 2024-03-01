@@ -3,13 +3,14 @@
 namespace App\Models;
 
 use App\Traits\HasManyJsonTrait;
+use App\Traits\HasManyJson;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class RecipientGroup extends Model
 {
     use HasFactory;
-    use HasManyJsonTrait;
+    use HasManyJson;
 
     protected $fillable = ['name', 'all_customers', 'location_ids', 'estate_ids', 'city_ids', 'customer_status', 'subscriber_status', 'completed_subscriber_status', 'company_id', 'created_by'];
 
@@ -23,7 +24,7 @@ class RecipientGroup extends Model
         'all_customers' => 'boolean',
     ];
 
-    protected $with = ['cities', 'company', 'estates', 'locations', ];
+    protected $with = ['cities', 'company', 'estates', 'locations'];
 
     public function company()
     {
