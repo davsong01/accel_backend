@@ -20,6 +20,7 @@ class RecipientGroup extends Model
         'customer_status' => 'array',
         'subscriber_status' => 'array',
         'completed_subscriber_status' => 'array',
+        'all_customers' => 'boolean',
     ];
 
     protected $with = ['cities', 'company', 'estates', 'locations', ];
