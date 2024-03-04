@@ -512,7 +512,7 @@ class StaffController extends Controller
                 'appearance_format' => 'nullable',
             ]);
         }
-
+        
         if ($validator->fails()) {
             return response()->json([
                 'error' => $validator->messages()->first(),

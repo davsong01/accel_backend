@@ -31,8 +31,8 @@ class CustomerContractController extends Controller
      */
     public function index(Request $request, $customer_id)
     {
-        $contracts = CustomerContract::with('contract_payment','property_type_details', 'city:name,id', 'estate:name,id', 'location:name,id', 'building_type:id,name', 'plot_size:id,size')->where('customer_id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->select(['id', 'primary_marketer_id', 'property_type_id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'contract_status', 'plot_size', 'building_type', 'subscribers', 'contract_type', 'property_type', 'transaction_date', 'created_at','form_payment_transaction_id', 'contract_payment_transaction_id','discount']);
-        
+        $contracts = CustomerContract::with('contract_payment', 'property_type_details', 'city:name,id', 'estate:name,id', 'location:name,id', 'building_type:id,name', 'plot_size:id,size')->where('customer_id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->select(['id', 'primary_marketer_id', 'property_type_id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'contract_status', 'plot_size', 'building_type', 'subscribers', 'contract_type', 'property_type', 'transaction_date', 'created_at', 'form_payment_transaction_id', 'contract_payment_transaction_id', 'discount']);
+
         $allContracts = [];
         if ($contracts->exists()) {
             if (!empty($request->contract_type)) {
@@ -66,14 +66,14 @@ class CustomerContractController extends Controller
                 $contract->subscribers = !empty($contract->subscribers) ? json_decode($contract->subscribers) : '';
                 $contract['location'] = $contract->location->name;
                 $allContracts[$key] = $contract;
-                
+
                 $contract->generated_legal_documents = $this->generatedDocuments($contract);
                 $contract->legal_document_type_ids = $this->prepareDocumentTypeIds($contract);
                 // $allContracts[$key]['form_amount'] = $this->getContractFormAmount($contract, 'single');
             }
 
             $data['all_contracts'] = $allContracts;
-            
+
             return response()->json(['message' => 'Success', 'data' => $data], 200);
         } else {
             return response()->json(['message' => 'No records found', 'data' => []], 200);
@@ -132,23 +132,23 @@ class CustomerContractController extends Controller
 
     public function customerPaymentHistory(Request $request, $customer_id)
     {
-        $histories = Transaction::with(['form_payment_contracts:id,property_type_id,form_payment_transaction_id,contract_payment_transaction_id,sei_payment_transaction_id,property_type,estate_id,plot_size,building_type', 'property_payment_contracts:id,property_type_id,form_payment_transaction_id,sei_payment_transaction_id,contract_payment_transaction_id,property_type,estate_id,plot_size,building_type', 'estate:id,name', 'sei_payment_transactions:id,property_type_id,form_payment_transaction_id,contract_payment_transaction_id,sei_payment_transaction_id,property_type,estate_id,plot_size,building_type'])->where('customer_id', $customer_id)->orderBy('created_at','DESC');
+        $histories = Transaction::with(['form_payment_contracts:id,property_type_id,form_payment_transaction_id,contract_payment_transaction_id,sei_payment_transaction_id,property_type,estate_id,plot_size,building_type', 'property_payment_contracts:id,property_type_id,form_payment_transaction_id,sei_payment_transaction_id,contract_payment_transaction_id,property_type,estate_id,plot_size,building_type', 'estate:id,name', 'sei_payment_transactions:id,property_type_id,form_payment_transaction_id,contract_payment_transaction_id,sei_payment_transaction_id,property_type,estate_id,plot_size,building_type'])->where('customer_id', $customer_id)->orderBy('created_at', 'DESC');
         $contract_id = $request->contract_id;
-        // dd($histories->get(), $customer_id)
-        
-;        if(!empty($request->contract_id)){
+            // dd($histories->get(), $customer_id)
+
+        ;
+        if (!empty($request->contract_id)) {
             // Get contract 
             $contract = CustomerContract::where('id', $contract_id)->first();
-           
-            $histories = $histories->where(function($query) use ($contract){
+
+            $histories = $histories->where(function ($query) use ($contract) {
                 $query->where('transaction_id', $contract->contract_payment_transaction_id)
-                ->orWhere('transaction_id', $contract->form_payment_transaction_id)
-                ->get();
+                    ->orWhere('transaction_id', $contract->form_payment_transaction_id)
+                    ->get();
             });
-           
         }
         // ->where(['customer_id' => $customer_id, 'company_id' => $this->sessionDetails('company_id'), 'purpose' => 'form_payment'])->whereHas('contracts')->orderBy('created_at', 'DESC')->get();
-     
+
         $histories = $histories->paginate(20)->withQueryString();
         // dd($histories);
         return response()->json(['message' => 'Success', 'data' => $histories], 200);
@@ -213,7 +213,7 @@ class CustomerContractController extends Controller
             $city = City::where('id', $request->city_id)->first();
             $estate = Estate::where('id', $request->estate_id)->first();
             $location = Location::where('id', $request->location_id)->first();
-            
+
             $data['type'] = 'add.contract.to.existing.customer';
             $data['name'] =  $customer->user->first_name;
             $data['email'] =  $customer->user->email;
@@ -230,7 +230,7 @@ class CustomerContractController extends Controller
             if ($data['primary_marketer_id']) {
                 $data['type'] = 'primary.marketer.email.for.new.customer';
                 $markerter = Staff::where('id', $data['primary_marketer_id'])->first();
-               
+
                 if ($markerter->user) {
                     $data['name'] =  $markerter->user->first_name;
                     $data['customer_details'] = [
@@ -240,7 +240,7 @@ class CustomerContractController extends Controller
                     ];
                     $data['customer_name'] =  $customer->user->first_name;
                     $data['email'] =  $markerter->user->email;
-                    
+
                     $this->logEmail($data);
                 }
             }
@@ -306,7 +306,7 @@ class CustomerContractController extends Controller
 
             $data = $validator->valid();
             $range = range(1, $data['no_of_units']);
-            
+
             $data['subscribers'] = json_encode($data['subscribers']);
             $data = Arr::except($data, 'no_of_units');
 
@@ -321,7 +321,7 @@ class CustomerContractController extends Controller
             $email['estate'] = $estate->name;
             $email['no_of_units'] = $request->no_of_units;
             $email['contract_type'] = ucfirst($data['contract_type']);
-            
+
             // Add user
             $user = $this->createUser($data);
             $data['user_id'] = $user->id;
@@ -337,7 +337,7 @@ class CustomerContractController extends Controller
                 $email['customer_id'] =  $user->customerId;
                 $this->logEmail($email);
 
-               
+
                 // Log subscriber email
                 $subscribers = json_decode($data['subscribers']);
                 if (count($subscribers) > 0) {
@@ -348,7 +348,6 @@ class CustomerContractController extends Controller
                         $this->logEmail($email);
                     }
                 }
-                
             } else {
                 return response()->json(['message' => 'Could not create user', 'data' => null], 422);
             }
@@ -379,7 +378,6 @@ class CustomerContractController extends Controller
                         $this->logEmail($email);
                     }
                 }
-                
             } else {
                 return response()->json(['message' => 'Could not create customer', 'data' => null], 422);
             }
@@ -390,7 +388,7 @@ class CustomerContractController extends Controller
 
         return response()->json(['message' => 'Success', 'data' => null], 200);
     }
-    
+
     public function contractPayment(Request $request)
     {
         if (!empty($request->customer_id)) {
@@ -448,7 +446,7 @@ class CustomerContractController extends Controller
             $city = City::where('id', $request->city_id)->first();
             $estate = Estate::where('id', $request->estate_id)->first();
             $location = Location::where('id', $request->location_id)->first();
-            
+
             $data['type'] = 'add.contract.to.existing.customer';
             $data['name'] =  $customer->user->first_name;
             $data['email'] =  $customer->user->email;
@@ -465,7 +463,7 @@ class CustomerContractController extends Controller
             if ($data['primary_marketer_id']) {
                 $data['type'] = 'primary.marketer.email.for.new.customer';
                 $markerter = Staff::where('id', $data['primary_marketer_id'])->first();
-               
+
                 if ($markerter->user) {
                     $data['name'] =  $markerter->user->first_name;
                     $data['customer_details'] = [
@@ -475,7 +473,7 @@ class CustomerContractController extends Controller
                     ];
                     $data['customer_name'] =  $customer->user->first_name;
                     $data['email'] =  $markerter->user->email;
-                    
+
                     $this->logEmail($data);
                 }
             }
@@ -541,7 +539,7 @@ class CustomerContractController extends Controller
 
             $data = $validator->valid();
             $range = range(1, $data['no_of_units']);
-            
+
             $data['subscribers'] = json_encode($data['subscribers']);
             $data = Arr::except($data, 'no_of_units');
 
@@ -556,7 +554,7 @@ class CustomerContractController extends Controller
             $email['estate'] = $estate->name;
             $email['no_of_units'] = $request->no_of_units;
             $email['contract_type'] = ucfirst($data['contract_type']);
-            
+
             // Add user
             $user = $this->createUser($data);
             $data['user_id'] = $user->id;
@@ -572,7 +570,7 @@ class CustomerContractController extends Controller
                 $email['customer_id'] =  $user->customerId;
                 $this->logEmail($email);
 
-               
+
                 // Log subscriber email
                 $subscribers = json_decode($data['subscribers']);
                 if (count($subscribers) > 0) {
@@ -583,7 +581,6 @@ class CustomerContractController extends Controller
                         $this->logEmail($email);
                     }
                 }
-                
             } else {
                 return response()->json(['message' => 'Could not create user', 'data' => null], 422);
             }
@@ -614,7 +611,6 @@ class CustomerContractController extends Controller
                         $this->logEmail($email);
                     }
                 }
-                
             } else {
                 return response()->json(['message' => 'Could not create customer', 'data' => null], 422);
             }
@@ -629,7 +625,7 @@ class CustomerContractController extends Controller
     public function createUser($request)
     {
         // Add User
-    
+
         $user = User::updateOrCreate([
             'first_name' => $request['first_name'] ?? null,
             'middle_name' => $request['middle_name'] ?? null,
@@ -646,7 +642,7 @@ class CustomerContractController extends Controller
             'country_id' => $request['country_id'] ?? null,
             'state_id' => $request['state_id'] ?? null,
             'lga_id' => $request['lga_id'] ?? null,
-       
+
             'company_id' => $this->sessionDetails('company_id'),
             'branch_id' => $this->sessionDetails('branch_id'),
             'email_verified_at' => now(),
@@ -654,8 +650,8 @@ class CustomerContractController extends Controller
             'type' => 'customer',
         ]);
 
-        $user->update(['customerId' => $this->generateCustomerId(false)]);
-    
+        $user->update(['customerId' => $this->generateCustomerId(true, $user->created_at)]);
+
         LogService::admin(auth()->user()->id, $user->id, 'Create or update a user', 'CREATE');
         return $user;
     }
@@ -663,7 +659,7 @@ class CustomerContractController extends Controller
     public function updateUser($user, $data)
     {
         $old_next_of_kin = !empty($user->next_of_kin) ? $user->next_of_kin : [];
-       
+
 
         $next_of_kin = json_encode([
             'nok_first_name' => isset($data['nok_first_name']) ? $data['nok_first_name'] : ($old_next_of_kin['nok_first_name'] ?? ''),
@@ -681,14 +677,14 @@ class CustomerContractController extends Controller
             'last_name' => $data['last_name'] ?? $user->last_name,
             'phone_number' => $data['phone_number'] ?? $user->phone_number,
             'residential_address' => $data['residential_address'] ?? $user->residential_address,
-            
+
             'branch_id' => $data['branch_id'] ?? $user->branch_id,
             'email' => $data['email'] ?? $user->email,
             'date_of_birth' => (isset($data['date_of_birth']) && !empty($data['date_of_birth'])) ? Carbon::parse($data['date_of_birth']) : $user->date_of_birth,
             'gender' => $data['gender'] ?? $user->gender,
             'email' => $data['email'] ?? $user->email,
             'username' => $data['username'] ?? $user->username,
-            'avatar' =>  (isset($data['passport_photo']) && !empty($data['passport_photo'])) ? $data['passport_photo'] : $user->passport_photo,
+            'avatar' => (isset($data['passport_photo']) && !empty($data['passport_photo'])) ? $data['passport_photo'] : $user->passport_photo,
             'next_of_kin' => $next_of_kin ?? $old_next_of_kin,
             'alternate_number' => $data['alternate_number'] ?? $user->alternate_number,
             'alternate_email' => $data['alternate_email'] ?? $user->alternate_email,
@@ -717,7 +713,7 @@ class CustomerContractController extends Controller
             'signature' => $data['signature'] ?? null,
             'office_address' => $data['office_address'] ?? null,
         ]);
-        
+
         LogService::admin(auth()->user()->id, $customer->user->id, 'Create or update a customer', 'CREATE');
         return $customer;
     }
@@ -741,7 +737,7 @@ class CustomerContractController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
-        LogService::admin(auth()->user()->id, NULL, 'Create or update a customer contract (' . $contract->id .')', 'CREATE');
+        LogService::admin(auth()->user()->id, NULL, 'Create or update a customer contract (' . $contract->id . ')', 'CREATE');
         return $contract;
     }
 
@@ -769,7 +765,7 @@ class CustomerContractController extends Controller
             'discount' => !empty($data['discount']) ? $data['discount'] : $contract->discount,
         ]);
 
-        LogService::admin(auth()->user()->id, NULL, 'Update a customer contract (' . $contract->id .')', 'UPDATE');
+        LogService::admin(auth()->user()->id, NULL, 'Update a customer contract (' . $contract->id . ')', 'UPDATE');
         return;
     }
 
@@ -778,8 +774,8 @@ class CustomerContractController extends Controller
      */
     public function show($contract_id)
     {
-        $contract = CustomerContract::with('property_type_details:type,id,estate_price,settings_and_excavation,infrastructural_fee', 'city:name,id', 'estate:name,id', 'location:name,id', 'building_type:id,name', 'plot_size:id,size')->where('id', $contract_id)->select(['id', 'property_type_id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'company_id','subscribers', 'contract_type', 'property_type', 'primary_marketer_id'])->orderBy('created_at', 'DESC')->where('company_id', $this->sessionDetails('company_id'))->first();
-        
+        $contract = CustomerContract::with('property_type_details:type,id,estate_price,settings_and_excavation,infrastructural_fee', 'city:name,id', 'estate:name,id', 'location:name,id', 'building_type:id,name', 'plot_size:id,size')->where('id', $contract_id)->select(['id', 'property_type_id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'company_id', 'subscribers', 'contract_type', 'property_type', 'primary_marketer_id'])->orderBy('created_at', 'DESC')->where('company_id', $this->sessionDetails('company_id'))->first();
+
         if ($contract) {
             $contract->subscribers = !empty($contract->subscribers) ? json_decode($contract->subscribers) : '';
             $contract->primary_marketer = $contract->primaryMarketer($contract);
@@ -817,7 +813,7 @@ class CustomerContractController extends Controller
         $datum = $request['contract_ids'];
 
         $sanitized = [];
-        foreach($datum as $data){
+        foreach ($datum as $data) {
             $estate_validator = Validator::make($data, [
                 'estate_id' => 'required|exists:estates,id,company_id,' . $this->sessionDetails('company_id'),
             ]);
@@ -832,25 +828,25 @@ class CustomerContractController extends Controller
             $estates = $estate_validator->valid();
 
             $newContracts = $this->sanitizeContractsByEstateIds($estates, $request->customer_id);
-            
-            if(!empty($newContracts)){
+
+            if (!empty($newContracts)) {
                 $sanitized[] = [
                     'estate_id' => $data['estate_id'],
                     'contract_ids' => $newContracts
                 ];
             }
         }
-        
+
         // try to get form payment for each estate
         $total_form_amount = 0;
-        
-        foreach($sanitized as $key=>&$sa){
+
+        foreach ($sanitized as $key => &$sa) {
             $form_amount = $this->generateFormPayment($sa['estate_id']);
             $total_form_amount = $total_form_amount + $form_amount;
             $sa['form_amount'] = $form_amount;
         }
-       
-        if($total_form_amount < 1){
+
+        if ($total_form_amount < 1) {
             return response()->json([
                 'error' => 'Error calculating form amount, Please ensure form amount is set for selected estates!',
                 'data' => null,
@@ -863,7 +859,7 @@ class CustomerContractController extends Controller
                 'data' => null,
             ], 412);
         }
-        
+
         if (!empty($request->payment_slip)) {
             $filename = $this->uploadFile($request->payment_slip, 'payments');
         }
@@ -871,10 +867,10 @@ class CustomerContractController extends Controller
         $customer = Customer::where('id', $request->customer_id)->first();
 
         // process receipt for contracts according to estates
-        foreach($sanitized as $key=>$contract){
+        foreach ($sanitized as $key => $contract) {
             $transaction_id = $this->generateTransactionId('FM');
             $customer_contract_ids = implode(',', $contract['contract_ids']);
-            
+
             $payment = Transaction::updateOrCreate(['estate_id' => $contract['estate_id'], 'customer_id' => $customer->id], [
                 // 'customer_contract_ids' => $customer_contract_ids,
                 'account_id' => $request->account_id,
@@ -891,13 +887,13 @@ class CustomerContractController extends Controller
             ]);
 
             // if(env('ENT') !== 'local'){
-                $receipt = $this->generateFormPaymentReceipt($payment);
-                $payment->update(['receipt_location' => $receipt['filepath'] ?? null]);
-                $receipts[] = $receipt['filepath'] ?? null;
+            $receipt = $this->generateFormPaymentReceipt($payment);
+            $payment->update(['receipt_location' => $receipt['filepath'] ?? null]);
+            $receipts[] = $receipt['filepath'] ?? null;
             // }
-           
+
             // Move contract to prospect
-            foreach($contract['contract_ids'] as $ids){
+            foreach ($contract['contract_ids'] as $ids) {
                 CustomerContract::where('id', $ids)->update([
                     'status' => 'prospect',
                     'form_payment_transaction_id' => $transaction_id,
@@ -905,18 +901,18 @@ class CustomerContractController extends Controller
                 ]);
             }
         }
-        
-        if(empty($customer->form_status)){
+
+        if (empty($customer->form_status)) {
             $customer->form_status = 'Not Filled';
             $customer->save();
-
         }
-        
+
         // Create customer response form with selected data
         CustomerForm::updateOrCreate(
             ['customer_id' => $customer->id, 'company_id' => $this->sessionDetails('company_id')],
-            ['bypass_approval' => null]);
-        
+            ['bypass_approval' => null]
+        );
+
         // Log email
         $data['type'] = 'form.payment';
         $data['name'] =  $customer->user->first_name ?? null;
@@ -928,21 +924,21 @@ class CustomerContractController extends Controller
         return response()->json(['message' => 'Success', 'data' => null], 200);
     }
 
-    public function sanitizeContractsByEstateIds($allData, $customer_id){
+    public function sanitizeContractsByEstateIds($allData, $customer_id)
+    {
         // Get all customer contract for this estate
-        $contracts = CustomerContract::where('customer_id', $customer_id)->where('estate_id', $allData['estate_id'])->where('status','lead');
-       
+        $contracts = CustomerContract::where('customer_id', $customer_id)->where('estate_id', $allData['estate_id'])->where('status', 'lead');
+
         $selected = null;
-        if(!empty($allData['contract_id'])){
+        if (!empty($allData['contract_id'])) {
             CustomerContract::where('customer_id', $customer_id)->where('estate_id', $allData['estate_id'])->whereNotIn('id', $allData['contract_id'])->delete();
             // delete();
 
             $newContracts = CustomerContract::where('customer_id', $customer_id)->where('estate_id', $allData['estate_id'])->whereIn('id', $allData['contract_id'])->pluck('id')->toArray();
-           
+
             $selected = $newContracts;
-            
         }
-       
+
         return $selected;
     }
 
@@ -980,7 +976,7 @@ class CustomerContractController extends Controller
             // 'commission' => 'nullable',
         ]);
 
-        if(isset($request->secondary_marketers) && in_array($request->primary_marketer_id, $request->secondary_marketers)){
+        if (isset($request->secondary_marketers) && in_array($request->primary_marketer_id, $request->secondary_marketers)) {
             return response()->json([
                 'error' => 'Primary Marketer cannot be a secondary marketer at the same time, please check input',
                 'data' => null,
@@ -993,7 +989,7 @@ class CustomerContractController extends Controller
                 'data' => null,
             ], 412);
         }
-        
+
         $CustomerContract->update([
             'customer_id' => $request->customer_id,
             'city_id' => $request->city_id,
@@ -1013,7 +1009,7 @@ class CustomerContractController extends Controller
         ]);
 
         $customer = Customer::where('id', $request->customer_id)->first();
-        LogService::admin(auth()->user()->id, $customer->user->id, 'Update a customer contract (' . $CustomerContract->id .')', 'UPDATE');
+        LogService::admin(auth()->user()->id, $customer->user->id, 'Update a customer contract (' . $CustomerContract->id . ')', 'UPDATE');
         return response()->json(['message' => 'Successfully updated', 'data' => ['contract_id' => $CustomerContract->id, 'customer_id' => $request->customer_id]], 200);
     }
 
@@ -1031,7 +1027,7 @@ class CustomerContractController extends Controller
         $customer_id = $contract->customer_id;
 
         $customer = Customer::where('id', $customer_id)->first();
-        LogService::admin(auth()->user()->id, $customer->user->id, 'Update a customer contract (' . $contract->id .')', 'UPDATE');
+        LogService::admin(auth()->user()->id, $customer->user->id, 'Update a customer contract (' . $contract->id . ')', 'UPDATE');
         $contract->delete();
         return response()->json(['message' => 'Successfully deleted', 'data' => ['customer_id' => $customer_id]], 200);
     }
@@ -1048,9 +1044,9 @@ class CustomerContractController extends Controller
 
         $customer = Customer::with('user:id,first_name,last_name,middle_name')->where('id', $customer_id)->first();
         $customerDetails = $customer->user ?? null;
-       
+
         $contracts = CustomerContract::with('location:name,id')->where('customer_id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->select(['id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'property_type_id', 'building_type_id', 'contract_type', 'property_type'])->orderBy('created_at', 'DESC');
-        
+
         if (!empty($request->status)) {
             $contracts = $contracts->where('status', $request->status);
         }
@@ -1078,7 +1074,7 @@ class CustomerContractController extends Controller
             foreach ($estates as $estate) {
                 // foreach ($contracts as $key => $contract) {
                 $details = CustomerContract::with('location:name,id', 'building_type:id,name', 'plot_size:id,size')->where('estate_id', $estate->estate_id)->where('customer_id', $customer_id)->select(['id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'contract_type', 'property_type', 'property_type_id'])->orderBy('created_at', 'DESC')->where('company_id', $this->sessionDetails('company_id'));
-                   
+
                 if (!empty($request->status)) {
                     $details = $details->where('status', $request->status);
                 }
@@ -1098,7 +1094,7 @@ class CustomerContractController extends Controller
                 // }
             }
 
-           
+
             $data['customer_details'] = [
                 'id' => $customer_id,
                 'first_name' => $customerDetails->first_name,
@@ -1115,8 +1111,8 @@ class CustomerContractController extends Controller
 
     public function formPaymentHistory($customer_id)
     {
-        $histories = Transaction::with(['contracts','estate:id,name'])->where(['customer_id' => $customer_id, 'company_id' => $this->sessionDetails('company_id'), 'purpose' => 'form_payment'])->whereHas('contracts')->orderBy('created_at', 'DESC')->get();
-       
+        $histories = Transaction::with(['contracts', 'estate:id,name'])->where(['customer_id' => $customer_id, 'company_id' => $this->sessionDetails('company_id'), 'purpose' => 'form_payment'])->whereHas('contracts')->orderBy('created_at', 'DESC')->get();
+
         $data = [];
 
         foreach ($histories as $history) {
