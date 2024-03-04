@@ -48,8 +48,8 @@ class StaffController extends Controller
             ->join("departments", "staff.department_id", "=", "departments.id")
             ->leftjoin("job_roles", "staff.jobrole_id", "=", "job_roles.id")
             ->leftjoin("job_types", "staff.jobtype_id", "=", "job_types.id")
-            ->select("staff.id AS staff_id", "users.id As user_id", "users.status", "staff.created_at", "users.first_name", "users.middle_name", "users.last_name", "users.email", "users.type", "users.company_id", "job_roles.name AS job_role", "job_types.name AS job_type", "departments.name AS department", "users.type", "users.phone_number", "users.gender","users.avatar", "staff.jobtype_id AS jobtype_id", "staff.jobrole_id AS jobrole_id", "staff.department_id AS department_id","bank_id")->orderBy("staff.created_at", "desc");
-       
+            ->select("staff.id AS staff_id", "users.id As user_id", "users.status", "staff.created_at", "users.first_name", "users.middle_name", "users.last_name", "users.email", "users.type", "users.company_id", "job_roles.name AS job_role", "job_types.name AS job_type", "departments.name AS department", "users.type", "users.phone_number", "users.gender", "users.avatar", "staff.jobtype_id AS jobtype_id", "staff.jobrole_id AS jobrole_id", "staff.department_id AS department_id", "bank_id")->orderBy("staff.created_at", "desc");
+
         if (!empty($request->name)) {
             $staff = $staff->where('first_name', 'LIKE', "%{$request->name}%")
                 ->orWhere(function ($staff) use ($request) {
@@ -83,7 +83,7 @@ class StaffController extends Controller
         foreach ($staff as $st) {
             $st->avatar = $st->user->avatar;
         }
-        
+
         return response()->json(['message' => 'Success', 'data' => $staff], 200);
     }
 
@@ -158,7 +158,7 @@ class StaffController extends Controller
 
         $staff = Staff::find($request->staff_id);
 
-        LogService::admin(auth()->user()->id, $staff->user->id, 'Assign a role to staff' , 'CREATE');
+        LogService::admin(auth()->user()->id, $staff->user->id, 'Assign a role to staff', 'CREATE');
         return response()->json(['message' => 'Created successfully', 'data' => []], 200);
     }
 
@@ -260,6 +260,8 @@ class StaffController extends Controller
         $data = array_merge($validator2, $validator);
 
         $data['date_of_birth'] = !empty($request->date_of_birth) ? Carbon::parse($request->date_of_birth) : null;
+        $data['date_of_employment'] = !empty($request->date_of_employment) ? Carbon::parse($request->date_of_employment) : null;
+
         // Create user
         if (!$request->staff_id && empty($request->staff_id)) {
             $user = User::create([
@@ -306,19 +308,17 @@ class StaffController extends Controller
             $data['recipient'] = $user->email ?? 'Staff';
 
             $this->logEmail($data);
-
-
         } else {
             $staff = Staff::where('id', $request->staff_id)->where('company_id', $this->sessionDetails('company_id'))->first();
             $user = $staff->user;
-            $updateUser = Arr::only($data, ['email','first_name', 'middle_name', 'last_name', 'username', 'phone_number', 'gender', 'next_of_kin', 'branch_id', 'date_of_birth']);
+            $updateUser = Arr::only($data, ['email', 'first_name', 'middle_name', 'last_name', 'username', 'phone_number', 'gender', 'next_of_kin', 'branch_id', 'date_of_birth']);
             $updateStaff = Arr::only($data, ['jobtype_id', 'date_of_employment', 'department_id', 'jobrole_id', 'commission_id', 'bank_id', 'pfa_id', 'account_name', 'account_name', 'account_number', 'sort_code', 'swift_code', 'nhf_number']);
 
             $user->update($updateUser);
             $staff->update($updateStaff);
         }
 
-        LogService::admin(auth()->user()->id, $staff->user->id, 'Add a staff' , 'CREATE');
+        LogService::admin(auth()->user()->id, $staff->user->id, 'Add a staff', 'CREATE');
         return response()->json(['message' => 'Successful!', 'data' => ['staff_id' => $staff->id]], 200);
     }
 
@@ -457,7 +457,7 @@ class StaffController extends Controller
             'company_id' => $this->sessionDetails('company_id')
         ]);
 
-        LogService::admin(auth()->user()->id, $staff->user->id, 'Update a role to staff' , 'UPDATE');
+        LogService::admin(auth()->user()->id, $staff->user->id, 'Update a role to staff', 'UPDATE');
 
         return response()->json(['message' => 'Successfully updated!', 'data' => ['staff_id' => $request->staff_id]], 200);
     }
@@ -512,7 +512,7 @@ class StaffController extends Controller
                 'appearance_format' => 'nullable',
             ]);
         }
-        
+
         if ($validator->fails()) {
             return response()->json([
                 'error' => $validator->messages()->first(),
@@ -527,7 +527,7 @@ class StaffController extends Controller
 
         StaffIdentificationSetting::updateOrCreate(['company_id' => $data['company_id']], $data);
 
-        LogService::admin(auth()->user()->id, null, 'Update staff identification setting' , 'UPDATE');
+        LogService::admin(auth()->user()->id, null, 'Update staff identification setting', 'UPDATE');
         return response()->json(['message' => 'Operation successfull', 'data' => $request['order_of_appearance']], 200);
     }
 
@@ -565,7 +565,7 @@ class StaffController extends Controller
 
         StaffDocumentSetting::updateOrCreate($data);
 
-        LogService::admin(auth()->user()->id, null, 'Add staff document setting' , 'CREATE');
+        LogService::admin(auth()->user()->id, null, 'Add staff document setting', 'CREATE');
 
         return response()->json(['message' => 'Operation Successfull', 'data' => []], 200);
     }
@@ -590,13 +590,13 @@ class StaffController extends Controller
 
         $settings = StaffDocumentSetting::where(['id' => $id, 'company_id' => $this->sessionDetails('company_id')])->update($data);
 
-        LogService::admin(auth()->user()->id, null, 'Update staff document settings' , 'UPDATE');
+        LogService::admin(auth()->user()->id, null, 'Update staff document settings', 'UPDATE');
         return response()->json(['message' => 'Operation successfull', 'data' => $settings], 200);
     }
 
     public function deleteStaffDocumentSetting(Request $request, $id)
     {
-        LogService::admin(auth()->user()->id, null, 'Delete staff document settings (' . $id . ')' , 'DELETE');
+        LogService::admin(auth()->user()->id, null, 'Delete staff document settings (' . $id . ')', 'DELETE');
 
         $settings = StaffDocumentSetting::where(['id' => $id, 'company_id' => $this->sessionDetails('company_id')])->delete();
 
@@ -605,11 +605,11 @@ class StaffController extends Controller
 
     public function getSingleStaffProfile($staff_id, $internal = null)
     {
-        $staff = Staff::with('bank')->with(['job_type','department','roles', 'job_role'])->whereHas('user', function($query){
+        $staff = Staff::with('bank')->with(['job_type', 'department', 'roles', 'job_role'])->whereHas('user', function ($query) {
             $query->where('type', 'staff')->where('status', 'active');
         })->where('id', $staff_id)->first();
 
-        if(empty($staff)){
+        if (empty($staff)) {
             return response()->json(['message' => 'No records found', 'data' => []], 200);
         }
 
@@ -621,13 +621,14 @@ class StaffController extends Controller
         //     ->leftjoin("commissions", "staff.commission_id", "=", "commissions.id")
         //     ->select("staff.id AS staff_id", "users.status", "users.staff_id as employee_id", "staff.created_at", "users.first_name", "users.username", "users.last_name", "users.middle_name", "users.avatar", "users.phone_number", "users.email", "staff.id AS staff_id", "users.type", "users.company_id", "staff.jobtype_id", "users.id AS user_id", "staff.date_of_employment", "staff.branch_id AS branch_id", "branches.name AS branch_name", "departments.id AS department_id", "departments.name AS department_name", "job_roles.id AS job_role_id", "job_roles.name AS job_role_name", "job_types.id AS job_type_id", "job_types.name AS job_type_name", "users.next_of_kin", "users.date_of_birth AS date_of_birth", "users.gender", "staff.commission_id AS commission_id", "commissions.name AS commission_name", "commissions.percentage",)
         //     ->first();
-       
+
         $profile_completenes = $this->profileCompletenes($staff);
-    
+
         // $additional_details = !empty($staff->additional_details) ? json_decode($staff->additional_details, true) : [];
         $next_of_kin = $staff->user->next_of_kin;
-       
+
         $time = Carbon::parse($staff->date_of_employment)->diff(Carbon::now());
+
         $time_in_company = ($time->y > 0 ? $time->y . ($time->y > 1 ? 'years, ' : 'year, ') : '') .  ($time->m > 0 ? ($time->m > 1 ? $time->m . ' months' : $time->m . ' month') : 'Less than a month');
         $my_anniversary = Carbon::parse($staff->date_of_employment)->format('jS\\, F');
         $data['staff_id'] = $staff->user->staff_id;
@@ -661,7 +662,7 @@ class StaffController extends Controller
                 'name' => $staff->branch_name ?? '',
             ]
         ];
-       
+
         $data['personal_information'] = [
             'first_name' => $staff->user->first_name ?? '',
             'middle_name' => $staff->user->middle_name ?? '',
@@ -674,26 +675,26 @@ class StaffController extends Controller
             'dob' => $date_of_birth,
             'avatar' => $staff->user->avatar,
         ];
-       
+
         $data['contact_and_additional_information'] = [
             'residential_address' => $staff->user->residential_address ?? '',
             'alternate_email' => $staff->user->alternate_email ?? '',
             'alternate_number' => $staff->user->alternate_number ?? '',
             'state' => [
-                'id' => $staff->user->state-> id ?? null,
+                'id' => $staff->user->state->id ?? null,
                 'name' => $staff->user->state->name ?? null
             ],
             'lga' => [
                 'id' => $staff->user->lga->id ?? null,
-                'name' => $staff->user->lga-> name ?? null
+                'name' => $staff->user->lga->name ?? null
             ],
 
             'nationality' => [
                 'id' => $staff->user->country->id ?? null,
-                'name' => $staff->user->country-> name ?? null
+                'name' => $staff->user->country->name ?? null
             ],
         ];
-       
+
         $data['next_of_kin_information'] = [
             'first_name' => $next_of_kin['nok_first_name'] ?? '',
             'last_name' => $next_of_kin['nok_last_name'] ?? '',
@@ -713,7 +714,7 @@ class StaffController extends Controller
 
         $data['bank'] = $staff->bank;
         $data['pfa'] = $staff->pfa;
-        
+
         return response()->json(['message' => 'Success', 'data' => $data], 200);
     }
 
@@ -729,24 +730,25 @@ class StaffController extends Controller
         }
     }
 
-    public function staffDeals(Request $request, $staff_id){
-        $deals = CustomerContract::join('customers','customers.id','=','customer_contracts.customer_id')
-        ->join('users','users.id','=','customers.user_id')
-        ->where('primary_marketer_id', $staff_id)->orderBy('customer_contracts.updated_at','desc')
-        ->select('customer_contracts.building_type', 'customer_contracts.estate_id', 'customer_contracts.contract_status','customer_contracts.id','customer_contracts.plot_size', 'customer_contracts.updated_at','customer_contracts.updated_at', 'customer_contracts.created_at','customer_contracts.property_type', 'customer_contracts.primary_marketer_id', 'users.first_name', 'users.middle_name', 'users.last_name');
- 
-        if(!empty($request->status)){
-            if($request->status == 'open'){
-                $deals = $deals->whereNull('contract_status')->orWhere('contract_status','ongoing');
-            }else{
-                $deals = $deals->whereIn('contract_status',['allocated','completed','closed']);
+    public function staffDeals(Request $request, $staff_id)
+    {
+        $deals = CustomerContract::join('customers', 'customers.id', '=', 'customer_contracts.customer_id')
+            ->join('users', 'users.id', '=', 'customers.user_id')
+            ->where('primary_marketer_id', $staff_id)->orderBy('customer_contracts.updated_at', 'desc')
+            ->select('customer_contracts.building_type', 'customer_contracts.estate_id', 'customer_contracts.contract_status', 'customer_contracts.id', 'customer_contracts.plot_size', 'customer_contracts.updated_at', 'customer_contracts.updated_at', 'customer_contracts.created_at', 'customer_contracts.property_type', 'customer_contracts.primary_marketer_id', 'users.first_name', 'users.middle_name', 'users.last_name');
+
+        if (!empty($request->status)) {
+            if ($request->status == 'open') {
+                $deals = $deals->whereNull('contract_status')->orWhere('contract_status', 'ongoing');
+            } else {
+                $deals = $deals->whereIn('contract_status', ['allocated', 'completed', 'closed']);
             }
         }
 
         $deals = $deals->get();
 
         // $deals = $deals->load('customer.user');
-        return response()->json(['message' => 'Retrieved successfully', 'data' => $deals], 200);    
+        return response()->json(['message' => 'Retrieved successfully', 'data' => $deals], 200);
     }
 
     public function sampleBulkStaff()
