@@ -107,7 +107,7 @@ class CommissionController extends Controller
         ]);
 
         LogService::admin(auth()->user()->id, NULL, 'Update a commission ('. $commission->id .')', 'UPDATE');
-        return response()->json(['message' => 'Department Updated Successfully', 'data' => $commission], 200);
+        return response()->json(['message' => 'Commission Updated Successfully', 'data' => $commission], 200);
     }
 
     /**
