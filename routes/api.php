@@ -51,7 +51,10 @@ use App\Http\Controllers\AccountClassificationController;
 use App\Http\Controllers\LegalDocumentTemplateController;
 use App\Http\Controllers\GeneratedLegalDocumentController;
 use App\Http\Controllers\EstateConstructionSettingController;
+use App\Http\Controllers\HCMController;
+use App\Http\Controllers\JobTitleController;
 use App\Http\Controllers\LeaveAndAbsenceManagementController;
+use App\Http\Controllers\RecipientGroupController;
 use App\Http\Controllers\StaffDisengagementController;
 use App\Http\Controllers\TransactionTypeDefinitionController;
 
@@ -114,8 +117,15 @@ Route::group(['middleware' => 'throttle:60,1'], function () {
     // [...]
 });
 Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
-    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle.login');
     Route::post('/get-permission-to-resource', [MenuController::class, 'getPermissionToResource'])->middleware(['auth:sanctum', 'company_check']);
+
+    Route::middleware(['auth:sanctum', 'company_check', 'otherchecks'])->group(function () {
+        Route::prefix('self-service')->group(function(){
+
+            Route::post('update-my-profile', [SelfServiceController::class, 'updateMyWorkProfile']);
+        });
+    });
 
     Route::middleware(['auth:sanctum', 'company_check', 'user_roles', 'otherchecks'])->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
@@ -127,6 +137,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
 
         // Staff Module Routes
         // Route::post('filter-customers', [CustomerController::class, 'index']);
+        Route::get('customers/total', [CustomerController::class, 'count']);
         Route::resource('customers', CustomerController::class);
         Route::get('customers-count', [CustomerController::class, 'CustomerCount']);
 
@@ -281,7 +292,6 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::group(['prefix' => 'self-service', 'before' => 'self-service'], function () {
             Route::get('dashboard', [SelfServiceController::class, 'dashboard']);
             Route::get('my-profile', [SelfServiceController::class, 'myWorkProfile']);
-            Route::post('update-my-profile', [SelfServiceController::class, 'updateMyWorkProfile']);
             Route::post('add-avatar/{staff_id?}', [SelfServiceController::class, 'addAvatar']);
             Route::get('delete-avatar/{staff_id?}', [SelfServiceController::class, 'deleteAvatar']);
             Route::get('get-avatar/{staff_id}', [SelfServiceController::class, 'getAvatar']);
@@ -366,8 +376,30 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('audit/log/search', [LogController::class, 'search']);
         
         Route::prefix('hcm')->group(function(){
+            Route::get('/', [HCMController::class, 'index']);
             Route::get('staffs/disengagement/search', [StaffDisengagementController::class, 'search']);
             Route::apiResource('staffs/disengagement', StaffDisengagementController::class);
+            Route::post('job/settings/title/bulk', [JobTitleController::class, 'bulk']);
+            Route::apiResource('job/settings/title', JobTitleController::class);
+        });
+
+        Route::prefix('crm')->group(function(){
+            Route::prefix('settings/recipients/')->group(function(){
+                Route::get('group/search', [RecipientGroupController::class, 'search']);
+                Route::apiResource('group', RecipientGroupController::class);
+            });
+        });
+
+        Route::prefix('rem')->group(function () {
+            Route::get('generated/legal/documents', [LegalDocumentController::class, 'index']);
+        });
+
+        Route::prefix('cities/locations')->group(function(){
+            Route::get('search', [LocationController::class, 'search']);
+        });
+
+        Route::prefix('locations/estates')->group(function(){
+            Route::get('search', [EstateController::class, 'search']);
         });
     });
 });

@@ -6,6 +6,7 @@ use App\Models\Estate;
 use App\Models\Property;
 use Illuminate\Http\Request;
 use App\Imports\EstateImport;
+use App\Models\City;
 use Illuminate\Http\Response;
 use App\Models\EstateSettings;
 use Illuminate\Validation\Rule;
@@ -14,6 +15,7 @@ use Illuminate\Http\RedirectResponse;
 use App\Models\EstatePropertyTypeDetails;
 use App\Models\LegalDocumentTemplate;
 use App\Models\LegalDocumentType;
+use App\Models\Location;
 use App\Services\LogService;
 use Illuminate\Support\Facades\Validator;
 
@@ -482,5 +484,52 @@ class EstateController extends Controller
     {
         $estates = Estate::where('location_id', $location_id)->where('company_id', $this->sessionDetails('company_id'))->get();
         return response()->json(['message' => 'Retrieved succesfully', 'data' => $estates], 200);
+    }
+
+       /**
+     * Search resources in storage
+     * 
+     */
+    public function search(Request $request)
+    {
+        $company_id = $this->sessionDetails('company_id');
+
+        $query = Estate::where('company_id', $company_id);
+
+        // search by estate name
+        if($request->input('name') && $name = $request->input('name')){
+            $query->where('name', 'LIKE', '%'. $name .'%');
+        }
+
+        // search by location ids
+        if($request->input('location_ids') && $location_ids = explode(',', $request->input('location_ids'))){
+            $query->whereIn('location_id', $location_ids);
+        }
+
+        $from = $request->input('from');
+        $to = $request->input('to');
+
+        // search by date range
+        if($from && $to){
+            $query->whereBetween('created_at', [$from, $to]);
+        }
+
+        // search by location names
+        if($request->input('location_names') && $location_names = $request->input('location_names')){
+            $locations = Location::where('company_id', $company_id)->whereNotNull('company_id')
+            ->where('name', 'LIKE', '%' . $location_names . '%')
+            ->get();
+            $location_ids = $locations->whereNotNull('id')->pluck('id')->toArray();
+
+            $query->whereIn('location_id',  $location_ids);
+        }
+
+        if($request->input('page')){
+            $estates = $query->paginate(20);
+        } else {
+            $estates = $query->get();
+        }
+    
+        return response()->json(['message' => 'Success', 'data' => $estates], 200);
     }
 }

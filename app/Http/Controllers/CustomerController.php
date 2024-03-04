@@ -389,5 +389,18 @@ class CustomerController extends Controller
         return response()->json(['message' => 'Successful', 'data' => $request['order_of_appearance']], 200);
     }
 
-   
+
+    /**
+     * Count resource
+     */
+
+    public function count(Request $request)
+    {
+        $company_id = $this->sessionDetails('company_id');
+
+        $count = Customer::where('company_id', $company_id)->whereNotNull('company_id')->whereHas('contracts', fn($query) =>
+            $query->whereIn('status',  explode(',', $request->input('status')))
+         )->count();
+        return response()->json(['message' => 'Successful', 'data' => $count], 200);
+    }   
 }

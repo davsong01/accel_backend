@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\City;
 use App\Models\Estate;
 use App\Models\Location;
 use App\Services\LogService;
@@ -124,5 +125,52 @@ class LocationController extends Controller
         
         $location->delete();
         return response()->json(['message' => 'Deleted Successfully.', 'data' => null], 200);
+    }
+
+    /**
+     * Search resources in storage
+     * 
+     */
+    public function search(Request $request)
+    {
+        $params = $request->only(['city_ids']);
+        $company_id = $this->sessionDetails('company_id');
+
+        $query = Location::where('company_id', $company_id);
+
+        // search by location name
+        if($request->input('name') && $name = $request->input('name')){
+            $query->where('name', 'LIKE', '%'. $name .'%');
+        }
+
+        // search by city ids
+        if($request->input('city_ids') && $city_ids = explode(',', $request->input('city_ids'))){
+            $query->whereIn('city_id', $city_ids);
+        }
+
+        $from = $request->input('from');
+        $to = $request->input('to');
+
+        // search by date range
+        if($from && $to){
+            $query->whereBetween('created_at', [$from, $to]);
+        }
+
+        // search by city names
+        if($request->input('city_names') && $city_names = $request->input('city_names')){
+            $cities = City::where('company_id', $company_id)->whereNotNull('company_id')
+            ->where('name', 'LIKE', '%' . $city_names . '%')
+            ->get();
+            $city_ids = $cities->whereNotNull('id')->pluck('id')->toArray();
+
+            $query->whereIn('city_id',  $city_ids);
+        }
+
+        if($request->input('page')){
+            $locations = $query->paginate(20);
+        } else {
+            $locations = $query->get();
+        }
+        return response()->json(['message' => 'Success', 'data' => $locations], 200);
     }
 }
