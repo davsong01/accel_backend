@@ -2,9 +2,9 @@
 
 namespace App\Traits;
 
-use App\Relations\HasManyJson;
+use App\Relations\HasManyJson as RelationsHasManyJson;
 
-trait HasManyJsonTrait
+trait HasManyJson
 {
     /**
      * Define a custom hasManyJson relationship.
@@ -26,6 +26,6 @@ trait HasManyJsonTrait
         $localKey = $localKey ?: $this->getKeyName();
 
         // Return a new instance of HasManyJson relationship
-        return new HasManyJson($instance->newQuery(), $this, $foreignKey, $localKey);
+        return new RelationsHasManyJson($instance->newQuery(), $this, $foreignKey, $localKey);
     }
 }

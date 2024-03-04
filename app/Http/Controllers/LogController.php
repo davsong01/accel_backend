@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AdminLog;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -40,6 +41,12 @@ class LogController extends Controller
         $to = $request->input('to');
 
         if($from && $to){
+            $from = Carbon::parse($request->input('from'));
+
+            $to = Carbon::parse($request->input('to'));
+            if ($to->format('H:i:s') == '00:00:00')
+                $to->endOfDay();
+
             $query->whereBetween('created_at', [$from, $to]);
         }
 
