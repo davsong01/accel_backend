@@ -19,9 +19,9 @@ class HCMController extends Controller
         $totals = User::Where('company_id', $company_id)
             ->selectRaw('COUNT(*) as users, SUM(type = "staff") as staffs, SUM(type = "customer") as customers')->first();
 
-        $anniversary = User::where('company_id', $company_id)
-            ->select('first_name', 'middle_name', 'last_name', 'email', DB::raw('DATE_FORMAT(created_at, "%d %b, %Y") as formatted_date'))
-            ->whereBetween('created_at', [now()->addMonth(4), now()])
+        $anniversary = Staff::where('company_id', $company_id)
+            ->with(['user'])
+            ->whereBetween('date_of_employment', [now()->startOfDay(), now()->addMonth(3)->endOfDay()])
             ->get();
 
         return response()->json(['message' => 'success', 'data' => [

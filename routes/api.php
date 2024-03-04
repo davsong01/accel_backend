@@ -365,6 +365,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         });
 
         Route::prefix('finance')->group(function(){
+            Route::get('/', [FinanceController::class, 'index']);
             Route::get('transaction/type/search', [TransactionTypeController::class, 'search']);
             Route::apiResource('transaction/type', TransactionTypeController::class);
 
@@ -380,6 +381,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
             Route::get('staffs/disengagement/search', [StaffDisengagementController::class, 'search']);
             Route::apiResource('staffs/disengagement', StaffDisengagementController::class);
             Route::post('job/settings/title/bulk', [JobTitleController::class, 'bulk']);
+            Route::get('job/settings/title/bulk/sample', [JobTitleController::class, 'sample']);
             Route::apiResource('job/settings/title', JobTitleController::class);
         });
 

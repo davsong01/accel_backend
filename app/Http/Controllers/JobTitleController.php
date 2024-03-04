@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Imports\JobTitlesImport;
+use App\Imports\JobTitleImport;
 use App\Models\JobTitle;
 use App\Services\LogService;
 use Illuminate\Http\Request;
@@ -57,19 +57,37 @@ class JobTitleController extends Controller
      */
     public function bulk(Request $request)
     {
-        Validator::make($request->all(), [
-            'job_titles' => 'required|
-				mimetypes:xlsv,xlsx,xls,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,
-				application/excel,application/x-excel,application/x-msexcel,text/comma-seperated-values, text/csv'
-        ], [
-            'file.mimetypes' => 'The file must be a file of type: xlsx'
-        ]);
-
-        Excel::import(new JobTitlesImport, request()->file('job_titles'));
-
-        LogService::admin(auth()->user()->id, NULL, 'Import a bulking job titles', 'CREATE');
-        return response()->json(['message' => 'Building Type Added Successfully', 'data' => null], 200);
-        Excel::import(new JobTitlesImport, request()->file('your_file'));
+        try {
+            $validator = Validator::make($request->all(), [
+                'job_titles' => 'required|
+                    mimetypes:xlsv,xlsx,xls,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,
+                    application/excel,application/x-excel,application/x-msexcel,text/comma-seperated-values, text/csv'
+            ], [
+                'file.mimetypes' => 'The file must be a file of type: xlsx'
+            ]);
+    
+    
+            if ($validator->fails()) {
+                return response()->json([
+                    'error' => $validator->messages()->first(),
+                    'data' => null,
+                ], 412);
+            }
+    
+            Excel::import(new JobTitleImport, $request->file('job_titles'));
+    
+            LogService::admin(auth()->user()->id, NULL, 'Import a bulking job titles', 'CREATE');
+            return response()->json(['message' => 'Building Type Added Successfully', 'data' => null], 200);
+        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+            $failures = $e->failures();
+     
+            foreach ($failures as $failure) {
+                return response()->json([
+                    'error' =>  $failure->errors(),
+                    'data' => null,
+                ], 412);
+        }
+    }
     }
     /**
      * Display the specified resource.
@@ -115,5 +133,14 @@ class JobTitleController extends Controller
 
         $title->delete();
         return response()->json(['message' => 'success', 'data' => null], 200);
+    }
+
+    /**
+     * Bulk resource upload sample file
+     */
+    public function sample()
+    {
+        $realpath = base_path() . '/sampleimports/sample_jobtitle.xlsx';
+        return response()->download($realpath);
     }
 }

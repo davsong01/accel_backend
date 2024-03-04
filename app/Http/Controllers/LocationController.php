@@ -6,6 +6,7 @@ use App\Models\City;
 use App\Models\Estate;
 use App\Models\Location;
 use App\Services\LogService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Http\RedirectResponse;
@@ -153,6 +154,12 @@ class LocationController extends Controller
 
         // search by date range
         if($from && $to){
+            $from = Carbon::parse($request->input('from'));
+
+            $to = Carbon::parse($request->input('to'));
+            if ($to->format('H:i:s') == '00:00:00')
+                $to->endOfDay();
+
             $query->whereBetween('created_at', [$from, $to]);
         }
 
@@ -171,6 +178,7 @@ class LocationController extends Controller
         } else {
             $locations = $query->get();
         }
+
         return response()->json(['message' => 'Success', 'data' => $locations], 200);
     }
 }

@@ -6,6 +6,7 @@ use App\Models\Staff;
 use App\Models\StaffDisengagement;
 use App\Models\User;
 use App\Services\LogService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -140,6 +141,12 @@ class StaffDisengagementController extends Controller
         $to = $request->input('to');
 
         if ($from && $to) {
+            $from = Carbon::parse($request->input('from'));
+
+            $to = Carbon::parse($request->input('to'));
+            if ($to->format('H:i:s') == '00:00:00')
+                $to->endOfDay();
+
             $query->whereBetween('created_at', [$from, $to]);
         }
 
