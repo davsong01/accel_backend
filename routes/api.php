@@ -51,6 +51,8 @@ use App\Http\Controllers\AccountClassificationController;
 use App\Http\Controllers\LegalDocumentTemplateController;
 use App\Http\Controllers\GeneratedLegalDocumentController;
 use App\Http\Controllers\EstateConstructionSettingController;
+use App\Http\Controllers\GLAccountController;
+use App\Http\Controllers\GLLedgerController;
 use App\Http\Controllers\HCMController;
 use App\Http\Controllers\JobTitleController;
 use App\Http\Controllers\LeaveAndAbsenceManagementController;
@@ -354,14 +356,17 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
             Route::get('search', 'search');
         });
 
-        Route::controller(FinanceController::class)->name('finance.')->prefix('finance')->group(function () {
-            Route::get('gl-ledger', 'GLLedger');
-            Route::post('gl-ledger/create', 'createGLLedger');
-            Route::get('gl-ledger/search', 'searchGLLedger');
-            Route::get('gl-ledger/{transaction}', 'showGLLedger');
-            Route::get('gl-account', 'GLAccount')->name('gl-account');
-            Route::get('gl-account/search', 'searchGLAccount')->name('gl-account.search');
-            Route::get('gl-account/{account}/transactions', 'GLAccountTransactions')->name('gl-account.transactions');
+        Route::controller(GLLedgerController::class)->name('finance.')->prefix('finance')->group(function () {
+            Route::get('gl-ledger', 'index');
+            Route::post('gl-ledger/create', 'create');
+            Route::get('gl-ledger/search', 'search');
+            Route::get('gl-ledger/{transaction}', 'show');
+        });
+
+        Route::controller(GLAccountController::class)->name('finance.')->prefix('finance')->group(function () {
+            Route::get('gl-account', 'index')->name('gl-account');
+            Route::get('gl-account/search', 'search')->name('gl-account.search');
+            Route::get('gl-account/{account}/transactions', 'transactions')->name('gl-account.transactions');
         });
 
         Route::prefix('finance')->group(function(){
