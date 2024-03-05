@@ -51,6 +51,7 @@ use App\Http\Controllers\AccountClassificationController;
 use App\Http\Controllers\LegalDocumentTemplateController;
 use App\Http\Controllers\GeneratedLegalDocumentController;
 use App\Http\Controllers\EstateConstructionSettingController;
+use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\GLAccountController;
 use App\Http\Controllers\GLLedgerController;
 use App\Http\Controllers\HCMController;
@@ -120,6 +121,11 @@ Route::group(['middleware' => 'throttle:60,1'], function () {
 });
 Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
     Route::post('/login', [AuthController::class, 'login'])->middleware('throttle.login');
+    Route::post('forgot-password', [ForgotPasswordController::class, 'forgot'])
+    ->name('forget.password');
+    Route::post('reset-password', [ForgotPasswordController::class, 'store'])
+    ->name('reset.password');
+
     Route::post('/get-permission-to-resource', [MenuController::class, 'getPermissionToResource'])->middleware(['auth:sanctum', 'company_check']);
 
     Route::middleware(['auth:sanctum', 'company_check', 'otherchecks'])->group(function () {
@@ -373,7 +379,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
             Route::get('/', [FinanceController::class, 'index']);
             Route::get('transaction/type/search', [TransactionTypeController::class, 'search']);
             Route::apiResource('transaction/type', TransactionTypeController::class);
-
+            
             Route::get('transaction/purpose/search', [TransactionPurposeController::class, 'search']);
             Route::apiResource('transaction/purpose', TransactionPurposeController::class);
         });
