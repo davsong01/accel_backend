@@ -92,14 +92,15 @@ class Controller extends BaseController
     {
         // Expects an array of estate ids with their sub array of contract ids
         $amount = Estate::where('id', $estate_id)->first()->form_amount;
-        
+
         return $amount;
     }
 
-    public function generateTransactionId($prefix=null){
-        if(!empty($prefix)){
-            return  $prefix.'-' . time() . rand(1111111111, 9999999999);
-        }else{
+    public function generateTransactionId($prefix = null)
+    {
+        if (!empty($prefix)) {
+            return  $prefix . '-' . time() . rand(1111111111, 9999999999);
+        } else {
             return  time() . rand(1111111111, 9999999999);
         }
     }
@@ -223,7 +224,7 @@ class Controller extends BaseController
         $lastUser = User::where('company_id', $this->sessionDetails('company_id'))->where('type', 'staff')->latest()->first();
         $lastUserId = $lastUser->id + 1;
         $lastStaffId = $lastUser->staff->id ?? 1;
-      
+
         if (!$settings) {
             return response()->json(['message' => 'Successful', 'data' => $lastUserId], 200);
         }
@@ -233,18 +234,18 @@ class Controller extends BaseController
 
         if ($settings->use_id_generator == 1) {
             $format = !empty($settings->appearance_format) ? $settings->appearance_format : ' ';
-            
+
             foreach ($order_of_appearance as $appearance) {
                 $slash = end($order_of_appearance) != $appearance ? '/' : '';
                 if ($appearance == 'prefix') {
                     $id .= $settings->prefix . $slash;
                 }
-                
-                if ($appearance == 'registration_year') {
+
+                if ($appearance == 'employment_year') {
                     $id .= $created_at->format('Y') . $slash;
                 }
 
-                if ($appearance == 'registration_month') {
+                if ($appearance == 'employment_month') {
                     $id .= $created_at->format('m') . $slash;
                 }
 
@@ -258,22 +259,21 @@ class Controller extends BaseController
                     $min = pow(10, $count - 1);
                     $id .= mt_rand($min, $min * 9) . $slash;
                 }
-
             }
         } else {
             $count = strlen($lastStaffId);
             $min = pow(10, $count - 1);
             $id = mt_rand($min, $min * 9);
         }
-       
-        if (isset($isJson) && $isJson == false) {
+
+        if ($isJson) {
             return $id;
         }
 
         return response()->json(['message' => 'Successful', 'data' => $id], 200);
     }
 
-    public function generateCustomerId($isJson = true)
+    public function generateCustomerId($isJson = false, $created_at = null)
     {
         $created_at = !empty($created_at) ? Carbon::parse($created_at) : Carbon::today();
 
@@ -282,13 +282,6 @@ class Controller extends BaseController
         $lastUserId = $lastUser->id + 1;
         $lastCustomerId = $lastUser->customerId ?? 1;
 
-        //     dd($settings);
-        //     use_id_generator" => 1
-        // "next_auto_increment_number" => "2"
-        // "auto_increment_number_digit" => "4"
-        // "appearance_format" => "1111"
-        // "prefix" => "ACC"
-        // "order_of_appearance" => "["prefix","registration_year","registration_month"]"
         if (!$settings) {
             return response()->json(['message' => 'Successful', 'data' => $lastUserId], 200);
         }
@@ -329,8 +322,8 @@ class Controller extends BaseController
             $min = pow(10, $count - 1);
             $id = mt_rand($min, $min * 9);
         }
-        
-        if (isset($isJson) && $isJson == false) {
+
+        if ($isJson) {
             return $id;
         }
 
@@ -397,7 +390,7 @@ class Controller extends BaseController
                 }
             }
         }
-        
+
         $file->storeAs($folder, $name, config('app.upload_path'));
 
         return [
@@ -506,17 +499,17 @@ class Controller extends BaseController
             $r = (string) $meth->name;
 
             $re = call_user_func($first . '\\' . $class . '::' . $rest[0], ...array_slice($rest, 1))->first()->$r;
-            
-            if($re){
+
+            if ($re) {
                 $re = $re->count();
                 $used[] = $r;
-            }else{
+            } else {
                 $re = 0;
             }
-           
+
             $counter = $counter + $re;
         }
-        
+
         return $counter;
     }
 
@@ -575,7 +568,7 @@ class Controller extends BaseController
 
     public function encodeUploadedFile($file)
     {
-       
+
         return !empty($file) ? url('/') . '/api/uploads/' . base64_encode($file) : '';
     }
 
@@ -651,26 +644,25 @@ class Controller extends BaseController
         $userDetails = $forms->customer->user;
         $customerDetails = $forms->customer;
         $next_of_kin = !empty($customerDetails->next_of_kin) ? json_decode($customerDetails->next_of_kin, true) : [];
-       
+
         // Get contracts in prospoect and attach to response form
-        $prospectContracts = CustomerContract::
-        where('status', 'prospect')
-        ->where('customer_id', $forms->customer_id)
-        ->where('company_id', $this->sessionDetails('company_id'))
-        ->orderBy('estate_id','DESC')
-        ->get();
-       
+        $prospectContracts = CustomerContract::where('status', 'prospect')
+            ->where('customer_id', $forms->customer_id)
+            ->where('company_id', $this->sessionDetails('company_id'))
+            ->orderBy('estate_id', 'DESC')
+            ->get();
+
         $contract_details = [];
 
-        if(!$prospectContracts){
+        if (!$prospectContracts) {
             return $contract_details;
-        }    
+        }
         if (!empty($prospectContracts)) {
             foreach ($prospectContracts as $contract) {
-                if(!$contract){
+                if (!$contract) {
                     return [];
                 }
-              
+
                 if (!empty($contract->form_payment_status) && $contract->form_payment_status == 'paid') {
                     if ($modify && $modify == 'approve_contract') {
                         $this->approveCustomerContract($contract);
@@ -680,7 +672,7 @@ class Controller extends BaseController
                 if ($modify && $modify == 'decline_contract') {
                     $this->declineCustomerContract($contract, $reason);
                 }
-             
+
                 $contract_details[] = [
                     'id' => $contract->id,
                     'customer_id' => $contract->customer_id,
@@ -705,7 +697,7 @@ class Controller extends BaseController
                 ];
             }
         }
-        
+
         return $contract_details;
     }
 
@@ -729,16 +721,16 @@ class Controller extends BaseController
         $name = $payment->transaction_id;
         $data['receipt_no'] = $name;
         $pathToSave = $this->getPathToSaveFile('receipts') . '/' . $name . '.pdf';
-        
+
         $pdf = PDF::loadView('receipts.form-payment', compact('payment', 'data'))->setPaper('a4', 'portrait');
-        
+
         file_put_contents(base_path() . '/' . config('app.upload_path') . '/' . $pathToSave, $pdf->output());
         // Rmember to create a public folder in the root directory if there is a PDF error
 
         return [
             'receipt_no' => $name . '.pdf',
             'filename' => $name . '.pdf',
-            'filepath' => config('app.upload_path').'/'.$pathToSave
+            'filepath' => config('app.upload_path') . '/' . $pathToSave
         ];
     }
 
@@ -751,8 +743,9 @@ class Controller extends BaseController
         return $rand . $year . $month;
     }
 
-    public function createTransaction($attributes){
-        if(key_exists('payment_slip', $attributes)){
+    public function createTransaction($attributes)
+    {
+        if (key_exists('payment_slip', $attributes)) {
             $filepath = $this->uploadProtectedFile($attributes['payment_slip'], 'payment_slips')['filepath'];
             $attributes['payment_slip'] = $filepath;
         }

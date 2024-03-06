@@ -59,7 +59,7 @@ class CommissionController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
-        LogService::admin(auth()->user()->id, NULL, 'Create a commission ('. $commission->id .')', 'CREATE');
+        LogService::admin(auth()->user()->id, NULL, 'Create a commission (' . $commission->id . ')', 'CREATE');
         return response()->json(['message' => 'Created successfully', 'data' => $commission], 200);
     }
 
@@ -86,8 +86,8 @@ class CommissionController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => [
-                'required', Rule::unique('commissions')->where(function ($query) {
-                    $query->where('company_id', $this->sessionDetails('company_id'));
+                'required', Rule::unique('commissions')->where(function ($query) use ($commission) {
+                    $query->where('company_id', $this->sessionDetails('company_id'))->where('name', '!=', $commission->name);
                 })
             ],
             'percentage' => 'required|numeric',
@@ -106,8 +106,8 @@ class CommissionController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
-        LogService::admin(auth()->user()->id, NULL, 'Update a commission ('. $commission->id .')', 'UPDATE');
-        return response()->json(['message' => 'Department Updated Successfully', 'data' => $commission], 200);
+        LogService::admin(auth()->user()->id, NULL, 'Update a commission (' . $commission->id . ')', 'UPDATE');
+        return response()->json(['message' => 'Commission Updated Successfully', 'data' => $commission], 200);
     }
 
     /**
@@ -120,7 +120,7 @@ class CommissionController extends Controller
             return response()->json(['message' => 'Unable to delete, resource in use', 'data' => []], 412);
         }
 
-        LogService::admin(auth()->user()->id, NULL, 'Delete a commission ('. $commission->id .')', 'DELETE');
+        LogService::admin(auth()->user()->id, NULL, 'Delete a commission (' . $commission->id . ')', 'DELETE');
         $commission->delete();
         return response()->json(['message' => 'Deleted Successfully.', 'data' => []], 200);
     }
