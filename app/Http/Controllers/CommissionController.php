@@ -92,7 +92,7 @@ class CommissionController extends Controller
             ],
             'percentage' => 'required|numeric',
         ]);
-
+        
         if ($validator->fails()) {
             return response()->json([
                 'error' => $validator->messages()->first(),
