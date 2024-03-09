@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ChartOfAccount;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -38,6 +39,17 @@ class GLAccountController extends Controller
                 $to->endOfDay();
 
             $query->whereBetween('created_at', [$from, $to]);
+        }
+
+        if ($name = $request->input('staff_name', null)) {
+            $company_id = $this->sessionDetails('company_id');
+            $users = User::with(['staff'])->where('company_id', $company_id)->whereNotNull('company_id')
+                ->where('first_name', 'LIKE', '%' . $name . '%')
+                ->orWhere('last_name', 'LIKE', '%' . $name . '%')
+                ->orWhere('middle_name', 'LIKE', '%' . $name . '%')->get();
+
+            $created_by_ids = $users->whereNotNull('staff.id')->pluck('staff.id')->toArray();
+            $query->whereIn('staff_id', $created_by_ids);
         }
 
         $transactions = $query->with(['staff:id,user_id,account_name,account_number'])->latest()->paginate(10);
