@@ -24,6 +24,7 @@ class RoleController extends Controller
         }
         $roles = Role::where('type', $type)
             ->where('company_id', $this->sessionDetails('company_id'))
+            ->where('id', '!=', env("DEFAULT_ROLE_ID"))
             ->get();
 
         return response()->json(['message' => 'Success', 'data' => $roles], 200);
@@ -81,7 +82,7 @@ class RoleController extends Controller
             ]
         );
 
-        LogService::admin(auth()->user()->id, null, 'Create or update a role (' . $role->id  . ')' , 'CREATE');
+        LogService::admin(auth()->user()->id, null, 'Create or update a role (' . $role->id  . ')', 'CREATE');
         return response()->json(['message' => 'Created successfully', 'data' => []], 200);
     }
 
@@ -147,7 +148,7 @@ class RoleController extends Controller
             'type' => $request->type,
         ]);
 
-        LogService::admin(auth()->user()->id, null, 'Update a role (' . $role->id  . ')' , 'UPDATE');
+        LogService::admin(auth()->user()->id, null, 'Update a role (' . $role->id  . ')', 'UPDATE');
         return response()->json(['message' => 'Role Updated Succesfully', 'data' => $role], 200);
     }
 
@@ -162,7 +163,7 @@ class RoleController extends Controller
             return response()->json(['message' => 'Unable to delete, resource in use', 'data' => []], 412);
         }
 
-        LogService::admin(auth()->user()->id, null, 'Delete a role (' . $role->id  . ')' , 'DELETE');
+        LogService::admin(auth()->user()->id, null, 'Delete a role (' . $role->id  . ')', 'DELETE');
 
         $role->delete();
         return response()->json(['message' => 'Deleted Successfully.', 'data' => null], 200);

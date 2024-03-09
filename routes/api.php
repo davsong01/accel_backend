@@ -131,7 +131,6 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
 
     Route::middleware(['auth:sanctum', 'company_check', 'otherchecks'])->group(function () {
         Route::prefix('self-service')->group(function(){
-
             Route::post('update-my-profile', [SelfServiceController::class, 'updateMyWorkProfile']);
         });
     });

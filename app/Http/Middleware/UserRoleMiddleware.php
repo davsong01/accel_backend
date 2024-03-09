@@ -37,6 +37,7 @@ class UserRoleMiddleware
             if (auth()->user()->type == 'staff') {
                 // Get roles from Staff
                 $user_roles = auth()->user()->staff->roles->pluck('id')->toArray();
+                $user_roles = array_merge($user_roles, [(int) env('DEFAULT_ROLE_ID')]); // default role
 
                 if (!$user_roles) {
                     return response()->json(['error' => 'No roles found for this user', 'data' => null], 412);
@@ -46,7 +47,7 @@ class UserRoleMiddleware
                         $individual_permissions = explode(',', $individual_permissions);
                         Session::put('individual_permissions', $individual_permissions);
                     }
-                    
+
                     Session::put('staff_id',  auth()->user()->staff->id);
                     Session::put('staff_roles',  $user_roles);
                 }

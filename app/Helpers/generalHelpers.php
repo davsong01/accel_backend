@@ -21,7 +21,7 @@ if (!function_exists("getPackageAccess")) {
     function getPackageAccess()
     {
         $package_ids = Session::get('company_package_ids');
-        
+
         if (!$package_ids) {
             return [];
         }
@@ -38,7 +38,7 @@ if (!function_exists("getPackageAccess")) {
             $all = explode(',', $acc);
 
             foreach ($all as $key => $value) {
-                if(!empty($value)){
+                if (!empty($value)) {
                     $allAccess[] = $value;
                 }
             }
@@ -55,30 +55,32 @@ if (!function_exists("getAllAccess")) {
         $packageAccess = getPackageAccess();
 
         // Roles Permissions
-        $roleAccess = auth()->user()->staff->roles->pluck('id');
+        $roleAccess = auth()->user()->staff->roles->pluck('id')->toArray();
+        $roleAccess[] = (int) env('DEFAULT_ROLE_ID');
+
         $rolesAccess = Role::whereIn('id', $roleAccess)->pluck('access');
         $allAccess = [];
 
         foreach ($rolesAccess as $acc) {
             $all = explode(',', $acc);
-            if(!empty($all)){
-                foreach($all as $a){
+            if (!empty($all)) {
+                foreach ($all as $a) {
                     if (!empty($a)) $allAccess[] = $a;
                 }
             }
         }
-        
+
         // Individual Permissions
         $individual_access = auth()->user()->user_permissions;
         if (!empty($individual_access)) {
             $individual_access = explode(',', $individual_access);
-            foreach($individual_access as $access){
+            foreach ($individual_access as $access) {
                 if (!empty($access)) $allAccess[] = $access;
-            }    
+            }
         }
 
         $allAccess = array_unique($allAccess);
-        
+
         // we have to make sure these access exist in company package, else yank it off
         $allowedAccess = [];
 
@@ -148,7 +150,7 @@ if (!function_exists("permissionsCheck")) {
         $permission = RolePermission::select('role_ids', 'status', 'id', 'type', 'is_menu')->where(['route' => $routeName, 'type' => auth()->user()->type])->first();
 
         $user_role_ids = getAllAccess();
-        
+
         if ($permission) {
             $permissionx = true;
             $code = 200;
@@ -165,7 +167,7 @@ if (!function_exists("permissionsCheck")) {
             // Link permissions to permission id
             $allowed_roles = explode(",", $permission->id);
             $check = !empty(array_intersect($allowed_roles, $user_role_ids));
-            
+
             if (!$check) {
                 $permissionx = false;
                 $error = 'You are not permitted to use this resource!';
@@ -176,12 +178,11 @@ if (!function_exists("permissionsCheck")) {
                 $permissionx = true;
                 $code = 200;
             };
-            
         } else {
             $permissionx = true;
             $code = 200;
         }
-        
+
         return [
             'permission' => $permissionx,
             'error' => $error,
@@ -191,13 +192,14 @@ if (!function_exists("permissionsCheck")) {
 }
 
 if (!function_exists("generateGenericPaymentReceipt")) {
-    function generateGenericPaymentReceipt($payment, $contract){
+    function generateGenericPaymentReceipt($payment, $contract)
+    {
         $name = $payment->transaction_id;
         $data['receipt_no'] = $name;
         $pathToSave = app('App\Http\Controllers\Controller')->getPathToSaveFile('receipts') . '/' . $name . '.pdf';
-        
+
         $pdf = \PDF::loadView('receipts.generic-payment', compact('payment', 'data', 'contract'))->setPaper('a4', 'portrait');
-        
+
         file_put_contents(base_path() . '/' . config('app.upload_path') . '/' . $pathToSave, $pdf->output());
         // Rmember to create a public folder in the root directory if there is a PDF error
         return [
