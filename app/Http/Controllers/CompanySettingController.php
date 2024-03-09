@@ -98,7 +98,7 @@ class CompanySettingController extends Controller
     {
         $companySetting = CompanySetting::where('company_id', '!=', NULL)
         ->where('company_id', $this->sessionDetails('company_id'))
-       ->first();
+        ->first();
 
         if (!$companySetting)
             return response()->json(['message' => 'Company not found', 'data' => []], 200);

@@ -64,7 +64,7 @@ class AuthController extends Controller
             }
             $user = User::where('type','customer');
             $user = $user->where('email', $request['email'])->orWhere('customerId', $request['email'])->first();
-           
+
             if (!$user) {
                 return response()->json([
                     'error' => 'User does not exist!'
@@ -112,7 +112,7 @@ class AuthController extends Controller
 
         $token = $user->createToken('auth_token', ['*'], now()->addMinute($ttl))->plainTextToken;
         $cookie = cookie('token', $token);
-   
+
         $datax = [
             'token' => $token,
             'userInfo' => [
