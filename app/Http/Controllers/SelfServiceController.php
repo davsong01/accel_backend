@@ -373,10 +373,6 @@ class SelfServiceController extends Controller
                 'data' => null,
             ], 412);
         }
-        $request->validate([
-            'token' => 'required',
-            'password' => 'required|string|min:6|confirmed',
-        ]);
 
         $passwordReset = ResetCodePassword::firstWhere('token', $data['token']);
 
