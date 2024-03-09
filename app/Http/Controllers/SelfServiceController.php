@@ -82,7 +82,7 @@ class SelfServiceController extends Controller
         $time = Carbon::parse(Auth::user()->staff->date_of_employment)->diff(Carbon::now());
         $time_in_company = ($time->y > 0 ? $time->y . ($time->y > 1 ? 'years, ' : 'year, ') : '') .  ($time->m > 0 ? ($time->m > 1 ? $time->m . ' months' : $time->m . ' month') : 'Less than a month');
         $my_anniversary = Carbon::parse(Auth::user()->staff->date_of_employment)->format('jS\\, F');
-
+        
         foreach ($col as $b) {
             $colleagues[] = [
                 'id' => $b->staff_id,
@@ -107,14 +107,15 @@ class SelfServiceController extends Controller
             'my_anniversary' => $my_anniversary,
             'birthdays' => $birthdays,
             'work_anniversary' => $work_anniversary,
-            'colleagues' => $colleagues
+            'colleagues' => $colleagues,
+            'default_role' => Auth::user()->staff->staffroles->count() < 1 ? 'yes' : 'no'
         ], 200);
     }
 
     public function myWorkProfile()
     {
         $sController = new StaffController();
- 
+
         return $sController->getSingleStaffProfile(Auth::user()->staff->id, 'internal');
     }
 
@@ -151,7 +152,7 @@ class SelfServiceController extends Controller
 
         $user->update(['avatar' => $avatar]);
 
-        LogService::admin(auth()->user()->id, null, 'Add an avatar (' . $user->id  . ')' , 'UPDATE');
+        LogService::admin(auth()->user()->id, null, 'Add an avatar (' . $user->id  . ')', 'UPDATE');
         return response()->json(['message' => 'Success', 'data' => Auth::user()->avatar], 200);
     }
 
@@ -176,7 +177,7 @@ class SelfServiceController extends Controller
 
         $user->update(['avatar' => null]);
 
-        LogService::admin(auth()->user()->id, null, 'Delete an avatar (' . $user->id  . ')' , 'UPDATE');
+        LogService::admin(auth()->user()->id, null, 'Delete an avatar (' . $user->id  . ')', 'UPDATE');
 
         return response()->json(['message' => 'Delete succesful', 'data' => null], 200);
     }
@@ -264,7 +265,7 @@ class SelfServiceController extends Controller
             }
         }
 
-        LogService::admin(auth()->user()->id, null, 'Upload documents avatar (' . $setting->id  . ')' , 'UPDATE');
+        LogService::admin(auth()->user()->id, null, 'Upload documents avatar (' . $setting->id  . ')', 'UPDATE');
         return response()->json(['message' => 'Upload successful', 'data' => []], 200);
     }
 
@@ -279,7 +280,7 @@ class SelfServiceController extends Controller
         if ($document) {
             $this->deleteUploadedFile($document->file);
 
-            LogService::admin(auth()->user()->id, null, 'Delete a document an avatar (' . $id  . ')' , 'DELETE');
+            LogService::admin(auth()->user()->id, null, 'Delete a document an avatar (' . $id  . ')', 'DELETE');
 
             $document->delete();
             return response()->json(['message' => 'Delete succesful', 'data' => []], 200);
@@ -354,7 +355,7 @@ class SelfServiceController extends Controller
         $mes = new MessageTransactionController();
         $mes->logEmailTransaction($data);
 
-        LogService::admin(auth()->user()->id, null, 'Change password' , 'UPDATE');
+        LogService::admin(auth()->user()->id, null, 'Change password', 'UPDATE');
         return response()->json(['message' => 'Password reset link has been sent to registered email', 'data' => null], 200);
     }
 
@@ -384,7 +385,7 @@ class SelfServiceController extends Controller
 
         // delete current token 
 
-        LogService::admin($user->id, null, 'Reset password (' . $user->id  . ')' , 'UPDATE');
+        LogService::admin($user->id, null, 'Reset password (' . $user->id  . ')', 'UPDATE');
         $passwordReset->delete();
 
         return response(['message' => 'Password successfully reset', 'data' => null], 200);

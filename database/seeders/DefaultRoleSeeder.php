@@ -18,7 +18,8 @@ class DefaultRoleSeeder extends Seeder
                 'access' => '',
                 'company_id' => 1,
                 'name' => 'Default Role',
-                'type' => 'staff'
+                'type' => 'staff',
+                'access' => '28'
             ]);
         } catch (\Throwable $th) {
             //throw $th;
