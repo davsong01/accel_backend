@@ -330,17 +330,6 @@ class SelfServiceController extends Controller
 
     public function sendResetPasswordEmail(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'email' => ['required', 'email'],
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'error' => $validator->messages()->all(),
-                'data' => null,
-            ], 412);
-        }
-
         // check if password for this user maches incoming
         if (!Hash::check($request->password, Auth::user()->password)) {
             return response()->json(['error' => 'Current Password supplied is incorrect', 'data' => null], 422);
