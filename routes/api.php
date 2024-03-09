@@ -52,6 +52,7 @@ use App\Http\Controllers\LegalDocumentTemplateController;
 use App\Http\Controllers\GeneratedLegalDocumentController;
 use App\Http\Controllers\EstateConstructionSettingController;
 use App\Http\Controllers\ForgotPasswordController;
+use App\Http\Controllers\GetStartedController;
 use App\Http\Controllers\GLAccountController;
 use App\Http\Controllers\GLLedgerController;
 use App\Http\Controllers\HCMController;
@@ -442,3 +443,5 @@ Route::group(['prefix' => 'customer', 'before' => 'customer'], function () {
         Route::get('get-customer-contract/{customer_id}', [CustomerContractController::class, 'getSingleCustomerContract']);
     });
 });
+
+Route::post('get-started', [GetStartedController::class, 'store']);
