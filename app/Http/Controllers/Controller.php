@@ -30,6 +30,8 @@ use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
+use function PHPUnit\Framework\isEmpty;
+
 class Controller extends BaseController
 {
     use AuthorizesRequests, ValidatesRequests;
@@ -46,8 +48,8 @@ class Controller extends BaseController
     public function deleteImage($image)
     {
         // Decode file first
-        dd(reConstructUploadedFile($image));
-        if (file_exists(public_path($image))) {
+        $image = $this->decodeFilePath($image);
+        if (!empty($image) && file_exists(public_path($image))) {
             unlink(public_path($image));
         }
 
@@ -752,4 +754,12 @@ class Controller extends BaseController
         $attributes['staff_id'] = Auth::user()->staff->id;
         return Transaction::create($attributes);
     }
+
+    public function decodeFilePath($image){
+        $path = parse_url($image ?? '', PHP_URL_PATH);
+        $filename = basename($path); 
+
+        return base64_decode($filename);
+    }
+
 }
