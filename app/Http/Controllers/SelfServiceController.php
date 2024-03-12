@@ -331,10 +331,11 @@ class SelfServiceController extends Controller
 
     public function sendResetPasswordEmail(Request $request)
     {
-        // check if password for this user maches incoming
-        if (!Hash::check($request->password, Auth::user()->password)) {
-            return response()->json(['error' => 'Current Password supplied is incorrect', 'data' => null], 422);
-        }
+        // // check if password for this user maches incoming
+        // if (!Hash::check($request->password, Auth::user()->password)) {
+        //     return response()->json(['error' => 'Current Password supplied is incorrect', 'data' => null], 422);
+        // }
+        
         // Delete all old code that user send before.
         ResetCodePassword::where('email', Auth::user()->email)->delete();
         // Generate random code
