@@ -59,7 +59,7 @@ class JobTitleController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'job_titles' => 'required|
+                'file' => 'required|
                     mimetypes:xlsv,xlsx,xls,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,
                     application/excel,application/x-excel,application/x-msexcel,text/comma-seperated-values, text/csv'
             ], [
@@ -74,13 +74,13 @@ class JobTitleController extends Controller
                 ], 412);
             }
     
-            Excel::import(new JobTitleImport, $request->file('job_titles'));
+            Excel::import(new JobTitleImport, $request->file('file'));
     
             LogService::admin(auth()->user()->id, NULL, 'Import a bulking job titles', 'CREATE');
-            return response()->json(['message' => 'Building Type Added Successfully', 'data' => null], 200);
+            return response()->json(['message' => 'Job titles successfully', 'data' => null], 200);
         } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
             $failures = $e->failures();
-     
+
             foreach ($failures as $failure) {
                 return response()->json([
                     'error' =>  $failure->errors(),

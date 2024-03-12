@@ -331,10 +331,6 @@ class SelfServiceController extends Controller
 
     public function sendResetPasswordEmail(Request $request)
     {
-        $request->validate([
-            'password' => 'required',
-        ]);
-
         // check if password for this user maches incoming
         if (!Hash::check($request->password, Auth::user()->password)) {
             return response()->json(['error' => 'Current Password supplied is incorrect', 'data' => null], 422);
@@ -361,16 +357,24 @@ class SelfServiceController extends Controller
 
     public function resetPassword(Request $request)
     {
-        $request->validate([
-            'token' => 'required',
-            'password' => 'required|string|min:6|confirmed',
+        $data = $request->all();
+        $data['token'] = base64_encode($request->input('token', ''));
+
+        $validator = Validator::make($data, [
+            'token' => ['required', 'exists:password_reset_tokens,token'],
+            'password' => ['required', 'string', 'min:6', 'confirmed'],
+        ], [
+            'token.exists' => 'Invalid Token'
         ]);
 
-        $encodeToken = base64_encode($request->token);
-        $passwordReset = ResetCodePassword::firstWhere('token', $encodeToken);
-        if (!$passwordReset) {
-            return response(['error' => 'Invalid Token', 'data' => null], 422);
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->messages()->all(),
+                'data' => null,
+            ], 412);
         }
+
+        $passwordReset = ResetCodePassword::firstWhere('token', $data['token']);
 
         // check if it does not expired: the time is one hour
         if ($passwordReset->created_at > now()->addHour()) {

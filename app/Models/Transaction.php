@@ -40,6 +40,11 @@ class Transaction extends Model
         return $this->hasMany(CustomerContract::class, 'sei_payment_transaction_id', 'transaction_id');
     }
 
+    public function transaction_entry()
+    {
+        return $this->hasMany(CustomerContract::class, 'id', 'customer_contract_id');
+    }
+
     
 
     public function estate()
