@@ -21,7 +21,7 @@ class HCMController extends Controller
 
         $anniversary = Staff::where('company_id', $company_id)
             ->with(['user'])
-            ->whereBetween('date_of_employment', [now()->startOfDay(), now()->addMonth(3)->endOfDay()])
+            ->whereBetween('date_of_employment', [now()->subMonths(5)->startOfDay(), now()->addMonth(5)->endOfDay()])
             ->get();
 
         return response()->json(['message' => 'success', 'data' => [
