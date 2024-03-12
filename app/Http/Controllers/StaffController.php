@@ -162,11 +162,11 @@ class StaffController extends Controller
         // Delete records where role_id is not in the array $roles
         // and staff_id matches $request->staff_id
         $count = StaffRole::WhereNotIn('role_id', $roles)->Where('staff_id', $request->staff_id)->delete();
-        if($count) {
-            LogService::admin(auth()->user()->id, $staff->user->id, "Deleted $count staff role(s)" , 'CREATE');
+        if ($count) {
+            LogService::admin(auth()->user()->id, $staff->user->id, "Deleted $count staff role(s)", 'CREATE');
         }
 
-        LogService::admin(auth()->user()->id, $staff->user->id, 'Assign a role to staff' , 'CREATE');
+        LogService::admin(auth()->user()->id, $staff->user->id, 'Assign a role to staff', 'CREATE');
         return response()->json(['message' => 'Created successfully', 'data' => []], 200);
     }
 
@@ -390,7 +390,7 @@ class StaffController extends Controller
             'alternate_number' => $request->input('alternate_number', $a_details['alternate_number'] ?? null),
             'alternate_email' => $request->input('alternate_email', $a_details['alternate_email'] ?? null),
             'state' => $request->input('state',  $a_details['state'] ?? null),
-            'residential_address' => $request->input('residential_address',  $a_details['residential_address'] ?? null ),
+            'residential_address' => $request->input('residential_address',  $a_details['residential_address'] ?? null),
             'marital_status' => $request->input('marital_status',  $a_details['marital_status'] ?? null),
             'nationality' => $request->input('nationality', $a_details['nationality'] ?? null),
             'lga' => $request->input('lga', $a_details['lga'] ?? null),
