@@ -583,6 +583,7 @@ class Controller extends BaseController
     {
         $data['attachments'] = (isset($data['attachments']) && !empty($data['attachments'])) ? json_encode($data['attachments']) : null;
         $mes = new MessageTransactionController();
+
         $mes->logEmailTransaction($data);
 
         return;
@@ -755,11 +756,11 @@ class Controller extends BaseController
         return Transaction::create($attributes);
     }
 
-    public function decodeFilePath($image){
+    public function decodeFilePath($image)
+    {
         $path = parse_url($image ?? '', PHP_URL_PATH);
-        $filename = basename($path); 
+        $filename = basename($path);
 
         return base64_decode($filename);
     }
-
 }

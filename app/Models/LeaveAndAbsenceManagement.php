@@ -24,4 +24,19 @@ class LeaveAndAbsenceManagement extends Model
         );
     }
 
+    protected function startDate(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string $value) => date("M jS, Y", strtotime($value)),
+        );
+    }
+
+    protected function endDate(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string $value) => date("M jS, Y", strtotime($value)),
+        );
+    }
+
+
 }

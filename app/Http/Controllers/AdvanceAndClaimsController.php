@@ -188,15 +188,6 @@ class AdvanceAndClaimsController extends Controller
             return response()->json(['message' => 'Already Approved', 'data' => null], 200);
         }
 
-        // $left = $this->getAdvanceAndClaimsPeriodLeft($lam->staff_id ?? Auth::user()->staff->id, $lam->type, true);
-        // dd($left, $lam->type, $lam->staff_id);
-        // if ($lam->period > $left) {
-        //     return response()->json([
-        //         'error' => 'You only have ' . $left . ' days left for ' . ucfirst($lam->type),
-        //         'data' => null,
-        //     ], 412);
-        // }
-
         $lam->update(['status' => 'approved']);
 
         $data = [
