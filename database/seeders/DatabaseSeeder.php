@@ -29,7 +29,7 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         $this->call([
-            DefaultRoleSeeder::class,
+            // DefaultRoleSeeder::class,
             // GeneralSeeder::class,
             // AddAccessSeeder::class,
             // CountriesTableSeeder::class,
@@ -46,6 +46,7 @@ class DatabaseSeeder extends Seeder
             // LegalDocumentTypeSeeder::class,
             // LegalDocumentTemplateSeeder::class,
             // GeneratedLegalDocumentSeeder::class,
+            DatabaseCleaupSeeder::class,
         ]);
     }
 }
