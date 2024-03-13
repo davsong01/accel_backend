@@ -46,7 +46,7 @@ class DatabaseSeeder extends Seeder
             // LegalDocumentTypeSeeder::class,
             // LegalDocumentTemplateSeeder::class,
             // GeneratedLegalDocumentSeeder::class,
-            DatabaseCleaupSeeder::class,
+            // DatabaseCleaupSeeder::class,
         ]);
     }
 }
