@@ -101,6 +101,7 @@ class SelfServiceController extends Controller
             'last_name' => Auth::user()->last_name ?? '',
             'work_id' => Auth::user()->staff_id ?? '',
             'job_role' => Auth::user()->staff->job_role->name ?? '',
+            'job_title' => auth()->user()->staff?->job_title?->only('id', 'title'),
             'avatar' => !empty(Auth::user()->avatar) ? Auth::user()->avatar : '',
             'time_in_company' => $time_in_company,
             'profile_completeness' => (int) $profile_completenes . '%',
@@ -335,7 +336,7 @@ class SelfServiceController extends Controller
         // if (!Hash::check($request->password, Auth::user()->password)) {
         //     return response()->json(['error' => 'Current Password supplied is incorrect', 'data' => null], 422);
         // }
-        
+
         // Delete all old code that user send before.
         ResetCodePassword::where('email', Auth::user()->email)->delete();
         // Generate random code

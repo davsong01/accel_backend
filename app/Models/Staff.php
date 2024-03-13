@@ -86,4 +86,8 @@ class Staff extends Model
         return $this->belongsTo(Pfa::class, 'pfa_id');
     }
 
+    public function job_title(){
+        return $this->belongsTo(JobTitle::class, 'job_title_id');
+    }
+
 }
