@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BuildingType;
 use Carbon\Carbon;
 use App\Models\City;
 use App\Models\User;
@@ -21,6 +22,7 @@ use App\Models\LegalDocumentType;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\RedirectResponse;
 use App\Models\GeneratedLegalDocument;
+use App\Models\PlotSize;
 use App\Services\LogService;
 use Illuminate\Support\Facades\Validator;
 
@@ -221,7 +223,11 @@ class CustomerContractController extends Controller
             $city = City::where('id', $request->city_id)->first();
             $estate = Estate::where('id', $request->estate_id)->first();
             $location = Location::where('id', $request->location_id)->first();
+            $plotsize = PlotSize::where('id', $request->plot_size)->first();
+            $building_type = BuildingType::where('id', $request->building_type)->first();
 
+            $data['plot_size'] = $plotsize->size ?? 'N/A';
+            $data['building_type'] = $building_type->name ?? 'N/A';
             $data['type'] = 'add.contract.to.existing.customer';
             $data['name'] =  $customer->user->first_name;
             $data['email'] =  $customer->user->email;
@@ -260,6 +266,8 @@ class CustomerContractController extends Controller
             $email['estate'] = $estate->name;
             $email['no_of_units'] = $request->no_of_units;
             $email['contract_type'] = ucfirst($data['contract_type']);
+            $email['plot_size'] = $plotsize->size ?? 'N/A';
+            $email['building_type'] = $building_type->name ?? 'N/A';
 
             $subscribers = json_decode($data['subscribers']);
             if (!empty($subscribers) && count($subscribers) > 0) {
@@ -322,6 +330,11 @@ class CustomerContractController extends Controller
             $city = City::where('id', $request->city_id)->first();
             $estate = Estate::where('id', $request->estate_id)->first();
             $location = Location::where('id', $request->location_id)->first();
+            $plotsize = PlotSize::where('id', $request->plot_size)->first();
+            $building_type = BuildingType::where('id', $request->building_type)->first();
+
+            $email['plot_size'] = $plotsize->size ?? 'N/A';
+            $email['building_type'] = $building_type->name ?? 'N/A';
 
             $email['property_type'] = ucfirst($request->property_type);
             $email['city'] = $city->name;
@@ -375,6 +388,7 @@ class CustomerContractController extends Controller
 
                     if ($markerter) {
                         $email['name'] =  $markerter->user->first_name;
+
                         $email['customer_details'] = [
                             'customer_name' => $customer->user->first_name . ' ' . $customer->user->last_name,
                             'customer_phone' => $customer->user->phone . ' ' . $customer->user->phone,
@@ -454,7 +468,11 @@ class CustomerContractController extends Controller
             $city = City::where('id', $request->city_id)->first();
             $estate = Estate::where('id', $request->estate_id)->first();
             $location = Location::where('id', $request->location_id)->first();
+            $plotsize = PlotSize::where('id', $request->plot_size)->first();
+            $building_type = BuildingType::where('id', $request->building_type)->first();
 
+            $data['plot_size'] = $plotsize->size ?? 'N/A';
+            $data['building_type'] = $building_type->name ?? 'N/A';
             $data['type'] = 'add.contract.to.existing.customer';
             $data['name'] =  $customer->user->first_name;
             $data['email'] =  $customer->user->email;
@@ -524,7 +542,6 @@ class CustomerContractController extends Controller
                 'no_of_units' => 'required',
                 'contract_type' => 'required',
                 'subscribers' => 'nullable',
-
                 'first_name' => 'required',
                 'last_name' => 'required',
                 'gender' => 'required|in:male,female',
@@ -555,10 +572,14 @@ class CustomerContractController extends Controller
             $city = City::where('id', $request->city_id)->first();
             $estate = Estate::where('id', $request->estate_id)->first();
             $location = Location::where('id', $request->location_id)->first();
+            $plotsize = PlotSize::where('id', $request->plot_size)->first();
+            $building_type = BuildingType::where('id', $request->building_type)->first();
 
             $email['property_type'] = ucfirst($request->property_type);
             $email['city'] = $city->name;
             $email['location'] = $location->name;
+            $email['plot_size'] = $plotsize->size ?? 'N/A';
+            $email['building_type'] = $building_type->name ?? 'N/A';
             $email['estate'] = $estate->name;
             $email['no_of_units'] = $request->no_of_units;
             $email['contract_type'] = ucfirst($data['contract_type']);

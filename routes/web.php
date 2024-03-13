@@ -32,8 +32,38 @@ Route::get('/testreceipttemplate', function () {
     $data['receipt_no'] = '0001';
 
     $payment = App\Models\ContractPayment::find(12);
-    $contract = CustomerContract::where('id',165)->first();
-    return view('receipts.template1', compact('data', 'payment','contract'));
+    $contract = CustomerContract::where('id', 165)->first();
+    return view('receipts.template1', compact('data', 'payment', 'contract'));
+});
+
+Route::get('/testreceiptdownload/{payment_id}/{contract_id}/{user_id}', function ($payment_id, $contract_id, $user_id) {
+    $data = [];
+    $data['company_id'] = 1;
+    $data['receipt_no'] = '0001';
+
+    $payment = App\Models\ContractPayment::find($payment_id);
+    $contract = CustomerContract::with('customer')->where('id', $contract_id)->first();
+    $name = $transaction_id ?? $payment->transaction_id;
+    $data['receipt_no'] = $name;
+    $payment->customer = App\Models\User::where('id', $user_id)->first();
+    
+    $pathToSave = app('App\Http\Controllers\Controller')->getPathToSaveFile('receipts') . '/' . $name . '.pdf';
+    $others = [
+        'contract_value' => $payment->contract_value,
+        'discount_applied' => $payment->discount_applied,
+    ];
+    // dd($payment->customer, $payment->transaction);
+    $pdf = PDF::loadView('receipts.contract-payment', compact('payment', 'data', 'contract', 'others'))->setPaper('a4', 'portrait');
+
+    file_put_contents(base_path() . '/' . config('app.upload_path') . '/' . $pathToSave, $pdf->output());
+    // Rmember to create a public folder in the root directory if there is a PDF error
+
+    return [
+        'receipt_no' => $name . '.pdf',
+        'filename' => $name . '.pdf',
+        'filepath' => config('app.upload_path') . '/' . $pathToSave
+    ];
+    return view('receipts.template1', compact('data', 'payment', 'contract'));
 });
 
 Route::get('/cron-process-messages-transaction', [MessageTransactionController::class, 'processMessagesTransaction']);
