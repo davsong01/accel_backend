@@ -82,7 +82,12 @@ class EmployeeExitController extends Controller
         $last_day = Carbon::parse($request->last_day_of_work);
         $resignation_letter = !empty($request->resignation_letter) ? $this->uploadFile($request->resignation_letter, 'exits') : null;
 
-        $ee = EmployeeExit::updateOrCreate(['staff_id' => $request->staff_id ?? $staff_id, 'type' => $request->type], [
+        $ee = EmployeeExit::updateOrCreate(
+            [
+                'staff_id' => $request->staff_id ?? $staff_id,
+                'type' => $request->type,
+                'status' => 'PENDING'
+            ], [
             'last_day_work' => $last_day,
             'reason' => $request->reason,
             'file' => $resignation_letter,
