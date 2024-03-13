@@ -282,7 +282,7 @@ class StaffController extends Controller
                 'username' => $data['username'] ?? '',
                 'phone_number' => $data['phone_number'] ?? '',
                 'gender' => $data['gender'] ?? '',
-                // 'additional_details' => $data['additional_details'] ?? '',
+                'user_permissions' => env('DEFAULT_ROLE_ID'),
                 'next_of_kin' => $data['next_of_kin'] ?? '',
                 'branch_id' => $data['branch_id'] ?? '',
                 'date_of_birth' => $data['date_of_birth'],
