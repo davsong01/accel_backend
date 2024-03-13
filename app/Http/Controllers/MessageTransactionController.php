@@ -391,10 +391,13 @@ class MessageTransactionController extends Controller
         if ($data['type'] == 'create.leave.request') {
             if (isset($data['medium']) && $data['medium'] == 'sms') {
             } else {
+                $user = $data['user'];
+                $lam = $data['lam'];
                 $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'email')->where('type', 'create.leave.request')->first();
-                $subject = $email_template->subject ?? 'Leave Request';
+                $subject = $email_template->subject ?? 'Leave Application Acknowledgment';
+                "Dear {$user->firstname}, Your leave application dated {$lam->created_at} has been received. It's under review by HR. We'll update you soon.<br>If you have any questions or concerns, please don't hesitate to contact me or our HR department.<br><br>Best regards,<br>";
                 $content = $email_template->content ?? '<div>
-                <p style="text-align:justify !important">' . $data['content'] . '.<br><br><br><br>Best regards,<br><br>' . $this->sessionDetails('company_name') . '</p>
+                <p style="text-align:justify !important">Dear {$user->firstname}, Your leave application dated {$lam->created_at} has been received. It is under review by HR. We will update you soon.<br>If you have any questions or concerns, please do not hesitate to contact me or our HR department.<br><br><br>Best regards,<br><br>' . $this->sessionDetails('company_name') . '</p>
                 </div>';
             }
         }

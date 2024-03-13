@@ -196,7 +196,10 @@ class LeaveAndAbsenceManagementController extends Controller
 
         $this->notify($data);
         $data['email'] = $user->email;
+        $data['user'] = $user;
+        $data['lam'] = $lam;
         $data['type'] = 'create.leave.request';
+        $data['subject'] = 'Leave Application Acknowledgment';
 
         $this->logEmail($data);
 
