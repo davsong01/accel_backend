@@ -73,7 +73,7 @@ class CompanyDocumentController extends Controller
      */
     public function show(CompanyDocument $companyDocument)
     {
-        //
+        return response()->json(['message' => 'Retrieved successfully', 'data' => $companyDocument], 200);
     }
 
     /**
