@@ -99,7 +99,7 @@ class SelfServiceController extends Controller
             'first_name' => Auth::user()->first_name ?? '',
             'middle_name' => Auth::user()->middle_name ?? '',
             'last_name' => Auth::user()->last_name ?? '',
-            'work_id' => Auth::user()->staff_id ?? '',
+            'staff_id' => Auth::user()->staff_id ?? '',
             'job_role' => Auth::user()->staff->job_role->name ?? '',
             'job_title' => auth()->user()->staff?->job_title?->only('id', 'title'),
             'avatar' => !empty(Auth::user()->avatar) ? Auth::user()->avatar : '',
