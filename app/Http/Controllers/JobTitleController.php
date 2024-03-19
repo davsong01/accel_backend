@@ -52,6 +52,16 @@ class JobTitleController extends Controller
         return response()->json(['message' => 'success', 'data' => $created], 200);
     }
 
+    public function getJobRoleByDepartmentId($id)
+    {
+        $jobtitles = JobTitle::where('department_id', $id)
+            ->where('company_id', $this->sessionDetails('company_id'))
+            ->select('id', 'department_id', 'title')
+            ->get();
+
+        return response()->json(['message' => 'Success', 'data' => $jobtitles], 200);
+    }
+
     /**
      * Store a bulk of newly created resources in storage.
      */
@@ -101,8 +111,13 @@ class JobTitleController extends Controller
      */
     public function show(JobTitle $title)
     {
-      $title->load(['department', 'company']);
+        $title->load(['department', 'company']);
         return response()->json(['message' => 'success', 'data' => $title], 200);
+    }
+
+    public function edit(JobTitle $jobtitle)
+    {
+        return response()->json(['message' => 'Success', 'data' => $jobtitle->load('department:id,name')], 200);
     }
 
     /**

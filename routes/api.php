@@ -187,7 +187,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         // Route::get('get-countries-currencies/{country_id?}', [CompanySettingController::class, 'countryAnCurrencies']);
 
         Route::resource('roles', RoleController::class);
-        Route::get('job-roles-by-department-id/{id}', [JobRoleController::class, 'getJobRoleByDepartmentId']);
+        // Route::get('job-roles-by-department-id/{id}', [JobRoleController::class, 'getJobRoleByDepartmentId']);
 
         Route::get('get-all-staff', [StaffController::class, 'getAllStaff']);
         Route::get('is-not-on-leave', [StaffController::class, 'isNotOnLeave']);
@@ -394,6 +394,8 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
             Route::post('job/settings/title/bulk', [JobTitleController::class, 'bulk']);
             Route::get('job/settings/title/bulk/sample', [JobTitleController::class, 'sample']);
             Route::apiResource('job/settings/title', JobTitleController::class);
+
+            Route::get('job-titles-by-department-id/{id}', [JobTitleController::class, 'getJobRoleByDepartmentId']);
         });
 
         Route::prefix('crm')->group(function(){

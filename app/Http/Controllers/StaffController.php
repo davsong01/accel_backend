@@ -8,11 +8,12 @@ use App\Models\Staff;
 use App\Models\StaffRole;
 use Illuminate\Support\Arr;
 use App\Imports\StaffImport;
-use App\Models\CustomerContract;
+use App\Services\LogService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
+use App\Models\CustomerContract;
 use Illuminate\Support\Facades\DB;
 use App\Models\StaffDocumentSetting;
 use Illuminate\Support\Facades\Auth;
@@ -21,7 +22,6 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Validator;
 use App\Models\StaffIdentificationSetting;
-use App\Services\LogService;
 use League\CommonMark\Extension\SmartPunct\EllipsesParser;
 
 class StaffController extends Controller
@@ -191,12 +191,11 @@ class StaffController extends Controller
                 'gender' => 'required',
                 'branch_id' => 'nullable',
                 'jobtype_id' => 'required|exists:job_types,id,company_id,' . $this->sessionDetails('company_id'),
-                // 'jobrole_id' => 'required|exists:job_roles,id,company_id,' . $this->sessionDetails('company_id'),
-                'job_title_id' => 'required|exits:job_titles,id,company,' . $this->sessionDetails('company_id'),
+                'job_title_id' => 'required|exists:job_titles,id,company_id,' . $this->sessionDetails('company_id'),
                 'commission_id' => 'nullable|exists:commissions,id,company_id,' . $this->sessionDetails('company_id'),
                 'date_of_employment' => 'nullable',
                 'department_id' => 'required|exists:departments,id,company_id,' . $this->sessionDetails('company_id'),
-
+                
                 'nationality' => 'sometimes|integer',
                 'state' => 'sometimes|integer',
                 'lga' => 'sometimes|integer',
@@ -210,17 +209,16 @@ class StaffController extends Controller
                 'nhf_number' => 'nullable'
 
             ]);
-
+        
             if ($validator->fails()) {
                 return response()->json([
                     'error' => $validator->messages()->first(),
-                    'data' => [],
+                    'data' => null,
                 ], 412);
             }
-
             $validator = $validator->valid();
-        } else {
 
+        } else {
             $validator2 = Validator::make($request->all(), [
                 'date_of_birth' => 'nullable',
                 'alternate_number' => 'nullable',
