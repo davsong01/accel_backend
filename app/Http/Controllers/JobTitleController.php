@@ -82,8 +82,15 @@ class JobTitleController extends Controller
             $failures = $e->failures();
 
             foreach ($failures as $failure) {
+                $errors = $failure->errors();
                 return response()->json([
-                    'error' =>  $failure->errors(),
+                    'message' => reset($errors),
+                    'error' =>  [
+                        'row' => $failure->row(),
+                        'attribute' => $failure->attribute(),
+                        'errors' => $errors,
+                        'values' => array_filter($failure->values()),
+                    ],
                     'data' => null,
                 ], 412);
         }
