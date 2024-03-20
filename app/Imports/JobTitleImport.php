@@ -12,7 +12,7 @@ use Maatwebsite\Excel\Concerns\WithValidation;
 
 class JobTitleImport implements ToModel, SkipsEmptyRows, WithValidation, WithHeadingRow
 {
-    use Importable;    
+    use Importable;
     /**
      * @param array $row
      *
@@ -34,6 +34,19 @@ class JobTitleImport implements ToModel, SkipsEmptyRows, WithValidation, WithHea
         return [
             'title'       => ['required', 'string'],
             'department_name' => ['required', 'exists:departments,name,company_id,' . session()->get('company_id', null)],
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public function customValidationMessages()
+    {
+        return [
+            'department_name.exists' => 'The selected Department Name does not exists.',
+            'department_name.required' => 'The Department Name field is required.',
+            'title.required' => 'The Title field is required.',
+            'title.string' => 'The Title field must be a string.',
         ];
     }
 }

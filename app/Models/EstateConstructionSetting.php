@@ -9,4 +9,8 @@ class EstateConstructionSetting extends Model
 {
     use HasFactory;
     protected $guarded = [];
+
+    public function building_type(){
+        return $this->hasOne(BuildingType::class, 'id', 'building_type_id');
+    }
 }
