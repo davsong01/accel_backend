@@ -10,6 +10,7 @@ use App\Models\AdvanceAndClaims;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\RedirectResponse;
 use App\Models\AdvanceAndClaimsSetting;
+use App\Models\Staff;
 use App\Services\LogService;
 use Illuminate\Support\Facades\Validator;
 
@@ -161,10 +162,12 @@ class AdvanceAndClaimsController extends Controller
             $status = 'approved';
         }
 
+        $staff = Staff::find($request->input('staff_id', Auth::user()->staff->id));
+
         $advance_and_claims = AdvanceAndClaims::create([
             'type' => $request->type,
             'purpose' => $request->purpose,
-            'staff_id' => $request->staff_id ?? Auth::user()->staff->id, 
+            'staff_id' => $staff->id, 
             'period' => $request->period ?? null,
             'date' => $request->date ?? null,
             'amount' => $request->amount,
@@ -175,7 +178,9 @@ class AdvanceAndClaimsController extends Controller
             'company_id' => $this->sessionDetails('company_id')
         ]);
 
-        LogService::admin(auth()->user()->id, NULL, 'Create an advance and claims ('. $advance_and_claims->id . ')', 'CREATE');
+        $staff = Staff::find($request->input('staff_id', Auth::user()->staff->id));
+
+        LogService::admin(auth()->user()->id, $staff->user->id, 'Create an advance and claims ('. $advance_and_claims->id . ')', 'CREATE');
         return response()->json(['message' => 'Created successfully', 'data' => null], 200);
 
     }

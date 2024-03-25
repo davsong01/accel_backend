@@ -42,7 +42,7 @@ class AccountCategoryController extends Controller
             } else {
                 $account_cat->update(['status' => 'active']);
             }
-            LogService::admin(auth()->user()->id, null, 'Modify account category', 'UPDATE');
+            LogService::admin(auth()->user()->id, null, "Modify account category ($account_cat->id)", 'UPDATE');
         }
         return response()->json(['message' => 'Successfully updated', 'data' => []], 200);
     }
@@ -81,7 +81,7 @@ class AccountCategoryController extends Controller
             'account_group_id' => $request->account_group_id,
         ]);
 
-        LogService::admin(auth()->user()->id, null, 'Update or create an account category(' . $request->name . ')', 'CREATE');
+        LogService::admin(auth()->user()->id, null, 'Update or create an account category(' . $account_group_id->id . ')', 'CREATE');
         return response()->json(['message' => 'Created successfully', 'data' => $account_group_id], 200);
     }
 
@@ -129,7 +129,7 @@ class AccountCategoryController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
-        LogService::admin(auth()->user()->id, null, 'Update an account category(' . $request->name . ')', 'UPDATE');
+        LogService::admin(auth()->user()->id, null, 'Update an account category(' . $accountCategory->id . ')', 'UPDATE');
         return response()->json(['message' => 'Updated Succesfully', 'data' => $accountCategory], 200);
     }
 
@@ -142,7 +142,7 @@ class AccountCategoryController extends Controller
             return response()->json(['message' => 'Unable to delete, resource in use', 'data' => []], 412);
         }
 
-        LogService::admin(auth()->user()->id, null, 'Delete an account category(' . $accountCategory->name . ')', 'DELETE');
+        LogService::admin(auth()->user()->id, null, 'Delete an account category(' . $accountCategory->id . ')', 'DELETE');
         $accountCategory->delete();
         return response()->json(['message' => 'Deleted Successfully.', 'data' => []], 200);
     }

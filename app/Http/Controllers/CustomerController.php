@@ -385,7 +385,7 @@ class CustomerController extends Controller
         $data['company_id'] = $this->sessionDetails('company_id');
 
         $cis = CustomerIdentificationSetting::updateOrCreate(['company_id' => $data['company_id']], $data);
-        LogService::admin(auth()->user()->id, null, 'Create or update a customer contract (' . $cis->id .')', 'CREATE');
+        LogService::admin(auth()->user()->id, null, 'Create or update a customer contract identification setting (' . $cis->id .')', 'CREATE');
         return response()->json(['message' => 'Successful', 'data' => $request['order_of_appearance']], 200);
     }
 
