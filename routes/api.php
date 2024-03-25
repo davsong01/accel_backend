@@ -48,6 +48,7 @@ use App\Http\Controllers\ContractAllocationController;
 use App\Http\Controllers\TransactionPurposeController;
 use App\Http\Controllers\PropertyTypeDetailsController;
 use App\Http\Controllers\AccountClassificationController;
+use App\Http\Controllers\ConstructionPaymentController;
 use App\Http\Controllers\LegalDocumentTemplateController;
 use App\Http\Controllers\GeneratedLegalDocumentController;
 use App\Http\Controllers\EstateConstructionSettingController;
@@ -407,6 +408,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
 
         Route::prefix('rem')->group(function () {
             Route::get('generated/legal/documents', [LegalDocumentController::class, 'index']);
+            Route::apiResource('construction/payments', ConstructionPaymentController::class);
         });
 
         Route::prefix('cities/locations')->group(function(){
