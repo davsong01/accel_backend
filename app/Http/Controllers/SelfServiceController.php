@@ -354,7 +354,7 @@ class SelfServiceController extends Controller
         $mes->logEmailTransaction($data);
 
         LogService::admin(auth()->user()->id, null, 'Change password', 'UPDATE');
-        return response()->json(['message' => 'Password reset link has been sent to registered email', 'data' => null], 200);
+        return response()->json(['message' => 'Password reset token has been sent to registered email', 'data' => null], 200);
     }
 
     public function resetPassword(Request $request)

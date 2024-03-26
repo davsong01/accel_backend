@@ -116,7 +116,7 @@ class MessageTransactionController extends Controller
         $content = "";
         $subject = "";
 
-        if ($data['type'] == 'password-reset') {
+        if ($data['type'] == 'password-reset' || $data['type'] == 'forgot-password') {
             if (isset($data['medium']) && $data['medium'] == 'sms') {
                 $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'sms')->where('type', 'password-reset')->first();
                 $content = $email_template->content ?? null;
@@ -124,17 +124,18 @@ class MessageTransactionController extends Controller
                 if (!empty($content)) {
                     $content .= $content;
                 } else {
-                    $content .= 'Hello, your password reset link is: ' . $url . '/reset-password?token=' . $data['token'];
+                    // $content .= 'Hello, your password reset link is: ' . $url . '/reset-password?token=' . $data['token'];
+                    $content .= 'Hello, your password reset token is: ' . $data['token'];
                 }
             } else {
                 $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'email')->where('type', 'password-reset')->first();
                 $subject = $email_template->subject ?? null;
                 $content = $email_template->content ?? null;
 
-                $subject = $subject ?? 'Password Reset Link';
+                $subject = $subject ?? 'Password Token Link';
                 $content .= $content ?? '<strong>Dear ' . $data['name'] . ', </strong><br><br>
                 <div>
-                <p style="text-align:justify !important">You asked for a password RESET mail on ' . $this->sessionDetails('company_name') . '. Please click the button below to reset your password. Thank you <br><br><a href="' . $url . '/reset-password?token=' . $data['token'] . '"><button style="background: green;text-decoration: none;padding: 10px;color: white;">RESET PASSWORD</button></a></p>
+                <p style="text-align:justify !important">You asked for a password RESET mail on ' . $this->sessionDetails('company_name') . ', your password reset token is: ' . $data['token'] . 'Thank you</p>
                 </div>';
             }
         }
