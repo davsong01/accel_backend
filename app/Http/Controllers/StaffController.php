@@ -456,14 +456,18 @@ class StaffController extends Controller
             'username' => $request->has('username') ? $data['username'] : $staff->user->username,
             'phone_number' => $request->has('phone_number') ? $data['phone_number'] : $staff->user->phone,
             'gender' => $request->has('gender')  ? $data['gender'] : $staff->user->gender,
-            'additional_details' => json_encode($additional_details),
             'next_of_kin' => json_encode($next_of_kin),
             'branch_id' => $request->has('branch_id')  ? $data['branch_id'] : $staff->user->branch_id,
             'date_of_birth' => $request->has('date_of_birth')  ? Carbon::parse($data['date_of_birth']) : $staff->user->date_of_birth,
-
+            'alternate_number' => $additional_details['alternate_number'],
+            'alternate_email' => $additional_details['alternate_email'],
+            'state_id' => $additional_details['state'],
+            'lga_id' => $additional_details['lga'],
+            'marital_status' =>  $additional_details['marital_status'],
+            'country_id' => $additional_details['nationality'],
+            'residential_address' => $additional_details['residential_address'],
             'company_id' => $this->sessionDetails('company_id')
         ]);
-
         LogService::admin(auth()->user()->id, $staff->user->id, 'Update a role to staff', 'UPDATE');
 
         return response()->json(['message' => 'Successfully updated!', 'data' => ['staff_id' => $request->staff_id]], 200);
