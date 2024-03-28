@@ -203,7 +203,7 @@ class LeaveAndAbsenceManagementController extends Controller
 
         $this->logEmail($data);
 
-        LogService::admin(auth()->user()->id, null, 'Create a leave and absence management (' . $lam->id  . ')', 'CREATE');
+        LogService::admin(auth()->user()->id, $user?->id, 'Create a leave and absence management (' . $lam->id  . ')', 'CREATE');
         return response()->json(['message' => 'Created successfully', 'data' => $lam], 200);
     }
 
@@ -242,7 +242,7 @@ class LeaveAndAbsenceManagementController extends Controller
 
         $this->logEmail($data);
 
-        LogService::admin(auth()->user()->id, null, 'Approve a leave and absence management (' . $lam->id  . ')', 'UPDATE');
+        LogService::admin(auth()->user()->id, $lam->staff->user?->id, 'Approve a leave and absence management (' . $lam->id  . ')', 'UPDATE');
         return response()->json(['message' => 'Approved successfully', 'data' => $lam], 200);
     }
 
@@ -262,7 +262,7 @@ class LeaveAndAbsenceManagementController extends Controller
 
         $this->notify($data);
 
-        LogService::admin(auth()->user()->id, null, 'Decline a leave and absence management (' . $lam->id  . ')', 'UPDATE');
+        LogService::admin(auth()->user()->id, $lam->staff->user?->id, 'Decline a leave and absence management (' . $lam->id  . ')', 'UPDATE');
         return response()->json(['message' => 'Declined successfully', 'data' => $lam], 200);
     }
 

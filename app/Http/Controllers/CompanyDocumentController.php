@@ -92,7 +92,7 @@ class CompanyDocumentController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'sometimes',
             'description' => 'sometimes',
-            'file' => 'sometimes',
+            'file' => 'sometimes|file',
             'visible_to_staff' => 'sometimes',
         ]);
 

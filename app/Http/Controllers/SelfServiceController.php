@@ -153,7 +153,7 @@ class SelfServiceController extends Controller
 
         $user->update(['avatar' => $avatar]);
 
-        LogService::admin(auth()->user()->id, null, 'Add an avatar (' . $user->id  . ')', 'UPDATE');
+        LogService::admin(auth()->user()->id, $user->id, 'Add an avatar (' . $user->id  . ')', 'UPDATE');
         return response()->json(['message' => 'Success', 'data' => Auth::user()->avatar], 200);
     }
 
@@ -178,7 +178,7 @@ class SelfServiceController extends Controller
 
         $user->update(['avatar' => null]);
 
-        LogService::admin(auth()->user()->id, null, 'Delete an avatar (' . $user->id  . ')', 'UPDATE');
+        LogService::admin(auth()->user()->id, $user->id, 'Delete an avatar (' . $user->id  . ')', 'UPDATE');
 
         return response()->json(['message' => 'Delete succesful', 'data' => null], 200);
     }
@@ -354,7 +354,7 @@ class SelfServiceController extends Controller
         $mes->logEmailTransaction($data);
 
         LogService::admin(auth()->user()->id, null, 'Change password', 'UPDATE');
-        return response()->json(['message' => 'Password reset link has been sent to registered email', 'data' => null], 200);
+        return response()->json(['message' => 'Password reset token has been sent to registered email', 'data' => null], 200);
     }
 
     public function resetPassword(Request $request)
@@ -391,7 +391,7 @@ class SelfServiceController extends Controller
 
         // delete current token 
 
-        LogService::admin($user->id, null, 'Reset password (' . $user->id  . ')', 'UPDATE');
+        LogService::admin($user->id, $user->id, 'Reset password (' . $user->id  . ')', 'UPDATE');
         $passwordReset->delete();
 
         return response(['message' => 'Password successfully reset', 'data' => null], 200);
@@ -485,8 +485,7 @@ class SelfServiceController extends Controller
             $notification = $user->unreadNotifications
                 ->where('id', $notification_id)
                 ->first();
-
-            $notification->markAsRead();
+            if($notification) $notification->markAsRead();
         } else {
             $userUnreadNotification = $user->unreadNotifications->where('company_id', $this->sessionDetails('company_id'));
 

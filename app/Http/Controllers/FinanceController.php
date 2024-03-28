@@ -38,8 +38,8 @@ class FinanceController extends Controller
         return response()->json(['message' => 'Success', 'data' => $transactions], 200);
     }
 
-        $company_id = $this->sessionDetails('company_id');
+        // $company_id = $this->sessionDetails('company_id');
 
-    }
+    // }
 
 }

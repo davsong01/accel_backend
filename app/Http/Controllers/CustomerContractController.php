@@ -766,7 +766,7 @@ class CustomerContractController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
-        LogService::admin(auth()->user()->id, NULL, 'Create or update a customer contract (' . $contract->id . ')', 'CREATE');
+        LogService::admin(auth()->user()->id,  $contract->customer?->user?->id, 'Create or update a customer contract (' . $contract->id . ')', 'CREATE');
         return $contract;
     }
 
@@ -794,7 +794,7 @@ class CustomerContractController extends Controller
             'discount' => !empty($data['discount']) ? $data['discount'] : $contract->discount,
         ]);
 
-        LogService::admin(auth()->user()->id, NULL, 'Update a customer contract (' . $contract->id . ')', 'UPDATE');
+        LogService::admin(auth()->user()->id,  $contract->customer?->user?->id, 'Update a customer contract (' . $contract->id . ')', 'UPDATE');
         return;
     }
 

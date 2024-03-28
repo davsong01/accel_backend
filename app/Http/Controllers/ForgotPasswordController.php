@@ -32,7 +32,7 @@ class ForgotPasswordController extends Controller
             ], 412);
         }
 
-        $message = 'If this is a registered email address, a password reset link has been sent to the email';
+        $message = 'If this is a registered email address, a password reset token has been sent to the email';
 
         if (!($user = User::firstWhere('email', $request->email))) {
             return response()->json(['message' => $message, 'data' => null], 200);
@@ -53,6 +53,8 @@ class ForgotPasswordController extends Controller
         $data['token'] = $rand;
 
         // Log email only
+        $mes = new MessageTransactionController();
+        $mes->logEmailTransaction($data);
 
         LogService::admin($user->id, null, "Forgot password for $request->email", 'UPDATE');
         return response()->json(['message' => $message, 'data' => null], 200);
