@@ -52,6 +52,9 @@ class ForgotPasswordController extends Controller
         $data['type'] = 'forget-password';
         $data['token'] = $rand;
 
+        // set company_id
+        $data['company_id'] = $user->company_id;
+
         // Log email only
         $mes = new MessageTransactionController();
         $mes->logEmailTransaction($data);
@@ -88,7 +91,7 @@ class ForgotPasswordController extends Controller
         $passwordReset = ResetCodePassword::firstWhere('token', $data['token']);
 
         // check if it does not expired: the time is one hour
-        if ($passwordReset->created_at > now()->addHour()) {
+        if (now()->addHour() > $passwordReset->created_at) {
             $passwordReset->delete();
             return response(['error' => 'Token has expired', 'data' => null], 422);
         }
@@ -100,10 +103,11 @@ class ForgotPasswordController extends Controller
                 'password' => Hash::make($request->password),
                 'remember_token' => Str::random(60),
             ])->save();
+
+            LogService::admin($user->id, null, "$user->email reset their password ($user->id)", 'UPDATE');
+            $passwordReset->delete();
         }
 
-        LogService::admin($user->id, null, "$user->email reset their password ($user->id)", 'UPDATE');
-        $passwordReset->delete();
 
         return response(['message' => 'Password successfully reset', 'data' => null], 200);
     }

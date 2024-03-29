@@ -79,6 +79,12 @@ class ConstructionPaymentController extends Controller
         
         $created = ConstructionPayment::create($data);
         // todo: handle payment slips
+
+        if ($request->hasFile('payment_slip')) {
+            $filepath = $this->uploadProtectedFile($attributes['payment_slip'], 'payment_slips')['filepath'];
+            $attributes['payment_slip'] = $filepath;
+        }
+
         $threads = $request->only((new ConstructionPaymentThread)->getFillable());
         $threads = array_merge(
             $threads,
@@ -127,6 +133,12 @@ class ConstructionPaymentController extends Controller
         }
 
         $attributes = $validator->validated();
+
+        if ($request->hasFile('payment_slip')) {
+            $filepath = $this->uploadProtectedFile($attributes['payment_slip'], 'payment_slips')['filepath'];
+            $attributes['payment_slip'] = $filepath;
+        }
+
         $threads = array_merge(
             $attributes,
             [
@@ -165,7 +177,7 @@ class ConstructionPaymentController extends Controller
         $params = $request->only(['customer_status', 'all_customers', 'subscriber_status', 'completed_subscriber_status']);
         $company_id = $this->sessionDetails('company_id');
 
-        $query = ConstructionPayment::where($params);
+        $query = ConstructionPayment::where('company_id', $company_id)->where($params);
 
         if ($name = $request->input('name'))
             $query->where('name', 'LIKE', '%' . $name . '%');

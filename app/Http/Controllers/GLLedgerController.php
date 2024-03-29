@@ -47,6 +47,7 @@ class GLLedgerController extends Controller
             'amount' => 'required|numeric',
             'created_at' => 'date|before:tomorrow',
             'payment_slip' => 'file|mimetypes:image/*,application/pdf',
+            'payment_mode_id' => 'required|exists:payment_modes,id',
             'description' => 'string',
         ]);
 

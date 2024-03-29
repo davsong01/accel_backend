@@ -59,6 +59,7 @@ use App\Http\Controllers\GLLedgerController;
 use App\Http\Controllers\HCMController;
 use App\Http\Controllers\JobTitleController;
 use App\Http\Controllers\LeaveAndAbsenceManagementController;
+use App\Http\Controllers\PaymentModeController;
 use App\Http\Controllers\RecipientGroupController;
 use App\Http\Controllers\StaffDisengagementController;
 use App\Http\Controllers\TransactionTypeDefinitionController;
@@ -385,6 +386,8 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
             
             Route::get('transaction/purpose/search', [TransactionPurposeController::class, 'search']);
             Route::apiResource('transaction/purpose', TransactionPurposeController::class);
+            Route::get('payment/mode/search', [PaymentModeController::class, 'search']);
+            Route::apiResource('payment/mode', PaymentModeController::class);
         });
         
         Route::get('audit/log', [LogController::class, 'audit']);
