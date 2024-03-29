@@ -126,7 +126,7 @@ class ContractPaymentController extends Controller
 
         $this->logEmail($data);
 
-        LogService::admin(auth()->user()->id, NULL, 'Update a company\'s contract, contract payment, contract payment thread and transaction (' . $contractX->id . ')', 'UPDATE');
+        LogService::admin(auth()->user()->id,  $contractX->customer->user->id, 'Update a company\'s contract, contract payment, contract payment thread and transaction (' . $contractX->id . ')', 'UPDATE');
         return response()->json(['message' => 'Payment successful', 'data' => []], 200);
     }
 
@@ -204,7 +204,7 @@ class ContractPaymentController extends Controller
             ];
     
             // Log email
-            LogService::admin(auth()->user()->id, NULL, 'Update a company\'s contract, contract payment, contract payment thread and transaction (' . $contract->id . ')', 'UPDATE');
+            LogService::admin(auth()->user()->id,  $contract?->customer?->user?->id, 'Update a company\'s contract, contract payment, contract payment thread and transaction (' . $contract->id . ')', 'UPDATE');
             
         }
         
