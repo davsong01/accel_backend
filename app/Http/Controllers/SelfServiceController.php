@@ -371,7 +371,7 @@ class SelfServiceController extends Controller
 
         if ($validator->fails()) {
             return response()->json([
-                'error' => $validator->messages()->all(),
+                'error' => $validator->messages()->first(),
                 'data' => null,
             ], 412);
         }
