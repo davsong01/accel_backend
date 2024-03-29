@@ -135,7 +135,7 @@ class StaffDisengagementController extends Controller
             'createdBy.user:id,first_name,middle_name,last_name,avatar,email',
             'disengaged:id,user_id',
             'disengaged.user:id,first_name,middle_name,last_name,avatar,email',
-        ])->where($params);
+        ])->where('company_id', $company_id)->where($params);
 
         $from = $request->input('from');
         $to = $request->input('to');
