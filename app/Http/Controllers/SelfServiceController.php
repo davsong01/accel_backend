@@ -7,8 +7,10 @@ use App\Models\User;
 use App\Models\Staff;
 use App\Models\Payment;
 use App\Models\Transaction;
+use App\Services\LogService;
 use Illuminate\Http\Request;
 use App\Models\StaffDocument;
+use App\Models\CustomerContract;
 use App\Models\ResetCodePassword;
 use Illuminate\Support\Facades\DB;
 use App\Models\StaffDocumentSetting;
@@ -18,7 +20,6 @@ use App\Models\StaffUploadedDocument;
 use App\Http\Controllers\StaffController;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\MessageTransactionController;
-use App\Services\LogService;
 
 class SelfServiceController extends Controller
 {
@@ -94,6 +95,16 @@ class SelfServiceController extends Controller
             ];
         }
 
+        $opendeals = CustomerContract::join('customers', 'customers.id', '=', 'customer_contracts.customer_id')
+        ->where('primary_marketer_id', Auth::user()->staff->id)->orderBy('customer_contracts.updated_at', 'desc')
+        ->where(function ($query) {
+            $query->whereNull('contract_status')->orWhere('contract_status', 'ongoing');
+        })->count();
+
+        $closeddeals = CustomerContract::join('customers', 'customers.id', '=', 'customer_contracts.customer_id')
+        ->where('primary_marketer_id', Auth::user()->staff->id)->orderBy('customer_contracts.updated_at', 'desc')
+        ->whereIn('contract_status', ['allocated', 'completed', 'closed'])->count();
+
         return response()->json([
             'user_id' => Auth::user()->id ?? '',
             'first_name' => Auth::user()->first_name ?? '',
@@ -109,7 +120,9 @@ class SelfServiceController extends Controller
             'birthdays' => $birthdays,
             'work_anniversary' => $work_anniversary,
             'colleagues' => $colleagues,
-            'default_role' => Auth::user()->staff->staffroles->count() < 1 ? 'yes' : 'no'
+            'default_role' => Auth::user()->staff->staffroles->count() < 1 ? 'yes' : 'no',
+            'closed_deals' => $closeddeals,
+            'open_deals' => $opendeals,
         ], 200);
     }
 
@@ -544,5 +557,9 @@ class SelfServiceController extends Controller
         }
 
         return response(['message' => 'Successfully retrieved', 'data' => $notifications], 200);
+    }
+
+    public function myDeals(Request $request){
+        return app('App\Http\Controllers\StaffController')->staffDeals($request, auth()->user()->staff->id);
     }
 }
