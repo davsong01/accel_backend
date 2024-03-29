@@ -321,6 +321,8 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
             // Route::get('single-leave-and-absence', [LeaveAndAbsenceManagementController::class, 'staffLeaveAndAbsence']);
             Route::get('advance-and-claims', [AdvanceAndClaimsController::class, 'index']);
             // Route::get('single-advance-and-claims', [AdvanceAndClaimsController::class, 'staffAdvanceAndClaims']);
+            Route::get('my-deals', [SelfServiceController::class, 'myDeals']);
+
 
         });
 

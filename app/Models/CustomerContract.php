@@ -23,7 +23,7 @@ class CustomerContract extends Model
     use HasFactory, SoftDeletes;
     protected $table = 'customer_contracts';
     protected $guarded = [];
-    protected $appends = ['form_payment_status','contract_name'];
+    protected $appends = ['form_payment_status','contract_name','contract_deal_status'];
     protected $prepends = ['contract_name'];
 
     public function customer(){
@@ -100,7 +100,7 @@ class CustomerContract extends Model
 
     public function getContractNameAttribute(){
         $name = '';
-       
+    
         if($this->property_type == 'building'){
             $building =  $this->property_type_details->building_details->name ?? null;
             $name = $building . ' - ' . $this->estate->name;
@@ -153,6 +153,17 @@ class CustomerContract extends Model
     public function generatedDocument(): HasOne
     {
         return $this->hasOne(GeneratedLegalDocument::class, 'contract_id');
+    }
+
+    public function getContractDealStatusAttribute(){
+        $deal_status = 'closed';
+        if (empty($this->contract_status) || $this->contract_status == 'ongoing') {
+            $deal_status = 'open';
+        } 
+        if(in_array($this->contract_status, ['allocated', 'completed', 'closed'])){
+            $deal_status = 'closed';
+        }
+        return $deal_status;
     }
 
 }
