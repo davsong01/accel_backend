@@ -52,6 +52,9 @@ class ForgotPasswordController extends Controller
         $data['type'] = 'forget-password';
         $data['token'] = $rand;
 
+        // set company_id
+        $data['company_id'] = $user->company_id;
+
         // Log email only
         $mes = new MessageTransactionController();
         $mes->logEmailTransaction($data);
