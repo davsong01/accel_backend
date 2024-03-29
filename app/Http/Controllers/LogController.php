@@ -27,7 +27,7 @@ class LogController extends Controller
         $params = $request->only(['crud_type']);
         $company_id = $this->sessionDetails('company_id');
 
-        $query =AdminLog::with(['createdBy:id,type,status,first_name,last_name,middle_name,title,avatar', 'causee:id,type,status,first_name,last_name,middle_name,title,avatar'])->where($params);
+        $query = AdminLog::with(['createdBy:id,type,status,first_name,last_name,middle_name,title,avatar', 'causee:id,type,status,first_name,last_name,middle_name,title,avatar'])->where('company_id', $company_id)->where($params);
 
         if($request->input('title') && $title = $request->input('title')){
             $query->where('title', 'LIKE', '%'. $title .'%');
