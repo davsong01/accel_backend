@@ -242,7 +242,7 @@ class StaffController extends Controller
                     'data' => [],
                 ], 412);
             }
-
+            
             $validator2 = $validator2->valid();
 
             $validator2['additional_details'] = json_encode([
