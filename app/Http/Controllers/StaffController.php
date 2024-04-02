@@ -242,7 +242,7 @@ class StaffController extends Controller
                     'data' => [],
                 ], 412);
             }
-            
+
             $validator2 = $validator2->valid();
 
             $validator2['additional_details'] = json_encode([
@@ -312,7 +312,7 @@ class StaffController extends Controller
             $data['type'] = 'staff.store';
             $data['medium'] = 'email';
             $data['user'] = $user;
-            $data['name'] = $data['name'] ?? Auth::user()->first_name;
+            $data['name'] = $user->first_name;
             $data['recipient'] = $user->email ?? 'Staff';
 
             $this->logEmail($data);
