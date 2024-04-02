@@ -298,6 +298,7 @@ class StaffController extends Controller
                 'jobrole_id' => $data['jobrole_id'] ?? '',
                 'commission_id' => $data['commission_id'] ?? '',
                 'company_id' => $this->sessionDetails('company_id'),
+                'job_title_id' => $data['job_title_id'] ?? null,
 
                 'bank_id' => $data['bank_id'] ?? null,
                 'pfa_id' => $data['pfa_id'] ?? null,
@@ -365,6 +366,7 @@ class StaffController extends Controller
             'date_of_employment' => 'nullable',
             'department_id' => 'nullable|exists:departments,id,company_id,' . $this->sessionDetails('company_id'),
             'commission_id' => 'nullable|exists:commissions,id,company_id,' . $this->sessionDetails('company_id'),
+            'date_of_birth' => 'nullable|date',
 
             'bank_id' => 'nullable|exists:banks,id',
             'pfa_id' => 'nullable|exists:pfas,id',

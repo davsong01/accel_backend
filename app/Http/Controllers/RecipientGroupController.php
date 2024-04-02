@@ -90,7 +90,7 @@ class RecipientGroupController extends Controller
         $params = $request->only(['customer_status', 'all_customers', 'subscriber_status', 'completed_subscriber_status']);
         $company_id = $this->sessionDetails('company_id');
 
-        $query = RecipientGroup::where($params);
+        $query = RecipientGroup::where('company_id', $company_id)->where($params);
 
         if ($name = $request->input('name'))
             $query->where('name', 'LIKE', '%' . $name . '%');

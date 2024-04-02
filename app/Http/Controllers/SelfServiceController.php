@@ -384,7 +384,7 @@ class SelfServiceController extends Controller
 
         if ($validator->fails()) {
             return response()->json([
-                'error' => $validator->messages()->all(),
+                'error' => $validator->messages()->first(),
                 'data' => null,
             ], 412);
         }
@@ -392,7 +392,7 @@ class SelfServiceController extends Controller
         $passwordReset = ResetCodePassword::firstWhere('token', $data['token']);
 
         // check if it does not expired: the time is one hour
-        if ($passwordReset->created_at > now()->addHour()) {
+        if ( now()->addHour() > $passwordReset->created_at) {
             $passwordReset->delete();
             return response(['error' => 'Token has expired', 'data' => null], 422);
         }

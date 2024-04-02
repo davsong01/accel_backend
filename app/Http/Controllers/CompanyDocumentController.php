@@ -17,7 +17,7 @@ class CompanyDocumentController extends Controller
      */
     public function index()
     {
-        $documents = CompanyDocument::where('company_id', $this->sessionDetails('company_id'))->get();
+        $documents = CompanyDocument::where('company_id', $this->sessionDetails('company_id'))->latest()->get();
         return response()->json(['message' => 'Success', 'data' => $documents], 200);
     }
 

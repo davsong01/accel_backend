@@ -73,23 +73,24 @@ class MessageTransactionController extends Controller
         //
     }
 
-    public function getActiveProvider($type)
+    public function getActiveProvider($type, $company_id = null)
     {
-        $provider = MessageProvider::where(['type' => $type, 'status' => 'active', 'company_id' => $this->sessionDetails('company_id')])->first();
+        $company_id = $this->sessionDetails('company_id') ?? $company_id;
+        $provider = MessageProvider::where(['type' => $type, 'status' => 'active', 'company_id' => $company_id])->first();
         return $provider;
     }
 
     public function logEmailTransaction($data)
     {
         $data['medium'] = 'email';
-        $data['provider_id'] = $this->getActiveProvider('email')->id;
-        $data['from'] = $this->getActiveProvider('email')->credentials['MAIL_FROM_ADDRESS'] ?? null;
+        $data['provider_id'] = $this->getActiveProvider('email', $data['company_id'])->id;
+        $data['from'] = $this->getActiveProvider('email',  $data['company_id'])->credentials['MAIL_FROM_ADDRESS'] ?? null;
         $data['name'] = $data['name'] ?? Auth::user()->first_name;
         $data['recipient'] = $data['email'] ?? Auth::user()->email;
         $data['message'] = $this->getMessageContent($data)['content'];
         $data['subject'] = $this->getMessageContent($data)['subject'];
         $data['schedule_date'] = Carbon::now();
-        $data['company_id'] = $this->sessionDetails('company_id');
+        $data['company_id'] = $this->sessionDetails('company_id') ??  $data['company_id'];
         $data = Arr::except($data, ['name']);
 
         $mes = MessageTransaction::create($data);
@@ -109,7 +110,7 @@ class MessageTransactionController extends Controller
 
     public function getMessageContent($data)
     {
-        $company_setting = CompanySetting::where('company_id', $this->sessionDetails('company_id'))->first();
+        $company_setting = CompanySetting::where('company_id', $this->sessionDetails('company_id') ??  $data['company_id'])->first();
         $url = $company_setting->website;
         $button_style = "background: " . $company_setting->primary_color . ";text-decoration: none; padding: 10px;color: white;border: none;color: white;border-radius: 5px;";
         $all = [];
@@ -118,7 +119,7 @@ class MessageTransactionController extends Controller
 
         if ($data['type'] == 'password-reset' || $data['type'] == 'forgot-password') {
             if (isset($data['medium']) && $data['medium'] == 'sms') {
-                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'sms')->where('type', 'password-reset')->first();
+                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id') ??  $data['company_id'])->where('medium', 'sms')->where('type', 'password-reset')->first();
                 $content = $email_template->content ?? null;
 
                 if (!empty($content)) {
@@ -128,14 +129,14 @@ class MessageTransactionController extends Controller
                     $content .= 'Hello, your password reset token is: ' . $data['token'];
                 }
             } else {
-                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'email')->where('type', 'password-reset')->first();
+                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id') ??  $data['company_id'])->where('medium', 'email')->where('type', 'password-reset')->first();
                 $subject = $email_template->subject ?? null;
                 $content = $email_template->content ?? null;
 
                 $subject = $subject ?? 'Password Token Link';
                 $content .= $content ?? '<strong>Dear ' . $data['name'] . ', </strong><br><br>
                 <div>
-                <p style="text-align:justify !important">You asked for a password RESET mail on ' . $this->sessionDetails('company_name') . ', your password reset token is: ' . $data['token'] . 'Thank you</p>
+                <p style="text-align:justify !important">You asked for a password RESET mail on ' . $this->sessionDetails('company_name') . ', your password reset token is: ' . $data['token'] . ' Thank you.</p>
                 </div>';
             }
         }
