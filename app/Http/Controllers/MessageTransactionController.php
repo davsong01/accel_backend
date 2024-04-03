@@ -83,8 +83,9 @@ class MessageTransactionController extends Controller
     public function logEmailTransaction($data)
     {
         $data['medium'] = 'email';
-        $data['provider_id'] = $this->getActiveProvider('email', $data['company_id'])->id;
-        $data['from'] = $this->getActiveProvider('email',  $data['company_id'])->credentials['MAIL_FROM_ADDRESS'] ?? null;
+        $company_id = $data['company_id'] ?? null;
+        $data['provider_id'] = $this->getActiveProvider('email', $company_id)->id;
+        $data['from'] = $this->getActiveProvider('email',  $company_id)->credentials['MAIL_FROM_ADDRESS'] ?? null;
         $data['name'] = $data['name'] ?? Auth::user()->first_name;
         $data['recipient'] = $data['email'] ?? Auth::user()->email;
         $data['message'] = $this->getMessageContent($data)['content'];

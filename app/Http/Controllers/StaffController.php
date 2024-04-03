@@ -313,7 +313,7 @@ class StaffController extends Controller
             $data['type'] = 'staff.store';
             $data['medium'] = 'email';
             $data['user'] = $user;
-            $data['name'] = $data['name'] ?? Auth::user()->first_name;
+            $data['name'] = $user->first_name;
             $data['recipient'] = $user->email ?? 'Staff';
 
             $this->logEmail($data);
