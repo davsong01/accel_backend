@@ -42,13 +42,14 @@ class StaffController extends Controller
 
     public function getAllStaff(Request $request)
     {
-        $staff = Staff::with('bank')->where(['staff.company_id' => $this->sessionDetails('company_id')])
+        $staff = Staff::with(['bank', 'job_title:id,title'])->where(['staff.company_id' => $this->sessionDetails('company_id')])
             ->join("users", "staff.user_id", "=", "users.id")
             ->where(['type' => 'staff'])
             ->join("departments", "staff.department_id", "=", "departments.id")
             ->leftjoin("job_roles", "staff.jobrole_id", "=", "job_roles.id")
             ->leftjoin("job_types", "staff.jobtype_id", "=", "job_types.id")
-            ->select("staff.id AS staff_id", "users.id As user_id", "users.status", "staff.created_at", "users.first_name", "users.middle_name", "users.last_name", "users.email", "users.type", "users.company_id", "job_roles.name AS job_role", "job_types.name AS job_type", "departments.name AS department", "users.type", "users.phone_number", "users.gender", "users.avatar", "staff.jobtype_id AS jobtype_id", "staff.jobrole_id AS jobrole_id", "staff.department_id AS department_id", "bank_id")->orderBy("staff.created_at", "desc");
+            ->select("staff.id AS staff_id", "users.id As user_id", "users.status", "staff.created_at", "job_title_id", "users.first_name", "users.middle_name", "users.last_name", "users.email", "users.type", "users.company_id", "job_roles.name AS job_role", "job_types.name AS job_type", "departments.name AS department", "users.type", "users.phone_number",  "users.avatar", "staff.jobtype_id AS jobtype_id", "staff.jobrole_id AS jobrole_id", "staff.department_id AS department_id", "bank_id")->orderBy("staff.created_at", "desc");
+
 
         if (!empty($request->name)) {
             $staff = $staff->where('first_name', 'LIKE', "%{$request->name}%")
@@ -618,7 +619,7 @@ class StaffController extends Controller
 
     public function getSingleStaffProfile($staff_id, $internal = null)
     {
-        $staff = Staff::with('bank')->with(['job_type', 'department', 'roles', 'job_role'])->whereHas('user', function ($query) {
+        $staff = Staff::with('bank')->with(['job_type', 'department', 'roles', 'job_role', 'job_title:id,title'])->whereHas('user', function ($query) {
             $query->where('type', 'staff')->where('status', 'active');
         })->where('id', $staff_id)->first();
 
@@ -673,7 +674,8 @@ class StaffController extends Controller
             'branch' => [
                 'id' => $staff->branch_id ?? '',
                 'name' => $staff->branch_name ?? '',
-            ]
+            ],
+            'job_title' => $staff->job_title
         ];
 
         $data['personal_information'] = [
