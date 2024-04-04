@@ -11,7 +11,7 @@ class AdminLog extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['created_by', 'title', 'ip', 'crud_type', 'causee_id'];
+    protected $fillable = ['created_by', 'title', 'ip', 'crud_type', 'causee_id', 'company_id'];
 
     protected function createdAt(): Attribute
     {
