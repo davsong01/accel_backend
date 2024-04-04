@@ -423,6 +423,8 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::prefix('locations/estates')->group(function(){
             Route::get('search', [EstateController::class, 'search']);
         });
+
+        route::get('my-operations', [LogController::class, 'operations']);
     });
 });
 
