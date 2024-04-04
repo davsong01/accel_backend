@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\AdminLog;
+use App\Models\User;
 use GuzzleHttp\Psr7\Request;
 
 class LogService
@@ -20,7 +21,7 @@ class LogService
     {
         AdminLog::create([
             'created_by' => $user_id,
-            'company_id' => request()->input('company_id') ?? $company_id,
+            'company_id' => request()->input('company_id') ?? User::find($user_id)?->company_id ?? $company_id,
             'causee_id' => $cuasee_id,
             'title' => $title,
             'ip' => request()->ip(),
