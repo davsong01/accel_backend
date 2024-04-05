@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Company;
 use App\Models\ResetCodePassword;
 use App\Models\User;
 use App\Services\LogService;
@@ -23,6 +24,7 @@ class ForgotPasswordController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'email' => ['required', 'email'],
+            'slug' => ['required']
         ]);
 
         if ($validator->fails()) {
@@ -34,11 +36,13 @@ class ForgotPasswordController extends Controller
 
         $message = 'If this is a registered email address, a password reset token has been sent to the email';
 
-        if (!($user = User::firstWhere('email', $request->email))) {
+        $user = User::firstWhere('email', $request->email);
+        $company = Company::firstWhere(['slug' => $request->slug, 'id' => $user?->id]);
+
+        if (!($user) || !($company)) {
             return response()->json(['message' => $message, 'data' => null], 200);
         }
-
-
+        
         // Delete all old code that user send before.
         ResetCodePassword::where('email', $request->email)->delete();
         // Generate random code
@@ -49,17 +53,35 @@ class ForgotPasswordController extends Controller
 
         // Create a new code
         $codeData = ResetCodePassword::create($data);
-        $data['type'] = 'forget-password';
+        $data['type'] = 'forgot-password';
         $data['token'] = $rand;
 
         // set company_id
         $data['company_id'] = $user->company_id;
 
+        // add to session
+        session()->put('company_id', $company->id);
+        session()->put('company_package_ids', $company->package_ids);
+        session()->put('company_name', $company->name);
+        session()->put('company_url', $company->url);
+        session()->put('company_location', $company->location);
+        session()->put('company_slug', $company->slug);
+
         // Log email only
         $mes = new MessageTransactionController();
         $mes->logEmailTransaction($data);
 
+
         LogService::admin($user->id, null, "Forgot password for $request->email", 'UPDATE');
+
+        //clear session
+        session()->forget('company_id');
+        session()->forget('company_package_ids');
+        session()->forget('company_name');
+        session()->forget('company_url');
+        session()->forget('company_location');
+        session()->forget('company_slug');
+
         return response()->json(['message' => $message, 'data' => null], 200);
     }
 
