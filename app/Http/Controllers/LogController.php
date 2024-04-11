@@ -119,7 +119,7 @@ class LogController extends Controller
             $query->whereIn('causee_id', $causees_ids);
         }
 
-        $logs = $query->paginate(20);
+        $logs = $query->latest()->paginate(20);
         return response()->json(['message' => 'Success', 'data' => $logs], 200);
     }
     
