@@ -12,7 +12,7 @@ use App\Models\LeaveAndAbsenceSetting;
 use App\Models\LeaveAndAbsenceManagement;
 use App\Services\LogService;
 use Illuminate\Support\Facades\Validator;
-
+use Illuminate\Validation\Rule;
 
 class LeaveAndAbsenceManagementController extends Controller
 {
@@ -136,7 +136,17 @@ class LeaveAndAbsenceManagementController extends Controller
             'start_date' => 'required',
             'end_date' => 'required',
             'bypass_approval' => 'sometimes',
-            'delegate_duty' => 'required|exists:staff,id,company_id,' . $this->sessionDetails('company_id'),
+            'delegate_duty' => [
+                'required',
+                'exists:staff,id,company_id,' . $this->sessionDetails('company_id'),
+                Rule::notIn([$request->staff_id ?? Auth::user()->staff->id]),
+                Rule::unique('leave_and_absence_management')->where(
+                    fn ($query) => $query->where('end_date', $request->end_date)
+                ),
+            ],
+        ], [
+            'delegate_duty.not_in' => 'The selected delegate cannot be yourself.',
+            'delegate_duty.unique' => 'The selected delegate has already been assigned for the specified end date.'
         ]);
 
         if ($validator->fails()) {
