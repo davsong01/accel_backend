@@ -457,9 +457,9 @@ class CustomerFormController extends Controller
         $customer = Customer::where('id', $data['customer_id'])->first();
         $user = $customer->user;
         app('App\Http\Controllers\CustomerContractController')->updateUser($user, $data);
-
+        
         // Update customer contract
-        if (\Request::route()->getPrefix() == 'api/customer') {
+        if (auth()->user()->type == 'customer') {
             $data['type'] = 'customer-response';
             $data['status'] = 'pending';
         } else {
