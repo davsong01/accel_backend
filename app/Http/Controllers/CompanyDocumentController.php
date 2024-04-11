@@ -132,4 +132,12 @@ class CompanyDocumentController extends Controller
         $companyDocument->delete();
         return response()->json(['message' => 'Success', 'data' => null], 200);
     }
+
+    public function selfService(){
+        $documents = CompanyDocument::where([
+            'company_id' => $this->sessionDetails('company_id'),
+            'visible_to_staff' => 1,
+        ])->latest()->get();
+        return response()->json(['message' => 'Success', 'data' => $documents], 200);
+    }
 }
