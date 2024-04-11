@@ -53,7 +53,7 @@ class CustomerFormController extends Controller
         if (!empty($request->type)) {
             if($request->type == 'form2-request'){
                 // $forms = $forms->where('type', $request->type)->where('customer_form_status', 'approved');
-                $forms = $forms->where('type', $request->type)->where('customer_form_status', 'approved');
+                $forms = $forms->where('type', $request->type)->where('customer_form_status', 'approved'); // completed form
             }else{
                 $forms = $forms->where('type', $request->type);
             }
@@ -457,13 +457,13 @@ class CustomerFormController extends Controller
         $customer = Customer::where('id', $data['customer_id'])->first();
         $user = $customer->user;
         app('App\Http\Controllers\CustomerContractController')->updateUser($user, $data);
-        
+
+        $data['type'] = 'customer-response';
+
         // Update customer contract
         if (auth()->user()->type == 'customer') {
-            $data['type'] = 'customer-response';
             $data['status'] = 'pending';
         } else {
-            $data['type'] = 'form2-request';
             $data['status'] = 'pending';
         }
 
@@ -519,6 +519,24 @@ class CustomerFormController extends Controller
         
         LogService::admin(auth()->user()->id, $customer->user->id, 'Update customer form (' . $customer->response_form->id .')', 'UPDATE');
         return response()->json(['message' => 'Success', 'data' => []], 200);
+    }
+
+    public function completeCustomerFormResponse($id)
+    {
+        $customer_form = CustomerForm::with('customer')->where('id', $id)->where('company_id', $this->sessionDetails('company_id'))->where('type', 'customer-response')->where('customer_form_status', 'approved')->first();
+
+        if (!$customer_form) {
+            return response()->json(['message' => 'No record found', 'data' => []], 200);
+        }
+
+        $customer_form->update([
+            'customer_form_status' => 'approved',
+            'type' => 'form2-request'
+        ]);
+
+        LogService::admin(auth()->user()->id, $customer_form->customer->user->id, 'Complete customer form response (' . $customer_form->id . ')', 'UPDATE');
+
+        return response()->json(['message' => 'Successful', 'data' => ['customer_id' => $customer_form->customer_id]], 200);
     }
 
     /**
