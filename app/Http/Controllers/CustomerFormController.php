@@ -308,7 +308,7 @@ class CustomerFormController extends Controller
         if (\Request::route()->getPrefix() == 'api/customer') {
             $request['customer_id'] = auth()->user()->customer->id;
         }
-       
+    
         $validator = Validator::make($request->all(), [
             'surname' => 'nullable',
             'first_name' => 'nullable',
