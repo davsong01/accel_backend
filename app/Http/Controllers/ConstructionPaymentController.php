@@ -39,6 +39,7 @@ class ConstructionPaymentController extends Controller
             'contract_id' => ['required', "exists:customer_contracts,id,customer_id,$request->customer_id"],
             'amount_paid' => ['required', 'min:1', 'integer', 'lte:total_amount'],
             'payment_slip' => ['file', 'sometimes', 'mimetypes:image/*,application/pdf', 'max:512' ],
+            'description' => ['sometimes', 'string'],
             'total_amount' => [
                 'required',
                 'min:1',
@@ -78,7 +79,6 @@ class ConstructionPaymentController extends Controller
         $data = array_merge($data, $attributes);
         
         $created = ConstructionPayment::create($data);
-        // todo: handle payment slips
 
         if ($request->hasFile('payment_slip')) {
             $filepath = $this->uploadProtectedFile($attributes['payment_slip'], 'payment_slips')['filepath'];

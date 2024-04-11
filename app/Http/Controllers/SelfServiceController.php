@@ -392,7 +392,7 @@ class SelfServiceController extends Controller
         $passwordReset = ResetCodePassword::firstWhere('token', $data['token']);
 
         // check if it does not expired: the time is one hour
-        if ( now()->addHour() > $passwordReset->created_at) {
+        if (now() > $passwordReset->created_at->addHour()) {
             $passwordReset->delete();
             return response(['error' => 'Token has expired', 'data' => null], 422);
         }
