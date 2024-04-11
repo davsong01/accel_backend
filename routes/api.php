@@ -323,6 +323,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
             Route::get('advance-and-claims', [AdvanceAndClaimsController::class, 'index']);
             // Route::get('single-advance-and-claims', [AdvanceAndClaimsController::class, 'staffAdvanceAndClaims']);
             Route::get('my-deals', [SelfServiceController::class, 'myDeals']);
+            Route::get('company-documents', [CompanyDocumentController::class, 'selfService']);
 
 
         });
