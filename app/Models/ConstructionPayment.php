@@ -26,7 +26,7 @@ class ConstructionPayment extends Model
 
     protected $with = [
         'payments',
-        'contract',
+        'contract:id',
         'estate_construction_settings',
         'created_by:id,type,status,first_name,last_name,middle_name,title,avatar',
         'paid_by:id,user_id',
