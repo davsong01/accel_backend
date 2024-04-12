@@ -274,6 +274,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
 
         Route::get('approve-customer-form-response/{id?}', [CustomerFormController::class, 'approveCustomerFormResponse']);
         Route::post('decline-customer-form-response/{id?}', [CustomerFormController::class, 'declineCustomerFormResponse']);
+        Route::get('complete-customer-form-response/{id?}', [CustomerFormController::class, 'completeCustomerFormResponse']);
 
         Route::get('form-payment-history/{customer_id}', [CustomerContractController::class, 'formPaymentHistory']);
         Route::post('make-form-payment', [CustomerContractController::class, 'makeFormPayment']);
@@ -324,8 +325,6 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
             // Route::get('single-advance-and-claims', [AdvanceAndClaimsController::class, 'staffAdvanceAndClaims']);
             Route::get('my-deals', [SelfServiceController::class, 'myDeals']);
             Route::get('company-documents', [CompanyDocumentController::class, 'selfService']);
-
-
         });
 
         Route::post('update-leave-and-absence-setting', [LeaveAndAbsenceManagementController::class, 'updateLeaveAndAbsenceSetting']);

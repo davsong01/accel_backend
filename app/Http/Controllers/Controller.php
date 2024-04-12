@@ -644,9 +644,9 @@ class Controller extends BaseController
 
     public function formatResponseForm($forms, $modify = false, $reason = '')
     {
-        $userDetails = $forms->customer->user;
+        // $userDetails = $forms->customer->user;
         $customerDetails = $forms->customer;
-        $next_of_kin = !empty($customerDetails->next_of_kin) ? json_decode($customerDetails->next_of_kin, true) : [];
+        // $next_of_kin = !empty($customerDetails->next_of_kin) ? json_decode($customerDetails->next_of_kin, true) : [];
 
         // Get contracts in prospoect and attach to response form
         $prospectContracts = CustomerContract::where('status', 'prospect')
