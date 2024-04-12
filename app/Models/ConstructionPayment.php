@@ -26,6 +26,7 @@ class ConstructionPayment extends Model
 
     protected $with = [
         'payments',
+        'contract',
         'estate_construction_settings',
         'created_by:id,type,status,first_name,last_name,middle_name,title,avatar',
         'paid_by:id,user_id',
@@ -38,7 +39,7 @@ class ConstructionPayment extends Model
 
     public function getPaymentProgressAttribute()
     {
-        return round(($this->attributes['amount_paid'] / $this->attributes['total_amount']) * 100, 2);
+        return round(($this->attributes['amount_paid'] ?? 1) / ($this->attributes['total_amount'] ?? 1) * 100, 2);
     }
 
     public function payments(){
@@ -56,6 +57,10 @@ class ConstructionPayment extends Model
 
     public function paid_by(){
         return $this->belongsTo(Customer::class, 'customer_id');
+    }
+    
+    public function contract() {
+        return $this->belongsTo(CustomerContract::class, 'contract_id');
     }
 
 }
