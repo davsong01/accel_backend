@@ -37,7 +37,7 @@ class ForgotPasswordController extends Controller
         $message = 'If this is a registered email address, a password reset token has been sent to the email';
 
         $user = User::firstWhere('email', $request->email);
-        $company = Company::firstWhere(['slug' => $request->slug, 'id' => $user?->id]);
+        $company = Company::firstWhere(['slug' => $request->slug, 'id' => $user?->company_id]);
 
         if (!($user) || !($company)) {
             return response()->json(['message' => $message, 'data' => null], 200);
