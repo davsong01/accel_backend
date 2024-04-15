@@ -299,7 +299,7 @@ class CustomerFormController extends Controller
         LogService::admin(auth()->user()->id, $customer_form->customer->user->id, 'Decline customer form 2 response (' . $customer_form->id .')', 'UPDATE');
         return response()->json(['message' => 'Successful', 'data' => ['customer_id' => $customer_form->customer_id]], 200);
     }
-
+    
     /**
      * Store a newly created resource in storage.
      */
@@ -368,6 +368,7 @@ class CustomerFormController extends Controller
         $customer_contract_ids = [];
         if (!empty($request->contract)) {
             $contracts = $this->cleanJsonInput($request->contract);
+            
             foreach ($contracts as $cont) {
                 // Make each contract a request
                 $contract_validator = Validator::make($cont, [
@@ -521,17 +522,89 @@ class CustomerFormController extends Controller
         return response()->json(['message' => 'Success', 'data' => []], 200);
     }
 
-    public function completeCustomerFormResponse($id)
+    public function completeCustomerFormResponse(Request $request)
     {
-        $customer_form = CustomerForm::with('customer')->where('id', $id)->where('company_id', $this->sessionDetails('company_id'))->where('type', 'customer-response')->where('customer_form_status', 'approved')->first();
+        ////
+        $validator = Validator::make($request->all(), [
+            // Contracts
+            'contract' => 'required',
+            'form_id' => 'required|exists:customer_forms,id,company_id,' . $this->sessionDetails('company_id'),
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->messages()->first(),
+                'data' => null,
+            ], 412);
+        }
+
+        $customer_form = CustomerForm::with('customer')->where('id', $request->form_id)->where('company_id', $this->sessionDetails('company_id'))->where('type', 'customer-response')->first();
 
         if (!$customer_form) {
             return response()->json(['message' => 'No record found', 'data' => []], 200);
         }
 
+        $customer_contract_ids = [];
+        if (!empty($request->contract)) {
+            $contracts = $this->cleanJsonInput($request->contract);
+            
+            foreach ($contracts as $cont) {
+                // Make each contract a request
+                $contract_validator = Validator::make($cont, [
+                    'estate_id' => 'required|exists:estates,id,company_id,' . $this->sessionDetails('company_id'),
+                    'city_id' => 'required|exists:cities,id,company_id,' . $this->sessionDetails('company_id'),
+                    'location_id' => 'required|exists:locations,id,company_id,' . $this->sessionDetails('company_id'),
+
+                    'property_type_id' => [
+                        'required', Rule::exists('estate_property_type_details', 'id')->where(function ($query) use ($cont) {
+                            $query->where('company_id', $this->sessionDetails('company_id'))->where('estate_id', $cont['estate_id'])->where('type', $cont['property_type']);
+                        })
+                    ],
+                    // Other details
+                    'property_price' => 'nullable|numeric',
+                    'infrastuctural_fee' => 'nullable|numeric',
+                    'setting_and_excavation_fee' => 'nullable',
+                    'discount' => 'nullable|numeric',
+                    'description' => 'nullable',
+
+                    // Marketer
+                    'primary_marketer' => 'nullable|exists:staff,id,company_id,' . $this->sessionDetails('company_id'),
+                    'secondary_marketers' => 'nullable',
+                    'subscribers' => 'nullable',
+
+                    'property_type' => 'required|in:land,building',
+                    'building_type_id' => 'nullable|exists:building_types,id',
+                    'plot_size_id' => 'nullable|exists:plot_sizes,id',
+                    'branch_id' => 'nullable|exists:branches,id,company_id,' . $this->sessionDetails('company_id'),
+                    'contract_type' => 'nullable',
+                    'transaction_date' => 'nullable',
+
+                    'contract_id' => 'required|exists:customer_contracts,id,company_id,' . $this->sessionDetails('company_id'),
+                ]);
+
+                if ($contract_validator->fails()) {
+                    return response()->json([
+                        'error' => $contract_validator->messages()->first(),
+                        'data' => null,
+                    ], 412);
+                }
+
+                $update = $validator->valid();
+
+                $update['contract'] = $cont;
+                $cont['transaction_date'] = Carbon::parse($request->transaction_date);
+
+                // Update the contract
+                $customer_contract_ids[] = $cont['contract_id'];
+                
+                app('App\Http\Controllers\CustomerContractController')->updateCustomerContract($cont, $cont['contract_id'], $request->customer_id);
+            }
+        }
+
         $customer_form->update([
             'customer_form_status' => 'approved',
-            'type' => 'form2-request'
+            'type' => 'form2-request',
+            'completed_at' => now(),
         ]);
 
         LogService::admin(auth()->user()->id, $customer_form->customer->user->id, 'Complete customer form response (' . $customer_form->id . ')', 'UPDATE');
