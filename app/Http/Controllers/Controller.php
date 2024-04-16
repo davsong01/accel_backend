@@ -636,7 +636,7 @@ class Controller extends BaseController
         if (isset($input[-1]) && ($input[-1] == "'" || $input[-1] == '"')) {
             $input = substr($input, 0, -1);
         }
-
+        
         $input = json_decode($input, true);
 
         return $input;

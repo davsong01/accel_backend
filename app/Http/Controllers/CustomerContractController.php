@@ -773,11 +773,11 @@ class CustomerContractController extends Controller
     public function updateCustomerContract($data, $contract_id, $customer_id)
     {
         $contract = CustomerContract::with('customer', 'property_type_details:type,id,estate_price,settings_and_excavation,infrastructural_fee', 'city:name,id', 'estate:name,id', 'location:name,id', 'building_type:id,name', 'plot_size:id,size', 'plotSize:id,size')->where('id', $contract_id)->where('customer_id', $customer_id)->first();
-
+        
         if (!$contract) {
             return;
         }
-
+        
         $contract->update([
             'primary_marketer_id' => !empty($data['primary_marketer']) ? $data['primary_marketer'] : $contract->primary_marketer_id,
             'secondary_marketers' => !empty($data['secondary_marketers']) ? json_encode($data['secondary_marketers']) : $contract->secondary_marketers,
