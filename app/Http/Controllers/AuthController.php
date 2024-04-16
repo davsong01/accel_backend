@@ -120,6 +120,7 @@ class AuthController extends Controller
                 'last_name' => $user->last_name,
                 'avatar' => $user->avatar,
                 'job_role' => $user->staff->job_role->name ?? '',
+                'staff_id' => $user->staff_id,
             ],
         ];
 
