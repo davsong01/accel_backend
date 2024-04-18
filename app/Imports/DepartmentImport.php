@@ -5,10 +5,11 @@ namespace App\Imports;
 use App\Models\Department;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
+use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
-class DepartmentImport implements ToCollection, WithHeadingRow
+class DepartmentImport implements ToCollection, SkipsEmptyRows, WithHeadingRow
 {
     private $session;
 
