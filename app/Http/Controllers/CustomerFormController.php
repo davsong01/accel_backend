@@ -53,7 +53,7 @@ class CustomerFormController extends Controller
         if (!empty($request->type)) {
             if($request->type == 'form2-request'){
                 // $forms = $forms->where('type', $request->type)->where('customer_form_status', 'approved');
-                $forms = $forms->where('type', $request->type)->where('customer_form_status', 'approved'); // completed form
+                $forms = $forms->where('type', $request->type)->whereIn('customer_form_status', ['approved','completed']); // completed form
             }else{
                 $forms = $forms->where('type', $request->type);
             }
@@ -602,7 +602,7 @@ class CustomerFormController extends Controller
         }
 
         $customer_form->update([
-            'customer_form_status' => 'approved',
+            'customer_form_status' => 'completed',
             'type' => 'form2-request',
             'completed_at' => now(),
         ]);
