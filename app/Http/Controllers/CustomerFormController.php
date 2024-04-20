@@ -546,7 +546,7 @@ class CustomerFormController extends Controller
 
         $customer_contract_ids = [];
         if (!empty($request->contract)) {
-            $contracts = $this->cleanJsonInput($request->contract);
+            $contracts = $request->contract;
             
             foreach ($contracts as $cont) {
                 // Make each contract a request
