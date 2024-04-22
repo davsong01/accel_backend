@@ -132,6 +132,13 @@ class AccountTypeController extends Controller
         // if ($count > 0) {
         //     return response()->json(['message' => 'Unable to delete, resource in use', 'data' => null], 412);
         // }
+        if ($account_type->account_category || $account_type->chartofaccount->count() || $account_type->status != 'inactive') {
+            return response()->json([
+                'error' => 'Ops, looks like the account type is in use',
+                'data' => null,
+            ], 409);
+        }
+
         LogService::admin(auth()->user()->id, null, 'Delete an account type(' . $account_type->id . ')', 'DELETE');
 
         $account_type->delete();
