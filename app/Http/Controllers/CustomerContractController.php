@@ -135,18 +135,11 @@ class CustomerContractController extends Controller
     public function customerPaymentHistory(Request $request, $customer_id)
     {
         $histories = Transaction::with([
-            'form_payment_contracts:id,property_type_id,form_payment_transaction_id,contract_payment_transaction_id,
-            sei_payment_transaction_id,property_type,estate_id,plot_size,building_type',
-            'property_payment_contracts:id,property_type_id,form_payment_transaction_id,sei_payment_transaction_id,
-            contract_payment_transaction_id,property_type,estate_id,plot_size,building_type',
-            'estate:id,name', 'sei_payment_transactions:id,property_type_id,form_payment_transaction_id,
-            contract_payment_transaction_id,sei_payment_transaction_id,property_type,estate_id,plot_size,building_type',
-            'transaction_entry'
+            'form_payment_contracts:id,property_type_id,form_payment_transaction_id,contract_payment_transaction_id,sei_payment_transaction_id,property_type,estate_id,plot_size,building_type',
+            'property_payment_contracts:id,property_type_id,form_payment_transaction_id,sei_payment_transaction_id,contract_payment_transaction_id,property_type,estate_id,plot_size,building_type','estate:id,name', 'sei_payment_transactions:id,property_type_id,form_payment_transaction_id,contract_payment_transaction_id,sei_payment_transaction_id,property_type,estate_id,plot_size,building_type','transaction_entry'
         ])->where('customer_id', $customer_id)->orderBy('created_at', 'DESC');
         $contract_id = $request->contract_id;
-            // dd($histories->get(), $customer_id)
-
-        ;
+        
         if (!empty($request->contract_id)) {
             // Get contract 
             $contract = CustomerContract::where('id', $contract_id)->first();
