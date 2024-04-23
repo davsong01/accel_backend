@@ -21,7 +21,7 @@ class LogService
     {
         AdminLog::create([
             'created_by' => $user_id,
-            'company_id' => request()->input('company_id') ?? User::find($user_id)?->company_id ?? $company_id,
+            'company_id' => session()->get('company_id') ?: User::find($user_id)?->company_id ?: $company_id,
             'causee_id' => $cuasee_id,
             'title' => $title,
             'ip' => request()->ip(),

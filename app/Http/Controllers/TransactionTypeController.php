@@ -59,7 +59,7 @@ class TransactionTypeController extends Controller
         return response()->json(['message' => 'Created successfully', 'data' => $created], 200);
     }
 
-     /**
+    /**
      * Show the specified resource in storage.
      */
     public function show(Request $request, TransactionType $type)
@@ -97,6 +97,12 @@ class TransactionTypeController extends Controller
      */
     public function destroy(TransactionType $type)
     {
+        if($type->purposes->count()){
+            return response()->json([
+                'error' => 'Ops, looks like the transaction type is in use',
+                'data' => null,
+            ], 409);
+        }
         LogService::admin(auth()->user()->id, null, 'Delete transaction type (' . $type->id  . ')' , 'DELETE');
 
         $type->delete();
