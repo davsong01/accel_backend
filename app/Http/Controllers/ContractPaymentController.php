@@ -472,6 +472,142 @@ class ContractPaymentController extends Controller
         return response()->json(['message' => 'Success', 'data' => $contract->property_type_details ?? []], 200);
     }
 
+    // public function makeSettingAndEscavationPayment(Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'account_id' => 'required|exists:chart_of_accounts,id,company_id,' . $this->sessionDetails('company_id'),
+    //         'contract_ids' => 'required',
+    //         'payment_slip' => 'nullable',
+    //     ]);
+
+    //     if ($validator->fails()) {
+    //         return response()->json([
+    //             'error' => $validator->messages()->first(),
+    //             'data' => null,
+    //         ], 412);
+    //     }
+
+    //     $contract_ids = json_decode($request['contract_ids'], true);
+
+    //     if (count($contract_ids) < 1) {
+    //         return response()->json([
+    //             'error' => 'Please select one or more contracts to pay for',
+    //             'data' => null,
+    //         ], 412);
+    //     }
+
+    //     $payments = [];
+    //     $filename = null;
+
+    //     foreach ($contract_ids as $contract) {
+    //         $contract_validator = Validator::make($contract, [
+    //             'amount' => 'required',
+    //             'type' => 'required|in:SE,INFRASTRUTURE',
+    //         ]);
+
+    //         if ($contract_validator->fails()) {
+    //             return response()->json([
+    //                 'error' => $contract_validator->messages()->first(),
+    //                 'data' => null,
+    //             ], 412);
+    //         }
+
+    //         $contractX = CustomerContract::where('id', $contract['contract_id'])->where('customer_id', $request->customer_id)->where('company_id', $this->sessionDetails('company_id'))->first();
+
+    //         if ($contract['type'] == 'SE') {
+    //             $fee = $contractX->property_type_details->settings_and_excavation;
+    //             $purpose = 'setting_and_escavation';
+    //         } else {
+    //             $fee = $contractX->property_type_details->infrastructural_fee;
+    //             $purpose = 'infrastructural_fee';
+    //         }
+
+    //         if ($contract['amount'] > $fee) {
+    //             return response()->json([
+    //                 'error' => 'Cannot pay more than set price for '.$contractX->name,
+    //                 'data' => null,
+    //             ],
+    //                 412
+    //             );
+    //         }
+
+    //         $balance = $fee - $contract['amount'];
+    //         $transaction_id = $this->generateTransactionId();
+
+    //         if ($request->payment_slip) {
+    //             $filename = empty($filename) ? $this->uploadFile($request->payment_slip, 'payments') : $filename;
+    //             \Log::info(['filename from setting and excavation' => $filename]);
+    //             $filename = $filename;
+    //         }
+
+    //         $payment = SeInfrastructure::updateOrCreate(['contract_id' => $request->contract_id, 'amount' => $request->amount, 'company_id' => $this->sessionDetails('company_id')], [
+    //             'contract_id' => $contractX->id,
+    //             'amount' => $contract['amount'],
+    //             'balance' => $balance,
+    //             'customer_id' => $contractX->customer_id,
+    //             'transaction_id' => $transaction_id,
+    //             'type' => $contract['type'],
+    //             'account_id' => $request->account_id,
+    //             'payment_slip' => $filename,
+    //             'infrastructure_fee' => $fee,
+    //             'company_id' => $this->sessionDetails('company_id')
+    //         ]);
+
+    //         // Create Payment thread
+    //         $payment_thread = SeInfrastructureThread::updateOrCreate(['se_infrastructures_id' => $payment->id, 'company_id' => $this->sessionDetails('company_id')], [
+    //             'se_infrastructures_id' => $payment->id,
+    //             'amount' => $contract['amount'],
+    //             'customer_id' => $contractX->customer_id,
+    //             'branch_id' => $this->sessionDetails('branch_id'),
+    //             'account_id' => $request->account_id,
+    //             'transaction_id' => $payment->transaction_id,
+    //             'payment_slip' => $filename,
+    //             'company_id' => $this->sessionDetails('company_id')
+    //         ]);
+
+    //         // Transaction
+    //         Transaction::updateOrCreate(['customer_id' => $payment->customer_id, 'transaction_id' => $payment->transaction_id, 'company_id' => $this->sessionDetails('company_id')], [
+    //             'customer_id' => $payment->customer_id,
+    //             'amount' => $contract['amount'],
+    //             'transaction_id' => $payment->transaction_id,
+    //             'account_id' => $payment->account_id,
+    //             'purpose' => $purpose,
+    //             'payment_slip' => $filename,
+    //             'description' => null,
+    //             'staff_id' => auth()->user()->staff->id,
+    //             'type' => 'credit',
+    //             'company_id' => $this->sessionDetails('company_id'),
+    //         ]);
+
+    //         $contractX->update([
+    //             'sei_payment_transaction_id' => $payment->transaction_id
+    //         ]);
+
+    //         if($balance <= 0){
+    //             $contractX->update([
+    //                 'contract_status' => 'closed',
+    //             ]);
+    //         }
+
+    //         $contractX->fee = $payment->infrastructure_fee;
+    //         $receipt = generateGenericPaymentReceipt($payment, $contractX);
+    //         $payment_thread->update(['receipt_location' => $receipt['filepath'] ?? null]);
+
+    //         $data['attachments'] = $receipt['filepath'];
+
+    //         $data['type'] = 'se.escavation.payment';
+    //         $data['element'] = $contract['type'];
+    //         $data['name'] =  $payment->customer->user->first_name;
+    //         $data['email'] =  $payment->customer->user->email;
+
+    //         $this->logEmail($data);
+    //         /////
+    //         $contract = array_merge($contract, $request->all());
+
+    //     }
+
+    //     return response()->json(['message' => 'Success', 'data' => []], 200);
+    // }
     public function makeSettingAndEscavationPayment(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -493,12 +629,12 @@ class ContractPaymentController extends Controller
         // Get contract
         $contract = CustomerContract::where('id', $request->contract_id)->first();
         
-        if ($contract->contract_status != 'completed') {
-            return response()->json([
-                'error' => 'Please check that the status of this contract is: completed!',
-                'data' => null,
-            ], 412);
-        }
+        // if ($contract->contract_status != 'completed') {
+        //     return response()->json([
+        //         'error' => 'Please check that the status of this contract is: completed!',
+        //         'data' => null,
+        //     ], 412);
+        // }
 
         if ($request->type == 'SE') {
             $fee = $contract->property_type_details->settings_and_excavation;
@@ -507,7 +643,7 @@ class ContractPaymentController extends Controller
             $fee = $contract->property_type_details->infrastructural_fee;
             $purpose = 'infrastructural_fee';
         }
-
+        
         if ($request->amount > $fee) {
             return response()->json([
                 'error' => 'Cannot pay more than set price',
@@ -515,7 +651,6 @@ class ContractPaymentController extends Controller
             ], 412);
         }
 
-        $balance = $fee - $request->amount;
         $transaction_id = $this->generateTransactionId();
         if ($request->payment_slip) {
             $filename = $this->uploadFile($request->payment_slip, 'payments');
@@ -523,21 +658,39 @@ class ContractPaymentController extends Controller
             $filename = null;
         }
 
-        $payment = SeInfrastructure::updateOrCreate(['contract_id' => $request->contract_id, 'amount' => $request->amount, 'company_id' => $this->sessionDetails('company_id')], [
-            'contract_id' => $contract->id,
-            'amount' => $request->amount,
-            'balance' => $balance,
-            'customer_id' => $contract->customer_id,
-            'transaction_id' => $transaction_id,
-            'type' => $request->type,
-            'account_id' => $request->account_id,
-            'payment_slip' => $filename,
-            'infrastructure_fee' => $fee,
-            'company_id' => $this->sessionDetails('company_id')
-        ]);
+        $payment = SeInfrastructure::where(['contract_id' => $request->contract_id, 'company_id' => $this->sessionDetails('company_id'), 'type' => $request->type])->first();
+        
+        if(empty($payment)){
+            $balance = $fee - $request->amount;
+
+            $payment = SeInfrastructure::updateOrCreate(['contract_id' => $request->contract_id, 'amount' => $request->amount, 'company_id' => $this->sessionDetails('company_id')], [
+                'contract_id' => $contract->id,
+                'amount' => $request->amount,
+                'balance' => $balance,
+                'customer_id' => $contract->customer_id,
+                'transaction_id' => $transaction_id,
+                'type' => $request->type,
+                'account_id' => $request->account_id,
+                'payment_slip' => $filename,
+                'infrastructure_fee' => $fee,
+                'company_id' => $this->sessionDetails('company_id')
+            ]);
+        }else{
+            $balance = $fee - ($request->amount + $payment->amount);
+            $payment->update([
+                'contract_id' => $contract->id,
+                'amount' => $request->amount + $payment->amount,
+                'balance' => $balance,
+                'customer_id' => $contract->customer_id,
+                'account_id' => $request->account_id,
+                'payment_slip' => $filename,
+                'company_id' => $this->sessionDetails('company_id')
+            ]);
+            $balance = $payment->balance;
+        }
 
         // Create Payment thread
-        $payment_thread = SeInfrastructureThread::updateOrCreate(['se_infrastructures_id' => $payment->id, 'company_id' => $this->sessionDetails('company_id')], [
+        $payment_thread = SeInfrastructureThread::create([
             'se_infrastructures_id' => $payment->id,
             'amount' => $request->amount,
             'customer_id' => $contract->customer_id,
@@ -562,22 +715,23 @@ class ContractPaymentController extends Controller
             'company_id' => $this->sessionDetails('company_id'),
         ]);
 
+        if($balance <= 0){
+            $contract->update([
+                'contract_status' => 'closed',
+            ]);
+        }
         $contract->update([
-            'contract_status' => 'closed',
             'sei_payment_transaction_id' => $payment->transaction_id
         ]);
         
-        // Generate payment receipt, stop here todat
         $contract->fee = $payment->infrastructure_fee;
 
-        if(env('ENT') == 'local' || env('ENT') == 'live'){
-            $receipt = generateGenericPaymentReceipt($payment, $contract);
-            
-            $payment->update(['receipt_location' => $receipt['filepath'] ?? null]);
-            $payment_thread->update(['receipt_location' => $receipt['filepath'] ?? null]);
-            
-            $data['attachments'] = $receipt['filepath'];
-        }
+        $receipt = generateGenericPaymentReceipt($payment, $contract);
+        
+        $payment->update(['receipt_location' => $receipt['filepath'] ?? null]);
+        $payment_thread->update(['receipt_location' => $receipt['filepath'] ?? null]);
+        
+        $data['attachments'][] = $receipt['filepath'];
 
         $data['type'] = 'se.escavation.payment';
         $data['element'] = $request->type;
