@@ -53,7 +53,7 @@ class ContractAllocationController extends Controller
 
         $this->logEmail($data);
         
-        return response()->json(['message' => 'Allocation successul', 'data' => []], 200);
+        return response()->json(['message' => 'Allocation successful', 'data' => []], 200);
 
     }
     /**
