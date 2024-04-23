@@ -391,11 +391,11 @@ class ContractPaymentController extends Controller
 
             // Generate payment receipt
 
-            if (env('ENT') == 'local') {
+            // if (env('ENT') == 'local') {
                 $receipt = $this->generateContractPaymentReceipt($payment, $contract, $others);
                 $payment->update(['receipt_location' => $receipt['filepath'] ?? null]);
                 $payment_thread->update(['receipt_location' => $receipt['filepath'] ?? null]);
-            }
+            // }
 
             $contract->update([
                 'contract_payment_transaction_id' => $payment->transaction_id,
@@ -466,9 +466,10 @@ class ContractPaymentController extends Controller
         //
     }
 
-    public function seEscavationSetting(CustomerContract $contract)
+    public function seEscavationSetting($contract)
     {
-        return response()->json(['message' => 'Success', 'data' => $contract->property_type_details], 200);
+        $contract = CustomerContract::where('id', $contract)->first();
+        return response()->json(['message' => 'Success', 'data' => $contract->property_type_details ?? []], 200);
     }
 
     public function makeSettingAndEscavationPayment(Request $request)
@@ -491,7 +492,7 @@ class ContractPaymentController extends Controller
 
         // Get contract
         $contract = CustomerContract::where('id', $request->contract_id)->first();
-
+        
         if ($contract->contract_status != 'completed') {
             return response()->json([
                 'error' => 'Please check that the status of this contract is: completed!',
@@ -565,17 +566,17 @@ class ContractPaymentController extends Controller
             'contract_status' => 'closed',
             'sei_payment_transaction_id' => $payment->transaction_id
         ]);
-
+        
         // Generate payment receipt, stop here todat
         $contract->fee = $payment->infrastructure_fee;
-        if(env('ENT' == 'local')){
+
+        if(env('ENT') == 'local' || env('ENT') == 'live'){
             $receipt = generateGenericPaymentReceipt($payment, $contract);
-    
+            
             $payment->update(['receipt_location' => $receipt['filepath'] ?? null]);
             $payment_thread->update(['receipt_location' => $receipt['filepath'] ?? null]);
-    
+            
             $data['attachments'] = $receipt['filepath'];
-
         }
 
         $data['type'] = 'se.escavation.payment';
