@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Services\LogService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Validator;
@@ -53,7 +54,14 @@ class EmployeeExitController extends Controller
             'type' => 'required|in:Voluntary Resignation,Requested Resignation,Termination,Demise,Retirement,Dismissal',
             'last_day_work' => 'required',
             'reason' => 'required|in:Better Remuneration,Career Advancement,Relocation,Performance',
-            'comment' => 'nullable'
+            'comment' => 'nullable',
+            'staff_id' => [
+                'sometimes',
+                Rule::exists('employ_exits', 'id')->where(function ($query) {
+                    $query->where('status', 'APPROVED');
+                    $query->where('company_id', $this->sessionDetails('company_id'));
+                }),
+                ]
         ]);
 
         if (\Request::route()->getPrefix() != 'api/admin/self-service') {
@@ -96,6 +104,16 @@ class EmployeeExitController extends Controller
         ]);
 
         $staff = Staff::find($request->staff_id ?? $staff_id);
+        $data = [
+            'title' => 'Exit application',
+            'content' => 'You have requested for an exit',
+            'link' => '',
+            'user_type' => 'staff',
+            'staff_id' => $staff->id,
+            'company_id' => $this->sessionDetails('company_id')
+        ];
+        $this->notify($data);
+
         LogService::admin(auth()->user()->id, $staff->user->id, 'Create or update an employee exit, ' .  $request->reason . ' (' . $ee->id . ')', 'CREATE');
         return response()->json(['message' => 'Success', 'data' => []], 200);
     }
