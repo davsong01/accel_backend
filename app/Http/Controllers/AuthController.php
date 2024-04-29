@@ -121,14 +121,14 @@ class AuthController extends Controller
                 'avatar' => $user->avatar,
                 'job_role' => $user->staff->job_role->name ?? '',
                 'staff_id' => $user->staff_id,
-                'staff' => $user->staff->only('id'),
+                'staff' => !empty($user->staff) ? $user->staff->only('id') : '',
             ],
         ];
 
         if($user->type == 'staff'){
             $datax['userInfo']['staff_id'] = $user->staff_id;
         }
-
+        
         if ($user->type == 'customer') {
             \Session::put('customer_id', $user->customer->id);
 

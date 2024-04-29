@@ -146,11 +146,12 @@ class MessageTransactionController extends Controller
             if (isset($data['medium']) && $data['medium'] == 'sms') {
                 $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'sms')->where('type', 'nudge.customer')->first();
             } else {
+            
                 $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'email')->where('type', 'nudge.customer')->first();
                 $subject = $email_template->subject ?? 'Complete Your Application Form';
                 $content = $email_template->content ?? '<strong>Dear ' . $data['name'] . ',</strong><br><br>
                 <div><p style="text-align:justify !important">I hope this email finds you well. We appreciate your interest in ' . $this->sessionDetails('company_name') . ' and are excited to have you on board.<br><br>There are some sections of the application form we want you to fill out to ensure that we have all the necessary information to provide you with the best possible experience. <br><br>To expedite the process, here are the details to access your application form:<br><br>
-
+                // has issues
                 Please <a style="' . $button_style . '" href="' . $url . '/customer-login">LOGIN</a> to fill your application form:<br><br>
                 <strong>Email:</strong> ' . $data['email'] . '<br>
                 <strong>Customer ID:</strong> ' . $data['customerId'] . '<br>

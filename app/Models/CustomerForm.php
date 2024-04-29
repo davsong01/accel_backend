@@ -53,15 +53,21 @@ class CustomerForm extends Model
         );
     }
 
-    protected function dateOfBirth(): Attribute
-    {
+    protected function dateOfBirth(): Attribute{
         return Attribute::make(
             get: fn (string $value) => date("M jS, Y", strtotime($value)),
         );
     }
     
-    public function customer()
-    {
+    public function customer(){
         return $this->belongsTo(Customer::class, 'customer_id');
+    }
+
+    public function scopeIsCustomerResponse($query){
+        return $query->where('is_customer_response', 1); 
+    }
+
+    public function scopeIsForm2Request($query){
+        return $query->where('is_form2_request', 1);
     }
 }

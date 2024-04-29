@@ -29,12 +29,12 @@ class CustomerFormController extends Controller
         $forms = CustomerForm::with(['customer'])->where('company_id', $this->sessionDetails('company_id'));
         
         if (\Request::route()->getPrefix() == 'api/customer') {
-
             if(Auth::check() ){
                 $customer_id = Auth::user()->customer->id ?? null;
                 $forms = $forms->where('customer_id', $customer_id)->first();
-                
-                $forms->contract_details = $this->formatResponseForm($forms);
+                if($forms){
+                    $forms->contract_details = $this->formatResponseForm($forms);
+                }
             }
             return response()->json(['message' => 'Successfully retrieved', 'data' => $forms], 200);
         }
@@ -52,10 +52,12 @@ class CustomerFormController extends Controller
 
         if (!empty($request->type)) {
             if($request->type == 'form2-request'){
-                // $forms = $forms->where('type', $request->type)->where('customer_form_status', 'approved');
-                $forms = $forms->where('type', $request->type)->whereIn('customer_form_status', ['approved','completed']); // completed form
+                $forms = $forms
+                // ->whereIn('customer_form_status', ['approved','completed'])// completed form
+                ->isForm2Request();
             }else{
-                $forms = $forms->where('type', $request->type);
+                $forms = $forms
+                ->isCustomerResponse();
             }
         }
         
@@ -222,7 +224,9 @@ class CustomerFormController extends Controller
 
     public function approveCustomerFormResponse($id)
     {
-        $customer_form = CustomerForm::with('customer')->where('id', $id)->where('company_id', $this->sessionDetails('company_id'))->where('type', 'customer-response')->first();
+        $customer_form = CustomerForm::with('customer')->where('id', $id)->where('company_id', $this->sessionDetails('company_id'))->where('is_customer_form', 1)
+        // ->where('type', 'customer-response')
+        ->first();
         
         if (!$customer_form) {
             return response()->json(['message' => 'No record found', 'data' => []], 200);
@@ -237,7 +241,7 @@ class CustomerFormController extends Controller
 
         $customer_form->update([
             'customer_form_status' => 'approved',
-            'type' => 'form2-request'
+            'is_form2_request' => 1
         ]);
         
         // $data['contract_details'] = $this->getFormRequestContractDetails($customer_form, 'approve_contract');
@@ -279,7 +283,7 @@ class CustomerFormController extends Controller
 
         $customer_form->update([
             'customer_form_status' => 'declined',
-            'type' => 'customer-response'
+            'is_form2_request' => 0
         ]);
 
         // $customer_form->customer->update([
@@ -375,7 +379,6 @@ class CustomerFormController extends Controller
                     'estate_id' => 'required|exists:estates,id,company_id,' . $this->sessionDetails('company_id'),
                     'city_id' => 'required|exists:cities,id,company_id,' . $this->sessionDetails('company_id'),
                     'location_id' => 'required|exists:locations,id,company_id,' . $this->sessionDetails('company_id'),
-
                     'property_type_id' => [
                         'required', Rule::exists('estate_property_type_details', 'id')->where(function ($query) use ($cont) {
                             $query->where('company_id', $this->sessionDetails('company_id'))->where('estate_id', $cont['estate_id'])->where('type', $cont['property_type']);
@@ -422,7 +425,7 @@ class CustomerFormController extends Controller
         }
 
         $data = array_merge($validator->valid());
-       
+        
         $data['date_of_birth'] = !empty($data['date_of_birth']) ? Carbon::parse($data['date_of_birth']) : '';
 
         if (!empty($request->passport_photo)) {
@@ -458,26 +461,24 @@ class CustomerFormController extends Controller
         $customer = Customer::where('id', $data['customer_id'])->first();
         $user = $customer->user;
         app('App\Http\Controllers\CustomerContractController')->updateUser($user, $data);
-
-        $data['type'] = 'customer-response';
-
+        
         // Update customer contract
         if (auth()->user()->type == 'customer') {
             $data['status'] = 'pending';
+            $data['is_customer_response'] = 1;
         } else {
             $data['status'] = 'pending';
+            $data['is_customer_response'] = 1;
+            $data['is_form2_request'] = 1;
         }
 
-        if (\Request::route()->getPrefix() != 'api/customer') {
+        if(!empty($customer->response_form)){
             $customer->response_form->update([
-                // 'customer_form_status' => 'approved',
+                'is_customer_response' => $data['is_customer_response'] ?? 0,
+                'is_form2_request' => $data['is_form2_request'] ?? 0,
+                'status' => $data['status'],
             ]);
         }
-        
-        $customer->response_form->update([
-            'type' => $data['type'],
-            'status' => $data['status'],
-        ]);
 
         // update customer form status
         $customer->update([
@@ -517,8 +518,11 @@ class CustomerFormController extends Controller
             }
 
         }
-        
-        LogService::admin(auth()->user()->id, $customer->user->id, 'Update customer form (' . $customer->response_form->id .')', 'UPDATE');
+
+        if (!empty($customer->response_form)) {
+            LogService::admin(auth()->user()->id, $customer->user->id, 'Update customer form (' . $customer->response_form->id .')', 'UPDATE');
+        }
+
         return response()->json(['message' => 'Success', 'data' => []], 200);
     }
 

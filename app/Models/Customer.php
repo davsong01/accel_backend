@@ -72,9 +72,9 @@ class Customer extends Model
 
     public function response_form()
     {
-        return $this->hasOne(CustomerForm::class, 'customer_id');
+        return $this->hasOne(CustomerForm::class, 'customer_id')->where('company_id',  app('App\Http\Controllers\Controller')->sessionDetails('company_id'));
     }
-
+    
     protected function idCard(): Attribute
     {
         return Attribute::make(
