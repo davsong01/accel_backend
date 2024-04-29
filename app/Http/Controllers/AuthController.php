@@ -10,6 +10,7 @@ use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\RegisterRequest;
 use App\Models\CompanySetting;
+use App\Models\EmployeeExit;
 use App\Services\LogService;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
@@ -104,6 +105,16 @@ class AuthController extends Controller
                 'error' => 'Invalid Company details!'
             ], 403);
         }
+
+        if (EmployeeExit::firstWhere([
+            'staff_id' =>$user->staff?->id,
+            'status' => 'APPROVED'])
+            ) {
+            return  response()->json([
+                'error' => 'You are no longer an active staff member.'
+            ], 412);
+        }
+
         
         // $user->token = $token;
         $companySetting = CompanySetting::firstWhere('company_id',$company->id);
