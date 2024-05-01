@@ -97,7 +97,7 @@ class LegalDocumentController extends Controller
             $message = 'No ' . $template->legalDocumentType->type . ' ' .  $template->legalDocumentType->name . ' uploaded for sent request parameters at: ' . $this->sessionDetails('company_name');
             $downloadPath = !empty($template->file_location) ? base_path() . '/' . $template->file_location : null;
         }
-      
+        
         if(!$downloadPath){
             return response()->json(['message' => $message, 'data' => []], 200);
         }
@@ -133,7 +133,6 @@ class LegalDocumentController extends Controller
     public function generate(Request $request)
     {
         $company_id = $this->sessionDetails('company_id');
-        
         $validator = Validator::make($request->all(), [
             'contract_id' => ['required', 'exists:customer_contracts,id,company_id,' . $company_id],
             'legal_document_type_id' => ['required', 'exists:legal_document_types,id'],
@@ -219,7 +218,9 @@ class LegalDocumentController extends Controller
 
     private function documentGenerator($contract_id, $legalDocumentTemplate)
     {
-        $file = base_path().'/'.$legalDocumentTemplate->file_location ?? $legalDocumentTemplate->template_sample;   
+        $file = !empty($legalDocumentTemplate->file_location) ? $legalDocumentTemplate->file_location : $legalDocumentTemplate->template_sample; 
+        $file = base_path() . '/' . $file; 
+        
         $options = $this->setOptions();
         $values = $this->getOptions($options, $contract_id, $legalDocumentTemplate);
 
