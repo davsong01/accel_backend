@@ -86,20 +86,20 @@ class LegalDocumentController extends Controller
         $template = LegalDocumentTemplate::where('company_id', $company_id)->where($request->all())->first();
         
         if(!$template){
-            return response()->json(['message' => 'No Legal document template found for sent request parameters at: ' . $this->sessionDetails('comapny_name'), 'data' => []], 200);
+            return response()->json(['message' => 'No Legal document template found for sent request parameters at: ' . $this->sessionDetails('company_name'), 'data' => []], 200);
         }
         $is_sample = request()->routeIs('template.preview.sample');
         
         if($is_sample){
-            $message = 'No '. $template->legalDocumentType->name.' sample found for '. $this->sessionDetails('comapny_name');
+            $message = 'No '. $template->legalDocumentType->type . ' ' .  $template->legalDocumentType->name.' sample found for '. $this->sessionDetails('company_name');
             $downloadPath = !empty($template->template_sample) ? base_path() . '/' . $template->template_sample : null;
         }else{
-            $message = 'No ' . $template->legalDocumentType->name . ' uploaded for sent request parameters at: ' . $this->sessionDetails('comapny_name');
+            $message = 'No ' . $template->legalDocumentType->type . ' ' .  $template->legalDocumentType->name . ' uploaded for sent request parameters at: ' . $this->sessionDetails('company_name');
             $downloadPath = !empty($template->file_location) ? base_path() . '/' . $template->file_location : null;
         }
-        
+      
         if(!$downloadPath){
-            return response()->json(['message' => 'No '. $message . ' file found', 'data' => []], 200);
+            return response()->json(['message' => $message, 'data' => []], 200);
         }
 
         return response()->download($downloadPath);
