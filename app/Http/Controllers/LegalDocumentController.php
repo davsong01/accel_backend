@@ -86,10 +86,10 @@ class LegalDocumentController extends Controller
 
         $template = LegalDocumentTemplate::where('company_id', $company_id)->where($params)->first();
         $is_sample = request()->routeIs('template.preview.sample');
+        $downloadPath = $is_sample ? base_path() . '/uploads/' . $template->template_sample : base_path() . '/' . $template->file_location;
 
-        $filepath = base64_decode(substr(stristr($is_sample ? $template->template_sample_location : $template->file_location, 'uploads/'), 8));
+        return response()->download($downloadPath);
 
-        return response()->download(base_path($filepath));
     }
 
     /**
@@ -119,7 +119,7 @@ class LegalDocumentController extends Controller
     public function generate(Request $request)
     {
         $company_id = $this->sessionDetails('company_id');
-
+        
         $validator = Validator::make($request->all(), [
             'contract_id' => ['required', 'exists:customer_contracts,id,company_id,' . $company_id],
             'legal_document_type_id' => ['required', 'exists:legal_document_types,id'],
@@ -138,7 +138,7 @@ class LegalDocumentController extends Controller
             'estate_id' => $request->estate_id,
             'company_id' => $company_id,
             ])->firstOrFail();
-
+        
         $documentGen = $this->documentGenerator($request->contract_id, $legalDocumentTemplate);
         $filepath = $documentGen['filepath'] . $documentGen['filename'];
         $generatedLegalDocument = GeneratedLegalDocument::updateOrCreate([
@@ -205,16 +205,15 @@ class LegalDocumentController extends Controller
 
     private function documentGenerator($contract_id, $legalDocumentTemplate)
     {
-        $file = getEncodedFileRealPath($legalDocumentTemplate->file_location);
-
+        $file = base_path().'/'.$legalDocumentTemplate->file_location ?? $legalDocumentTemplate->template_sample;   
         $options = $this->setOptions();
         $values = $this->getOptions($options, $contract_id, $legalDocumentTemplate);
 
         $filepath = config('app.upload_path') . '/' . $this->getPathToSaveFile('generated-legal-documents') . '/';
         $filename =  uniqid(11) . '.pdf';
         $destination = base_path($filepath . '/' . $filename);
-
-        GeneratedDocumentService::handler($file['filepath'], $values, $destination);
+        
+        GeneratedDocumentService::handler($file, $values, $destination);
 
         return [
             'filepath' => $filepath,

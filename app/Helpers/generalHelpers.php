@@ -101,7 +101,6 @@ if (!function_exists("getEncodedFileRealPath")) {
     {
         $res = [];
         // $realpath = base_path() . '/' . config('app.upload_path') . '/' . $filename;
-
         $file = explode('/', $file);
         if (!empty($file)) {
             $file = array_slice($file, -1, 1);

@@ -18,20 +18,18 @@ class GeneratedDocumentService
     static function handler(string $source, array $options, string $destination)
     {
         $directory = dirname($destination);
-
+        
         if (!file_exists($source))
             throw new Exception("Template file doesn't exists, $source does not exists", 1);
 
         if (file_exists($destination))
             throw new Exception("Destination file already exists, $destination file already exists", 1);
 
-        
         if (!is_dir($directory)) {
-                mkdir($directory, 0777, true);
+            mkdir($directory, 0777, true);
         }
 
         $templateProcessor = new TemplateProcessor($source);
-
         $templateProcessor->setValues($options);
         // $templateProcessor->setImageValue('company_logo', $options['company_logo']);
         $templateProcessor->saveAs($destination . '.docx'); // temp file

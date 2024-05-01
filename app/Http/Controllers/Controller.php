@@ -570,8 +570,12 @@ class Controller extends BaseController
 
     public function encodeUploadedFile($file)
     {
-
         return !empty($file) ? url('/') . '/api/uploads/' . base64_encode($file) : '';
+    }
+
+    public function formatLegalDocument($file)
+    {
+        return !empty($file) ? url('/') . '/api/uploads/' . $file : '';
     }
 
     public function encodeGeneralUploadedFile($file)

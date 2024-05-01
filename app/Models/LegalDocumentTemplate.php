@@ -16,17 +16,17 @@ class LegalDocumentTemplate extends Model
     protected $fillable = ['estate_id', 'company_id', 'created_by', 'legal_document_type_id', 'property_type_id', 'file_location', 'template_sample'];
     protected $appends = ['template_sample_location'];
 
-    protected function fileLocation(): Attribute
-    {
-        return Attribute::make(
-            get: fn (string $value) => url('/') . '/api/uploads/' . base64_encode($value ?: $this->template_sample),
-        );
-    }
+    // protected function fileLocation(): Attribute
+    // {
+    //     return Attribute::make(
+    //         get: fn (string $value = null) => !empty($value) ? app('App\Http\Controllers\Controller')->encodeUploadedFile($value) : '',
+    //     );
+    // }
 
-    protected function getTemplateSampleLocationAttribute()
-    {
-       return  $this->template_sample ? url('/') . '/api/uploads/' . base64_encode($this->template_sample) : $this->file_location;
-    }
+    // protected function getTemplateSampleLocationAttribute()
+    // {
+    //     return !empty($this->template_sample) ? app('App\Http\Controllers\Controller')->encodeUploadedFile($this->template_sample) : '';
+    // }
 
     /**
      * Get the estate for the legal document template.
