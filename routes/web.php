@@ -3,6 +3,7 @@
 use App\Http\Controllers\MessageTransactionController;
 use App\Mail\MessageTransactionMail;
 use App\Models\CustomerContract;
+use App\Models\GeneratedLegalDocument;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,6 +16,18 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
+
+Route::get('update-generated-legal-documents', function(){
+    $generated = GeneratedLegalDocument::with('template')->whereNull('legal_document_type_id')->get();
+    if($generated->count() > 0){
+        foreach($generated as $document){
+            $document->legal_document_type_id = $document->template->legalDocumentType->id;
+            $document->save();
+        }
+    }else{
+        dd('All Done!');
+    }
+});
 
 Route::get('/testemailtemplate', function () {
     $data['message'] = 'helllosds';

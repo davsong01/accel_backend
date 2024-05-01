@@ -109,21 +109,63 @@ class LegalDocumentController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function estateContracts(Request $request): JsonResponse
+    // public function estateContracts(Request $request): JsonResponse
+    // {
+    //     $company_id = $this->sessionDetails('company_id');
+
+    //     $params = $request->only((new LegalDocumentTemplate)->getFillable());
+    //     $legalDocumentTemplate = LegalDocumentTemplate::where('company_id', $company_id)->where($params)->firstOrFail();
+
+    //     $data = null;
+    //     if ($legalDocumentTemplate->legalDocumentType->name === 'OFFER_LETTER') {
+    //         $data =  CustomerContract::with(['customer.user:first_name,last_name,id,middle_name,customerId,avatar', 'generatedDocument', 'location'])->where([
+    //             ...($request->input('estate_id') ? ['estate_id' => $request->input('estate_id')] : []),
+    //             'form_approval_status' => 'approved',
+    //         ])->paginate(20);
+    //     }
+    //     // TODO: condition for other legal document types
+    //     return response()->json(['message' => 'success', 'data' => $data], 200);
+    // }
+
+    public function generatedLegalDocuments(Request $request): JsonResponse
     {
         $company_id = $this->sessionDetails('company_id');
+        $documents = GeneratedLegalDocument::select('id','estate_id','contract_id', 'legal_document_template_id', 'legal_document_type_id', 'regenerate_count', 'file_location')->with('estate:id,name', 'legalDocumentType:id,type,name')->where('company_id', $company_id)->orderBy('created_at', 'DESC');
         
-        $params = $request->only((new LegalDocumentTemplate)->getFillable());
-        $legalDocumentTemplate = LegalDocumentTemplate::where('company_id', $company_id)->where($params)->firstOrFail();
-
-        $data = null;
-        if($legalDocumentTemplate->legalDocumentType->name === 'OFFER_LETTER'){
-            $data =  CustomerContract::with(['customer.user:first_name,last_name,id,middle_name,customerId,avatar', 'generatedDocument', 'location'])->where([
-                ...($request->input('estate_id') ? ['estate_id' => $request->input('estate_id')]: []),
-                'form_approval_status' => 'approved',
-            ])->paginate(20);
+        if(!empty($request->estate_id)){
+            $documents = $documents->where('estate_id', $request->estate_id);
         }
-        // TODO: condition for other legal document types
+
+        if (!empty($request->legal_document_template_id)) {
+            $documents = $documents->where('legal_document_template_id', $request->legal_document_template_id);
+        }
+    
+        if (!empty($request->legal_document_type_id)) {
+            $documents = $documents->where('legal_document_type_id', $request->legal_document_type_id);
+        }
+
+        if (!empty($request->contract_id)) {
+            $documents = $documents->where('contract_id', $request->contract_id);
+        }
+        
+        $data = $documents->paginate(20)->withQueryString();
+
+        if (!empty($data)) {
+            foreach ($data as $document) {
+                $document->user = [
+                    'id' => $document->contract->customer->user->id,
+                    'customer_id' => $document->contract->customer->id,
+                    'first_name' => $document->contract->customer->user->first_name,
+                    'last_name' => $document->contract->customer->user->last_name,
+                    'customerId' => $document->contract->customer->user->customerId,
+                    'avatar' => $document->contract->customer->user->avatar,
+                ];
+
+                $document->location = $document->contract->estate->location;
+                unset($document->contract);
+            }
+        }
+        
         return response()->json(['message' => 'success', 'data' => $data], 200);
     }
 
@@ -151,12 +193,15 @@ class LegalDocumentController extends Controller
             'estate_id' => $request->estate_id,
             'company_id' => $company_id,
             ])->firstOrFail();
-        
+           
         $documentGen = $this->documentGenerator($request->contract_id, $legalDocumentTemplate);
+        
         $filepath = $documentGen['filepath'] . $documentGen['filename'];
+       
         $generatedLegalDocument = GeneratedLegalDocument::updateOrCreate([
             'contract_id' => $request->contract_id,
             'legal_document_template_id' => $legalDocumentTemplate->id,
+            'legal_document_type_id' => $legalDocumentTemplate->legalDocumentType->id,
             'estate_id' => $request->estate_id,
             'company_id' => $this->sessionDetails('company_id'),
         ],

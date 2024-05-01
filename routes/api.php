@@ -364,8 +364,9 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
             Route::post('template', 'template');
             Route::post('generate', 'generate');
             Route::patch('{document}/regenerate', 'regenerate');
-            Route::get('estate-contracts', 'estateContracts');
+            // Route::get('estate-contracts', 'estateContracts');
             Route::get('search', 'search');
+            Route::get('generated-documents', 'generatedLegalDocuments');
         });
 
         Route::controller(GLLedgerController::class)->name('finance.')->prefix('finance')->group(function () {
