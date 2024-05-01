@@ -83,10 +83,24 @@ class LegalDocumentController extends Controller
     {
         $company_id = $this->sessionDetails('company_id');
         $params = $request->input((new LegalDocumentTemplate)->getFillable());
-
-        $template = LegalDocumentTemplate::where('company_id', $company_id)->where($params)->first();
+        $template = LegalDocumentTemplate::where('company_id', $company_id)->where($request->all())->first();
+        
+        if(!$template){
+            return response()->json(['message' => 'No Legal document template found for sent request parameters at: ' . $this->sessionDetails('comapny_name'), 'data' => []], 200);
+        }
         $is_sample = request()->routeIs('template.preview.sample');
-        $downloadPath = $is_sample ? base_path() . '/uploads/' . $template->template_sample : base_path() . '/' . $template->file_location;
+        
+        if($is_sample){
+            $message = 'No '. $template->legalDocumentType->name.' sample found for '. $this->sessionDetails('comapny_name');
+            $downloadPath = !empty($template->template_sample) ? base_path() . '/' . $template->template_sample : null;
+        }else{
+            $message = 'No ' . $template->legalDocumentType->name . ' uploaded for sent request parameters at: ' . $this->sessionDetails('comapny_name');
+            $downloadPath = !empty($template->file_location) ? base_path() . '/' . $template->file_location : null;
+        }
+        
+        if(!$downloadPath){
+            return response()->json(['message' => 'No '. $message . ' file found', 'data' => []], 200);
+        }
 
         return response()->download($downloadPath);
 

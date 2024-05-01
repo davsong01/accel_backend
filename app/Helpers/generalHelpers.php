@@ -132,7 +132,7 @@ if (!function_exists("generateEstateLegalDocumentSamples")) {
                 [
                     'created_by' => auth()->user()->staff->id,
                     'property_type_id' => $document->property_type_id,
-                    'file_location' => 'legal_documents_samples/' . SAMPLE_LEGAL_DOCUMENTS[$document->id],
+                    'file_location' => 'legal_document_samples/' . SAMPLE_LEGAL_DOCUMENTS[$document->id],
                 ]
             );
         }
