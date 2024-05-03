@@ -60,7 +60,8 @@ class CustomerContractController extends Controller
                 'id' => $customerY->id,
                 'first_name' => $customerY->user->first_name,
                 'last_name' => $customerY->user->last_name,
-                'middle_name' => $customerY->user->middle_name
+                'middle_name' => $customerY->user->middle_name,
+                'customerID' => $customerY->user->customerId
             ];
             foreach ($contracts as $key => $contract) {
                 // $estate->load('city', 'location', 'estate_property_type')

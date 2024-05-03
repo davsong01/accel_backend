@@ -139,7 +139,7 @@ class LegalDocumentController extends Controller
         if (!empty($request->legal_document_template_id)) {
             $documents = $documents->where('legal_document_template_id', $request->legal_document_template_id);
         }
-    
+        
         if (!empty($request->legal_document_type_id)) {
             $documents = $documents->where('legal_document_type_id', $request->legal_document_type_id);
         }
