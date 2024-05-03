@@ -492,7 +492,7 @@ class Controller extends BaseController
         $methods = array_filter($reflector->getMethods(), function ($methods) use ($class) {
             return str_contains($methods, $class) && $methods->getModifiers() == ReflectionMethod::IS_PUBLIC;
         });
-
+        
         $counter = 0;
         $used = [];
         foreach ($methods as $meth) {

@@ -23,7 +23,7 @@ class CustomerController extends Controller
 
     public function index(Request $request)
     {
-        $customers = Customer::with(['user', 'contracts:id,property_type_id,status,customer_id,customerId'])->withCount('contracts')
+        $customers = Customer::with(['user', 'contracts:id,property_type_id,status,customer_id'])->withCount('contracts')
             ->where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'DESC');
        
         if (!empty($request->name)) {
