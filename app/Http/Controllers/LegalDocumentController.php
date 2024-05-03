@@ -194,8 +194,8 @@ class LegalDocumentController extends Controller
             'company_id' => $company_id,
             ])->firstOrFail();
            
-        $documentGen = $this->documentGenerator($request->contract_id, $legalDocumentTemplate);
-        
+        $contract = CustomerContract::where('id',$request->contract_id)->first();
+        $documentGen = $this->documentGenerator($request->contract_id, $legalDocumentTemplate, $contract);
         $filepath = $documentGen['filepath'] . $documentGen['filename'];
        
         $generatedLegalDocument = GeneratedLegalDocument::updateOrCreate([
@@ -242,33 +242,34 @@ class LegalDocumentController extends Controller
             'date' => null,
             'customer_phone' => null,
             'company_name' => null,
+            'DATE' => null,
         ];
 
         return $options;
     }
 
-    private function getOptions($options, $contract_id, $legalDocumentTemplate)
+    private function getOptions($options, $contract_id, $legalDocumentTemplate, $contract=null)
     {
-        $customer = CustomerContract::find($contract_id)->customer;
+        $customer = $contract->customer;
         $values = [];
 
         $values['customer_name'] = key_exists('customer_name', $options) ? $customer->user->first_name . ' ' . $customer->user->last_name : null;
         $values['date'] = key_exists('date', $options) ? date("M jS, Y", strtotime(now())) : null;
+        $values['DATE'] = key_exists('DATE', $options) ? date("M jS, Y", strtotime(now())) : null;
         $values['customer_phone'] = key_exists('customer_phone', $options) ? $customer->user->phone_number : null;
         $values['company_name'] = key_exists('company_name', $options) ? $this->sessionDetails('company_name') : null;
-
+        
         return $values;
     }
 
 
-    private function documentGenerator($contract_id, $legalDocumentTemplate)
+    private function documentGenerator($contract_id, $legalDocumentTemplate, $contract=null)
     {
         $file = !empty($legalDocumentTemplate->file_location) ? $legalDocumentTemplate->file_location : $legalDocumentTemplate->template_sample; 
         $file = base_path() . '/' . $file; 
         
         $options = $this->setOptions();
-        $values = $this->getOptions($options, $contract_id, $legalDocumentTemplate);
-
+        $values = $this->getOptions($options, $contract_id, $legalDocumentTemplate, $contract);
         $filepath = config('app.upload_path') . '/' . $this->getPathToSaveFile('generated-legal-documents') . '/';
         $filename =  uniqid(11) . '.pdf';
         $destination = base_path($filepath . '/' . $filename);
