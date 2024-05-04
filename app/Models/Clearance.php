@@ -11,7 +11,7 @@ class Clearance extends Model
 
     protected $fillable = ['customer_id', 'customer_contract_id', 'certificate', 'status', 'company_id'];
 
-    protected $with = ['customer', 'contract', 'comments'];
+    protected $with = ['customer', 'contract',];
 
     public function customer(){
         return $this->belongsTo(Customer::class, 'customer_id');
