@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Services\LogService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class ConstructionPaymentController extends Controller
 {
@@ -106,7 +107,7 @@ class ConstructionPaymentController extends Controller
      */
     public function show(ConstructionPayment $payment)
     {
-        return response()->json(['message' => 'Fetched successfully', 'data' => $payment], 200);
+        return response()->json(['message' => 'Fetched successfully', 'data' => $payment->load('current_building_phase')], 200);
     }
 
     /**
@@ -120,9 +121,13 @@ class ConstructionPaymentController extends Controller
         $balance = intval($payment->total_amount) - intval($payment->amount_paid);
 
         $validator = Validator::make($request->all(), [
-            'chart_of_account_id' => ['required', 'exists:chart_of_accounts,id'],
-            'amount_paid' => ['required', 'min:1', 'integer', "lte:$balance"],
-            'payment_slip' => ['file', 'sometimes', 'mimetypes:image/*,application/pdf', 'max:512' ]
+            'chart_of_account_id' => ['required_with:amount_paid', 'exists:chart_of_accounts,id'],
+            'amount_paid' => ['required_with:amount_paid', 'min:1', 'integer', "lte:$balance"],
+            'payment_slip' => ['file', 'sometimes', 'mimetypes:image/*,application/pdf', 'max:512' ],
+            'current_building_phase_id' => [
+                'sometimes',
+                Rule::in($payment->estate_construction_setting_ids)
+            ]
         ]);
 
         if ($validator->fails()) {
@@ -147,8 +152,12 @@ class ConstructionPaymentController extends Controller
             ]
         );
 
-        $payment->payments()->create($threads);
-        $payment->update(['amount_paid' => $payment->amount_paid + $request->amount_paid]);
+        if ($request->has('current_building_phase_id')) {
+            $payment->update(['current_building_phase_id' => $request->current_building_phase_id]);
+        } else {
+            $payment->payments()->create($threads);
+            $payment->update(['amount_paid' => $payment->amount_paid + $request->amount_paid]);
+        }
 
         LogService::admin($user->id, $customer->user->id, 'Updated a construction payment (' . $payment->id  . ')', 'UPDATE');
         return response()->json(['message' => 'Updated successfully', 'data' => $payment], 200);

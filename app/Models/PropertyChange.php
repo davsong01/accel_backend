@@ -1,0 +1,32 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class PropertyChange extends Model
+{
+    use HasFactory;
+
+
+    protected $fillable = ['branch_id', 'customer_id', 'original_customer_contract_id', 'new_customer_contract_id', 'company_id', 'comment'];
+
+    protected $with = [ 'original_contract', 'new_contract', 'branch', 'customer'];
+
+    public function original_contract(){
+        return $this->belongsTo(CustomerContract::class, 'original_customer_contract_id');
+    }
+
+    public function new_contract(){
+        return $this->belongsTo(CustomerContract::class, 'new_customer_contract_id');
+    }
+
+    public function branch(){
+        return $this->belongsTo(Branch::class, 'branch_id');
+    }
+
+    public function customer(){
+        return $this->belongsTo(Customer::class, 'customer_id');
+    }
+}
