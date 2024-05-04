@@ -22,6 +22,7 @@ class ConstructionPayment extends Model
         'estate_construction_setting_ids',
         'amount_paid',
         'total_amount',
+        'current_building_phase_id'
     ];
 
     protected $with = [
@@ -61,6 +62,10 @@ class ConstructionPayment extends Model
     
     public function contract() {
         return $this->belongsTo(CustomerContract::class, 'contract_id');
+    }
+
+    public function current_building_phase() {
+        return $this->belongsTo(EstateConstructionSetting::class, 'current_building_phase_id');
     }
 
 }
