@@ -614,7 +614,7 @@ class ContractPaymentController extends Controller
             'account_id' => 'required|exists:chart_of_accounts,id,company_id,' . $this->sessionDetails('company_id'),
             'contract_id' => 'required|exists:customer_contracts,id,company_id,' . $this->sessionDetails('company_id'),
             'amount' => 'required',
-            'type' => 'required|in:SE,INFRASTRUTURE',
+            'type' => 'required|in:SE,INFRASTRUCTURE',
             'payment_slip' => 'nullable',
         ]);
 

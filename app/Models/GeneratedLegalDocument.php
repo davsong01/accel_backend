@@ -2,23 +2,25 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\CustomerContract;
+use App\Models\LegalDocumentType;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class GeneratedLegalDocument extends Model
 {
     use HasFactory;
 
-    protected $fillable = [ 'estate_id', 'regenerate_count', 'file_location', 'company_id', 'legal_document_template_id', 'contract_id'];
+    protected $fillable = [ 'estate_id', 'regenerate_count', 'file_location', 'company_id', 'legal_document_template_id', 'contract_id', 'legal_document_type_id'];
     protected $append = ['file_location'];
     
 
     public function getFileLocationAttribute()
     {
-        $file_location = !empty($this->attributes['file_location']) ? app('App\Http\Controllers\Controller')->encodeUploadedFile($this->attributes['file_location'])
+        $file_location = !empty($this->attributes['file_location']) ? app('App\Http\Controllers\Controller')->encodeGeneralUploadedFile($this->attributes['file_location'])
         : '';
         return $file_location;
     }
@@ -29,6 +31,11 @@ class GeneratedLegalDocument extends Model
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function contract(): BelongsTo
+    {
+        return $this->belongsTo(CustomerContract::class);
     }
 
     /**
@@ -53,4 +60,10 @@ class GeneratedLegalDocument extends Model
     {
         return $this->hasOne(LegalDocumentTemplate::class, 'id', 'legal_document_template_id');
     }
+
+    public function legalDocumentType(): HasOne
+    {
+        return $this->hasOne(LegalDocumentType::class, 'id','legal_document_type_id');
+    }
+
 }

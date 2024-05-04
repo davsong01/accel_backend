@@ -44,7 +44,7 @@ class DatabaseSeeder extends Seeder
             // PfaKeywordsSeeder::class,
             // PropertyTypeSeeder::class,
             // LegalDocumentTypeSeeder::class,
-            // LegalDocumentTemplateSeeder::class,
+            LegalDocumentTemplateSeeder::class,
             // GeneratedLegalDocumentSeeder::class,
             // DatabaseCleaupSeeder::class,
         ]);

@@ -60,7 +60,8 @@ class CustomerContractController extends Controller
                 'id' => $customerY->id,
                 'first_name' => $customerY->user->first_name,
                 'last_name' => $customerY->user->last_name,
-                'middle_name' => $customerY->user->middle_name
+                'middle_name' => $customerY->user->middle_name,
+                'customerID' => $customerY->user->customerId
             ];
             foreach ($contracts as $key => $contract) {
                 // $estate->load('city', 'location', 'estate_property_type')
@@ -949,13 +950,13 @@ class CustomerContractController extends Controller
     public function sanitizeContractsByEstateIds($allData, $customer_id)
     {
         // Get all customer contract for this estate
-        $contracts = CustomerContract::where('customer_id', $customer_id)->where('estate_id', $allData['estate_id'])->where('status', 'lead');
-
+        $leadContracts = CustomerContract::where('customer_id', $customer_id)->where('estate_id', $allData['estate_id'])->where('status', 'lead')->pluck('id')->toArray();
+        
         $selected = null;
         if (!empty($allData['contract_id'])) {
-            CustomerContract::where('customer_id', $customer_id)->where('estate_id', $allData['estate_id'])->whereNotIn('id', $allData['contract_id'])->delete();
-            // delete();
-
+            CustomerContract::where('customer_id', $customer_id)->whereIn('id', $leadContracts)->where('estate_id', $allData['estate_id'])->whereNotIn('id', $allData['contract_id'])
+            ->delete();
+            
             $newContracts = CustomerContract::where('customer_id', $customer_id)->where('estate_id', $allData['estate_id'])->whereIn('id', $allData['contract_id'])->pluck('id')->toArray();
 
             $selected = $newContracts;

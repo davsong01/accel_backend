@@ -98,21 +98,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         }
     });
 
-    Route::get('uploads/{filename}', function ($filename) {
-        $filename = base64_decode($filename);
-    
-        $realpath = base_path() . '/' .  $filename;
-
-        try {
-            return response()->download($realpath);
-            //code...
-        } catch (\Throwable $th) {
-            return response()->json([
-                'error' => 'The file does not exist',
-                'data' => [],
-            ], 200);
-        }
-    });
+   
     
     // Route::get('generated-legal-documents/{filename}', function ($filename) {
     //     $filename = base64_decode($filename);
@@ -122,6 +108,22 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // });
 });
 
+Route::get('uploads/{filename}', function ($filename) {
+    $filename = base64_decode($filename);
+    $realpath = base_path() . '/uploads/' .  $filename;
+
+    return response()->download($realpath);
+    
+    try {
+        return response()->download($realpath);
+        //code...
+    } catch (\Throwable $th) {
+        return response()->json([
+            'error' => 'The file does not exist',
+            'data' => [],
+        ], 200);
+    }
+});
 
 Route::get('domain-details/{slug}', [CompanySettingController::class, 'domainDetails']);
 Route::group(['middleware' => 'throttle:60,1'], function () {
@@ -367,8 +369,9 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
             Route::post('template', 'template');
             Route::post('generate', 'generate');
             Route::patch('{document}/regenerate', 'regenerate');
-            Route::get('estate-contracts', 'estateContracts');
+            // Route::get('estate-contracts', 'estateContracts');
             Route::get('search', 'search');
+            Route::get('generated-documents', 'generatedLegalDocuments');
         });
 
         Route::controller(GLLedgerController::class)->name('finance.')->prefix('finance')->group(function () {

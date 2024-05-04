@@ -492,7 +492,7 @@ class Controller extends BaseController
         $methods = array_filter($reflector->getMethods(), function ($methods) use ($class) {
             return str_contains($methods, $class) && $methods->getModifiers() == ReflectionMethod::IS_PUBLIC;
         });
-
+        
         $counter = 0;
         $used = [];
         foreach ($methods as $meth) {
@@ -570,8 +570,12 @@ class Controller extends BaseController
 
     public function encodeUploadedFile($file)
     {
-
         return !empty($file) ? url('/') . '/api/uploads/' . base64_encode($file) : '';
+    }
+
+    public function formatLegalDocument($file)
+    {
+        return !empty($file) ? url('/') . '/api/uploads/' . $file : '';
     }
 
     public function encodeGeneralUploadedFile($file)
@@ -682,15 +686,15 @@ class Controller extends BaseController
                     'subscribers' => !empty($contract->subscribers) ? json_decode($contract->subscribers) : '',
                     'contract_type' => $contract->contract_type,
                     'property_type' => $contract->property_type_details->type,
-                    'property_price' => number_format((float) $contract->property_type_details->estate_price),
+                    'property_price' => $contract->property_type_details->estate_price,
                     'city' =>  $contract->city,
                     'building_type' => $contract->building_type,
                     'location' => $contract->location->name,
                     'estate' => $contract->estate,
                     'plot_size' => $contract->plotSize,
-                    'infrastructural_fee' => number_format((float)$contract->property_type_details->infrastructural_fee),
-                    // 'net_property_fee' => number_format((float) $contract->net_property_fee),
-                    // 'discount' => number_format((float) $contract->discount),
+                    'infrastructural_fee' => $contract->property_type_details->infrastructural_fee,
+                    // 'net_property_fee' => $contract->net_property_fee,
+                    // 'discount' => $contract->discount,
                     'transaction_date' => $contract->transaction_date,
                     'primary_marketer' => $contract->primaryMarketer($contract),
                     'settings_and_escavation' => $contract->property_type_details->settings_and_excavation,

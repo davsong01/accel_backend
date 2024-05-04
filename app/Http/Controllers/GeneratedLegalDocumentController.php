@@ -114,7 +114,7 @@ class GeneratedLegalDocumentController extends Controller
             'customer_phone' => null,
             'company_name' => null,
         ];
-
+        
         return $options;
     }
 
@@ -142,7 +142,7 @@ class GeneratedLegalDocumentController extends Controller
         $filepath = $this->getPathToSaveFile('generated-legal-documents');
         $filename =  uniqid(11) . '.pdf';
         $destination = base_path($filepath . '/' . $filename);
-
+        
         GeneratedDocumentService::handler($file['filepath'], $values, $destination);
 
         return [
