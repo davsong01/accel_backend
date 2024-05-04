@@ -48,8 +48,11 @@ use App\Http\Controllers\ContractAllocationController;
 use App\Http\Controllers\TransactionPurposeController;
 use App\Http\Controllers\PropertyTypeDetailsController;
 use App\Http\Controllers\AccountClassificationController;
+use App\Http\Controllers\ChangeOfOwnershipController;
 use App\Http\Controllers\ClearanceController;
 use App\Http\Controllers\ConstructionPaymentController;
+use App\Http\Controllers\ContractCancellationController;
+use App\Http\Controllers\CustomerRefundController;
 use App\Http\Controllers\LegalDocumentTemplateController;
 use App\Http\Controllers\GeneratedLegalDocumentController;
 use App\Http\Controllers\EstateConstructionSettingController;
@@ -61,6 +64,7 @@ use App\Http\Controllers\HCMController;
 use App\Http\Controllers\JobTitleController;
 use App\Http\Controllers\LeaveAndAbsenceManagementController;
 use App\Http\Controllers\PaymentModeController;
+use App\Http\Controllers\PropertyChangeController;
 use App\Http\Controllers\RecipientGroupController;
 use App\Http\Controllers\StaffDisengagementController;
 use App\Http\Controllers\TransactionTypeDefinitionController;
@@ -138,7 +142,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         });
     });
 
-    Route::middleware(['auth:sanctum', 'company_check', 'user_roles', 'otherchecks'])->group(function () {
+    Route::middleware(['auth:sanctum', 'company_check', 'user_roles', 'otherchecks', 'check.exited.staff'])->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/user', [AuthController::class, 'user']);
         Route::get('/permissions', [MenuController::class, 'linkGenerator'])->name('permissions.index');
@@ -416,6 +420,19 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
             Route::get('generated/legal/documents', [LegalDocumentController::class, 'index']);
             Route::apiResource('construction/payments', ConstructionPaymentController::class);
             Route::resource('clearance', ClearanceController::class);
+            Route::prefix('special-request')->group(function(){
+                Route::get('change-of-ownership/search', [ChangeOfOwnershipController::class, 'search']);
+                Route::apiResource('change-of-ownership', ChangeOfOwnershipController::class);
+
+                Route::get('property-change/search', [PropertyChangeController::class, 'search']);
+                Route::apiResource('property-change', PropertyChangeController::class);
+
+                Route::get('contract-cancellation/search', [ContractCancellationController::class, 'search']);
+                Route::apiResource('contract-cancellation', ContractCancellationController::class);
+
+                Route::get('customer-refund/search', [CustomerRefundController::class, 'search']);
+                Route::apiResource('customer-refund', CustomerRefundController::class);
+            });
         });
 
         Route::prefix('cities/locations')->group(function(){
