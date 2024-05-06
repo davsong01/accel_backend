@@ -750,7 +750,7 @@ class StaffController extends Controller
         $deals = CustomerContract::join('customers', 'customers.id', '=', 'customer_contracts.customer_id')
             ->join('users', 'users.id', '=', 'customers.user_id')
             ->where('primary_marketer_id', $staff_id)->orderBy('customer_contracts.updated_at', 'desc')
-            ->select('customer_contracts.building_type', 'customer_contracts.estate_id', 'customer_contracts.contract_status', 'customer_contracts.id', 'customer_contracts.plot_size', 'customer_contracts.updated_at', 'customer_contracts.updated_at', 'customer_contracts.created_at', 'customer_contracts.property_type', 'customer_contracts.primary_marketer_id', 'users.first_name', 'users.middle_name', 'users.last_name');
+            ->select('customer_contracts.building_type', 'customer_contracts.estate_id', 'customer_contracts.contract_status', 'customer_contracts.id', 'customer_contracts.plot_size', 'customer_contracts.updated_at', 'customer_contracts.updated_at', 'customer_contracts.created_at', 'customer_contracts.property_type', 'customer_contracts.primary_marketer_id', 'customer_contracts.contract_name', 'users.first_name', 'users.middle_name', 'users.last_name');
 
         if (!empty($request->status)) {
             if ($request->status == 'open') {
