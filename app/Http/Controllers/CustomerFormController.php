@@ -224,7 +224,7 @@ class CustomerFormController extends Controller
 
     public function approveCustomerFormResponse($id)
     {
-        $customer_form = CustomerForm::with('customer')->where('id', $id)->where('company_id', $this->sessionDetails('company_id'))->where('is_customer_form', 1)
+        $customer_form = CustomerForm::with('customer')->where('id', $id)->where('company_id', $this->sessionDetails('company_id'))->where('is_customer_response', 1)
         // ->where('type', 'customer-response')
         ->first();
         
