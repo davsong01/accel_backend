@@ -24,4 +24,9 @@ class ContractCancellation extends Model
     public function contract(){
         return $this->belongsTo(CustomerContract::class, 'customer_contract_id');
     }
+
+    public function special_request()
+    {
+        return $this->morphOne(SpecialRequest::class, 'special_requestable');
+    }
 }
