@@ -18,16 +18,16 @@ class AccountGroupController extends Controller
     public function index(Request $request)
     {
 
-        $account_group = AccountGroup::where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'desc');
+        $account_group = AccountGroup::where('company_id', $this->sessionDetails('company_id'))->latest();
 
         if (!empty($request->status)) {
             $account_group = $account_group->where('status', $request->status);
         }
 
         if (!empty($request->paginate) && $request->paginate == 'false') {
-            $account_group = AccountGroup::where('company_id', $this->sessionDetails('company_id'))->get();
+            $account_group = AccountGroup::where('company_id', $this->sessionDetails('company_id'))->latest()->get();
         } else {
-            $account_group = AccountGroup::where('company_id', $this->sessionDetails('company_id'))->paginate(20)->withQueryString();
+            $account_group = AccountGroup::where('company_id', $this->sessionDetails('company_id'))->latest()->paginate(20)->withQueryString();
         }
 
         return response()->json(['message' => 'Success', 'data' => $account_group], 200);
