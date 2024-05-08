@@ -255,6 +255,15 @@ class LegalDocumentController extends Controller
     }
 
     public function availableTokens(){
-        return setOptions();
+        $options = setOptions();
+        $modified = [];
+        foreach($options as $key=>$value){
+            $modified[] = [
+                'key' => $key,
+                'usage' => '${'.$key.'}',
+            ];
+        }
+
+        return response()->json($modified);
     }
 }
