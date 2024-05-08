@@ -171,6 +171,6 @@ class StaffDisengagementController extends Controller
         }
 
         $staffDisengagement = $query->latest()->paginate(20);
-        return response()->json(['message' => 'success', 'data' => $staffDisengagement], 200);
+        return response()->json(['message' => Success, 'data' => $staffDisengagement], 200);
     }
 }

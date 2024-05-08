@@ -249,6 +249,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
 
         Route::get('single-customer-contract/{customer_id}', [CustomerContractController::class, 'index']);
         Route::get('delete-customer-contract/{contract_id}', [CustomerContractController::class, 'destroy']);
+        Route::get('clear-customer-contract/{contract_id}', [CustomerContractController::class, 'clear']);
 
         Route::get('customercontract/{contract_id}', [CustomerContractController::class, 'show']);
         Route::get('single-contract-payment-history/{contract_id}', [ContractPaymentController::class, 'contractPaymentHistory']);

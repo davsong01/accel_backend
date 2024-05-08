@@ -83,27 +83,36 @@ class LegalDocumentController extends Controller
     {
         $company_id = $this->sessionDetails('company_id');
         $params = $request->input((new LegalDocumentTemplate)->getFillable());
-        $template = LegalDocumentTemplate::where('company_id', $company_id)->where($request->all())->first();
+        $template = LegalDocumentTemplate::select('id', 'file_location', 'template_sample')->where('company_id', $company_id)->where($request->all())->first();
+        $template->file_location = !empty($template->file_location) ? $this->encodeUploadedFile($template->file_location) : '';
+        $template->template_sample = !empty($template->template_sample) ? $this->encodeUploadedFile($template->template_sample) : '';
         
         if(!$template){
             return response()->json(['message' => 'No Legal document template found for sent request parameters at: ' . $this->sessionDetails('company_name'), 'data' => []], 200);
         }
         $is_sample = request()->routeIs('template.preview.sample');
         
-        if($is_sample){
-            $message = 'No '. $template->legalDocumentType->type . ' ' .  $template->legalDocumentType->name.' sample found for '. $this->sessionDetails('company_name');
-            $downloadPath = !empty($template->template_sample) ? base_path() . '/' . $template->template_sample : null;
-        }else{
-            $message = 'No ' . $template->legalDocumentType->type . ' ' .  $template->legalDocumentType->name . ' uploaded for sent request parameters at: ' . $this->sessionDetails('company_name');
-            $downloadPath = !empty($template->file_location) ? base_path() . '/' . $template->file_location : null;
-        }
+        // if($is_sample){
+        //     $message = 'No '. $template->legalDocumentType->type . ' ' .  $template->legalDocumentType->name.' sample found for '. $this->sessionDetails('company_name');
+        //     $downloadPath = !empty($template->template_sample) ? base_path() . '/' . $template->template_sample : null;
+        // }
+        // else{
+        //     $message = 'No ' . $template->legalDocumentType->type . ' ' .  $template->legalDocumentType->name . ' uploaded for sent request parameters at: ' . $this->sessionDetails('company_name');
+        //     $downloadPath = !empty($template->file_location) ? base_path() . '/' . $template->file_location : null;
+        // }
         
-        if(!$downloadPath){
-            return response()->json(['message' => $message, 'data' => []], 200);
-        }
+        // if(!$downloadPath){
+        //     return response()->json(['message' => $message, 'data' => []], 200);
+        // }
 
-        return response()->download($downloadPath);
+        // return response()->download($downloadPath);
+        return response()->json(['message' => 'Success', 'data' => $template], 200);
+    }
 
+    public function encodeUploadedFile($file)
+    {
+        $file = !empty($file) ? url('/') . '/general-uploads/' . base64_encode($file) : '';
+        return $file;
     }
 
     /**
@@ -124,7 +133,7 @@ class LegalDocumentController extends Controller
     //         ])->paginate(20);
     //     }
     //     // TODO: condition for other legal document types
-    //     return response()->json(['message' => 'success', 'data' => $data], 200);
+    //     return response()->json(['message' => Success, 'data' => $data], 200);
     // }
 
     public function generatedLegalDocuments(Request $request): JsonResponse
@@ -166,7 +175,7 @@ class LegalDocumentController extends Controller
             }
         }
         
-        return response()->json(['message' => 'success', 'data' => $data], 200);
+        return response()->json(['message' => Success, 'data' => $data], 200);
     }
 
     /**

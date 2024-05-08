@@ -50,7 +50,7 @@ class ContractCancellationController extends Controller
 
         $created = ContractCancellation::create($attributes);
         $created->special_request()->create(['type' => 'Contract Cancellation', 'company_id' => $company_id]);
-
+        
         LogService::admin($user->id, $customer->user->id, 'Create a contract cancellation (' . $created->id  . ')', 'CREATE');
         return response()->json(['message' => 'Created successfully', 'data' => $created], 200);
     }
@@ -139,6 +139,6 @@ class ContractCancellationController extends Controller
         }
 
         $contract_cancellations = $query->latest()->paginate(20);
-        return response()->json(['message' => 'success', 'data' => $contract_cancellations], 200);
+        return response()->json(['message' => Success, 'data' => $contract_cancellations], 200);
     }
 }
