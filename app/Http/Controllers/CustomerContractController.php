@@ -1168,11 +1168,14 @@ class CustomerContractController extends Controller
     }
 
     public function clear(CustomerContract $contract_id){
-        
         if(empty($contract_id->sei_payment_transaction_id)){
-            return response()->json(['error' => 'No commitment made for this contract yet', 'data' => []], 412);
+            return response()->json(['error' => 'No commitment made for this contract', 'data' => []], 412);
         }
-        
+
+        if ($contract_id->seInfrastructurePayment->type == 'SE' && $contract_id->seInfrastructurePayment->balance > 0) {
+            return response()->json(['error' => 'Not enough commitment made for this contract', 'data' => []], 412);
+        }
+
         $contract_id->update(['contract_status' => 'closed']);
         return response()->json(['message' => 'Success', 'data' => []], 200);
     }

@@ -106,6 +106,7 @@ class LegalDocumentController extends Controller
         // }
 
         // return response()->download($downloadPath);
+            
         return response()->json(['message' => 'Success', 'data' => $template], 200);
     }
 
