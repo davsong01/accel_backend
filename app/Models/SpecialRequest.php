@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Customer;
+use App\Models\Customer;
 use App\Models\Branch;
 use App\Models\Company;
 use Illuminate\Database\Eloquent\Model;
@@ -12,6 +12,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class SpecialRequest extends Model
 {
     use HasFactory;
+
+    protected $fillable = ['type', 'company_id'];
+
+    protected $with = ['special_requestable'];
 
     public function branch(){
         return $this->belongsTo(Branch::class);
@@ -42,6 +46,11 @@ class SpecialRequest extends Model
         return Attribute::make(
             get: fn (string $value) => number_format($value),
         );
+    }
+
+    public function special_requestable()
+    {
+        return $this->morphTo();
     }
 
 }

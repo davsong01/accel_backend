@@ -220,7 +220,6 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::post('staff-document-setting/{id}', [StaffController::class, 'updateStaffDocumentSetting']);
         Route::get('delete-staff-document-settings/{id}', [StaffController::class, 'deleteStaffDocumentSetting']);
 
-        Route::resource('special-request', SpecialRequestController::class);
         Route::resource('department', DepartmentController::class);
         Route::get('sample-bulk-department-import', [DepartmentController::class, 'sampleBulkDepartment']);
         Route::post('import-bulk-department', [DepartmentController::class, 'importBulkDepartment']);
@@ -425,6 +424,8 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
             Route::apiResource('construction/payments', ConstructionPaymentController::class);
             Route::resource('clearance', ClearanceController::class);
             Route::prefix('special-request')->group(function(){
+                Route::get('/', [SpecialRequestController::class, 'index']);
+
                 Route::get('change-of-ownership/search', [ChangeOfOwnershipController::class, 'search']);
                 Route::apiResource('change-of-ownership', ChangeOfOwnershipController::class);
 

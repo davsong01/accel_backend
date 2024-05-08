@@ -49,6 +49,7 @@ class ContractCancellationController extends Controller
         $attributes = array_merge($validator->validated(), ['company_id' => $company_id]);
 
         $created = ContractCancellation::create($attributes);
+        $created->special_request()->create(['type' => 'Contract Cancellation', 'company_id' => $company_id]);
 
         LogService::admin($user->id, $customer->user->id, 'Create a contract cancellation (' . $created->id  . ')', 'CREATE');
         return response()->json(['message' => 'Created successfully', 'data' => $created], 200);

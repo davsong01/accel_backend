@@ -29,4 +29,9 @@ class PropertyChange extends Model
     public function customer(){
         return $this->belongsTo(Customer::class, 'customer_id');
     }
+
+    public function special_request()
+    {
+        return $this->morphOne(SpecialRequest::class, 'special_requestable');
+    }
 }
