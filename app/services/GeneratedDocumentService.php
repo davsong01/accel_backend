@@ -46,7 +46,7 @@ class GeneratedDocumentService
         $xmlWriter->save($destination);
             
         unlink($destination . '.docx'); // delete temp file
-        dd($destination, $source);
+    
         if (file_exists($destination))
             return $destination;
         return null;

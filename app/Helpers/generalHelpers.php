@@ -2,8 +2,10 @@
 
 use App\Models\Role;
 use App\Models\Package;
+use App\Models\Customer;
 use App\Models\RolePermission;
 use App\Models\LegalDocumentType;
+use App\Http\Controllers\Controller;
 use App\Models\LegalDocumentTemplate;
 
 define('SAMPLE_LEGAL_DOCUMENTS', [
@@ -206,5 +208,35 @@ if (!function_exists("generateGenericPaymentReceipt")) {
             'filename' => $name . '.pdf',
             'filepath' => config('app.upload_path') . '/' . $pathToSave
         ];
+    }
+}
+
+
+if (!function_exists("setOptions")) {
+    function setOptions()
+    {
+        $options = [
+            'CUSTOMER_PHONE' => null,
+            'COMPANY_NAME' => null,
+            'DATE' => null,
+        ];
+
+        return $options;
+    }
+}
+
+if (!function_exists("getOptions")) {
+    function getOptions($options, $customer_id, $legalDocumentTemplate){
+        $customer = Customer::where('id', $customer_id)->first();
+        $controller = new Controller();
+        
+        $values = [];
+
+        $values['customer_name'] = key_exists('customer_name', $options) ? $customer->user->first_name . ' ' . $customer->user->last_name : null;
+        $values['date'] = key_exists('date', $options) ? date("M jS, Y", strtotime(now())) : null;
+        $values['customer_phone'] = key_exists('customer_phone', $options) ? $customer->user->phone_number : null;
+        $values['company_name'] = key_exists('company_name', $options) ? $controller->sessionDetails('company_name') : null;
+
+        return $values;
     }
 }

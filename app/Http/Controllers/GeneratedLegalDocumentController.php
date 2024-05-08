@@ -106,38 +106,12 @@ class GeneratedLegalDocumentController extends Controller
         return response()->json(['message' => 'Success', 'data' => $generatedLegalDocument], 200);
     }
 
-    private function setOptions()
-    {
-        $options = [
-            'customer_name' => null,
-            'date' => null,
-            'customer_phone' => null,
-            'company_name' => null,
-        ];
-        
-        return $options;
-    }
-
-    private function getOptions($options, $customer_id, $legalDocumentTemplate)
-    {
-        $customer = Customer::where('id', $customer_id)->first();
-        $values = [];
-
-        $values['customer_name'] = key_exists('customer_name', $options) ? $customer->user->first_name . ' ' . $customer->user->last_name : null;
-        $values['date'] = key_exists('date', $options) ? date("M jS, Y", strtotime(now())) : null;
-        $values['customer_phone'] = key_exists('customer_phone', $options) ? $customer->user->phone_number : null;
-        $values['company_name'] = key_exists('company_name', $options) ? $this->sessionDetails('company_name') : null;
-
-        return $values;
-    }
-
-
     private function documentGenerator($customer_id, $legalDocumentTemplate)
     {
         $file = getEncodedFileRealPath($legalDocumentTemplate->file_location);
 
-        $options = $this->setOptions();
-        $values = $this->getOptions($options, $customer_id, $legalDocumentTemplate);
+        $options = setOptions();
+        $values = getOptions($options, $customer_id, $legalDocumentTemplate);
 
         $filepath = $this->getPathToSaveFile('generated-legal-documents');
         $filename =  uniqid(11) . '.pdf';
