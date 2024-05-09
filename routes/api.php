@@ -424,6 +424,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
             Route::resource('clearance', ClearanceController::class);
             Route::prefix('special-request')->group(function(){
                 Route::get('/', [SpecialRequestController::class, 'index']);
+                Route::get('/search', [SpecialRequestController::class, 'search']);
 
                 Route::get('change-of-ownership/search', [ChangeOfOwnershipController::class, 'search']);
                 Route::apiResource('change-of-ownership', ChangeOfOwnershipController::class);
