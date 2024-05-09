@@ -176,7 +176,7 @@ class LegalDocumentController extends Controller
             }
         }
         
-        return response()->json(['message' => Success, 'data' => $data], 200);
+        return response()->json(['message' => 'Success', 'data' => $data], 200);
     }
 
     /**
