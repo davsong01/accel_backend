@@ -420,6 +420,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
 
         Route::prefix('rem')->group(function () {
             Route::get('generated/legal/documents', [LegalDocumentController::class, 'index']);
+            Route::get('construction/payments/search', [ConstructionPaymentController::class, 'search']);
             Route::apiResource('construction/payments', ConstructionPaymentController::class);
             Route::resource('clearance', ClearanceController::class);
             Route::prefix('special-request')->group(function(){
