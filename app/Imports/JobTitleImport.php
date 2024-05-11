@@ -4,6 +4,7 @@ namespace App\Imports;
 
 use App\Models\Department;
 use App\Models\JobTitle;
+use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
 use Maatwebsite\Excel\Concerns\ToModel;
@@ -32,7 +33,7 @@ class JobTitleImport implements ToModel, SkipsEmptyRows, WithValidation, WithHea
     public function rules(): array
     {
         return [
-            'title'       => ['required', 'string'],
+            'title'       => ['required', 'string', 'unique:job_titles'],
             'department_name' => ['required', 'exists:departments,name,company_id,' . session()->get('company_id', null)],
         ];
     }
