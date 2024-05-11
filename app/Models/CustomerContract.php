@@ -10,6 +10,7 @@ use App\Models\PlotSize;
 use App\Models\Transaction;
 use App\Models\BuildingType;
 use App\Models\ContractPayment;
+use App\Models\SeInfrastructure;
 use App\Models\GeneratedLegalDocument;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\EstatePropertyTypeDetails;
@@ -164,6 +165,11 @@ class CustomerContract extends Model
             $deal_status = 'closed';
         }
         return $deal_status;
+    }
+
+    public function seInfrastructurePayment(): HasOne
+    {
+        return $this->hasOne(SeInfrastructure::class, 'transaction_id','sei_payment_transaction_id', );
     }
 
 }

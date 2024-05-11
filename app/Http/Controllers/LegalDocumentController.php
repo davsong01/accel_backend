@@ -83,27 +83,37 @@ class LegalDocumentController extends Controller
     {
         $company_id = $this->sessionDetails('company_id');
         $params = $request->input((new LegalDocumentTemplate)->getFillable());
-        $template = LegalDocumentTemplate::where('company_id', $company_id)->where($request->all())->first();
+        $template = LegalDocumentTemplate::select('id', 'file_location', 'template_sample')->where('company_id', $company_id)->where($request->all())->first();
+        $template->file_location = !empty($template->file_location) ? $this->encodeUploadedFile($template->file_location) : '';
+        $template->template_sample = !empty($template->template_sample) ? $this->encodeUploadedFile($template->template_sample) : '';
         
         if(!$template){
             return response()->json(['message' => 'No Legal document template found for sent request parameters at: ' . $this->sessionDetails('company_name'), 'data' => []], 200);
         }
         $is_sample = request()->routeIs('template.preview.sample');
         
-        if($is_sample){
-            $message = 'No '. $template->legalDocumentType->type . ' ' .  $template->legalDocumentType->name.' sample found for '. $this->sessionDetails('company_name');
-            $downloadPath = !empty($template->template_sample) ? base_path() . '/' . $template->template_sample : null;
-        }else{
-            $message = 'No ' . $template->legalDocumentType->type . ' ' .  $template->legalDocumentType->name . ' uploaded for sent request parameters at: ' . $this->sessionDetails('company_name');
-            $downloadPath = !empty($template->file_location) ? base_path() . '/' . $template->file_location : null;
-        }
+        // if($is_sample){
+        //     $message = 'No '. $template->legalDocumentType->type . ' ' .  $template->legalDocumentType->name.' sample found for '. $this->sessionDetails('company_name');
+        //     $downloadPath = !empty($template->template_sample) ? base_path() . '/' . $template->template_sample : null;
+        // }
+        // else{
+        //     $message = 'No ' . $template->legalDocumentType->type . ' ' .  $template->legalDocumentType->name . ' uploaded for sent request parameters at: ' . $this->sessionDetails('company_name');
+        //     $downloadPath = !empty($template->file_location) ? base_path() . '/' . $template->file_location : null;
+        // }
         
-        if(!$downloadPath){
-            return response()->json(['message' => $message, 'data' => []], 200);
-        }
+        // if(!$downloadPath){
+        //     return response()->json(['message' => $message, 'data' => []], 200);
+        // }
 
-        return response()->download($downloadPath);
+        // return response()->download($downloadPath);
+            
+        return response()->json(['message' => 'Success', 'data' => $template], 200);
+    }
 
+    public function encodeUploadedFile($file)
+    {
+        $file = !empty($file) ? url('/') . '/general-uploads/' . base64_encode($file) : '';
+        return $file;
     }
 
     /**
@@ -124,7 +134,7 @@ class LegalDocumentController extends Controller
     //         ])->paginate(20);
     //     }
     //     // TODO: condition for other legal document types
-    //     return response()->json(['message' => 'success', 'data' => $data], 200);
+    //     return response()->json(['message' => Success, 'data' => $data], 200);
     // }
 
     public function generatedLegalDocuments(Request $request): JsonResponse
@@ -166,7 +176,7 @@ class LegalDocumentController extends Controller
             }
         }
         
-        return response()->json(['message' => 'success', 'data' => $data], 200);
+        return response()->json(['message' => 'Success', 'data' => $data], 200);
     }
 
     /**
@@ -235,41 +245,13 @@ class LegalDocumentController extends Controller
         return response()->download(base_path($filepath));
     }
 
-    private function setOptions()
-    {
-        $options = [
-            'customer_name' => null,
-            'date' => null,
-            'customer_phone' => null,
-            'company_name' => null,
-            'DATE' => null,
-        ];
-
-        return $options;
-    }
-
-    private function getOptions($options, $contract_id, $legalDocumentTemplate, $contract=null)
-    {
-        $customer = $contract->customer;
-        $values = [];
-
-        $values['customer_name'] = key_exists('customer_name', $options) ? $customer->user->first_name . ' ' . $customer->user->last_name : null;
-        $values['date'] = key_exists('date', $options) ? date("M jS, Y", strtotime(now())) : null;
-        $values['DATE'] = key_exists('DATE', $options) ? date("M jS, Y", strtotime(now())) : null;
-        $values['customer_phone'] = key_exists('customer_phone', $options) ? $customer->user->phone_number : null;
-        $values['company_name'] = key_exists('company_name', $options) ? $this->sessionDetails('company_name') : null;
-        
-        return $values;
-    }
-
-
     private function documentGenerator($contract_id, $legalDocumentTemplate, $contract=null)
     {
         $file = !empty($legalDocumentTemplate->file_location) ? $legalDocumentTemplate->file_location : $legalDocumentTemplate->template_sample; 
         $file = base_path() . '/' . $file; 
         
-        $options = $this->setOptions();
-        $values = $this->getOptions($options, $contract_id, $legalDocumentTemplate, $contract);
+        $options = setOptions();
+        $values = getOptions($options, $contract_id, $legalDocumentTemplate, $contract);
         $filepath = config('app.upload_path') . '/' . $this->getPathToSaveFile('generated-legal-documents') . '/';
         $filename =  uniqid(11) . '.pdf';
         $destination = base_path($filepath . '/' . $filename);
@@ -280,5 +262,18 @@ class LegalDocumentController extends Controller
             'filepath' => $filepath,
             'filename' => $filename,
         ];
+    }
+
+    public function availableTokens(){
+        $options = setOptions();
+        $modified = [];
+        foreach($options as $key=>$value){
+            $modified[] = [
+                'key' => $key,
+                'usage' => '${'.$key.'}',
+            ];
+        }
+
+        return response()->json($modified);
     }
 }

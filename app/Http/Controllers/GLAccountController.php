@@ -83,6 +83,6 @@ class GLAccountController extends Controller
             $query->where('name', 'LIKE', '%' . $name . '%');
 
         $accounts = $query->latest()->paginate(20);
-        return response()->json(['message' => 'success', 'data' => $accounts], 200);
+        return response()->json(['message' => Success, 'data' => $accounts], 200);
     }
 }

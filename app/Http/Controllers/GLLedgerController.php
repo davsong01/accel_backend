@@ -25,7 +25,7 @@ class GLLedgerController extends Controller
             ->where('company_id', $company_id)
             ->latest()
             ->paginate(20);
-        return response()->json(['message' => 'success', 'data' => $transactions], 200);
+        return response()->json(['message' => Success, 'data' => $transactions], 200);
     }
 
     /**
@@ -64,7 +64,7 @@ class GLLedgerController extends Controller
 
         $customer = Customer::find($request->customer_id);
         LogService::admin(auth()->user()->id, $customer?->user?->id, 'New transaction entry (' . $transaction->id . ')', 'CREATE');
-        return response()->json(['message' => 'success', 'data' => $transaction], 200);
+        return response()->json(['message' => Success, 'data' => $transaction], 200);
     }
 
     /**
@@ -101,7 +101,7 @@ class GLLedgerController extends Controller
         }
 
         $transactions = $query->latest()->paginate(20);
-        return response()->json(['message' => 'success', 'data' => $transactions], 200);
+        return response()->json(['message' => Success, 'data' => $transactions], 200);
     }
 
     /**
@@ -113,6 +113,6 @@ class GLLedgerController extends Controller
 
         $transaction->load(['account', 'staff:id,user_id', 'staff.user:id,first_name,middle_name,last_name', 'customer:id,user_id', 'customer.user:id,status,type,first_name,middle_name,last_name']);
 
-        return response()->json(['message' => 'success', 'data' => $transaction], 200);
+        return response()->json(['message' => Success, 'data' => $transaction], 200);
     }
 }

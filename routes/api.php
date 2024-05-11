@@ -249,6 +249,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
 
         Route::get('single-customer-contract/{customer_id}', [CustomerContractController::class, 'index']);
         Route::get('delete-customer-contract/{contract_id}', [CustomerContractController::class, 'destroy']);
+        Route::get('clear-customer-contract/{contract_id}', [CustomerContractController::class, 'clear']);
 
         Route::get('customercontract/{contract_id}', [CustomerContractController::class, 'show']);
         Route::get('single-contract-payment-history/{contract_id}', [ContractPaymentController::class, 'contractPaymentHistory']);
@@ -371,6 +372,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
             // Route::get('estate-contracts', 'estateContracts');
             Route::get('search', 'search');
             Route::get('generated-documents', 'generatedLegalDocuments');
+            Route::get('get-available-tokens', 'availableTokens');
         });
 
         Route::controller(GLLedgerController::class)->name('finance.')->prefix('finance')->group(function () {
