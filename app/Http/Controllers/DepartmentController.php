@@ -19,7 +19,7 @@ class DepartmentController extends Controller
      */
     public function index()
     {
-        $departments = Department::where('company_id', $this->sessionDetails('company_id'))->get();
+        $departments = Department::where('company_id', $this->sessionDetails('company_id'))->latest()->get();
         return response()->json(['message' => 'Success', 'data' => $departments], 200);
     }
 

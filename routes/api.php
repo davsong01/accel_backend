@@ -422,10 +422,12 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
 
         Route::prefix('rem')->group(function () {
             Route::get('generated/legal/documents', [LegalDocumentController::class, 'index']);
+            Route::get('construction/payments/search', [ConstructionPaymentController::class, 'search']);
             Route::apiResource('construction/payments', ConstructionPaymentController::class);
             Route::resource('clearance', ClearanceController::class);
             Route::prefix('special-request')->group(function(){
                 Route::get('/', [SpecialRequestController::class, 'index']);
+                Route::get('/search', [SpecialRequestController::class, 'search']);
 
                 Route::get('change-of-ownership/search', [ChangeOfOwnershipController::class, 'search']);
                 Route::apiResource('change-of-ownership', ChangeOfOwnershipController::class);

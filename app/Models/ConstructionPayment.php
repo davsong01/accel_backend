@@ -22,16 +22,18 @@ class ConstructionPayment extends Model
         'estate_construction_setting_ids',
         'amount_paid',
         'total_amount',
-        'current_building_phase_id'
+        'current_building_phase_id', 
+        'chart_of_account_id',
     ];
 
     protected $with = [
         'payments',
         'contract',
         'estate_construction_settings',
-        'created_by:id,type,status,first_name,last_name,middle_name,title,avatar',
-        'paid_by:id,user_id',
-        'paid_by.user:id,type,status,first_name,last_name,middle_name,title,avatar'
+        'staff:id,type,status,first_name,last_name,middle_name,title,avatar',
+        'customer:id,user_id',
+        'customer.user:id,type,status,first_name,last_name,middle_name,title,avatar,staff_id',
+        'customer.user.staff:id,user_id'
     ];
 
     protected $casts = [
@@ -52,11 +54,15 @@ class ConstructionPayment extends Model
         return $this->hasManyJson(EstateConstructionSetting::class, 'id', 'estate_construction_setting_ids');
     }
 
-    public function created_by(){
+    public function staff(){
         return $this->belongsTo(User::class, 'created_by');
     }
 
     public function paid_by(){
+        return $this->belongsTo(Customer::class, 'customer_id');
+    }
+
+    public function customer(){
         return $this->belongsTo(Customer::class, 'customer_id');
     }
     
@@ -66,6 +72,10 @@ class ConstructionPayment extends Model
 
     public function current_building_phase() {
         return $this->belongsTo(EstateConstructionSetting::class, 'current_building_phase_id');
+    }
+    
+    public function chart_of_account() {
+        return $this->belongsTo(ChartOfAccount::class, 'chart_of_account_id');
     }
 
 }

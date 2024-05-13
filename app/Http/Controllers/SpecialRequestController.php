@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Branch;
 use App\Models\SpecialRequest;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -66,5 +68,31 @@ class SpecialRequestController extends Controller
     public function destroy(SpecialRequest $specialRequest)
     {
         //
+    }
+
+    /**
+     * Search a listing of resource.
+     */
+    public function search(Request $request)
+    {
+        $company_id = $this->sessionDetails('company_id');
+
+        $query = SpecialRequest::where('company_id', $company_id);
+
+        if ($type = $request->input('type')) {
+            $query->where('type', 'LIKE', '%' . $type . '%');
+        }
+
+        if ($name = $request->input('branch_name')) {
+            $branches = Branch::where('company_id', $company_id)->whereNotNull('company_id')
+                ->where('name', 'LIKE', '%' . $name . '%')
+                ->get();
+
+            $branch_ids = $branches->whereNotNull('id')->pluck('id')->toArray();
+            $query->whereIn('special_requestable.branch_id', $branch_ids);
+        }
+
+        $special_requests = $query->latest()->paginate(20);
+        return response()->json(['message' => 'success', 'data' => $special_requests], 200);
     }
 }

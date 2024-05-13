@@ -9,6 +9,7 @@ use App\Models\Estate;
 use App\Models\EstateConstructionSetting;
 use App\Models\User;
 use App\Services\LogService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -40,6 +41,10 @@ class ConstructionPaymentController extends Controller
             'contract_id' => ['required', "exists:customer_contracts,id,customer_id,$request->customer_id"],
             'amount_paid' => ['required', 'min:1', 'integer', 'lte:total_amount'],
             'payment_slip' => ['file', 'sometimes', 'mimetypes:image/*,application/pdf', 'max:512' ],
+            'current_building_phase_id' => [
+                'sometimes',
+                Rule::in($request->estate_construction_setting_ids)
+            ],
             'description' => ['sometimes', 'string'],
             'total_amount' => [
                 'required',
@@ -107,7 +112,7 @@ class ConstructionPaymentController extends Controller
      */
     public function show(ConstructionPayment $payment)
     {
-        return response()->json(['message' => 'Fetched successfully', 'data' => $payment->load('current_building_phase')], 200);
+        return response()->json(['message' => 'Fetched successfully', 'data' => $payment->load(['current_building_phase', 'chart_of_account'])], 200);
     }
 
     /**
@@ -183,45 +188,47 @@ class ConstructionPaymentController extends Controller
      */
     public function search(Request $request)
     {
-        $params = $request->only(['customer_status', 'all_customers', 'subscriber_status', 'completed_subscriber_status']);
+        $params = $request->only(['company_id', 'customer_id', 'contract_id', 'created_by', 'amount_paid', 'total_amount', 'current_building_phase_id', 'chart_of_account_id']);
         $company_id = $this->sessionDetails('company_id');
 
         $query = ConstructionPayment::where('company_id', $company_id)->where($params);
 
-        if ($name = $request->input('name'))
-            $query->where('name', 'LIKE', '%' . $name . '%');
+        $from = $request->input('from');
+        $to = $request->input('to');
+        if ($from && $to) {
+            $from = Carbon::parse($request->input('from'));
 
-        if ($request->input('created_by') && $name = $request->input('created_by')) {
-            $users = User::with(['staff'])->where('company_id', $company_id)->whereNotNull('company_id')
-                ->where('first_name', 'LIKE', '%' . $name . '%')
-                ->orWhere('last_name', 'LIKE', '%' . $name . '%')
-                ->orWhere('middle_name', 'LIKE', '%' . $name . '%')->get();
+            $to = Carbon::parse($request->input('to'));
+            if ($to->format('H:i:s') == '00:00:00')
+                $to->endOfDay();
 
-            $created_by_ids = $users->whereNotNull('staff.id')->pluck('staff.id')->toArray();
-            $query->whereIn('created_by', $created_by_ids);
+            $query->whereBetween('created_at', [$from, $to]);
         }
 
-        if ($request->input('customer') && $name = $request->input('customer')) {
-            $users = User::with(['customer'])->where('company_id', $company_id)->whereNotNull('company_id')
-                ->where('first_name', 'LIKE', '%' . $name . '%')
-                ->orWhere('last_name', 'LIKE', '%' . $name . '%')
-                ->orWhere('middle_name', 'LIKE', '%' . $name . '%')->get();
-
-            $customer_ids = $users->whereNotNull('customer.id')->pluck('customer.id')->toArray();
-            $query->whereIn('customer_id', $customer_ids);
-        }
-
-        if ($request->input('estates') && $name = $request->input('estates')) {
-            $estates = Estate::where('company_id', $company_id)->whereNotNull('company_id')
-                ->where('name', 'LIKE', '%' . $name . '%')
+        if ($request->input('name') && $name = $request->input('name')) {
+            $users = User::with(['staff', 'customer'])
+                ->where('company_id', $company_id)
+                ->whereNotNull('company_id')
+                ->where(function ($query) use ($name) {
+                    $query->where('first_name', 'LIKE', '%' . $name . '%')
+                        ->orWhere('last_name', 'LIKE', '%' . $name . '%')
+                        ->orWhere('middle_name', 'LIKE', '%' . $name . '%');
+                })
                 ->get();
+        
+            $staff_ids = $users->pluck('staff.id')->filter()->toArray();
+            $customer_ids = $users->pluck('customer.id')->filter()->toArray();
+        
+            $query->whereIn('created_by', $staff_ids)->orWhereIn('customer_id', $customer_ids);
+        }
+        
 
-            $estates_ids = $estates->whereNotNull('id')->pluck('id')->toArray();
-            $query->whereJsonContains('estate_ids', $estates_ids);
+        if ($request->input('estate_construction_setting_ids') && $setting_ids = $request->input('estate_construction_setting_ids')) {
+            $query->whereJsonContains('estate_construction_setting_ids', $setting_ids);
         }
 
 
         $recipients = $query->latest()->paginate(20);
-        return response()->json(['message' => Success, 'data' => $recipients], 200);
+        return response()->json(['message' => 'Success', 'data' => $recipients], 200);
     }
 }
