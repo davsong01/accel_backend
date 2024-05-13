@@ -41,6 +41,10 @@ class ConstructionPaymentController extends Controller
             'contract_id' => ['required', "exists:customer_contracts,id,customer_id,$request->customer_id"],
             'amount_paid' => ['required', 'min:1', 'integer', 'lte:total_amount'],
             'payment_slip' => ['file', 'sometimes', 'mimetypes:image/*,application/pdf', 'max:512' ],
+            'current_building_phase_id' => [
+                'sometimes',
+                Rule::in($request->estate_construction_setting_ids)
+            ],
             'description' => ['sometimes', 'string'],
             'total_amount' => [
                 'required',
@@ -108,7 +112,7 @@ class ConstructionPaymentController extends Controller
      */
     public function show(ConstructionPayment $payment)
     {
-        return response()->json(['message' => 'Fetched successfully', 'data' => $payment->load('current_building_phase')], 200);
+        return response()->json(['message' => 'Fetched successfully', 'data' => $payment->load(['current_building_phase', 'chart_of_account'])], 200);
     }
 
     /**
@@ -225,6 +229,6 @@ class ConstructionPaymentController extends Controller
 
 
         $recipients = $query->latest()->paginate(20);
-        return response()->json(['message' => Success, 'data' => $recipients], 200);
+        return response()->json(['message' => 'Success', 'data' => $recipients], 200);
     }
 }
