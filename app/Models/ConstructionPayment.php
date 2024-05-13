@@ -32,7 +32,8 @@ class ConstructionPayment extends Model
         'estate_construction_settings',
         'staff:id,type,status,first_name,last_name,middle_name,title,avatar',
         'customer:id,user_id',
-        'customer.user:id,type,status,first_name,last_name,middle_name,title,avatar'
+        'customer.user:id,type,status,first_name,last_name,middle_name,title,avatar,staff_id',
+        'customer.user.staff:id,user_id'
     ];
 
     protected $casts = [
@@ -71,6 +72,10 @@ class ConstructionPayment extends Model
 
     public function current_building_phase() {
         return $this->belongsTo(EstateConstructionSetting::class, 'current_building_phase_id');
+    }
+    
+    public function chart_of_account() {
+        return $this->belongsTo(ChartOfAccount::class, 'chart_of_account_id');
     }
 
 }
