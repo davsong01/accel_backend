@@ -32,7 +32,7 @@ class ConstructionPayment extends Model
         'estate_construction_settings',
         'staff:id,type,status,first_name,last_name,middle_name,title,avatar',
         'customer:id,user_id',
-        'customer.user:id,type,status,first_name,last_name,middle_name,title,avatar,staff_id',
+        'customer.user:id,type,status,first_name,last_name,middle_name,title,avatar,staff_id,customerId',
         'customer.user.staff:id,user_id'
     ];
 
