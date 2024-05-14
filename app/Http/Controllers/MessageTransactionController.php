@@ -235,7 +235,7 @@ class MessageTransactionController extends Controller
                 <strong>Plot Size: </strong>' . $data['plot_size'] . '
                 <strong>Building Type: </strong>' . $data['building_type'] . '
                <br><br>Please review the contract details and let us know if there are any discrepancies or if you need further clarification.<br><br>Your Customer ID is: ' . $data['customer_id'] .
-                    '<br><br>Thank you for choosing ' . $this->sessionDetails('company_name') . 'We look forward to serving you.<br><br>Best Regards,<br>' . $this->sessionDetails('company_name') . '</div>';
+                    '<br><br>Thank you for choosing ' . $this->sessionDetails('company_name') . '. <br><br>We look forward to serving you.<br><br>Best Regards,<br>' . $this->sessionDetails('company_name') . '</div>';
             }
         }
 
@@ -387,7 +387,7 @@ class MessageTransactionController extends Controller
                 $subject = $email_template->subject ?? 'Payment Confirmation';
                 $content = $email_template->content ?? '<strong>Dear ' . $data['name'] . ',</strong><br>
                 <div>
-                <p style="text-align:justify !important">We are delighted to inform you that your first installment payment for your chosen property has been successfully processed. Congratulations on taking the initial step towards property ownership with ' . $this->sessionDetails('company_name') . '.<br><br>You will receive a separate email with an official receipt for your first and subsequent installment payments. <br><br>Please visit our office to pick up your Provisional Allocation Letter, and if you have any questions, do not hesitate to contact our support team/contact person.<br><br>We look forward to creating a rewarding experience for you as a property owner.<br><br>Best regards,<br><br>' . $this->sessionDetails('company_name') . '</p>
+                <p style="text-align:justify !important">We are delighted to inform you that your first installment payment for your chosen property has been successfully processed. Congratulations on taking the initial step towards property ownership with ' . $this->sessionDetails('company_name') . '.<br><br>You will receive a separate email with an official receipt for your first and subsequent installment payments. <br><br>Please visit our office to pick up your Provisional Allocation Letter, and if you have any questions, do not hesitate to contact our support team/contact person. <br><br>We look forward to creating a rewarding experience for you as a property owner.<br><br>Best regards,<br><br>' . $this->sessionDetails('company_name') . '</p>
                 </div>';
             }
         }

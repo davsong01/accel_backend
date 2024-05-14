@@ -202,12 +202,12 @@ class LegalDocumentController extends Controller
             'legal_document_type_id' => $request->legal_document_type_id,
             'estate_id' => $request->estate_id,
             'company_id' => $company_id,
-            ])->firstOrFail();
-           
+        ])->firstOrFail();
+        
         $contract = CustomerContract::where('id',$request->contract_id)->first();
         $documentGen = $this->documentGenerator($request->contract_id, $legalDocumentTemplate, $contract);
         $filepath = $documentGen['filepath'] . $documentGen['filename'];
-       
+    
         $generatedLegalDocument = GeneratedLegalDocument::updateOrCreate([
             'contract_id' => $request->contract_id,
             'legal_document_template_id' => $legalDocumentTemplate->id,

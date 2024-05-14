@@ -144,7 +144,7 @@ class CustomerFormController extends Controller
 
     public function approveForm2Request($id)
     {
-        $customer_form = CustomerForm::with('customer')->where('id', $id)->where('company_id', $this->sessionDetails('company_id'))->where('type', 'form2-request')->first();
+        $customer_form = CustomerForm::with('customer')->where('id', $id)->where('company_id', $this->sessionDetails('company_id'))->first();
         
         if (!$customer_form) {
             return response()->json(['message' => 'No records found', 'data' => []], 200);
@@ -189,7 +189,7 @@ class CustomerFormController extends Controller
             ], 412);
         }
 
-        $customer_form = CustomerForm::with('customer')->where('id', $id)->where('company_id', $this->sessionDetails('company_id'))->where('type', 'form2-request')->first();
+        $customer_form = CustomerForm::with('customer')->where('id', $id)->where('company_id', $this->sessionDetails('company_id'))->first();
 
         if (!$customer_form) {
             return response()->json([
@@ -224,10 +224,11 @@ class CustomerFormController extends Controller
 
     public function approveCustomerFormResponse($id)
     {
-        $customer_form = CustomerForm::with('customer')->where('id', $id)->where('company_id', $this->sessionDetails('company_id'))->where('is_customer_response', 1)
+        $customer_form = CustomerForm::with('customer')->where('id', $id)->where('company_id', $this->sessionDetails('company_id'))
+        ->where('is_customer_response', 1)
         // ->where('type', 'customer-response')
         ->first();
-        
+       
         if (!$customer_form) {
             return response()->json(['message' => 'No record found', 'data' => []], 200);
         }
@@ -272,7 +273,7 @@ class CustomerFormController extends Controller
             ], 412);
         }
 
-        $customer_form = CustomerForm::with('customer')->where('id', $id)->where('company_id', $this->sessionDetails('company_id'))->where('type', 'customer-response')->first();
+        $customer_form = CustomerForm::with('customer')->where('id', $id)->where('company_id', $this->sessionDetails('company_id'))->first();
 
         if (!$customer_form) {
             return response()->json([
@@ -468,7 +469,7 @@ class CustomerFormController extends Controller
             $data['is_customer_response'] = 1;
         } else {
             $data['status'] = 'pending';
-            $data['is_customer_response'] = 1;
+            // $data['is_customer_response'] = 1;
             $data['is_form2_request'] = 1;
         }
 
@@ -542,7 +543,7 @@ class CustomerFormController extends Controller
             ], 412);
         }
 
-        $customer_form = CustomerForm::with('customer')->where('id', $request->form_id)->where('company_id', $this->sessionDetails('company_id'))->where('type', 'customer-response')->first();
+        $customer_form = CustomerForm::with('customer')->where('id', $request->form_id)->where('company_id', $this->sessionDetails('company_id'))->where('is_customer_response', 1)->first();
 
         if (!$customer_form) {
             return response()->json(['message' => 'No record found', 'data' => []], 200);

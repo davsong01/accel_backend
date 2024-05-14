@@ -686,7 +686,7 @@ class Controller extends BaseController
                     'subscribers' => !empty($contract->subscribers) ? json_decode($contract->subscribers) : '',
                     'contract_type' => $contract->contract_type,
                     'property_type' => $contract->property_type_details->type,
-                    'property_price' => $contract->property_type_details->estate_price,
+                    'property_price' => (double) $contract->property_type_details->estate_price,
                     'city' =>  $contract->city,
                     'building_type' => $contract->building_type,
                     'location' => $contract->location->name,
