@@ -2,18 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Customer;
-use App\Models\CustomerContract;
-use App\Models\GeneratedLegalDocument;
-use App\Models\LegalDocumentTemplate;
-use App\Models\LegalDocumentType;
 use App\Models\User;
-use App\Services\GeneratedDocumentService;
+use App\Models\Customer;
+use Illuminate\Support\Arr;
 use App\Services\LogService;
 use Illuminate\Http\Request;
+use App\Models\CustomerContract;
+use App\Models\LegalDocumentType;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use App\Models\LegalDocumentTemplate;
+use App\Models\GeneratedLegalDocument;
 use Illuminate\Support\Facades\Validator;
+use App\Services\GeneratedDocumentService;
 
 class LegalDocumentController extends Controller
 {
@@ -66,6 +67,8 @@ class LegalDocumentController extends Controller
             'file_location' =>  $filepath
         ];
 
+        $data = Arr::except($data, ['file']);
+        
         $document = LegalDocumentTemplate::updateOrcreate([
             'estate_id' => $data['estate_id'],
             'company_id' => $this->sessionDetails('company_id'),
@@ -163,15 +166,16 @@ class LegalDocumentController extends Controller
         if (!empty($data)) {
             foreach ($data as $document) {
                 $document->user = [
-                    'id' => $document->contract->customer->user->id,
-                    'customer_id' => $document->contract->customer->id,
-                    'first_name' => $document->contract->customer->user->first_name,
-                    'last_name' => $document->contract->customer->user->last_name,
-                    'customerId' => $document->contract->customer->user->customerId,
-                    'avatar' => $document->contract->customer->user->avatar,
+                    'id' => $document->contract->customer->user ? $document->contract->customer->user->id : NULL,
+                    'customer_id' => $document->contract->customer ? $document->contract->customer->id : NULL,
+                    'first_name' => $document->contract->customer->user ? $document->contract->customer->user->first_name : NULL,
+                    'last_name' => $document->contract->customer->user ? $document->contract->customer->user->last_name : NULL,
+                    'customerId' => $document->contract->customer->user ? $document->contract->customer->user->customerId : NULL,
+                    'avatar' => $document->contract->customer->user ? $document->contract->customer->user->avatar : null,
                 ];
 
                 $document->location = $document->contract->estate->location;
+                $document->property_description = $document->contract->contract_name;
                 unset($document->contract);
             }
         }

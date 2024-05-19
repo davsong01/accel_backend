@@ -418,6 +418,12 @@ class ContractPaymentController extends Controller
 
     public function generateContractPaymentReceipt($payment, $contract,$others)
     {
+        return [
+            'receipt_no' => 'disabled.pdf',
+            'filename' => 'disabled.pdf',
+            'filepath' => ''
+        ];
+
         $name = $transaction_id ?? $payment->transaction_id;
         $data['receipt_no'] = $name;
         $pathToSave = $this->getPathToSaveFile('receipts') . '/' . $name . '.pdf';
