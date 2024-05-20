@@ -152,6 +152,16 @@ class EmployeeExitController extends Controller
 
         $employeeExit->update($validator->validated());
 
+        $data = [
+            'title' => 'Exit application',
+            'content' => "Your exit application has just being $request->status",
+            'link' => '',
+            'user_type' => 'staff',
+            'staff_id' => $employeeExit->staff->id,
+            'company_id' => $this->sessionDetails('company_id')
+        ];
+        $this->notify($data);
+
         LogService::admin(auth()->user()->id, $employeeExit->staff->user->id, 'Update an employee exit to ' . $request->status . '(' . $employeeExit->id . ')', 'UPDATE');
         return response()->json(['message' => 'Successfully updated', 'data' => $employeeExit], 200);
     }

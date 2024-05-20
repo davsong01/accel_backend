@@ -33,7 +33,9 @@ class ConstructionPayment extends Model
         'staff:id,type,status,first_name,last_name,middle_name,title,avatar',
         'customer:id,user_id',
         'customer.user:id,type,status,first_name,last_name,middle_name,title,avatar,staff_id,customerId',
-        'customer.user.staff:id,user_id'
+        'customer.user.staff:id,user_id',
+        'current_building_phase',
+        'chart_of_account'
     ];
 
     protected $casts = [
