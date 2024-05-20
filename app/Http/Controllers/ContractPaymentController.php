@@ -127,7 +127,7 @@ class ContractPaymentController extends Controller
         $this->logEmail($data);
 
         LogService::admin(auth()->user()->id,  $contractX->customer->user->id, 'Update a company\'s contract, contract payment, contract payment thread and transaction (' . $contractX->id . ')', 'UPDATE');
-        return response()->json(['message' => 'Payment successful', 'data' => []], 200);
+        return response()->json(['message' => 'Payment successful', 'data' => $contractX], 200);
     }
 
     public function continueContractPayment(Request $request)
@@ -209,7 +209,7 @@ class ContractPaymentController extends Controller
         }
         
         $this->logContractEmail($contract, $payments);
-        return response()->json(['message' => 'Payment successful', 'data' => []], 200);
+        return response()->json(['message' => 'Payment successful', 'data' => $contract,], 200);
     }
 
     public function logContractEmail($contract, $payments)
@@ -418,6 +418,12 @@ class ContractPaymentController extends Controller
 
     public function generateContractPaymentReceipt($payment, $contract,$others)
     {
+        return [
+            'receipt_no' => 'disabled.pdf',
+            'filename' => 'disabled.pdf',
+            'filepath' => ''
+        ];
+
         $name = $transaction_id ?? $payment->transaction_id;
         $data['receipt_no'] = $name;
         $pathToSave = $this->getPathToSaveFile('receipts') . '/' . $name . '.pdf';
