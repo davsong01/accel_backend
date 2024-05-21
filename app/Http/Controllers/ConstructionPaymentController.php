@@ -112,7 +112,7 @@ class ConstructionPaymentController extends Controller
      */
     public function show(ConstructionPayment $payment)
     {
-        return response()->json(['message' => 'Fetched successfully', 'data' => $payment->load(['current_building_phase', 'chart_of_account'])], 200);
+        return response()->json(['message' => 'Fetched successfully', 'data' => $payment], 200);
     }
 
     /**
