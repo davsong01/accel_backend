@@ -397,7 +397,7 @@ class Controller extends BaseController
 
         return [
             'filename' => $name,
-            'filepath' => config('app.upload_path') . '/' . $folder . '/' . $name
+            'filepath' => $folder . '/' . $name
             // 'filepath' => $folder . '/' . $name
         ];
     }
