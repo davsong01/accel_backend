@@ -588,7 +588,7 @@ class ContractPaymentController extends Controller
     //         $contractX->update([
     //             'sei_payment_transaction_id' => $payment->transaction_id
     //         ]);
-
+    
     //         if($balance <= 0){
     //             $contractX->update([
     //                 'contract_status' => 'closed',

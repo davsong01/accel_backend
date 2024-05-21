@@ -143,7 +143,7 @@ class LegalDocumentController extends Controller
     public function generatedLegalDocuments(Request $request): JsonResponse
     {
         $company_id = $this->sessionDetails('company_id');
-        $documents = GeneratedLegalDocument::select('id','estate_id','contract_id', 'legal_document_template_id', 'legal_document_type_id', 'regenerate_count', 'file_location')->with('estate:id,name', 'legalDocumentType:id,type,name')->where('company_id', $company_id)->orderBy('created_at', 'DESC');
+        $documents = GeneratedLegalDocument::select('id','estate_id','contract_id', 'legal_document_template_id', 'legal_document_type_id', 'regenerate_count', 'file_location','updated_at','created_at')->with('estate:id,name', 'legalDocumentType:id,type,name')->where('company_id', $company_id)->orderBy('created_at', 'DESC');
         
         if(!empty($request->estate_id)){
             $documents = $documents->where('estate_id', $request->estate_id);
