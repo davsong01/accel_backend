@@ -35,7 +35,7 @@ class ContractPaymentController extends Controller
         $paymentHistory = ContractPayment::where('contract_id', $contract_id)->first();
         $history = [
             'contract_id' => $contract_id,
-            'payment_history' => $paymentHistory->payment_thread,
+            'payment_history' => $paymentHistory?->payment_thread,
         ];
 
         return response()->json(['message' => 'Succee', 'data' => $history], 200);

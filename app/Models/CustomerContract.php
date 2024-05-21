@@ -24,7 +24,7 @@ class CustomerContract extends Model
     use HasFactory, SoftDeletes;
     protected $table = 'customer_contracts';
     protected $guarded = [];
-    protected $appends = ['form_payment_status','contract_name','contract_deal_status'];
+    protected $appends = ['form_payment_status','contract_name','contract_deal_status', 'contract_history_status'];
     protected $prepends = ['contract_name'];
 
     public function customer(){
@@ -116,6 +116,21 @@ class CustomerContract extends Model
         
         return $name;
 
+    }
+
+    public function getContractHistoryStatusAttribute()
+    {
+        $status = NULL;
+
+        if ($this->status == 'lead' || $this->status == 'prospect') {
+            $status = $this->status;
+        }
+
+        if (in_array($this->contract_status, ['ongoing','closed','completed'])) {
+            $status = $this->contract_status;
+        }
+
+        return $status;
     }
 
     public function primaryMarketer()
