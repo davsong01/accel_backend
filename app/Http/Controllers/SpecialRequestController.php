@@ -75,12 +75,21 @@ class SpecialRequestController extends Controller
      */
     public function search(Request $request)
     {
+        $$params = $request->only(['company_id', 'branch_id', 'customer_id', 'contract_id', 'original_owner_id', 'new_owner_id']);
         $company_id = $this->sessionDetails('company_id');
 
-        $query = SpecialRequest::where('company_id', $company_id);
+        $query = SpecialRequest::where('company_id', $company_id)->where($params);
 
         if ($type = $request->input('type')) {
             $query->where('type', 'LIKE', '%' . $type . '%');
+        }
+
+        if ($current_contract = $request->input('current_contract')) {
+            $query->where('current_contract', 'LIKE', '%' . $current_contract . '%');
+        }
+
+        if ($new_contract = $request->input('new_contract')) {
+            $query->where('new_contract', 'LIKE', '%' . $new_contract . '%');
         }
 
         if ($name = $request->input('branch_name')) {
