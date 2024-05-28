@@ -747,7 +747,7 @@ class StaffController extends Controller
 
     public function staffDeals(Request $request, $staff_id)
     {
-        $deals = CustomerContract::select('id','customer_id', 'property_type_id','estate_id')->with('customer.user:id,first_name,last_name,middle_name','estate:id,name')->where('primary_marketer_id', $staff_id)->where('company_id', $this->sessionDetails('company_id'));
+        $deals = CustomerContract::select('id', 'property_type','customer_id', 'property_type_id','estate_id')->with('customer.user:id,first_name,last_name,middle_name','estate:id,name')->where('primary_marketer_id', $staff_id)->where('company_id', $this->sessionDetails('company_id'));
 
         if (!empty($request->status)) {
             if ($request->status == 'open') {
