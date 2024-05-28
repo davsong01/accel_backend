@@ -220,8 +220,8 @@ class CustomerContractController extends Controller
             $plotsize = PlotSize::where('id', $request->plot_size)->first();
             $building_type = BuildingType::where('id', $request->building_type)->first();
 
-            $data['plot_size'] = $plotsize->size ?? 'N/A';
-            $data['building_type'] = $building_type->name ?? 'N/A';
+            $data['plot_size'] = $plotsize->size ?? null;
+            $data['building_type'] = $building_type->name ?? null;
             $data['type'] = 'add.contract.to.existing.customer';
             $data['name'] =  $customer->user->first_name;
             $data['email'] =  $customer->user->email;
@@ -260,8 +260,8 @@ class CustomerContractController extends Controller
             $email['estate'] = $estate->name;
             $email['no_of_units'] = $request->no_of_units;
             $email['contract_type'] = ucfirst($data['contract_type']);
-            $email['plot_size'] = $plotsize->size ?? 'N/A';
-            $email['building_type'] = $building_type->name ?? 'N/A';
+            $email['plot_size'] = $plotsize->size ?? null;
+            $email['building_type'] = $building_type->name ?? null;
 
             $subscribers = json_decode($data['subscribers']);
             if (!empty($subscribers) && count($subscribers) > 0) {
@@ -327,8 +327,8 @@ class CustomerContractController extends Controller
             $plotsize = PlotSize::where('id', $request->plot_size)->first();
             $building_type = BuildingType::where('id', $request->building_type)->first();
 
-            $email['plot_size'] = $plotsize->size ?? 'N/A';
-            $email['building_type'] = $building_type->name ?? 'N/A';
+            $email['plot_size'] = $plotsize->size ?? null;
+            $email['building_type'] = $building_type->name ?? null;
 
             $email['property_type'] = ucfirst($request->property_type);
             $email['city'] = $city->name;
@@ -465,8 +465,8 @@ class CustomerContractController extends Controller
             $plotsize = PlotSize::where('id', $request->plot_size)->first();
             $building_type = BuildingType::where('id', $request->building_type)->first();
 
-            $data['plot_size'] = $plotsize->size ?? 'N/A';
-            $data['building_type'] = $building_type->name ?? 'N/A';
+            $data['plot_size'] = $plotsize->size ?? null;
+            $data['building_type'] = $building_type->name ?? null;
             $data['type'] = 'add.contract.to.existing.customer';
             $data['name'] =  $customer->user->first_name;
             $data['email'] =  $customer->user->email;
@@ -572,8 +572,8 @@ class CustomerContractController extends Controller
             $email['property_type'] = ucfirst($request->property_type);
             $email['city'] = $city->name;
             $email['location'] = $location->name;
-            $email['plot_size'] = $plotsize->size ?? 'N/A';
-            $email['building_type'] = $building_type->name ?? 'N/A';
+            $email['plot_size'] = $plotsize->size ?? null;
+            $email['building_type'] = $building_type->name ?? null;
             $email['estate'] = $estate->name;
             $email['no_of_units'] = $request->no_of_units;
             $email['contract_type'] = ucfirst($data['contract_type']);
