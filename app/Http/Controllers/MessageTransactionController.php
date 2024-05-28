@@ -97,8 +97,8 @@ class MessageTransactionController extends Controller
         $mes = MessageTransaction::create($data);
 
         // Create QA Emaii;
-        $data['recipient'] = 'quality@consode.com';
-        $qa = MessageTransaction::create($data);
+        // $data['recipient'] = 'quality@consode.com';
+        // $qa = MessageTransaction::create($data);
         // End QA Email
 
         return $mes;
