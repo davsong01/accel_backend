@@ -113,7 +113,7 @@ class MessageTransactionController extends Controller
     {
         $company_setting = CompanySetting::where('company_id', $this->sessionDetails('company_id') ??  $data['company_id'])->first();
         $url = $company_setting->website;
-        $button_style = "background: " . $company_setting->primary_color . ";text-decoration: none; padding: 10px;color: white;border: none;color: white;border-radius: 5px;";
+        $button_style = "background: " . $company_setting->primary_color . ";text-decoration: none; padding: 10px;color: white;border: none;color: white;border-radius: 5px;cursor: pointer;";
         $all = [];
         $content = "";
         $subject = "";
@@ -151,11 +151,10 @@ class MessageTransactionController extends Controller
                 $subject = $email_template->subject ?? 'Complete Your Application Form';
                 $content = $email_template->content ?? '<strong>Dear ' . $data['name'] . ',</strong><br><br>
                 <div><p style="text-align:justify !important">I hope this email finds you well. We appreciate your interest in ' . $this->sessionDetails('company_name') . ' and are excited to have you on board.<br><br>There are some sections of the application form we want you to fill out to ensure that we have all the necessary information to provide you with the best possible experience. <br><br>To expedite the process, here are the details to access your application form:<br><br>
-                // has issues
-                Please <a style="' . $button_style . '" href="' . $url . '/customer-login">LOGIN</a> to fill your application form:<br><br>
+                Please click the button below to login to your personalized dashboard and fill your application form:<br><br><a style="' . $button_style . '" href="' . $url . '/customer-login" target="_blank">LOGIN</a><br><br>
                 <strong>Email:</strong> ' . $data['email'] . '<br>
                 <strong>Customer ID:</strong> ' . $data['customerId'] . '<br>
-                <strong>Password:</strong> ' . 'Your set password' . '<br><br> If you encounter any challenges or have questions while filling out the form, please don\'t hesitate to contact us. Thank you for your prompt attention to this matter. We value your partnership and look forward to serving you.<br><br>Best regards,<br><br>' . $this->sessionDetails('company_name') . '</p>
+                <br> If you encounter any challenges or have questions while filling out the form, please don\'t hesitate to contact us. Thank you for your prompt attention to this matter. We value your partnership and look forward to serving you.<br><br>Best regards,<br><br>' . $this->sessionDetails('company_name') . '</p>
                 </div>';
             }
         }
@@ -183,7 +182,7 @@ class MessageTransactionController extends Controller
                 $subject = $email_template->subject ?? 'Your Attention is Needed';
                 $content = $email_template->content ?? '<strong>Dear ' . $data['name'] . ',</strong><br>
                 <div>
-                <p style="text-align:justify !important">Could you please take a moment to look into ' . $data['form']->form_name . '<br><br>Your timely review and feedback are essential for us to proceed smoothly.<br><br>Thank you for your prompt attention to this matter.<br><br>Please click the button below to attend to this form<br><br><a href="' . $url . '/customer-form-response/' . $data['form']->id . '"><button style="' . $button_style . '">CHECK IT OUT</button></a><br><br>Best regards,<br><br>' . $this->sessionDetails('company_name') . '</p>
+                <p style="text-align:justify !important">Could you please take a moment to look into ' . $data['form']->form_name . '<br><br>Your timely review and feedback are essential for us to proceed smoothly.<br><br>Thank you for your prompt attention to this matter.<br><br>Please click the button below to attend to this form<br><br><a target="_blank" href="' . $url . '/customer-form-response/' . $data['form']->id . '"><button style="' . $button_style . '">CHECK IT OUT</button></a><br><br>Best regards,<br><br>' . $this->sessionDetails('company_name') . '</p>
                 </div>';
             }
         }
@@ -214,7 +213,7 @@ class MessageTransactionController extends Controller
                 Last Name: ' . $data['user']['last_name'] . '<br>
                 Email: ' . $data['user']['email'] . '<br>
                 Staff Id: ' . $data['user']['staff_id'] . '<br>
-                Password: ' . '123456789' . '<br><br> Please click the login button below to login to your personalized dashboard using your email/staff Id and password above. Thank you <br><br><a href="' . $url . '"><button style="' . $button_style . '">LOGIN</button></a></p>
+                Password: ' . '123456789' . '<br><br> Please click the login button below to login to your personalized dashboard using your email/staff Id and password above. Thank you <br><br><a target="_blank" href="' . $url . '"><button style="' . $button_style . '">LOGIN</button></a></p>
                 </div>';
             }
         }
