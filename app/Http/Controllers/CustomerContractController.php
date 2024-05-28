@@ -954,7 +954,10 @@ class CustomerContractController extends Controller
         
         $selected = null;
         if (!empty($allData['contract_id'])) {
-            CustomerContract::where('customer_id', $customer_id)->whereIn('id', $leadContracts)->where('estate_id', $allData['estate_id'])->whereNotIn('id', $allData['contract_id'])
+            CustomerContract::where('customer_id', $customer_id)
+            ->whereIn('id', $leadContracts)
+            ->where('estate_id', $allData['estate_id'])
+            ->whereNotIn('id', $allData['contract_id'])
             ->delete();
             
             $newContracts = CustomerContract::where('customer_id', $customer_id)->where('estate_id', $allData['estate_id'])->whereIn('id', $allData['contract_id'])->pluck('id')->toArray();
