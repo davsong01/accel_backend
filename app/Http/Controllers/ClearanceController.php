@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Clearance;
 use App\Models\ClearanceThread;
 use App\Models\Customer;
+use App\Models\User;
 use App\Services\LogService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -108,6 +110,52 @@ class ClearanceController extends Controller
 
         LogService::admin($user->id, $customer->user->id, 'Updated a clearance (' . $clearance->id  . ')', 'UPDATE');
         return response()->json(['message' => 'Updated successfully', 'data' => $clearance], 200);
+    }
+
+    /**
+     * Search a listing of resource.
+     */
+    public function search(Request $request)
+    {
+        $params = $request->only(['company_id', 'customer_id', 'customer_contract_id', 'status']);
+        $company_id = $this->sessionDetails('company_id');
+
+        $query = Clearance::where('company_id', $company_id)->where($params);
+
+        $from = $request->input('from');
+        $to = $request->input('to');
+        if ($from && $to) {
+            $from = Carbon::parse($request->input('from'));
+
+            $to = Carbon::parse($request->input('to'));
+            if ($to->format('H:i:s') == '00:00:00')
+                $to->endOfDay();
+
+            $query->whereBetween('created_at', [$from, $to]);
+        }
+
+        if ($request->input('name') && $name = $request->input('name')) {
+            $users = User::with(['customer'])
+                ->where('company_id', $company_id)
+                ->whereNotNull('company_id')
+                ->where(function ($query) use ($name) {
+                    $query->where('first_name', 'LIKE', '%' . $name . '%')
+                        ->orWhere('last_name', 'LIKE', '%' . $name . '%')
+                        ->orWhere('middle_name', 'LIKE', '%' . $name . '%');
+                })
+                ->get();
+        
+            $customer_ids = $users->pluck('customer.id')->filter()->toArray();
+        
+            $query->whereIn('created_by', $customer_ids);
+        }
+        if ($request->input('statuses') && $statuses = $request->input('statuses')) {
+            $query->whereIn('status', $statuses);
+        }
+        
+
+        $recipients = $query->latest()->paginate(20);
+        return response()->json(['message' => 'Success', 'data' => $recipients], 200);
     }
 
 }

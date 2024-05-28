@@ -196,7 +196,7 @@ class LeaveAndAbsenceManagementController extends Controller
 
         $user = Staff::where('id', $staff_id)->first()->user;
         $data = [
-            'title' => 'Leave Request',
+            'title' => ucfirst($request->type ?? 'leave') . " Request",
             'content' => 'Your ' . $request->type . ' request has been received and it is pending approval',
             'link' => url('/') . '/single-staff-leave-and-absence/api/admin/' . $lam->staff_id . '?type=leave',
             'user_type' => 'staff',
