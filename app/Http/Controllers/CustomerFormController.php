@@ -211,8 +211,8 @@ class CustomerFormController extends Controller
         $data['type'] = 'formrequest.decline';
         $data['reason'] = $request->reason;
         $data['medium'] = 'email';
-        $data['name'] = $customer_form->first_name ?? '';
-        $data['email'] = $customer_form->email_address ?? '';
+        $data['name'] = $customer_form->customer->user->first_name ?? '';
+        $data['email'] = $customer_form->customer->user->email ?? '';
 
         $this->logEmail($data);
 
