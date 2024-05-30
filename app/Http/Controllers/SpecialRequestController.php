@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Branch;
 use App\Models\SpecialRequest;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -75,21 +76,24 @@ class SpecialRequestController extends Controller
      */
     public function search(Request $request)
     {
-        $$params = $request->only(['company_id', 'branch_id', 'customer_id', 'contract_id', 'original_owner_id', 'new_owner_id']);
         $company_id = $this->sessionDetails('company_id');
 
-        $query = SpecialRequest::where('company_id', $company_id)->where($params);
+        $query = SpecialRequest::where('company_id', $company_id);
 
         if ($type = $request->input('type')) {
             $query->where('type', 'LIKE', '%' . $type . '%');
         }
 
-        if ($current_contract = $request->input('current_contract')) {
-            $query->where('current_contract', 'LIKE', '%' . $current_contract . '%');
-        }
+        $from = $request->input('from');
+        $to = $request->input('to');
+        if ($from && $to) {
+            $from = Carbon::parse($request->input('from'));
 
-        if ($new_contract = $request->input('new_contract')) {
-            $query->where('new_contract', 'LIKE', '%' . $new_contract . '%');
+            $to = Carbon::parse($request->input('to'));
+            if ($to->format('H:i:s') == '00:00:00')
+                $to->endOfDay();
+
+            $query->whereBetween('created_at', [$from, $to]);
         }
 
         if ($name = $request->input('branch_name')) {
@@ -98,7 +102,10 @@ class SpecialRequestController extends Controller
                 ->get();
 
             $branch_ids = $branches->whereNotNull('id')->pluck('id')->toArray();
-            $query->whereIn('special_requestable.branch_id', $branch_ids);
+            $query->whereHas(
+                'special_requestable',
+                fn ($query) => $query->whereIn('branch_id', $branch_ids)
+            );
         }
 
         $special_requests = $query->latest()->paginate(20);

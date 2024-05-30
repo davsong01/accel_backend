@@ -17,6 +17,8 @@ class SpecialRequest extends Model
 
     protected $with = ['special_requestable'];
 
+    protected $hidden = ['special_requestable_id', 'special_requestable_type' ];
+
     public function branch(){
         return $this->belongsTo(Branch::class);
     }
