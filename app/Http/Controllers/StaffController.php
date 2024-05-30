@@ -747,14 +747,11 @@ class StaffController extends Controller
 
     public function staffDeals(Request $request, $staff_id)
     {
-        $deals = CustomerContract::join('customers', 'customers.id', '=', 'customer_contracts.customer_id')
-            ->join('users', 'users.id', '=', 'customers.user_id')
-            ->where('primary_marketer_id', $staff_id)->orderBy('customer_contracts.updated_at', 'desc')
-            ->select('customer_contracts.building_type', 'customer_contracts.estate_id', 'customer_contracts.contract_status', 'customer_contracts.id', 'customer_contracts.plot_size', 'customer_contracts.updated_at', 'customer_contracts.updated_at', 'customer_contracts.created_at', 'customer_contracts.property_type', 'customer_contracts.primary_marketer_id', 'customer_contracts.contract_name', 'users.first_name', 'users.middle_name', 'users.last_name');
+        $deals = CustomerContract::select('id', 'property_type','customer_id', 'property_type_id','estate_id')->with('customer.user:id,first_name,last_name,middle_name','estate:id,name')->where('primary_marketer_id', $staff_id)->where('company_id', $this->sessionDetails('company_id'));
 
         if (!empty($request->status)) {
             if ($request->status == 'open') {
-                $deals = $deals->whereNull('contract_status')->orWhere('contract_status', 'ongoing');
+                $deals = $deals->whereIn('contract_status', ['ongoing']);
             } else {
                 $deals = $deals->whereIn('contract_status', ['allocated', 'completed', 'closed']);
             }
@@ -762,7 +759,6 @@ class StaffController extends Controller
 
         $deals = $deals->get();
 
-        // $deals = $deals->load('customer.user');
         return response()->json(['message' => 'Retrieved successfully', 'data' => $deals], 200);
     }
 

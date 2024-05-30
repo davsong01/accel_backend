@@ -167,9 +167,8 @@ class CustomerFormController extends Controller
         $data['type'] = 'formrequest.approve';
         $data['medium'] = 'email';
         // $data['user'] = Customer::where('id', 'customer_id')->user;
-        $data['name'] = $customer_form->first_name ?? '';
-        $data['email'] = $customer_form->email_address ?? '';
-
+        $data['name'] = $customer_form->customer->user->first_name ?? '';
+        $data['email'] = $customer_form->customer->user->email ?? '';
         $this->logEmail($data);
 
         LogService::admin(auth()->user()->id, $customer_form->customer->user->id, 'Approve customer form 2 request (' . $customer_form->id .')', 'UPDATE');
@@ -212,8 +211,8 @@ class CustomerFormController extends Controller
         $data['type'] = 'formrequest.decline';
         $data['reason'] = $request->reason;
         $data['medium'] = 'email';
-        $data['name'] = $customer_form->first_name ?? '';
-        $data['email'] = $customer_form->email_address ?? '';
+        $data['name'] = $customer_form->customer->user->first_name ?? '';
+        $data['email'] = $customer_form->customer->user->email ?? '';
 
         $this->logEmail($data);
 

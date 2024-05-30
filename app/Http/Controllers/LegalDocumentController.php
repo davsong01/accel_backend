@@ -36,6 +36,13 @@ class LegalDocumentController extends Controller
     public function type(Request $request)
     {
         $params = $request->input();
+
+        $types = LegalDocumentType::orderBy('created_at','DESC');
+        if(!empty($params['name'])){
+            $types = $types->where('name', $params['name'])->pluck('id');
+            return response()->json(['message' => 'Success', 'data' => $types], 200);
+        }
+
         $types = LegalDocumentType::where($params)->get();
         return response()->json(['message' => 'Success', 'data' => $types], 200);
     }
@@ -157,6 +164,11 @@ class LegalDocumentController extends Controller
             $documents = $documents->where('legal_document_type_id', $request->legal_document_type_id);
         }
 
+        if (!empty($request->legal_document_type_ids)) {
+            $array = explode(",",$request->legal_document_type_ids);
+            $documents = $documents->whereIn('legal_document_type_id', $array);
+        }
+
         if (!empty($request->contract_id)) {
             $documents = $documents->where('contract_id', $request->contract_id);
         }
@@ -166,12 +178,12 @@ class LegalDocumentController extends Controller
         if (!empty($data)) {
             foreach ($data as $document) {
                 $document->user = [
-                    'id' => $document->contract->customer->user ? $document->contract->customer->user->id : NULL,
-                    'customer_id' => $document->contract->customer ? $document->contract->customer->id : NULL,
-                    'first_name' => $document->contract->customer->user ? $document->contract->customer->user->first_name : NULL,
-                    'last_name' => $document->contract->customer->user ? $document->contract->customer->user->last_name : NULL,
-                    'customerId' => $document->contract->customer->user ? $document->contract->customer->user->customerId : NULL,
-                    'avatar' => $document->contract->customer->user ? $document->contract->customer->user->avatar : null,
+                    'id' => !empty($document->contract->customer->user) ? $document->contract->customer->user->id : NULL,
+                    'customer_id' => !empty($document->contract->customer) ? $document->contract->customer->id : NULL,
+                    'first_name' => !empty($document->contract->customer->user) ? $document->contract->customer->user->first_name : NULL,
+                    'last_name' => !empty($document->contract->customer->user) ? $document->contract->customer->user->last_name : NULL,
+                    'customerId' => !empty($document->contract->customer->user) ? $document->contract->customer->user->customerId : NULL,
+                    'avatar' => !empty($document->contract->customer->user) ? $document->contract->customer->user->avatar : null,
                 ];
 
                 $document->location = $document->contract->estate->location;

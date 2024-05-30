@@ -101,7 +101,6 @@ class CustomerContract extends Model
 
     public function getContractNameAttribute(){
         $name = '';
-    
         if($this->property_type == 'building'){
             $building =  $this->property_type_details->building_details->name ?? null;
             $name = $building . ' - ' . $this->estate->name;
@@ -113,7 +112,6 @@ class CustomerContract extends Model
 
             $name = $psize .' - '. $building . ' - '. $this->estate->name;
         }
-        
         return $name;
 
     }
