@@ -171,7 +171,7 @@ class AdvanceAndClaimsController extends Controller
             'date' => $request->date ?? null,
             'amount' => $request->amount,
             'purpose' => $request->purpose,
-            'time_sensitivity' => $request->amount,
+            'time_sensitivity' => $request->time_sensitivity,
             'proof' => json_encode($proof),
             'status' => $status ?? 'pending',
             'company_id' => $this->sessionDetails('company_id')
