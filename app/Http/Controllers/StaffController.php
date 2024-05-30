@@ -134,7 +134,7 @@ class StaffController extends Controller
     public function assignRoleToStaff(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'roles' => 'required|nullable',
+            'roles' => 'sometimes|nullable',
             'staff_id' => 'required|exists:staff,id',
         ]);
 
