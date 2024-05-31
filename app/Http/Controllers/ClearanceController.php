@@ -147,7 +147,7 @@ class ClearanceController extends Controller
         
             $customer_ids = $users->pluck('customer.id')->filter()->toArray();
         
-            $query->whereIn('created_by', $customer_ids);
+            $query->whereIn('customer_id', $customer_ids);
         }
         if ($request->input('statuses') && $statuses = $request->input('statuses')) {
             $query->whereIn('status', $statuses);
