@@ -78,7 +78,7 @@ class ClearanceController extends Controller
 
         $validator = Validator::make($request->all(), [
             'comment' => ['required', 'min:3', 'string'],
-            'status' => ['required', 'in:,APPROVE_PAYMENT_APPROVAL,APPROVE_CONSTRUCTION_APPROVAL,DECLINED'],
+            'status' => ['required', 'in:,APPROVE_PAYMENT_APPROVAL,APPROVE_CONSTRUCTION_APPROVAL,DECLINED,PAYMENT_APPROVAL_DECLINED,CONSTRUCTION_APPROVAL_DECLINED'],
         ]);
 
         if ($validator->fails()) {
