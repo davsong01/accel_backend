@@ -59,11 +59,11 @@ class ClearanceController extends Controller
      */
     public function show(Clearance $clearance)
     {
-        $markdown = new \Illuminate\Mail\Markdown(view(), config('mail.markdown'));
+        // $markdown = new \Illuminate\Mail\Markdown(view(), config('mail.markdown'));
 
-        return $markdown->render('emails.certificate_of_clearance', ['name' => 'John Doe']);
+        // return $markdown->render('emails.certificate_of_clearance', ['name' => 'John Doe']);
         // return view('emails.certificate_of_clearance', ['name' => 'John Doe']);
-        // return response()->json(['message' => 'Fetched successfully', 'data' => $clearance], 200);
+        return response()->json(['message' => 'Fetched successfully', 'data' => $clearance->load('comments')], 200);
     }
 
     /**
