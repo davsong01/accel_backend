@@ -141,6 +141,6 @@ class CustomerRefundController extends Controller
         }
 
         $customer_refunds = $query->latest()->paginate(20);
-        return response()->json(['message' => Success, 'data' => $customer_refunds], 200);
+        return response()->json(['message' => 'Success', 'data' => $customer_refunds], 200);
     }
 }

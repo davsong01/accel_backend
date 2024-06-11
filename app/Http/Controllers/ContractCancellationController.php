@@ -139,6 +139,6 @@ class ContractCancellationController extends Controller
         }
 
         $contract_cancellations = $query->latest()->paginate(20);
-        return response()->json(['message' => Success, 'data' => $contract_cancellations], 200);
+        return response()->json(['message' => 'Success', 'data' => $contract_cancellations], 200);
     }
 }
