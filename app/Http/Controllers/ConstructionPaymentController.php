@@ -38,7 +38,7 @@ class ConstructionPaymentController extends Controller
             'estate_construction_setting_ids.*' => "exists:estate_construction_settings,id,company_id,$company_id",
             'customer_id' => ['required', "exists:customers,id,company_id,$company_id"],
             'chart_of_account_id' => ['required', "exists:chart_of_accounts,id,company_id,$company_id"],
-            'contract_id' => ['required', "exists:customer_contracts,id,customer_id,$request->customer_id"],
+            'contract_id' => ['required', "exists:customer_contracts,id,deleted_at,NULL,customer_id,$request->customer_id"],
             'amount_paid' => ['required', 'min:1', 'integer', 'lte:total_amount'],
             'payment_slip' => ['file', 'sometimes', 'mimetypes:image/*,application/pdf', 'max:512' ],
             'current_building_phase_id' => [
@@ -78,10 +78,10 @@ class ConstructionPaymentController extends Controller
 
         $user =  auth()->user();
         $customer = Customer::find($request->customer_id);
-        $attributes = ['company_id' => $company_id, 'created_by' => auth()->user()->id];
+        $attributes = ['company_id' => $company_id, 'created_by_id' => auth()->user()->id];
 
 
-        $data = $request->only((new ConstructionPayment)->getFillable());
+        $data = $validator->validated();
         $data = array_merge($data, $attributes);
         
         $created = ConstructionPayment::create($data);
@@ -91,10 +91,7 @@ class ConstructionPaymentController extends Controller
             $attributes['payment_slip'] = $filepath;
         }
 
-        $threads = $request->only((new ConstructionPaymentThread)->getFillable());
-        $threads = array_merge(
-            $threads,
-            $attributes,
+        $threads = array_merge($data,
             [
                 'balance_before' => $request->total_amount,
                 'balance_after' => $request->total_amount - $request->amount_paid
@@ -122,11 +119,11 @@ class ConstructionPaymentController extends Controller
     {
         $user = auth()->user();
         $customer = Customer::find($payment->customer_id);
-
+        $company_id = $this->sessionDetails('company_id');
         $balance = intval($payment->total_amount) - intval($payment->amount_paid);
 
         $validator = Validator::make($request->all(), [
-            'chart_of_account_id' => ['required_with:amount_paid', 'exists:chart_of_accounts,id'],
+            'chart_of_account_id' => ['required_with:amount_paid', "exists:chart_of_accounts,id,company_id,$company_id"],
             'amount_paid' => ['required_with:amount_paid', 'min:1', 'integer', "lte:$balance"],
             'payment_slip' => ['file', 'sometimes', 'mimetypes:image/*,application/pdf', 'max:512' ],
             'current_building_phase_id' => [
@@ -142,7 +139,7 @@ class ConstructionPaymentController extends Controller
             ], 412);
         }
 
-        $attributes = $validator->validated();
+        $attributes = array_merge($validator->validated(), ['company_id' => $company_id, 'created_by_id' => auth()->user()->id]);
 
         if ($request->hasFile('payment_slip')) {
             $filepath = $this->uploadProtectedFile($attributes['payment_slip'], 'payment_slips')['filepath'];
@@ -153,19 +150,99 @@ class ConstructionPaymentController extends Controller
             $attributes,
             [
                 'balance_before' => $payment->total_amount - $payment->amount_paid,
-                'balance_after' =>  $balance - $request->amount_paid
+                'balance_after' =>  $balance - $request->amount_paid,
+                'estate_construction_setting_ids' => $payment->estate_construction_setting_ids
             ]
         );
 
-        if ($request->has('current_building_phase_id')) {
-            $payment->update(['current_building_phase_id' => $request->current_building_phase_id]);
-        } else {
+        if(isset($attributes['amount_paid'])){
             $payment->payments()->create($threads);
             $payment->update(['amount_paid' => $payment->amount_paid + $request->amount_paid]);
+            }else {
+            $payment->update($attributes);  
         }
+        
 
         LogService::admin($user->id, $customer->user->id, 'Updated a construction payment (' . $payment->id  . ')', 'UPDATE');
         return response()->json(['message' => 'Updated successfully', 'data' => $payment], 200);
+    }
+
+    /**
+     * Upgrade a payment.
+     */
+    public function upgrade(Request $request, ConstructionPayment $payment)
+    {
+        $user = auth()->user();
+        $customer = Customer::find($payment->customer_id);
+        $company_id = $this->sessionDetails('company_id');
+
+        $balance_before = intval($request->total_amount) - intval($payment->amount_paid);
+        $stagers = array_unique(array_merge($request->estate_construction_setting_ids ?? [], $payment->estate_construction_setting_ids ?? []));       
+
+        $validator = Validator::make($request->all(), [
+            'estate_construction_setting_ids' => ['required', 'array'],
+            'estate_construction_setting_ids.*' => "exists:estate_construction_settings,id,company_id,$company_id",
+            'chart_of_account_id' => ['sometimes', "exists:chart_of_accounts,id,company_id,$company_id"],
+            'amount_paid' => ['required_with:chart_of_account_id', 'min:1', 'integer', "lte:" . abs($balance_before)],
+            'payment_slip' => ['file', 'sometimes', 'mimetypes:image/*,application/pdf', 'max:512' ],
+            'current_building_phase_id' => ['sometimes', Rule::in($stagers)],
+            'description' => ['sometimes', 'string'],
+            'total_amount' => [
+                'required',
+                "min:$payment->total_amount",
+                'integer',
+                function ($attribute, $value, $fail) use ($request, $payment) {
+                    $totalPrice = 0;
+                    foreach ($request->estate_construction_setting_ids as $productId) {
+                        $product = EstateConstructionSetting::find($productId);
+                        if (!$product) {
+                            $fail('One or more products do not exist.');
+                            return;
+                        }
+                        $totalPrice += $product->price;
+                    }
+                    $totalPrice = round($totalPrice);
+
+                    if ($totalPrice != $value) {
+                        $fail("The total amount must be equal to the sum of stager prices which is $totalPrice.");
+                    }
+                },
+            ],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->messages()->first(),
+                'data' => null,
+            ], 412);
+        }
+
+        $attributes = $validator->validated();
+        $attributes['estate_construction_setting_ids'] = $stagers;
+        
+        if ($request->hasFile('payment_slip')) {
+            $filepath = $this->uploadProtectedFile($attributes['payment_slip'], 'payment_slips')['filepath'];
+            $attributes['payment_slip'] = $filepath;
+        }
+
+        if(isset($attributes['amount_paid']))
+            $attributes['amount_paid'] = $payment->amount_paid + $request->amount_paid; // sum old amount + new amount paid
+        $payment->update($attributes);
+
+        $threads = [
+            'balance_before' => $balance_before,
+            'balance_after' =>  $balance_before - $request->amount_paid,
+            'company_id' => $company_id, 'created_by_id' => auth()->user()->id
+        ];
+        $threads = array_merge($attributes, $threads);
+
+        if(isset($threads['amount_paid'])){
+            $threads['amount_paid'] = $request->amount_paid; // ensure save the amount actually paid
+            $payment->payments()->create($threads);
+        }
+    
+        LogService::admin($user->id, $customer->user->id, 'Upgrade a construction payment (' . $payment->id  . ')', 'UPDATE');
+        return response()->json(['message' => 'Upgrade successfully', 'data' => $payment], 200);
     }
 
     /**

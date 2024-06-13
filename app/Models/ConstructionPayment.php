@@ -18,7 +18,7 @@ class ConstructionPayment extends Model
         'company_id',
         'customer_id',
         'contract_id',
-        'created_by',
+        'created_by_id',
         'estate_construction_setting_ids',
         'amount_paid',
         'total_amount',
@@ -30,7 +30,7 @@ class ConstructionPayment extends Model
         'payments',
         'contract',
         'estate_construction_settings',
-        'staff:id,type,status,first_name,last_name,middle_name,title,avatar',
+        'created_by:id,type,status,first_name,last_name,middle_name,title,avatar',
         'customer:id,user_id',
         'customer.user:id,type,status,first_name,last_name,middle_name,title,avatar,staff_id,customerId',
         'customer.user.staff:id,user_id',
@@ -44,7 +44,11 @@ class ConstructionPayment extends Model
 
     public function getPaymentProgressAttribute()
     {
-        return round(($this->attributes['amount_paid'] ?? 1) / ($this->attributes['total_amount'] ?? 1) * 100, 2);
+        $t_amt = $this->attributes['total_amount'] ?? 1;
+        $p_amt = $this->attributes['amount_paid'] ?? 1;
+
+        $perc = ($p_amt / $t_amt) * 100;
+        return max(0, min(100, floatval(substr(strval($perc), 0, 5))));
     }
 
     public function payments(){
@@ -56,8 +60,8 @@ class ConstructionPayment extends Model
         return $this->hasManyJson(EstateConstructionSetting::class, 'id', 'estate_construction_setting_ids');
     }
 
-    public function staff(){
-        return $this->belongsTo(User::class, 'created_by');
+    public function created_by(){
+        return $this->belongsTo(User::class, 'created_by_id');
     }
 
     public function paid_by(){
@@ -68,7 +72,7 @@ class ConstructionPayment extends Model
         return $this->belongsTo(Customer::class, 'customer_id');
     }
     
-    public function contract() {
+    public function contract(){
         return $this->belongsTo(CustomerContract::class, 'contract_id');
     }
 
