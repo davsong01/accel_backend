@@ -267,6 +267,11 @@ class ConstructionPaymentController extends Controller
     {
         $params = $request->only(['company_id', 'customer_id', 'contract_id', 'created_by', 'amount_paid', 'total_amount', 'current_building_phase_id', 'chart_of_account_id']);
         $company_id = $this->sessionDetails('company_id');
+    
+        if($params['created_by']){
+            $params['created_by_id'] = $params['created_by'];
+            unset($params['created_by']);
+        }
 
         $query = ConstructionPayment::where('company_id', $company_id)->where($params);
 
@@ -296,7 +301,7 @@ class ConstructionPaymentController extends Controller
             $staff_ids = $users->pluck('staff.id')->filter()->toArray();
             $customer_ids = $users->pluck('customer.id')->filter()->toArray();
         
-            $query->whereIn('created_by', $staff_ids)->orWhereIn('customer_id', $customer_ids);
+            $query->whereIn('created_by_id', $staff_ids)->orWhereIn('customer_id', $customer_ids);
         }
         
 
