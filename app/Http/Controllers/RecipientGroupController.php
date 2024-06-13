@@ -134,6 +134,6 @@ class RecipientGroupController extends Controller
 
 
         $recipients = $query->latest()->paginate(20);
-        return response()->json(['message' => Success, 'data' => $recipients], 200);
+        return response()->json(['message' => 'Success', 'data' => $recipients], 200);
     }
 }

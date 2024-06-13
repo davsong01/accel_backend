@@ -59,11 +59,11 @@ class ClearanceController extends Controller
      */
     public function show(Clearance $clearance)
     {
-        $markdown = new \Illuminate\Mail\Markdown(view(), config('mail.markdown'));
+        // $markdown = new \Illuminate\Mail\Markdown(view(), config('mail.markdown'));
 
-        return $markdown->render('emails.certificate_of_clearance', ['name' => 'John Doe']);
+        // return $markdown->render('emails.certificate_of_clearance', ['name' => 'John Doe']);
         // return view('emails.certificate_of_clearance', ['name' => 'John Doe']);
-        // return response()->json(['message' => 'Fetched successfully', 'data' => $clearance], 200);
+        return response()->json(['message' => 'Fetched successfully', 'data' => $clearance->load('comments')], 200);
     }
 
     /**
@@ -78,7 +78,7 @@ class ClearanceController extends Controller
 
         $validator = Validator::make($request->all(), [
             'comment' => ['required', 'min:3', 'string'],
-            'status' => ['required', 'in:,APPROVE_PAYMENT_APPROVAL,APPROVE_CONSTRUCTION_APPROVAL,DECLINED'],
+            'status' => ['required', 'in:,APPROVE_PAYMENT_APPROVAL,APPROVE_CONSTRUCTION_APPROVAL,DECLINED,PAYMENT_APPROVAL_DECLINED,CONSTRUCTION_APPROVAL_DECLINED'],
         ]);
 
         if ($validator->fails()) {
