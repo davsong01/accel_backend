@@ -134,39 +134,4 @@ class LeaveDateService
 
         return $existingLeave;
     }
-
-
-    /**
-     * Search leave applications within a specified date range.
-     *
-     * @param string $startDate The start date of the search range in 'Y-m-d' format.
-     * @param string $endDate The end date of the search range in 'Y-m-d' format.
-     * @return \Illuminate\Database\Eloquent\Collection Collection of LeaveApplication models.
-     */
-    public function searchLeaveByDateRange($startDate, $endDate, $staffId = null)
-    {
-        // Convert search dates to Carbon objects for comparison
-        $startDate = Carbon::parse($startDate);
-        $endDate = Carbon::parse($endDate);
-
-        // Query leave applications that overlap with the search date range
-        $query = LeaveAndAbsenceManagement::where(function ($query) use ($startDate, $endDate) {
-            $query->whereBetween('start_date', [$startDate, $endDate])
-                ->orWhereBetween('end_date', [$startDate, $endDate])
-                ->orWhere(function ($query) use ($startDate, $endDate) {
-                    $query->where('start_date', '<=', $startDate)
-                            ->where('end_date', '>=', $endDate);
-                });
-        });
-
-        // Optionally add staff_id condition if provided
-        if ($staffId !== null) {
-            $query->where('staff_id', $staffId);
-        }
-
-        // Retrieve the leave applications
-        $leaveApplications = $query->get();
-
-        return $leaveApplications;
-    }
 }
