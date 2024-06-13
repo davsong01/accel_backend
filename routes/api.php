@@ -422,8 +422,12 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
 
         Route::prefix('rem')->group(function () {
             Route::get('generated/legal/documents', [LegalDocumentController::class, 'index']);
-            Route::get('construction/payments/search', [ConstructionPaymentController::class, 'search']);
-            Route::apiResource('construction/payments', ConstructionPaymentController::class);
+
+            Route::prefix('construction/payments')->group(function (){
+                Route::get('search', [ConstructionPaymentController::class, 'search']);
+                Route::apiResource('/', ConstructionPaymentController::class)->parameter('', 'payment');
+                Route::match(['PUT', 'PATCH'],'/{payment}/upgrade', [ConstructionPaymentController::class, 'upgrade']);
+            });
 
             Route::get('clearance/search', [ ClearanceController::class, 'search']);
             Route::apiResource('clearance', ClearanceController::class);
