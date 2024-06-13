@@ -107,9 +107,9 @@ class LeaveDateService
 
 
     /**
-     * Check if a user's leave application overlaps with any existing leave periods.
+     * Check if a staff's leave application overlaps with any existing leave periods.
      *
-     * @param int $userId The ID of the user applying for leave.
+     * @param int $staffId The ID of the staff applying for leave.
      * @param string $proposedStartDate The proposed start date of the new leave in 'Y-m-d' format.
      * @param string $proposedEndDate The proposed end date of the new leave in 'Y-m-d' format.
      * @return bool True if there is an overlap, false otherwise.
@@ -120,7 +120,7 @@ class LeaveDateService
         $startDate = Carbon::parse($proposedStartDate);
         $endDate = Carbon::parse($proposedEndDate);
 
-        // Query existing leave applications for the user within the proposed period
+        // Query existing leave applications for the staff within the proposed period
         $existingLeave = LeaveAndAbsenceManagement::where('staff_id', $staff_id)
             ->where(function ($query) use ($startDate, $endDate) {
                 $query->whereBetween('start_date', [$startDate, $endDate])
