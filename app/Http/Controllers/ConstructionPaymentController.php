@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UpgradeConstructionPaymentRequest;
 use App\Models\ConstructionPayment;
 use App\Models\ConstructionPaymentThread;
 use App\Models\Customer;
@@ -170,7 +171,7 @@ class ConstructionPaymentController extends Controller
     /**
      * Upgrade a payment.
      */
-    public function upgrade(Request $request, ConstructionPayment $payment)
+    public function upgrade(UpgradeConstructionPaymentRequest $request, ConstructionPayment $payment)
     {
         $user = auth()->user();
         $customer = Customer::find($payment->customer_id);
@@ -178,47 +179,9 @@ class ConstructionPaymentController extends Controller
 
         $balance_before = intval($request->total_amount) - intval($payment->amount_paid);
         $stagers = array_unique(array_merge($request->estate_construction_setting_ids ?? [], $payment->estate_construction_setting_ids ?? []));
-        
-        $validator = Validator::make($request->all(), [
-            'estate_construction_setting_ids' => ['required', 'array'],
-            'estate_construction_setting_ids.*' => "exists:estate_construction_settings,id,company_id,$company_id",
-            'chart_of_account_id' => ['sometimes', "exists:chart_of_accounts,id,company_id,$company_id"],
-            'amount_paid' => ['required_with:chart_of_account_id', 'min:1', 'integer', "lte:" . abs($balance_before)],
-            'payment_slip' => ['file', 'sometimes', 'mimetypes:image/*,application/pdf', 'max:512' ],
-            'current_building_phase_id' => ['sometimes', Rule::in($stagers)],
-            'description' => ['sometimes', 'string'],
-            'total_amount' => [
-                'required',
-                "min:$payment->total_amount",
-                'integer',
-                function ($attribute, $value, $fail) use ($stagers) {
-                    $totalPrice = 0;
-                    foreach ($stagers as $productId) {
-                        $product = EstateConstructionSetting::find($productId);
-                        if (!$product) {
-                            $fail('One or more products do not exist.');
-                            return;
-                        }
-                        $totalPrice += $product->price;
-                    }
-                    $totalPrice = round($totalPrice);
-
-                    if ($totalPrice != $value) {
-                        $fail("The total amount must be equal to the sum of stager prices which is $totalPrice.");
-                    }
-                },
-            ],
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'error' => $validator->messages()->first(),
-                'data' => null,
-            ], 412);
-        }
 
 
-        $attributes = $validator->validated();
+        $attributes = $request->validated();
         $attributes['estate_construction_setting_ids'] = $stagers;
         
         if ($request->hasFile('payment_slip')) {
