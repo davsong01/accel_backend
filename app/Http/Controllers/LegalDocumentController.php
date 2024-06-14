@@ -38,12 +38,16 @@ class LegalDocumentController extends Controller
         $params = $request->input();
 
         $types = LegalDocumentType::orderBy('created_at','DESC');
+        
         if(!empty($params['name'])){
             $types = $types->where('name', $params['name'])->pluck('id');
             return response()->json(['message' => 'Success', 'data' => $types], 200);
         }
 
-        $types = LegalDocumentType::where($params)->get();
+        if (!empty($params['type'])) {
+            $types = $types->where('type', $params['type'])->pluck('id');
+        }
+       
         return response()->json(['message' => 'Success', 'data' => $types], 200);
     }
 

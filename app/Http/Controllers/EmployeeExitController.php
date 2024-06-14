@@ -113,7 +113,7 @@ class EmployeeExitController extends Controller
             'company_id' => $this->sessionDetails('company_id')
         ];
         $this->notify($data);
-
+        
         LogService::admin(auth()->user()->id, $staff->user->id, 'Create or update an employee exit, ' .  $request->reason . ' (' . $ee->id . ')', 'CREATE');
         return response()->json(['message' => 'Success', 'data' => []], 200);
     }
