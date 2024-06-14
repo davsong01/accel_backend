@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreConstructionPaymentRequest;
 use App\Http\Requests\UpgradeConstructionPaymentRequest;
 use App\Models\ConstructionPayment;
 use App\Models\ConstructionPaymentThread;
@@ -30,59 +31,16 @@ class ConstructionPaymentController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreConstructionPaymentRequest $request)
     {
         $company_id = $this->sessionDetails('company_id');
-
-        $validator = Validator::make($request->all(), [
-            'estate_construction_setting_ids' => ['required', 'array'],
-            'estate_construction_setting_ids.*' => "exists:estate_construction_settings,id,company_id,$company_id",
-            'customer_id' => ['required', "exists:customers,id,company_id,$company_id"],
-            'chart_of_account_id' => ['required', "exists:chart_of_accounts,id,company_id,$company_id"],
-            'contract_id' => ['required', "exists:customer_contracts,id,deleted_at,NULL,customer_id,$request->customer_id"],
-            'amount_paid' => ['required', 'min:1', 'integer', 'lte:total_amount'],
-            'payment_slip' => ['file', 'sometimes', 'mimetypes:image/*,application/pdf', 'max:512' ],
-            'current_building_phase_id' => [
-                'sometimes',
-                Rule::in($request->estate_construction_setting_ids)
-            ],
-            'description' => ['sometimes', 'string'],
-            'total_amount' => [
-                'required',
-                'min:1',
-                'integer',
-                function ($attribute, $value, $fail) use ($request) {
-                    $totalPrice = 0;
-                    foreach ($request->estate_construction_setting_ids as $productId) {
-                        $product = EstateConstructionSetting::find($productId);
-                        if (!$product) {
-                            $fail('One or more products do not exist.');
-                            return;
-                        }
-                        $totalPrice += $product->price;
-                    }
-                    $totalPrice = round($totalPrice);
-
-                    if ($totalPrice != $value) {
-                        $fail("The total amount must be equal to the sum of stager prices which is $totalPrice.");
-                    }
-                },
-            ],
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'error' => $validator->messages()->first(),
-                'data' => null,
-            ], 412);
-        }
 
         $user =  auth()->user();
         $customer = Customer::find($request->customer_id);
         $attributes = ['company_id' => $company_id, 'created_by_id' => auth()->user()->id];
 
 
-        $data = $validator->validated();
+        $data = $request->validated();
         $data = array_merge($data, $attributes);
         
         $created = ConstructionPayment::create($data);
