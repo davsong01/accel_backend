@@ -30,7 +30,7 @@ class LocationController extends Controller
         if (($locations->count() <= 0)) {
             return response()->json(['message' => 'No records found', 'data' => $locations], 200);
         }
-
+        
         return response()->json(['message' => 'Success', 'data' => $locations], 200);
     }
     /**

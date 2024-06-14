@@ -1008,7 +1008,7 @@ class CustomerContractController extends Controller
                 'data' => null,
             ], 412);
         }
-
+        
         if ($validator->fails()) {
             return response()->json([
                 'error' => $validator->messages()->first(),

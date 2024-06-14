@@ -95,7 +95,7 @@ class MessageTransactionController extends Controller
         $data = Arr::except($data, ['name']);
 
         $mes = MessageTransaction::create($data);
-
+        
         // Create QA Emaii;
         // $data['recipient'] = 'quality@consode.com';
         // $qa = MessageTransaction::create($data);
