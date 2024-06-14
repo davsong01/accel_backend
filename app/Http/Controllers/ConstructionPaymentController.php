@@ -177,8 +177,8 @@ class ConstructionPaymentController extends Controller
         $company_id = $this->sessionDetails('company_id');
 
         $balance_before = intval($request->total_amount) - intval($payment->amount_paid);
-        $stagers = array_unique(array_merge($request->estate_construction_setting_ids ?? [], $payment->estate_construction_setting_ids ?? []));       
-
+        $stagers = array_unique(array_merge($request->estate_construction_setting_ids ?? [], $payment->estate_construction_setting_ids ?? []));
+        
         $validator = Validator::make($request->all(), [
             'estate_construction_setting_ids' => ['required', 'array'],
             'estate_construction_setting_ids.*' => "exists:estate_construction_settings,id,company_id,$company_id",
@@ -191,9 +191,9 @@ class ConstructionPaymentController extends Controller
                 'required',
                 "min:$payment->total_amount",
                 'integer',
-                function ($attribute, $value, $fail) use ($request, $payment) {
+                function ($attribute, $value, $fail) use ($stagers) {
                     $totalPrice = 0;
-                    foreach ($request->estate_construction_setting_ids as $productId) {
+                    foreach ($stagers as $productId) {
                         $product = EstateConstructionSetting::find($productId);
                         if (!$product) {
                             $fail('One or more products do not exist.');
@@ -216,6 +216,7 @@ class ConstructionPaymentController extends Controller
                 'data' => null,
             ], 412);
         }
+
 
         $attributes = $validator->validated();
         $attributes['estate_construction_setting_ids'] = $stagers;
@@ -255,6 +256,7 @@ class ConstructionPaymentController extends Controller
 
         LogService::admin($user->id, $customer->user->id, 'Delete a construction payment (' . $payment->id  . ')', 'DELETE');
 
+        $payment->payments()->delete();
         $payment->delete();
         return response()->json(['message' => 'Deleted Successfully.', 'data' => null], 200);
     }
