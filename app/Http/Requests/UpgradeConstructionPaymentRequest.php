@@ -54,14 +54,14 @@ class UpgradeConstructionPaymentRequest extends FormRequest
     {
         $company_id = $this->input('company_id');
         $payment = $this->payment;
-        $balance_before = intval($this->input('total_amount')) - intval($payment->amount_paid);
+        $balance_before = (floatval($this->input('total_amount')) - floatval($payment->amount_paid));
         $stagers = array_unique(array_merge($this->input('estate_construction_setting_ids') ?? [], $payment->estate_construction_setting_ids ?? []));
 
         return[
             'total_amount' => [
                 'required',
                 "min:$payment->total_amount",
-                'integer',
+                'numeric',
                 function ($attribute, $value, $fail) use ($stagers) {
                     $totalPrice = 0;
                     $stagers = EstateConstructionSetting::whereIn('id', $stagers)->get();
@@ -73,7 +73,7 @@ class UpgradeConstructionPaymentRequest extends FormRequest
                         }
                         $totalPrice += $product->price;
                     }
-                    $totalPrice = round($totalPrice);
+                    $totalPrice;
 
                     if ($totalPrice != $value) {
                         $fail("The total amount must be equal to the sum of stager prices which is $totalPrice.");
@@ -87,7 +87,7 @@ class UpgradeConstructionPaymentRequest extends FormRequest
 
             'chart_of_account_id' => ['sometimes', "exists:chart_of_accounts,id,company_id,$company_id"],
 
-            'amount_paid' => ['required_with:chart_of_account_id', 'min:1', 'integer', "lte:" . abs($balance_before)],
+            'amount_paid' => ['required_with:chart_of_account_id', 'min:1', 'numeric', "lte:" . abs($balance_before)],
 
             'payment_slip' => ['file', 'sometimes', 'mimetypes:image/*,application/pdf', 'max:512' ],
 

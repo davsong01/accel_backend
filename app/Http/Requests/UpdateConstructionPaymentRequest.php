@@ -58,7 +58,7 @@ class UpdateConstructionPaymentRequest extends FormRequest
 
         return [
             'chart_of_account_id' => ['required_with:amount_paid', "exists:chart_of_accounts,id,company_id,$company_id"],
-            'amount_paid' => ['required_with:amount_paid', 'min:1', 'integer', "lte:$balance"],
+            'amount_paid' => ['required_with:amount_paid', 'min:1', 'numeric', "lte:$balance"],
             'payment_slip' => ['file', 'sometimes', 'mimetypes:image/*,application/pdf', 'max:512' ],
             'current_building_phase_id' => [
                 'sometimes',

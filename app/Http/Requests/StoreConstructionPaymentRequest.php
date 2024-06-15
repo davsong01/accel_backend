@@ -45,7 +45,7 @@ class StoreConstructionPaymentRequest extends FormRequest
             'total_amount' => [
                 'required',
                 'min:1',
-                'integer',
+                'numeric',
                 function ($attribute, $value, $fail) {
                     $totalPrice = 0;
                     $settingIds = $this->input('estate_construction_setting_ids', []);
@@ -54,7 +54,7 @@ class StoreConstructionPaymentRequest extends FormRequest
                     foreach ($stagers as $product) {
                         $totalPrice += $product->price;
                     }
-                    $totalPrice = round($totalPrice);
+                    $totalPrice;
 
                     if ($totalPrice != $value) {
                         $fail("The total amount must be equal to the sum of stager prices which is $totalPrice.");
@@ -79,7 +79,7 @@ class StoreConstructionPaymentRequest extends FormRequest
                     ->where('customer_id', $customer_id)
             ],
 
-            'amount_paid' => ['required', 'min:1', 'integer', 'lte:total_amount'],
+            'amount_paid' => ['required', 'min:1', 'numeric', 'lte:total_amount'],
 
             'payment_slip' => ['file', 'sometimes', 'mimetypes:image/*,application/pdf', 'max:512'],
 
