@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreConstructionPaymentRequest;
+use App\Http\Requests\UpdateConstructionPaymentRequest;
 use App\Http\Requests\UpgradeConstructionPaymentRequest;
 use App\Models\ConstructionPayment;
 use App\Models\ConstructionPaymentThread;
@@ -74,31 +75,15 @@ class ConstructionPaymentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, ConstructionPayment $payment)
+    public function update(UpdateConstructionPaymentRequest $request, ConstructionPayment $payment)
     {
         $user = auth()->user();
         $customer = Customer::find($payment->customer_id);
         $company_id = $this->sessionDetails('company_id');
         $balance = intval($payment->total_amount) - intval($payment->amount_paid);
 
-        $validator = Validator::make($request->all(), [
-            'chart_of_account_id' => ['required_with:amount_paid', "exists:chart_of_accounts,id,company_id,$company_id"],
-            'amount_paid' => ['required_with:amount_paid', 'min:1', 'integer', "lte:$balance"],
-            'payment_slip' => ['file', 'sometimes', 'mimetypes:image/*,application/pdf', 'max:512' ],
-            'current_building_phase_id' => [
-                'sometimes',
-                Rule::in($payment->estate_construction_setting_ids)
-            ]
-        ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'error' => $validator->messages()->first(),
-                'data' => null,
-            ], 412);
-        }
-
-        $attributes = array_merge($validator->validated(), ['company_id' => $company_id, 'created_by_id' => auth()->user()->id]);
+        $attributes = array_merge($request->validated(), ['company_id' => $company_id, 'created_by_id' => auth()->user()->id]);
 
         if ($request->hasFile('payment_slip')) {
             $filepath = $this->uploadProtectedFile($attributes['payment_slip'], 'payment_slips')['filepath'];
