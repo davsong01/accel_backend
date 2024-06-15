@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreConstructionPaymentRequest;
+use App\Http\Requests\UpdateConstructionPaymentRequest;
+use App\Http\Requests\UpgradeConstructionPaymentRequest;
 use App\Models\ConstructionPayment;
 use App\Models\ConstructionPaymentThread;
 use App\Models\Customer;
@@ -29,59 +32,16 @@ class ConstructionPaymentController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreConstructionPaymentRequest $request)
     {
         $company_id = $this->sessionDetails('company_id');
-
-        $validator = Validator::make($request->all(), [
-            'estate_construction_setting_ids' => ['required', 'array'],
-            'estate_construction_setting_ids.*' => "exists:estate_construction_settings,id,company_id,$company_id",
-            'customer_id' => ['required', "exists:customers,id,company_id,$company_id"],
-            'chart_of_account_id' => ['required', "exists:chart_of_accounts,id,company_id,$company_id"],
-            'contract_id' => ['required', "exists:customer_contracts,id,deleted_at,NULL,customer_id,$request->customer_id"],
-            'amount_paid' => ['required', 'min:1', 'integer', 'lte:total_amount'],
-            'payment_slip' => ['file', 'sometimes', 'mimetypes:image/*,application/pdf', 'max:512' ],
-            'current_building_phase_id' => [
-                'sometimes',
-                Rule::in($request->estate_construction_setting_ids)
-            ],
-            'description' => ['sometimes', 'string'],
-            'total_amount' => [
-                'required',
-                'min:1',
-                'integer',
-                function ($attribute, $value, $fail) use ($request) {
-                    $totalPrice = 0;
-                    foreach ($request->estate_construction_setting_ids as $productId) {
-                        $product = EstateConstructionSetting::find($productId);
-                        if (!$product) {
-                            $fail('One or more products do not exist.');
-                            return;
-                        }
-                        $totalPrice += $product->price;
-                    }
-                    $totalPrice = round($totalPrice);
-
-                    if ($totalPrice != $value) {
-                        $fail("The total amount must be equal to the sum of stager prices which is $totalPrice.");
-                    }
-                },
-            ],
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'error' => $validator->messages()->first(),
-                'data' => null,
-            ], 412);
-        }
 
         $user =  auth()->user();
         $customer = Customer::find($request->customer_id);
         $attributes = ['company_id' => $company_id, 'created_by_id' => auth()->user()->id];
 
 
-        $data = $validator->validated();
+        $data = $request->validated();
         $data = array_merge($data, $attributes);
         
         $created = ConstructionPayment::create($data);
@@ -115,31 +75,15 @@ class ConstructionPaymentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, ConstructionPayment $payment)
+    public function update(UpdateConstructionPaymentRequest $request, ConstructionPayment $payment)
     {
         $user = auth()->user();
         $customer = Customer::find($payment->customer_id);
         $company_id = $this->sessionDetails('company_id');
         $balance = intval($payment->total_amount) - intval($payment->amount_paid);
 
-        $validator = Validator::make($request->all(), [
-            'chart_of_account_id' => ['required_with:amount_paid', "exists:chart_of_accounts,id,company_id,$company_id"],
-            'amount_paid' => ['required_with:amount_paid', 'min:1', 'integer', "lte:$balance"],
-            'payment_slip' => ['file', 'sometimes', 'mimetypes:image/*,application/pdf', 'max:512' ],
-            'current_building_phase_id' => [
-                'sometimes',
-                Rule::in($payment->estate_construction_setting_ids)
-            ]
-        ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'error' => $validator->messages()->first(),
-                'data' => null,
-            ], 412);
-        }
-
-        $attributes = array_merge($validator->validated(), ['company_id' => $company_id, 'created_by_id' => auth()->user()->id]);
+        $attributes = array_merge($request->validated(), ['company_id' => $company_id, 'created_by_id' => auth()->user()->id]);
 
         if ($request->hasFile('payment_slip')) {
             $filepath = $this->uploadProtectedFile($attributes['payment_slip'], 'payment_slips')['filepath'];
@@ -170,54 +114,17 @@ class ConstructionPaymentController extends Controller
     /**
      * Upgrade a payment.
      */
-    public function upgrade(Request $request, ConstructionPayment $payment)
+    public function upgrade(UpgradeConstructionPaymentRequest $request, ConstructionPayment $payment)
     {
         $user = auth()->user();
         $customer = Customer::find($payment->customer_id);
         $company_id = $this->sessionDetails('company_id');
 
         $balance_before = intval($request->total_amount) - intval($payment->amount_paid);
-        $stagers = array_unique(array_merge($request->estate_construction_setting_ids ?? [], $payment->estate_construction_setting_ids ?? []));       
+        $stagers = array_unique(array_merge($request->estate_construction_setting_ids ?? [], $payment->estate_construction_setting_ids ?? []));
 
-        $validator = Validator::make($request->all(), [
-            'estate_construction_setting_ids' => ['required', 'array'],
-            'estate_construction_setting_ids.*' => "exists:estate_construction_settings,id,company_id,$company_id",
-            'chart_of_account_id' => ['sometimes', "exists:chart_of_accounts,id,company_id,$company_id"],
-            'amount_paid' => ['required_with:chart_of_account_id', 'min:1', 'integer', "lte:" . abs($balance_before)],
-            'payment_slip' => ['file', 'sometimes', 'mimetypes:image/*,application/pdf', 'max:512' ],
-            'current_building_phase_id' => ['sometimes', Rule::in($stagers)],
-            'description' => ['sometimes', 'string'],
-            'total_amount' => [
-                'required',
-                "min:$payment->total_amount",
-                'integer',
-                function ($attribute, $value, $fail) use ($request, $payment) {
-                    $totalPrice = 0;
-                    foreach ($request->estate_construction_setting_ids as $productId) {
-                        $product = EstateConstructionSetting::find($productId);
-                        if (!$product) {
-                            $fail('One or more products do not exist.');
-                            return;
-                        }
-                        $totalPrice += $product->price;
-                    }
-                    $totalPrice = round($totalPrice);
 
-                    if ($totalPrice != $value) {
-                        $fail("The total amount must be equal to the sum of stager prices which is $totalPrice.");
-                    }
-                },
-            ],
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'error' => $validator->messages()->first(),
-                'data' => null,
-            ], 412);
-        }
-
-        $attributes = $validator->validated();
+        $attributes = $request->validated();
         $attributes['estate_construction_setting_ids'] = $stagers;
         
         if ($request->hasFile('payment_slip')) {
@@ -255,6 +162,7 @@ class ConstructionPaymentController extends Controller
 
         LogService::admin($user->id, $customer->user->id, 'Delete a construction payment (' . $payment->id  . ')', 'DELETE');
 
+        $payment->payments()->delete();
         $payment->delete();
         return response()->json(['message' => 'Deleted Successfully.', 'data' => null], 200);
     }

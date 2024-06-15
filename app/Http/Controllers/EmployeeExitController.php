@@ -150,7 +150,8 @@ class EmployeeExitController extends Controller
             ], 412);
         }
 
-        $employeeExit->update($validator->validated());
+        $attributes = $validator->validated();
+        $employeeExit->update($attributes);
 
         $data = [
             'title' => 'Exit application',
@@ -161,6 +162,10 @@ class EmployeeExitController extends Controller
             'company_id' => $this->sessionDetails('company_id')
         ];
         $this->notify($data);
+
+        if($attributes['status'] == 'APPROVED'){
+            $employeeExit->staff->user->update(['status' => 'inactive']);
+        }
 
         LogService::admin(auth()->user()->id, $employeeExit->staff->user->id, 'Update an employee exit to ' . $request->status . '(' . $employeeExit->id . ')', 'UPDATE');
         return response()->json(['message' => 'Successfully updated', 'data' => $employeeExit], 200);
