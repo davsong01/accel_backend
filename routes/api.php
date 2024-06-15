@@ -224,6 +224,8 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('sample-bulk-department-import', [DepartmentController::class, 'sampleBulkDepartment']);
         Route::post('import-bulk-department', [DepartmentController::class, 'importBulkDepartment']);
 
+        Route::get('get-leave-dates', [LeaveAndAbsenceManagementController::class, 'getLeaveDates']);
+
         Route::get('leave-and-absence/{id?}', [LeaveAndAbsenceManagementController::class, 'index']);
         Route::get('single-staff-leave-and-absence/{staff_id}', [LeaveAndAbsenceManagementController::class, 'staffLeaveAndAbsence']);
         Route::post('create-leave-and-absence', [LeaveAndAbsenceManagementController::class, 'store']);
