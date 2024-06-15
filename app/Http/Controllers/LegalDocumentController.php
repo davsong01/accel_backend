@@ -45,7 +45,7 @@ class LegalDocumentController extends Controller
         }
 
         if (!empty($params['type'])) {
-            $types = $types->where('type', $params['type'])->pluck('id');
+            $types = $types->where('type', $params['type'])->get();
         }
        
         return response()->json(['message' => 'Success', 'data' => $types], 200);
