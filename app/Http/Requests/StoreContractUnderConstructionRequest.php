@@ -8,7 +8,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Validation\Rule;
 
-class StoreConstructionPaymentRequest extends FormRequest
+class StoreContractUnderConstructionRequest extends FormRequest
 {
     /**
      * Indicates if the validator should stop on the first rule failure.
@@ -74,6 +74,7 @@ class StoreConstructionPaymentRequest extends FormRequest
 
             'contract_id' => [
                 'required',
+                'unique:contract_under_constructions,contract_id',
                 Rule::exists('customer_contracts', 'id')
                     ->whereNull('deleted_at')
                     ->where('customer_id', $customer_id)
