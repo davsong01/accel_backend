@@ -2,22 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreConstructionPaymentRequest;
-use App\Http\Requests\UpdateConstructionPaymentRequest;
-use App\Http\Requests\UpgradeConstructionPaymentRequest;
-use App\Models\ConstructionPayment;
-use App\Models\ConstructionPaymentThread;
+use App\Http\Requests\StoreContractUnderConstructionRequest;
+use App\Http\Requests\UpdateContractUnderConstructionRequest;
+use App\Http\Requests\UpgradeContractUnderConstructionRequest;
+use App\Models\ContractUnderConstruction;
 use App\Models\Customer;
-use App\Models\Estate;
-use App\Models\EstateConstructionSetting;
 use App\Models\User;
 use App\Services\LogService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 
-class ConstructionPaymentController extends Controller
+class ContractUnderConstructionController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -25,14 +20,14 @@ class ConstructionPaymentController extends Controller
     public function index()
     {
         $company_id = $this->sessionDetails('company_id');
-        $list = ConstructionPayment::where('company_id', $company_id)->latest()->paginate();
+        $list = ContractUnderConstruction::where('company_id', $company_id)->latest()->paginate();
         return response()->json(['message' => 'Success', 'data' => $list], 200);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreConstructionPaymentRequest $request)
+    public function store(StoreContractUnderConstructionRequest $request)
     {
         $company_id = $this->sessionDetails('company_id');
 
@@ -44,7 +39,7 @@ class ConstructionPaymentController extends Controller
         $data = $request->validated();
         $data = array_merge($data, $attributes);
         
-        $created = ConstructionPayment::create($data);
+        $created = ContractUnderConstruction::create($data);
 
         if ($request->hasFile('payment_slip')) {
             $filepath = $this->uploadProtectedFile($attributes['payment_slip'], 'payment_slips')['filepath'];
@@ -67,20 +62,20 @@ class ConstructionPaymentController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(ConstructionPayment $payment)
+    public function show(ContractUnderConstruction $contract)
     {
-        return response()->json(['message' => 'Fetched successfully', 'data' => $payment], 200);
+        return response()->json(['message' => 'Fetched successfully', 'data' => $contract], 200);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateConstructionPaymentRequest $request, ConstructionPayment $payment)
+    public function update(UpdateContractUnderConstructionRequest $request, ContractUnderConstruction $contract)
     {
         $user = auth()->user();
-        $customer = Customer::find($payment->customer_id);
+        $customer = Customer::find($contract->customer_id);
         $company_id = $this->sessionDetails('company_id');
-        $balance = intval($payment->total_amount) - intval($payment->amount_paid);
+        $balance = intval($contract->total_amount) - intval($contract->amount_paid);
 
 
         $attributes = array_merge($request->validated(), ['company_id' => $company_id, 'created_by_id' => auth()->user()->id]);
@@ -93,35 +88,35 @@ class ConstructionPaymentController extends Controller
         $threads = array_merge(
             $attributes,
             [
-                'balance_before' => $payment->total_amount - $payment->amount_paid,
+                'balance_before' => $contract->total_amount - $contract->amount_paid,
                 'balance_after' =>  $balance - $request->amount_paid,
-                'estate_construction_setting_ids' => $payment->estate_construction_setting_ids
+                'estate_construction_setting_ids' => $contract->estate_construction_setting_ids
             ]
         );
 
         if(isset($attributes['amount_paid'])){
-            $payment->payments()->create($threads);
-            $payment->update(['amount_paid' => $payment->amount_paid + $request->amount_paid]);
+            $contract->payments()->create($threads);
+            $contract->update(['amount_paid' => $contract->amount_paid + $request->amount_paid]);
             }else {
-            $payment->update($attributes);  
+            $contract->update($attributes);  
         }
         
 
-        LogService::admin($user->id, $customer->user->id, 'Updated a construction payment (' . $payment->id  . ')', 'UPDATE');
-        return response()->json(['message' => 'Updated successfully', 'data' => $payment], 200);
+        LogService::admin($user->id, $customer->user->id, 'Updated a construction payment (' . $contract->id  . ')', 'UPDATE');
+        return response()->json(['message' => 'Updated successfully', 'data' => $contract], 200);
     }
 
     /**
      * Upgrade a payment.
      */
-    public function upgrade(UpgradeConstructionPaymentRequest $request, ConstructionPayment $payment)
+    public function upgrade(UpgradeContractUnderConstructionRequest $request, ContractUnderConstruction $contract)
     {
         $user = auth()->user();
-        $customer = Customer::find($payment->customer_id);
+        $customer = Customer::find($contract->customer_id);
         $company_id = $this->sessionDetails('company_id');
 
-        $balance_before = intval($request->total_amount) - intval($payment->amount_paid);
-        $stagers = array_unique(array_merge($request->estate_construction_setting_ids ?? [], $payment->estate_construction_setting_ids ?? []));
+        $balance_before = intval($request->total_amount) - intval($contract->amount_paid);
+        $stagers = array_unique(array_merge($request->estate_construction_setting_ids ?? [], $contract->estate_construction_setting_ids ?? []));
 
 
         $attributes = $request->validated();
@@ -133,8 +128,8 @@ class ConstructionPaymentController extends Controller
         }
 
         if(isset($attributes['amount_paid']))
-            $attributes['amount_paid'] = $payment->amount_paid + $request->amount_paid; // sum old amount + new amount paid
-        $payment->update($attributes);
+            $attributes['amount_paid'] = $contract->amount_paid + $request->amount_paid; // sum old amount + new amount paid
+        $contract->update($attributes);
 
         $threads = [
             'balance_before' => $balance_before,
@@ -145,25 +140,25 @@ class ConstructionPaymentController extends Controller
 
         if(isset($threads['amount_paid'])){
             $threads['amount_paid'] = $request->amount_paid; // ensure save the amount actually paid
-            $payment->payments()->create($threads);
+            $contract->payments()->create($threads);
         }
     
-        LogService::admin($user->id, $customer->user->id, 'Upgrade a construction payment (' . $payment->id  . ')', 'UPDATE');
-        return response()->json(['message' => 'Upgrade successfully', 'data' => $payment], 200);
+        LogService::admin($user->id, $customer->user->id, 'Upgrade a construction payment (' . $contract->id  . ')', 'UPDATE');
+        return response()->json(['message' => 'Upgrade successfully', 'data' => $contract], 200);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(ConstructionPayment $payment)
+    public function destroy(ContractUnderConstruction $contract)
     {
         $user = auth()->user();
-        $customer = Customer::find($payment->customer_id);
+        $customer = Customer::find($contract->customer_id);
 
-        LogService::admin($user->id, $customer->user->id, 'Delete a construction payment (' . $payment->id  . ')', 'DELETE');
+        LogService::admin($user->id, $customer->user->id, 'Delete a construction payment (' . $contract->id  . ')', 'DELETE');
 
-        $payment->payments()->delete();
-        $payment->delete();
+        $contract->payments()->delete();
+        $contract->delete();
         return response()->json(['message' => 'Deleted Successfully.', 'data' => null], 200);
     }
 
@@ -181,7 +176,7 @@ class ConstructionPaymentController extends Controller
             unset($params['created_by']);
         }
 
-        $query = ConstructionPayment::where('company_id', $company_id)->where($params);
+        $query = ContractUnderConstruction::where('company_id', $company_id)->where($params);
 
         $from = $request->input('from');
         $to = $request->input('to');

@@ -50,7 +50,7 @@ use App\Http\Controllers\PropertyTypeDetailsController;
 use App\Http\Controllers\AccountClassificationController;
 use App\Http\Controllers\ChangeOfOwnershipController;
 use App\Http\Controllers\ClearanceController;
-use App\Http\Controllers\ConstructionPaymentController;
+use App\Http\Controllers\ContractUnderConstructionController;
 use App\Http\Controllers\ContractCancellationController;
 use App\Http\Controllers\CustomerRefundController;
 use App\Http\Controllers\LegalDocumentTemplateController;
@@ -425,10 +425,10 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::prefix('rem')->group(function () {
             Route::get('generated/legal/documents', [LegalDocumentController::class, 'index']);
 
-            Route::prefix('construction/payments')->group(function (){
-                Route::get('search', [ConstructionPaymentController::class, 'search']);
-                Route::apiResource('/', ConstructionPaymentController::class)->parameter('', 'payment');
-                Route::match(['PUT', 'PATCH'],'/{payment}/upgrade', [ConstructionPaymentController::class, 'upgrade']);
+            Route::prefix('contract-under-construction/payments')->group(function (){
+                Route::get('search', [ContractUnderConstructionController::class, 'search']);
+                Route::apiResource('/', ContractUnderConstructionController::class)->parameter('', 'contract');
+                Route::match(['PUT', 'PATCH'],'/{contract}/upgrade', [ContractUnderConstructionController::class, 'upgrade']);
             });
 
             Route::get('clearance/search', [ ClearanceController::class, 'search']);

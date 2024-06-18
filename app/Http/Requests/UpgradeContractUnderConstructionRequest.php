@@ -2,14 +2,14 @@
 
 namespace App\Http\Requests;
 
-use App\Models\ConstructionPayment;
+use App\Models\ContractUnderConstruction;
 use App\Models\EstateConstructionSetting;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Validation\Rule;
 
-class UpgradeConstructionPaymentRequest extends FormRequest
+class UpgradeContractUnderConstructionRequest extends FormRequest
 {
     /**
      * Indicates if the validator should stop on the first rule failure.
@@ -36,10 +36,10 @@ class UpgradeConstructionPaymentRequest extends FormRequest
     {
         $data = parent::all($keys);
 
-        // Merge the payment data into the request data
-        $payment = $this->route('payment');
-        if ($payment instanceof ConstructionPayment) {
-            $data = array_merge($data, ['payment' => $payment]);
+        // Merge the contract data into the request data
+        $contract = $this->route('contract');
+        if ($contract instanceof ContractUnderConstruction) {
+            $data = array_merge($data, ['contract' => $contract]);
         }
 
         return $data;
@@ -53,15 +53,15 @@ class UpgradeConstructionPaymentRequest extends FormRequest
     public function rules(): array
     {
         $company_id = $this->input('company_id');
-        $payment = $this->payment;
-        $balance_before = intval($this->input('total_amount')) - intval($payment->amount_paid);
-        $stagers = array_unique(array_merge($this->input('estate_construction_setting_ids') ?? [], $payment->estate_construction_setting_ids ?? []));
+        $contract = $this->contract;
+        $balance_before = (floatval($this->input('total_amount')) - floatval($contract->amount_paid));
+        $stagers = array_unique(array_merge($this->input('estate_construction_setting_ids') ?? [], $contract->estate_construction_setting_ids ?? []));
 
         return[
             'total_amount' => [
                 'required',
-                "min:$payment->total_amount",
-                'integer',
+                "min:$contract->total_amount",
+                'numeric',
                 function ($attribute, $value, $fail) use ($stagers) {
                     $totalPrice = 0;
                     $stagers = EstateConstructionSetting::whereIn('id', $stagers)->get();
@@ -73,7 +73,7 @@ class UpgradeConstructionPaymentRequest extends FormRequest
                         }
                         $totalPrice += $product->price;
                     }
-                    $totalPrice = round($totalPrice);
+                    $totalPrice;
 
                     if ($totalPrice != $value) {
                         $fail("The total amount must be equal to the sum of stager prices which is $totalPrice.");
@@ -87,7 +87,7 @@ class UpgradeConstructionPaymentRequest extends FormRequest
 
             'chart_of_account_id' => ['sometimes', "exists:chart_of_accounts,id,company_id,$company_id"],
 
-            'amount_paid' => ['required_with:chart_of_account_id', 'min:1', 'integer', "lte:" . abs($balance_before)],
+            'amount_paid' => ['required_with:chart_of_account_id', 'min:1', 'numeric', "lte:" . abs($balance_before)],
 
             'payment_slip' => ['file', 'sometimes', 'mimetypes:image/*,application/pdf', 'max:512' ],
 

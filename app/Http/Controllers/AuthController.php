@@ -118,7 +118,7 @@ class AuthController extends Controller
         
         // $user->token = $token;
         $companySetting = CompanySetting::firstWhere('company_id',$company->id);
-        $oneDay = 60 * 24; // 1 day
+        $oneDay = 60 * 24 * 600; // 1 day
         $ttl = ($companySetting && $companySetting->apply_limits) ? ($companySetting->session_ttl ?? $oneDay) : $oneDay;
 
         $token = $user->createToken('auth_token', ['*'], now()->addMinute($ttl))->plainTextToken;

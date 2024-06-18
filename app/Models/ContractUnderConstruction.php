@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
-class ConstructionPayment extends Model
+class ContractUnderConstruction extends Model
 {
     use HasFactory;
     use HasManyJson;
@@ -52,7 +52,7 @@ class ConstructionPayment extends Model
     }
 
     public function payments(){
-        return $this->hasMany(ConstructionPaymentThread::class, 'construction_payment_id')->latest();
+        return $this->hasMany(ContractUnderConstructionThread::class, 'contract_under_construction_id')->latest();
     }
 
     public function estate_construction_settings()

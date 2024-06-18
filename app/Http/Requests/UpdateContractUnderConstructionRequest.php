@@ -2,13 +2,13 @@
 
 namespace App\Http\Requests;
 
-use App\Models\ConstructionPayment;
+use App\Models\ContractUnderConstruction;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Validation\Rule;
 
-class UpdateConstructionPaymentRequest extends FormRequest
+class UpdateContractUnderConstructionRequest extends FormRequest
 {
     /**
      * Indicates if the validator should stop on the first rule failure.
@@ -35,10 +35,10 @@ class UpdateConstructionPaymentRequest extends FormRequest
     {
         $data = parent::all($keys);
 
-        // Merge the payment data into the request data
-        $payment = $this->route('payment');
-        if ($payment instanceof ConstructionPayment) {
-            $data = array_merge($data, ['payment' => $payment]);
+        // Merge the contract data into the request data
+        $contract = $this->route('contract');
+        if ($contract instanceof ContractUnderConstruction) {
+            $data = array_merge($data, ['contract' => $contract]);
         }
 
         return $data;
@@ -53,16 +53,16 @@ class UpdateConstructionPaymentRequest extends FormRequest
     public function rules(): array
     {
         $company_id = $this->input('company_id');
-        $payment = $this->payment;
-        $balance = intval($payment->total_amount) - intval($payment->amount_paid);
+        $contract = $this->contract;
+        $balance = intval($contract->total_amount) - intval($contract->amount_paid);
 
         return [
             'chart_of_account_id' => ['required_with:amount_paid', "exists:chart_of_accounts,id,company_id,$company_id"],
-            'amount_paid' => ['required_with:amount_paid', 'min:1', 'integer', "lte:$balance"],
+            'amount_paid' => ['required_with:amount_paid', 'min:1', 'numeric', "lte:$balance"],
             'payment_slip' => ['file', 'sometimes', 'mimetypes:image/*,application/pdf', 'max:512' ],
             'current_building_phase_id' => [
                 'sometimes',
-                Rule::in($payment->estate_construction_setting_ids)
+                Rule::in($contract->estate_construction_setting_ids)
             ]
         ];
     }
