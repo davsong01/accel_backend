@@ -2,14 +2,14 @@
 
 namespace App\Http\Requests;
 
-use App\Models\ConstructionPayment;
+use App\Models\ContractUnderConstruction;
 use App\Models\EstateConstructionSetting;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Validation\Rule;
 
-class UpgradeConstructionPaymentRequest extends FormRequest
+class UpgradeContractUnderConstructionRequest extends FormRequest
 {
     /**
      * Indicates if the validator should stop on the first rule failure.
@@ -36,10 +36,10 @@ class UpgradeConstructionPaymentRequest extends FormRequest
     {
         $data = parent::all($keys);
 
-        // Merge the payment data into the request data
-        $payment = $this->route('payment');
-        if ($payment instanceof ConstructionPayment) {
-            $data = array_merge($data, ['payment' => $payment]);
+        // Merge the contract data into the request data
+        $contract = $this->route('contract');
+        if ($contract instanceof ContractUnderConstruction) {
+            $data = array_merge($data, ['contract' => $contract]);
         }
 
         return $data;
@@ -53,14 +53,14 @@ class UpgradeConstructionPaymentRequest extends FormRequest
     public function rules(): array
     {
         $company_id = $this->input('company_id');
-        $payment = $this->payment;
-        $balance_before = (floatval($this->input('total_amount')) - floatval($payment->amount_paid));
-        $stagers = array_unique(array_merge($this->input('estate_construction_setting_ids') ?? [], $payment->estate_construction_setting_ids ?? []));
+        $contract = $this->contract;
+        $balance_before = (floatval($this->input('total_amount')) - floatval($contract->amount_paid));
+        $stagers = array_unique(array_merge($this->input('estate_construction_setting_ids') ?? [], $contract->estate_construction_setting_ids ?? []));
 
         return[
             'total_amount' => [
                 'required',
-                "min:$payment->total_amount",
+                "min:$contract->total_amount",
                 'numeric',
                 function ($attribute, $value, $fail) use ($stagers) {
                     $totalPrice = 0;
