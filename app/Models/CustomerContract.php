@@ -185,4 +185,9 @@ class CustomerContract extends Model
         return $this->hasOne(SeInfrastructure::class, 'transaction_id','sei_payment_transaction_id', );
     }
 
+    public function under_construction(): HasOne
+    {
+        return $this->hasOne(ContractUnderConstruction::class, 'contract_id');
+    }
+
 }
