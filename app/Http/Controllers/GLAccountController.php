@@ -4,13 +4,21 @@ namespace App\Http\Controllers;
 
 use App\Models\ChartOfAccount;
 use App\Models\User;
+use App\Services\TransactionService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class GLAccountController extends Controller
 {
-    
+
+    public function __construct(
+        private readonly TransactionService $transactionService,
+    )
+    {
+    }
+
     /**
      * Display a listing of the GL Account.
      */
@@ -24,35 +32,24 @@ class GLAccountController extends Controller
 
     /**
      * Display a listing of all the transactions on GL Account.
+     *
+     * @param Request $request
+     * @param ChartOfAccount $account
+     * @return JsonResponse
      */
     public function transactions(Request $request, ChartOfAccount $account): JsonResponse
     {
-        $query = $account->payments();
-
-        $from = $request->input('from');
-        $to = $request->input('to');
-        if ($from && $to) {
-            $from = Carbon::parse($request->input('from'));
-
-            $to = Carbon::parse($request->input('to'));
-            if ($to->format('H:i:s') == '00:00:00')
-                $to->endOfDay();
-
-            $query->whereBetween('created_at', [$from, $to]);
-        }
-
-        if ($name = $request->input('staff_name', null)) {
-            $company_id = $this->sessionDetails('company_id');
-            $users = User::with(['staff'])->where('company_id', $company_id)->whereNotNull('company_id')
-                ->where('first_name', 'LIKE', '%' . $name . '%')
-                ->orWhere('last_name', 'LIKE', '%' . $name . '%')
-                ->orWhere('middle_name', 'LIKE', '%' . $name . '%')->get();
-
-            $created_by_ids = $users->whereNotNull('staff.id')->pluck('staff.id')->toArray();
-            $query->whereIn('staff_id', $created_by_ids);
-        }
-
-        $transactions = $query->with(['staff:id,user_id,account_name,account_number'])->latest()->paginate(10);
+        $company_id = $this->sessionDetails('company_id');
+        $transactions = $this->transactionService
+            ->fetchAccountTransactionQuery(
+                account: $account,
+                companyId: $company_id,
+                request: $request
+            )
+            ->orderBy('created_at', 'desc')
+            ->paginate($request->has('per_page') ? $request->input('per_page') : 10)
+            ->withQueryString()
+            ->through(fn($item) => $this->transactionService->resolveTransactionInfo($item));
 
         return response()->json([
             'message' => 'Success',
@@ -63,16 +60,14 @@ class GLAccountController extends Controller
         ], 200);
     }
 
-
     /**
      * Search/filter GL Account
-     * 
+     *
      */
     public function search(Request $request)
     {
         $params = $request->only(['status', 'accounttype_id']);
         $company_id = $this->sessionDetails('company_id');
-
 
         $query = ChartOfAccount::with(['account_category', 'account_type'])->where('company_id', $company_id)->where($params);
 

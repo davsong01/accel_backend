@@ -9,7 +9,7 @@ use App\Models\CustomerContract;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Transaction extends Model
 {
@@ -44,8 +44,6 @@ class Transaction extends Model
     {
         return $this->hasMany(CustomerContract::class, 'id', 'customer_contract_id');
     }
-
-    
 
     public function estate()
     {
@@ -88,4 +86,13 @@ class Transaction extends Model
         return '';
     }
 
+    public function txn_purpose() : BelongsTo
+    {
+        return $this->belongsTo(TransactionPurpose::class);
+    }
+
+    public function txn_type() : BelongsTo
+    {
+        return $this->belongsTo(TransactionType::class);
+    }
 }

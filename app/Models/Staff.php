@@ -8,16 +8,18 @@ use App\Models\User;
 use App\Models\JobType;
 use App\Models\StaffRole;
 use Illuminate\Support\Carbon;
-use App\Models\CustomerContract;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\LeaveAndAbsenceManagement;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Staff extends Model
 {
     use HasFactory;
     protected $guarded = [];
-    
+
+    protected $table = 'staff';
+
     public function staffRoles()
     {
         return $this->hasMany(StaffRole::class, 'staff_id');
@@ -59,7 +61,7 @@ class Staff extends Model
     public function scopeRolesList($query){
         $rolesX = [];
         $roles = StaffRole::with('role')->where('staff_id', $this->id)->get();
-        
+
         foreach($roles as $r){
             if($r->role){
                 $rolesX[] =  [
@@ -70,9 +72,9 @@ class Staff extends Model
                             ];
 
             }
-          
+
         }
-       
+
         return $rolesX;
     }
 
@@ -88,6 +90,11 @@ class Staff extends Model
 
     public function job_title(){
         return $this->belongsTo(JobTitle::class, 'job_title_id');
+    }
+
+    public function company() : BelongsTo
+    {
+        return $this->belongsTo(Company::class);
     }
 
 }
