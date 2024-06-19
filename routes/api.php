@@ -98,12 +98,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
         }
     });
 
-   
-    
+
+
     // Route::get('generated-legal-documents/{filename}', function ($filename) {
     //     $filename = base64_decode($filename);
     //     $realpath = base_path() . '/uploads/generated-legal-documents' . '/' . $filename;
-        
+
     //     return response()->download($realpath);
     // });
 });
@@ -113,7 +113,7 @@ Route::get('uploads/{filename}', function ($filename) {
     $realpath = base_path() . '/uploads/' .  $filename;
 
     return response()->download($realpath);
-    
+
     try {
         return response()->download($realpath);
         //code...
@@ -166,7 +166,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::resource('building-type', BuildingTypeController::class);
         Route::get('sample-bulk-building-type-import', [BuildingTypeController::class, 'sampleBulkBuildingType']);
         Route::post('import-bulk-building-type', [BuildingTypeController::class, 'importBulkBuildingType']);
-        
+
         Route::get('sample-bulk-plotsizes-import', [PlotSizeController::class, 'sampleBulkPlotSize']);
         Route::post('import-bulk-plotsizes', [PlotSizeController::class, 'importBulkPlotSize']);
 
@@ -253,7 +253,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
 
         Route::get('customercontract/{contract_id}', [CustomerContractController::class, 'show']);
         Route::get('single-contract-payment-history/{contract_id}', [ContractPaymentController::class, 'contractPaymentHistory']);
-        
+
         Route::get('estate-property-type', [PropertyTypeDetailsController::class, 'index']);
 
         Route::get('get-leads', [CustomerController::class, 'getLeads']);
@@ -274,7 +274,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('single-customer-form-payment-details/{customer_id}', [CustomerContractController::class, 'singleCustomerFormDetails']);
         // Submit application form 2
         Route::post('customer-form-response', [CustomerFormController::class, 'store'])->name('application.form.submit');
-        
+
         Route::get('customer-form-response/{id?}', [CustomerFormController::class, 'index']);
         Route::get('approve-form2-request/{id?}', [CustomerFormController::class, 'approveForm2Request']);
         Route::post('decline-form2-request/{id?}', [CustomerFormController::class, 'declineForm2Request']);
@@ -386,22 +386,23 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
             Route::get('gl-account', 'index')->name('gl-account');
             Route::get('gl-account/search', 'search')->name('gl-account.search');
             Route::get('gl-account/{account}/transactions', 'transactions')->name('gl-account.transactions');
+            Route::get('gl-account/{account}/transactions/search', 'transactions')->name('gl-account.transactions.search');
         });
 
         Route::prefix('finance')->group(function(){
             Route::get('/', [FinanceController::class, 'index']);
             Route::get('transaction/type/search', [TransactionTypeController::class, 'search']);
             Route::apiResource('transaction/type', TransactionTypeController::class);
-            
+
             Route::get('transaction/purpose/search', [TransactionPurposeController::class, 'search']);
             Route::apiResource('transaction/purpose', TransactionPurposeController::class);
             Route::get('payment/mode/search', [PaymentModeController::class, 'search']);
             Route::apiResource('payment/mode', PaymentModeController::class);
         });
-        
+
         Route::get('audit/log', [LogController::class, 'audit']);
         Route::get('audit/log/search', [LogController::class, 'search']);
-        
+
         Route::prefix('hcm')->group(function(){
             Route::get('/', [HCMController::class, 'index']);
             Route::get('staffs/disengagement/search', [StaffDisengagementController::class, 'search']);
@@ -468,7 +469,7 @@ Route::group(['prefix' => 'customer', 'before' => 'customer'], function () {
         Route::get('details/{id}', [CustomerController::class, 'show']);
         Route::post('form-response', [CustomerFormController::class, 'store']);
         Route::get('form-response', [CustomerFormController::class, 'index']);
-        
+
         Route::get('get-countries', [GeneralController::class, 'getCountries']);
         Route::get('get-states', [GeneralController::class, 'getStates']);
         Route::get('get-lga', [GeneralController::class, 'getLgas']);
