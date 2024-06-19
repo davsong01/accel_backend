@@ -24,7 +24,7 @@ class HCMController extends Controller
             ->whereBetween('date_of_employment', [now()->subMonths(5)->startOfDay(), now()->addMonth(5)->endOfDay()])
             ->get();
 
-        return response()->json(['message' => Success, 'data' => [
+        return response()->json(['message' => 'Success', 'data' => [
             'total' => $totals,
             'anniversary' => $anniversary,
 

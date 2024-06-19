@@ -105,6 +105,6 @@ class PaymentModeController extends Controller
         }
 
         $modes = $query->latest()->paginate(20);
-        return response()->json(['message' => Success, 'data' => $modes], 200);
+        return response()->json(['message' => 'Success', 'data' => $modes], 200);
     }
 }

@@ -50,7 +50,7 @@ use App\Http\Controllers\PropertyTypeDetailsController;
 use App\Http\Controllers\AccountClassificationController;
 use App\Http\Controllers\ChangeOfOwnershipController;
 use App\Http\Controllers\ClearanceController;
-use App\Http\Controllers\ConstructionPaymentController;
+use App\Http\Controllers\ContractUnderConstructionController;
 use App\Http\Controllers\ContractCancellationController;
 use App\Http\Controllers\CustomerRefundController;
 use App\Http\Controllers\LegalDocumentTemplateController;
@@ -223,6 +223,8 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::resource('department', DepartmentController::class);
         Route::get('sample-bulk-department-import', [DepartmentController::class, 'sampleBulkDepartment']);
         Route::post('import-bulk-department', [DepartmentController::class, 'importBulkDepartment']);
+
+        Route::get('get-leave-dates', [LeaveAndAbsenceManagementController::class, 'getLeaveDates']);
 
         Route::get('leave-and-absence/{id?}', [LeaveAndAbsenceManagementController::class, 'index']);
         Route::get('single-staff-leave-and-absence/{staff_id}', [LeaveAndAbsenceManagementController::class, 'staffLeaveAndAbsence']);
@@ -423,8 +425,12 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
 
         Route::prefix('rem')->group(function () {
             Route::get('generated/legal/documents', [LegalDocumentController::class, 'index']);
-            Route::get('construction/payments/search', [ConstructionPaymentController::class, 'search']);
-            Route::apiResource('construction/payments', ConstructionPaymentController::class);
+
+            Route::prefix('contract-under-construction/payments')->group(function (){
+                Route::get('search', [ContractUnderConstructionController::class, 'search']);
+                Route::apiResource('/', ContractUnderConstructionController::class)->parameter('', 'contract');
+                Route::match(['PUT', 'PATCH'],'/{contract}/upgrade', [ContractUnderConstructionController::class, 'upgrade']);
+            });
 
             Route::get('clearance/search', [ ClearanceController::class, 'search']);
             Route::apiResource('clearance', ClearanceController::class);

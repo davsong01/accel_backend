@@ -13,9 +13,17 @@ use App\Models\LeaveAndAbsenceManagement;
 use App\Services\LogService;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use App\Services\LeaveDateService;
 
 class LeaveAndAbsenceManagementController extends Controller
 {
+    protected $leaveDateService;
+
+    public function __construct(LeaveDateService $leaveDateService)
+    {
+        $this->leaveDateService = $leaveDateService;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -34,6 +42,14 @@ class LeaveAndAbsenceManagementController extends Controller
 
         if (isset($request->status) && !empty($request->status)) {
             $lam = $lam->where('status', $request->status);
+        }
+
+        if($request->start_date && $request->end_date){
+            // Convert search dates to Carbon objects for comparison
+            $startDate = Carbon::parse($request->start_date)->startOfDay();
+            $endDate = Carbon::parse($request->end_date)->endOfDay();
+            // Query leave applications that were created within the specified range
+            $lam = $lam->whereBetween('created_at', [$startDate, $endDate]);
         }
 
         if (isset($id) && !empty($id)) {
@@ -128,13 +144,24 @@ class LeaveAndAbsenceManagementController extends Controller
         }
     }
 
+    public function getLeaveDates(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'start_date' => 'required',
+            'period' => 'required',
+        ]);
+        $leaveDays = $request->period;
+        $start = $request->start_date;
+        $leaveDates = $this->leaveDateService->calculateLeaveDates($start, $leaveDays, true, []);
+        return response()->json(['message' => 'Fetched Leave Dates Successfully', 'data' => $leaveDates], 200);
+    }
+
     public function store(Request $request, $internal = null)
     {
         $validator = Validator::make($request->all(), [
             'period' => 'required',
             'reason' => 'required',
             'start_date' => 'required',
-            'end_date' => 'required',
             'bypass_approval' => 'sometimes',
             'delegate_duty' => [
                 'required',
@@ -157,19 +184,39 @@ class LeaveAndAbsenceManagementController extends Controller
         }
 
         $start = Carbon::parse($request->start_date . ' 00:00:00');
-        $end = Carbon::parse($request->end_date . ' 23:59:00');
+        
+        $staff_id = $request->staff_id ?? Auth::user()->staff->id;
 
-        if ($start > $end) {
+        ###############################################
+        ############# Generate Leave Dates ############
+        ###############################################
+        $leaveDays = $request->period;
+        $leaveDates = $this->leaveDateService
+            ->calculateLeaveDates(
+                $start, 
+                $leaveDays, 
+                true, 
+                []
+            );
+        
+        ###############################################
+        ######### Check if there is an overlap ########
+        ###############################################
+        $check_overlap = $this->leaveDateService->hasLeaveOverlap(
+            $staff_id, 
+            $leaveDates["start_date"], 
+            $leaveDates["end_date"]
+        );
+        if ($check_overlap) {
             return response()->json([
-                'error' => 'Start date cannot be greater than end date',
+                'error' => 'You currently have an active leave.',
                 'data' => null,
-            ], 412);
+            ], 400);
         }
-
-        $period = $end->diffInDays($start);
+        ################## ENDS HERE ################
         $left = $this->getLeaveAndAbsencePeriodLeft($request->staff_id ?? Auth::user()->staff->id, $request->type, true);
 
-        if ($period > $left) {
+        if ($leaveDays > $left) {
             return response()->json([
                 'error' => 'You only have ' . $left . ' days left for ' . ucfirst($request->type),
                 'data' => null,
@@ -180,13 +227,11 @@ class LeaveAndAbsenceManagementController extends Controller
             $status = 'approved';
         }
 
-        $staff_id = $request->staff_id ?? Auth::user()->staff->id;
-
         $lam = LeaveAndAbsenceManagement::create([
             'staff_id' => $staff_id,
             'start_date' => $request->start_date,
-            'end_date' => $request->end_date,
-            'period' => $period,
+            'end_date' => $leaveDates["end_date"],
+            'period' => $leaveDays,
             'reason' => $request->reason,
             'type' => $request->type ?? 'leave',
             'delegate_duty' => $request->delegate_duty,

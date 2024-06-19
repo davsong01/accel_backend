@@ -49,7 +49,7 @@ class JobTitleController extends Controller
         $created = JobTitle::updateOrCreate($attributes);
 
         LogService::admin(auth()->user()->id, NULL, 'New job title added (' . $created->id . ')', 'CREATE');
-        return response()->json(['message' => Success, 'data' => $created], 200);
+        return response()->json(['message' => 'Success', 'data' => $created], 200);
     }
 
     public function getJobRoleByDepartmentId($id)
@@ -112,7 +112,7 @@ class JobTitleController extends Controller
     public function show(JobTitle $title)
     {
         $title->load(['department', 'company']);
-        return response()->json(['message' => Success, 'data' => $title], 200);
+        return response()->json(['message' => 'Success', 'data' => $title], 200);
     }
 
     public function edit(JobTitle $jobtitle)
@@ -143,7 +143,7 @@ class JobTitleController extends Controller
         $title->update($attributes);
 
         LogService::admin(auth()->user()->id, NULL, 'Update a job title (' . $title->id . ')', 'UPDATE');
-        return response()->json(['message' => Success, 'data' => $title->load(['department', 'company'])], 200);
+        return response()->json(['message' => 'Success', 'data' => $title->load(['department', 'company'])], 200);
     }
 
     /**
@@ -154,7 +154,7 @@ class JobTitleController extends Controller
         LogService::admin(auth()->user()->id, NULL, 'Delete a job title (' . $title->id . ')', 'DELETE');
 
         $title->delete();
-        return response()->json(['message' => Success, 'data' => null], 200);
+        return response()->json(['message' => 'Success', 'data' => null], 200);
     }
 
     /**
