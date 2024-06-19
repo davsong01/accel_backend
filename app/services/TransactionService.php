@@ -12,6 +12,14 @@ use \Illuminate\Database\Eloquent\Builder;
 class TransactionService
 {
 
+    /**
+     * Query builder for transaction filtering
+     *
+     * @param ChartOfAccount $account
+     * @param integer $companyId
+     * @param Request $request
+     * @return Builder
+     */
     public function fetchAccountTransactionQuery(ChartOfAccount $account, int $companyId, Request $request) : Builder
     {
         $from = $request->input('from');
@@ -50,6 +58,12 @@ class TransactionService
         return $query;
     }
 
+    /**
+     * resolve transaction info returned
+     *
+     * @param Transaction $txn
+     * @return array
+     */
     public function resolveTransactionInfo(Transaction $txn) : array
     {
         return [

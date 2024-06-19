@@ -32,6 +32,10 @@ class GLAccountController extends Controller
 
     /**
      * Display a listing of all the transactions on GL Account.
+     *
+     * @param Request $request
+     * @param ChartOfAccount $account
+     * @return JsonResponse
      */
     public function transactions(Request $request, ChartOfAccount $account): JsonResponse
     {
