@@ -226,11 +226,12 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
 
         Route::get('get-leave-dates', [LeaveAndAbsenceManagementController::class, 'getLeaveDates']);
 
-        Route::get('leave-and-absence/{id?}', [LeaveAndAbsenceManagementController::class, 'index']);
+        Route::get('leave-and-absence/{id?}', [LeaveAndAbsenceManagementController::class, 'index'])->name("view_leave");
         Route::get('single-staff-leave-and-absence/{staff_id}', [LeaveAndAbsenceManagementController::class, 'staffLeaveAndAbsence']);
         Route::post('create-leave-and-absence', [LeaveAndAbsenceManagementController::class, 'store']);
         Route::get('approve-leave-and-absence/{id}', [LeaveAndAbsenceManagementController::class, 'approveLeaveAndAbsence']);
         Route::get('decline-leave-and-absence/{id}', [LeaveAndAbsenceManagementController::class, 'declineLeaveAndAbsence']);
+        Route::get('employees-on-leave/{type}', [LeaveAndAbsenceManagementController::class, 'employeesOnLeave']);
 
         Route::get('advance-and-claims/{id?}', [AdvanceAndClaimsController::class, 'index']);
         Route::get('single-staff-advance-and-claims/{staff_id}', [AdvanceAndClaimsController::class, 'staffAdvanceAndClaims']);

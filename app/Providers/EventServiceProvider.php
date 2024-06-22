@@ -6,6 +6,10 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Event;
+use App\Events\LeaveCreated;
+use App\Listeners\SendLeaveCreatedNotification;
+use App\Events\LeaveStatusUpdated;
+use App\Listeners\SendLeaveStatusUpdatedNotification;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -17,6 +21,12 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         Registered::class => [
             SendEmailVerificationNotification::class,
+        ],
+        LeaveCreated::class => [
+            SendLeaveCreatedNotification::class,
+        ],
+        LeaveStatusUpdated::class => [
+            SendLeaveStatusUpdatedNotification::class,
         ],
     ];
 
