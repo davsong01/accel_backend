@@ -503,11 +503,10 @@ class MessageTransactionController extends Controller
                 config($providerX);
                 try {
                     Mail::to($message->recipient)->send(new MessageTransactionMail($message->toArray(), $providerX));
-
                     $message->update(['status' => 'sent']);
                 } catch (\Exception $e) {
-                    // dd($e->getMessage());
                     $message->update(['errors' => $e->getMessage()]);
+                    continue;
                 }
             }
         }
