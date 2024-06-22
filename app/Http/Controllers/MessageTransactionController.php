@@ -92,6 +92,7 @@ class MessageTransactionController extends Controller
         $data['subject'] = $this->getMessageContent($data)['subject'];
         $data['schedule_date'] = Carbon::now();
         $data['company_id'] = $this->sessionDetails('company_id') ??  $data['company_id'];
+        
         $data = Arr::except($data, ['name']);
 
         $mes = MessageTransaction::create($data);
