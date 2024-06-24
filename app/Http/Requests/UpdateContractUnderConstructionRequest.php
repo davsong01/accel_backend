@@ -63,7 +63,11 @@ class UpdateContractUnderConstructionRequest extends FormRequest
             'current_building_phase_id' => [
                 'sometimes',
                 Rule::in($contract->estate_construction_setting_ids)
-            ]
+            ],
+            'completed_building_phases' => ['sometimes', 'array'],
+            'completed_building_phases.*' => [
+                Rule::in($contract->estate_construction_setting_ids)
+            ],
         ];
     }
 
