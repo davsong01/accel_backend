@@ -8,6 +8,7 @@ use App\Models\Transaction;
 use App\Models\AccountCategory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ChartOfAccount extends Model
 {
@@ -39,5 +40,10 @@ class ChartOfAccount extends Model
 
     public function transactions(){
         return $this->hasMany(Transaction::class, 'account_id');
+    }
+
+    public function company() : BelongsTo
+    {
+        return $this->belongsTo(Company::class, 'company_id');
     }
 }

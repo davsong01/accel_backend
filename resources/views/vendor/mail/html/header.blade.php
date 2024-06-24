@@ -1,5 +1,5 @@
 <?php 
-    $logo = base_path() . '/uploads' . '/' . session('companySetting')->company_logo;
+    $logo = !empty( $company->company_logo) ? base_path() . '/uploads/' . session('companySetting')->company_logo : base_path() . '/uploads/' .'images/brands/logos/default.png';
 ?>
 @props(['url'])
 <tr>

@@ -47,11 +47,11 @@ class User extends Authenticatable
     {
         return $this->hasOne(Staff::class);
     }
-    
+
     public function getNextOfKinAttribute()
     {
         $next_of_kin = !empty($this->attributes['next_of_kin']) ? json_decode($this->attributes['next_of_kin'], true) : [];
-        
+
         return $next_of_kin;
     }
 
@@ -63,9 +63,14 @@ class User extends Authenticatable
 
     protected function avatar(): Attribute
     {
-        return Attribute::make( 
+        return Attribute::make(
             get: fn (string $value = null) => !empty($value) ? app('App\Http\Controllers\Controller')->encodeGeneralUploadedFile($value) : '',
         );
+    }
+
+    protected function getFullnameAttribute()
+    {
+        return trim("{$this->first_name} {$this->last_name} {$this->middle_name}");
     }
 
     public function city()

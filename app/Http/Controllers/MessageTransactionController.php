@@ -92,6 +92,7 @@ class MessageTransactionController extends Controller
         $data['subject'] = $this->getMessageContent($data)['subject'];
         $data['schedule_date'] = Carbon::now();
         $data['company_id'] = $this->sessionDetails('company_id') ??  $data['company_id'];
+        
         $data = Arr::except($data, ['name']);
 
         $mes = MessageTransaction::create($data);
@@ -502,11 +503,10 @@ class MessageTransactionController extends Controller
                 config($providerX);
                 try {
                     Mail::to($message->recipient)->send(new MessageTransactionMail($message->toArray(), $providerX));
-
                     $message->update(['status' => 'sent']);
                 } catch (\Exception $e) {
-                    // dd($e->getMessage());
                     $message->update(['errors' => $e->getMessage()]);
+                    continue;
                 }
             }
         }
