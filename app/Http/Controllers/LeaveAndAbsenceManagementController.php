@@ -14,6 +14,11 @@ use App\Services\LogService;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use App\Services\LeaveDateService;
+use App\Events\LeaveCreated;
+use App\Events\LeaveStatusUpdated;
+use App\Http\Responses\CustomResponse;
+use Illuminate\Support\Facades\Event;
+use DB;
 
 class LeaveAndAbsenceManagementController extends Controller
 {
@@ -65,9 +70,13 @@ class LeaveAndAbsenceManagementController extends Controller
             }
 
             if ($lam) {
-                return response()->json(['message' => 'Retrieved Successfully', 'data' => $lam], 200);
+                return CustomResponse::success(
+                    'Retrieved successfully', $lam->toArray(), 200
+                );
             } else {
-                return response()->json(['message' => 'No records found', 'data' => $lam], 200);
+                return CustomResponse::error(
+                    'No record found!', 404, $lam->toArray()
+                );
             }
         }
 
@@ -84,9 +93,13 @@ class LeaveAndAbsenceManagementController extends Controller
             }
         }
         if ($lam->count() > 0) {
-            return response()->json(['message' => 'Retrieved Successfully', 'data' => $lam], 200);
+            return CustomResponse::success(
+                'Retrieved successfully', $lam->toArray(), 200
+            );
         } else {
-            return response()->json(['message' => 'No records found', 'data' => $lam], 200);
+            return CustomResponse::error(
+                'No record found!', 404, $lam->toArray()
+            );
         }
     }
 
@@ -119,9 +132,13 @@ class LeaveAndAbsenceManagementController extends Controller
             }
 
             if ($lam) {
-                return response()->json(['message' => 'Retrieved Successfully', 'data' => $lam], 200);
+                return CustomResponse::success(
+                    'Retrieved successfully', $lam->toArray(), 200
+                );
             } else {
-                return response()->json(['message' => 'No records found', 'data' => $lam], 200);
+                return CustomResponse::error(
+                    'No record found!', 404, $lam->toArray()
+                );
             }
         }
 
@@ -138,9 +155,13 @@ class LeaveAndAbsenceManagementController extends Controller
             }
         }
         if ($lam->count() > 0) {
-            return response()->json(['message' => 'Retrieved Successfully', 'data' => $lam], 200);
+            return CustomResponse::success(
+                'Retrieved successfully', $lam->toArray(), 200
+            );
         } else {
-            return response()->json(['message' => 'No records found', 'data' => $lam], 200);
+            return CustomResponse::error(
+                'No record found!', 404, $lam->toArray()
+            );
         }
     }
 
@@ -153,7 +174,10 @@ class LeaveAndAbsenceManagementController extends Controller
         $leaveDays = $request->period;
         $start = $request->start_date;
         $leaveDates = $this->leaveDateService->calculateLeaveDates($start, $leaveDays, true, []);
-        return response()->json(['message' => 'Fetched Leave Dates Successfully', 'data' => $leaveDates], 200);
+        
+        return CustomResponse::success(
+            'Fetched Leave Dates Successfully', $leaveDates, 200
+        );
     }
 
     public function store(Request $request, $internal = null)
@@ -163,6 +187,7 @@ class LeaveAndAbsenceManagementController extends Controller
             'reason' => 'required',
             'start_date' => 'required',
             'bypass_approval' => 'sometimes',
+            'file_path' => "required|mimes:docx,doc,pdf|max:5120",
             'delegate_duty' => [
                 'required',
                 'exists:staff,id,company_id,' . $this->sessionDetails('company_id'),
@@ -177,148 +202,204 @@ class LeaveAndAbsenceManagementController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'error' => $validator->messages()->first(),
-                'data' => null,
-            ], 412);
-        }
-
-        $start = Carbon::parse($request->start_date . ' 00:00:00');
-        
-        $staff_id = $request->staff_id ?? Auth::user()->staff->id;
-
-        ###############################################
-        ############# Generate Leave Dates ############
-        ###############################################
-        $leaveDays = $request->period;
-        $leaveDates = $this->leaveDateService
-            ->calculateLeaveDates(
-                $start, 
-                $leaveDays, 
-                true, 
-                []
+            return CustomResponse::error(
+                $validator->messages()->first(), 412, []
             );
-        
-        ###############################################
-        ######### Check if there is an overlap ########
-        ###############################################
-        $check_overlap = $this->leaveDateService->hasLeaveOverlap(
-            $staff_id, 
-            $leaveDates["start_date"], 
-            $leaveDates["end_date"]
-        );
-        if ($check_overlap) {
-            return response()->json([
-                'error' => 'You currently have an active leave.',
-                'data' => null,
-            ], 400);
-        }
-        ################## ENDS HERE ################
-        $left = $this->getLeaveAndAbsencePeriodLeft($request->staff_id ?? Auth::user()->staff->id, $request->type, true);
-
-        if ($leaveDays > $left) {
-            return response()->json([
-                'error' => 'You only have ' . $left . ' days left for ' . ucfirst($request->type),
-                'data' => null,
-            ], 412);
         }
 
-        if (!empty($request->bypass_approval) && $request->bypass_approval == 'Yes') {
-            $status = 'approved';
+        DB::beginTransaction();
+
+        try{
+            $start = Carbon::parse($request->start_date . ' 00:00:00');
+            
+            $staff_id = $request->staff_id ?? Auth::user()->staff->id;
+
+            ###############################################
+            ############# Generate Leave Dates ############
+            ###############################################
+            $leaveDays = $request->period;
+            $leaveDates = $this->leaveDateService
+                ->calculateLeaveDates(
+                    $start, 
+                    $leaveDays, 
+                    true, 
+                    []
+                );
+            
+            ###############################################
+            ######### Check if there is an overlap ########
+            ###############################################
+            $check_overlap = $this->leaveDateService->hasLeaveOverlap(
+                $staff_id, 
+                $leaveDates["start_date"], 
+                $leaveDates["end_date"]
+            );
+            if ($check_overlap) {
+                return CustomResponse::error(
+                    'You currently have an active leave.', 400, []
+                );
+            }
+            ################## ENDS HERE ################
+            $left = $this->getLeaveAndAbsencePeriodLeft($request->staff_id ?? Auth::user()->staff->id, $request->type, true);
+
+            if ($leaveDays > $left) {
+                return CustomResponse::error(
+                    'You only have ' . $left . ' days left for ' . ucfirst($request->type), 412, []
+                );
+                
+            }
+
+            if (!empty($request->bypass_approval) && $request->bypass_approval == 'Yes') {
+                $status = 'approved';
+            }
+
+            // check if file exist
+            $filepath = "";
+            if($request->has("file_path")){
+                $filepath = $this->uploadProtectedFile($request->file_path, 'leave_application_documents')['filepath'];
+            }
+            $lam = LeaveAndAbsenceManagement::create([
+                'staff_id' => $staff_id,
+                'start_date' => $leaveDates["start_date"],
+                'end_date' => $leaveDates["end_date"],
+                'resumption_date' => $leaveDates["resumption_date"],
+                'period' => $leaveDays,
+                'reason' => $request->reason,
+                'type' => $request->type ?? 'leave',
+                'delegate_duty' => $request->delegate_duty,
+                'status' => $status ?? 'pending',
+                'company_id' => $this->sessionDetails('company_id'),
+                'file_path' =>  $filepath
+            ]);
+
+            $user = $lam->staff->user;
+            $data = [
+                'title' => ucfirst($request->type ?? 'leave') . " Request",
+                'content' => 'Your ' . $request->type . ' request has been received and it is pending approval',
+                'link' => url('/') . '/single-staff-leave-and-absence/api/admin/' . $lam->staff_id . '?type=leave',
+                'user_type' => 'staff',
+                'staff_id' => $lam->staff_id,
+                'company_id' => $this->sessionDetails('company_id')
+            ];
+
+            $this->notify($data);
+            $data['email'] = $user->email;
+            $data['user'] = $user;
+            $data['lam'] = $lam;
+            $data['type'] = 'create.leave.request';
+            $data['subject'] = 'Leave Application Acknowledgment';
+
+            // Check if Relief Officer is selected then Notify Relief Officer
+            if(isset($request->delegate_duty)){
+                $officer = $lam->reliefOfficer->user;
+
+                $user_name = $user->first_name . " - " . $user->last_name;
+
+                // Dispatch event after leave is created
+                event(new LeaveCreated($lam));
+            }
+
+            $this->logEmail($data);
+
+            LogService::admin(auth()->user()->id, $user?->id, 'Create a leave and absence management (' . $lam->id  . ')', 'CREATE');
+
+            // Commit the transaction
+            DB::commit();
+
+            
+            return CustomResponse::success(
+                'Created Successfully', $lam->toArray(), 200
+            );
+        } catch(Exception $e){
+            // Rollback the transaction
+            DB::rollBack();
+
+            return CustomResponse::error(
+                "Something happened! " . $e->getMessage(), 500, []
+            );
         }
-
-        $lam = LeaveAndAbsenceManagement::create([
-            'staff_id' => $staff_id,
-            'start_date' => $request->start_date,
-            'end_date' => $leaveDates["end_date"],
-            'period' => $leaveDays,
-            'reason' => $request->reason,
-            'type' => $request->type ?? 'leave',
-            'delegate_duty' => $request->delegate_duty,
-            'status' => $status ?? 'pending',
-            'company_id' => $this->sessionDetails('company_id'),
-        ]);
-
-        $user = Staff::where('id', $staff_id)->first()->user;
-        $data = [
-            'title' => ucfirst($request->type ?? 'leave') . " Request",
-            'content' => 'Your ' . $request->type . ' request has been received and it is pending approval',
-            'link' => url('/') . '/single-staff-leave-and-absence/api/admin/' . $lam->staff_id . '?type=leave',
-            'user_type' => 'staff',
-            'staff_id' => $lam->staff_id,
-            'company_id' => $this->sessionDetails('company_id')
-        ];
-
-        $this->notify($data);
-        $data['email'] = $user->email;
-        $data['user'] = $user;
-        $data['lam'] = $lam;
-        $data['type'] = 'create.leave.request';
-        $data['subject'] = 'Leave Application Acknowledgment';
-
-        $this->logEmail($data);
-
-        LogService::admin(auth()->user()->id, $user?->id, 'Create a leave and absence management (' . $lam->id  . ')', 'CREATE');
-        return response()->json(['message' => 'Created successfully', 'data' => $lam], 200);
     }
 
     public function approveLeaveAndAbsence($id)
     {
         $lam = LeaveAndAbsenceManagement::find($id);
+        if ($lam) {
+            if ($lam->status == 'approved') {
+                return CustomResponse::success(
+                    'Alread Approved', [], 200
+                );
+            }
 
-        if ($lam->status == 'approved') {
-            return response()->json(['message' => 'Already Approved', 'data' => null], 200);
+            $left = $this->getLeaveAndAbsencePeriodLeft($lam->staff_id ?? Auth::user()->staff->id, $lam->type, true);
+
+            if ($lam->period > $left) {
+                return CustomResponse::error(
+                    'You only have ' . $left . ' days left for ' . ucfirst($lam->type), 412, []
+                );
+            }
+
+            $lam->update(['status' => 'approved']);
+            $data = [
+                'title' => 'Leave Approved',
+                'content' => 'Your leave request has been approved by ' . Auth::user()->first_name . ' ' . Auth::user()->last_name,
+                'link' => url('/') . '/single-staff-leave-and-absence/api/admin/' . $lam->staff_id . '?type=' . $lam->type,
+                'user_type' => 'staff',
+                'staff_id' => $lam->staff_id,
+                'company_id' => $this->sessionDetails('company_id')
+            ];
+
+            $this->notify($data);
+
+            $data['subject'] = 'Leave Approved';
+            $data['email'] = $lam->staff->user->email;
+            $data['type'] = 'approve.leave.request';
+
+            // Dispatch LeaveStatusUpdated event
+            // event(new LeaveStatusUpdated($lam, 'approved'));
+            Event::dispatch(new LeaveStatusUpdated($lam, 'approved'));
+            $this->logEmail($data);
+
+            LogService::admin(auth()->user()->id, $lam->staff->user?->id, 'Approve a leave and absence management (' . $lam->id  . ')', 'UPDATE');
+
+            return CustomResponse::success(
+                'Approved successfully', $lam->toArray(), 200
+            );
+        } else {
+            return CustomResponse::error(
+                'Failed to approve. Leave not found!', 400, []
+            );
         }
-
-        $left = $this->getLeaveAndAbsencePeriodLeft($lam->staff_id ?? Auth::user()->staff->id, $lam->type, true);
-
-        if ($lam->period > $left) {
-            return response()->json([
-                'error' => 'You only have ' . $left . ' days left for ' . ucfirst($lam->type),
-                'data' => null,
-            ], 412);
-        }
-
-        $lam->update(['status' => 'approved']);
-        $data = [
-            'title' => 'Leave Approved',
-            'content' => 'Your leave request has been approved by ' . Auth::user()->first_name . ' ' . Auth::user()->last_name,
-            'link' => url('/') . '/single-staff-leave-and-absence/api/admin/' . $lam->staff_id . '?type=' . $lam->type,
-            'user_type' => 'staff',
-            'staff_id' => $lam->staff_id,
-            'company_id' => $this->sessionDetails('company_id')
-        ];
-
-        $this->notify($data);
-
-        $data['subject'] = 'Leave Approved';
-        $data['email'] = $lam->staff->user->email;
-        $data['type'] = 'approve.leave.request';
-
-        $this->logEmail($data);
-
-        LogService::admin(auth()->user()->id, $lam->staff->user?->id, 'Approve a leave and absence management (' . $lam->id  . ')', 'UPDATE');
-        return response()->json(['message' => 'Approved successfully', 'data' => $lam], 200);
     }
 
     public function declineLeaveAndAbsence($id)
     {
         $lam = LeaveAndAbsenceManagement::find($id);
-        $lam->update(['status' => 'declined']);
+        if ($lam) {
+            $lam->update(['status' => 'declined']);
 
-        $data = [
-            'title' => ucfirst($lam->type) . ' Request Declined!',
-            'content' => 'Your ' . ucfirst($lam->type) . ' has been declined by ' . Auth::user()->first_name . ' ' . Auth::user()->last_name,
-            'link' => url('/') . '/api/admin/leave-and-absence/' . $lam->id,
-            'user_type' => 'staff',
-            'staff_id' => $lam->staff_id,
-            'company_id' => $this->sessionDetails('company_id')
-        ];
+            $data = [
+                'title' => ucfirst($lam->type) . ' Request Declined!',
+                'content' => 'Your ' . ucfirst($lam->type) . ' has been declined by ' . Auth::user()->first_name . ' ' . Auth::user()->last_name,
+                'link' => url('/') . '/api/admin/leave-and-absence/' . $lam->id,
+                'user_type' => 'staff',
+                'staff_id' => $lam->staff_id,
+                'company_id' => $this->sessionDetails('company_id')
+            ];
 
-        $this->notify($data);
+            $this->notify($data);
+            // Dispatch LeaveStatusUpdated event
+            //event(new LeaveStatusUpdated($lam, 'rejected'));
+            Event::dispatch(new LeaveStatusUpdated($lam, 'rejected'));
 
-        LogService::admin(auth()->user()->id, $lam->staff->user?->id, 'Decline a leave and absence management (' . $lam->id  . ')', 'UPDATE');
-        return response()->json(['message' => 'Declined successfully', 'data' => $lam], 200);
+            LogService::admin(auth()->user()->id, $lam->staff->user?->id, 'Decline a leave and absence management (' . $lam->id  . ')', 'UPDATE');
+            return CustomResponse::success(
+                'Declined successfully', $lam->toArray(), 200
+            );
+        } else {
+            return CustomResponse::error(
+                'Failed to decline. Leave not found!', 400, []
+            );
+        }
     }
 
     /**
@@ -337,10 +418,9 @@ class LeaveAndAbsenceManagementController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'error' => $validator->messages()->first(),
-                'data' => null,
-            ], 412);
+            return CustomResponse::error(
+                $validator->messages()->first(), 412, []
+            );
         }
 
         $company_id = $this->sessionDetails('company_id');
@@ -351,7 +431,10 @@ class LeaveAndAbsenceManagementController extends Controller
         ]);
 
         LogService::admin(auth()->user()->id, null, 'Update or create a leave and absence setting (' . $setting->id  . ')', 'UPDATE');
-        return response()->json(['message' => 'Updated successfully', 'data' => null], 200);
+        
+        return CustomResponse::success(
+            'Updated successfully', [], 200
+        );
     }
 
     public function getLeaveAndAbsenceSetting(Request $request)
@@ -361,9 +444,39 @@ class LeaveAndAbsenceManagementController extends Controller
         if (!empty($request->type)) {
             $settings = $settings->where('type', $request->type)->first();
 
-            return response()->json(['message' => 'Retrieved successfully', 'data' => $settings], 200);
+            return CustomResponse::success(
+                'Retrieved successfully', $settings->toArray(), 200
+            );
         }
 
-        return response()->json(['message' => 'Retrieved successfully', 'data' => $settings->get()], 200);
+        return CustomResponse::success(
+            'Retrieved successfully', $settings->get(), 200
+        );
+    }
+
+    public function employeesOnLeave(Request $request, $type)
+    {
+
+        switch ($type) {
+            case 'today':
+                $employeesOnLeave = $this->leaveDateService->getEmployeesOnLeaveToday();
+                break;
+            case 'week':
+                $employeesOnLeave = $this->leaveDateService->getEmployeesOnLeaveThisWeek();
+                break;
+            case 'month':
+                $employeesOnLeave = $this->leaveDateService->getEmployeesOnLeaveThisMonth();
+                break;
+            case 'year':
+                $employeesOnLeave = $this->leaveDateService->getEmployeesOnLeaveThisYear();
+                break;
+            default:
+                $employeesOnLeave = [];
+                break;
+        }
+
+        return CustomResponse::success(
+            'Retrieved successfully', $employeesOnLeave, 200
+        );
     }
 }

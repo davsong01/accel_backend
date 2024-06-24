@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('leave_and_abence_management', function (Blueprint $table) {
+        Schema::create('leave_and_absence_management', function (Blueprint $table) {
             $table->id();
             $table->string('staff_id');
-            $table->timeStamp('start_time')->nullable();
-            $table->timeStamp('end_time')->nullable();
+            $table->dateTime('start_date')->nullable();
+            $table->dateTime('end_date')->nullable();
             $table->string('period')->nullable();
             $table->string('reason')->nullable();
             $table->string('type')->nullable(); // Absence, Leave
@@ -32,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('leave_and_abence_management');
+        Schema::dropIfExists('leave_and_absence_management');
     }
 };
