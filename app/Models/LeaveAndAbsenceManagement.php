@@ -46,7 +46,7 @@ class LeaveAndAbsenceManagement extends Model
     protected function resumptionDate(): Attribute
     {
         return Attribute::make(
-            get: fn (string $value) => date("M jS, Y", strtotime($value)),
+            get: fn (?string $value) => $value ? date("M jS, Y", strtotime($value)) : null,
         );
     }
 
