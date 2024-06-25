@@ -24,6 +24,7 @@ class ContractUnderConstruction extends Model
         'total_amount',
         'current_building_phase_id', 
         'chart_of_account_id',
+        'completed_building_phases'
     ];
 
     protected $with = [
@@ -40,6 +41,7 @@ class ContractUnderConstruction extends Model
 
     protected $casts = [
         'estate_construction_setting_ids' => 'array',
+        'completed_building_phases' => 'array',
     ];
 
     public function getPaymentProgressAttribute()
