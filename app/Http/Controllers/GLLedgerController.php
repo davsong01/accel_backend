@@ -6,6 +6,7 @@ use App\Models\Customer;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Services\LogService;
+use App\Services\TransactionService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -13,24 +14,35 @@ use Illuminate\Support\Facades\Validator;
 
 class GLLedgerController extends Controller
 {
+    public function __construct(
+        private readonly TransactionService $transactionService,
+    )
+    {
+    }
+
      /**
      * Display a listing of the GL Ledger.
-     * 
+     *
      */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         $company_id = $this->sessionDetails('company_id');
 
-        $transactions = Transaction::with(['account', 'staff:id,user_id', 'staff.user:id,status,type,first_name,middle_name,last_name,phone_number', 'customer:id'])
-            ->where('company_id', $company_id)
-            ->latest()
-            ->paginate(20);
+        $transactions = $this->transactionService
+            ->fetchGLAccountTransactionQuery(
+                companyId: $company_id,
+                request: $request
+            )
+            ->orderBy('created_at', 'desc')
+            ->paginate($request->has('per_page') ? $request->input('per_page') : 20)
+            ->withQueryString();
+
         return response()->json(['message' => 'Success', 'data' => $transactions], 200);
     }
 
     /**
      * Create a resource for GL Ledger.
-     * 
+     *
      */
     public function create(Request $request): JsonResponse
     {
@@ -69,44 +81,29 @@ class GLLedgerController extends Controller
 
     /**
      * Search/filter GL Ledger
-     * 
+     *
      */
-    public function search(Request $request)
+    public function search(Request $request): JsonResponse
     {
         $params = $request->only(['type', 'account_id']);
         $company_id = $this->sessionDetails('company_id');
 
-        $query = Transaction::with(['account', 'staff:id,user_id', 'staff.user:id,first_name,middle_name,last_name', 'customer:id,user_id', 'customer.user:id,status,type,first_name,middle_name,last_name'])->where('company_id', $company_id)->where($params);
+        $transactions = $this->transactionService
+            ->fetchGLAccountTransactionQuery(
+                companyId: $company_id,
+                request: $request
+            )
+            ->where($params)
+            ->orderBy('created_at', 'desc')
+            ->paginate($request->has('per_page') ? $request->input('per_page') : 20)
+            ->withQueryString();
 
-        $from = $request->input('from');
-        $to = $request->input('to');
-        if ($from && $to) {
-            $from = Carbon::parse($request->input('from'));
-
-            $to = Carbon::parse($request->input('to'));
-            if ($to->format('H:i:s') == '00:00:00')
-                $to->endOfDay();
-
-            $query->whereBetween('created_at', [$from, $to]);
-        }
-
-        if ($request->input('staff_name') && $name = $request->input('staff_name')) {
-            $users = User::with(['staff'])->where('company_id', $company_id)->whereNotNull('company_id')
-                ->where('first_name', 'LIKE', '%' . $name . '%')
-                ->orWhere('last_name', 'LIKE', '%' . $name . '%')
-                ->orWhere('middle_name', 'LIKE', '%' . $name . '%')->get();
-            $staff_ids = $users->whereNotNull('staff.id')->pluck('staff.id')->toArray();
-
-            $query->whereIn('staff_id', $staff_ids);
-        }
-
-        $transactions = $query->latest()->paginate(20);
         return response()->json(['message' => 'Success', 'data' => $transactions], 200);
     }
 
     /**
      * Search/filter GL Ledger
-     * 
+     *
      */
     public function show(Transaction $transaction)
     {
