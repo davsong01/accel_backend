@@ -88,11 +88,16 @@ class Transaction extends Model
 
     public function txn_purpose() : BelongsTo
     {
-        return $this->belongsTo(TransactionPurpose::class);
+        return $this->belongsTo(TransactionPurpose::class, 'transaction_purpose_id', 'id');
     }
 
     public function txn_type() : BelongsTo
     {
-        return $this->belongsTo(TransactionType::class);
+        return $this->belongsTo(TransactionType::class, 'transaction_type_id', 'id');
+    }
+
+    public function company() : BelongsTo
+    {
+        return $this->belongsTo(Company::class, 'company_id', 'id');
     }
 }

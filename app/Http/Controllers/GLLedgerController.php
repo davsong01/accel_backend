@@ -108,7 +108,19 @@ class GLLedgerController extends Controller
     public function show(Transaction $transaction)
     {
 
-        $transaction->load(['account', 'staff:id,user_id', 'staff.user:id,first_name,middle_name,last_name', 'customer:id,user_id', 'customer.user:id,status,type,first_name,middle_name,last_name']);
+        $transaction
+            ->load([
+                'account',
+                'company:id,name',
+                'staff:id,user_id,branch_id',
+                'staff.user:id,first_name,middle_name,last_name',
+                'staff.branch:id,name',
+                'customer:id,user_id',
+                'customer.user:id,status,type,first_name,middle_name,last_name',
+                'txn_type:id',
+                'txn_type:id,name',
+                'txn_purpose:id,name',
+            ]);
 
         return response()->json(['message' => 'Success', 'data' => $transaction], 200);
     }
