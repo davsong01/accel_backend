@@ -117,9 +117,9 @@ class GLLedgerController extends Controller
                 'staff.branch:id,name',
                 'customer:id,user_id',
                 'customer.user:id,status,type,first_name,middle_name,last_name',
-                'txn_type:id',
                 'txn_type:id,name',
                 'txn_purpose:id,name',
+                'payment_mode:id,mode as name'
             ]);
 
         return response()->json(['message' => 'Success', 'data' => $transaction], 200);

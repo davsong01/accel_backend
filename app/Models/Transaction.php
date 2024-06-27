@@ -100,4 +100,9 @@ class Transaction extends Model
     {
         return $this->belongsTo(Company::class, 'company_id', 'id');
     }
+
+    public function payment_mode() : BelongsTo
+    {
+        return $this->belongsTo(PaymentMode::class, 'payment_mode_id', 'id');
+    }
 }
