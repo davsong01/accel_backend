@@ -134,4 +134,49 @@ class LeaveDateService
 
         return $existingLeave;
     }
+
+    public function getEmployeesOnLeaveToday()
+    {
+        $today = Carbon::today();
+
+        return $this->getEmployeesOnLeaveBetweenDates($today, $today);
+    }
+
+    public function getEmployeesOnLeaveThisWeek()
+    {
+        $startOfWeek = Carbon::now()->startOfWeek();
+        $endOfWeek = Carbon::now()->endOfWeek();
+
+        return $this->getEmployeesOnLeaveBetweenDates($startOfWeek, $endOfWeek);
+    }
+
+    public function getEmployeesOnLeaveThisMonth()
+    {
+        $startOfMonth = Carbon::now()->startOfMonth();
+        $endOfMonth = Carbon::now()->endOfMonth();
+
+        return $this->getEmployeesOnLeaveBetweenDates($startOfMonth, $endOfMonth);
+    }
+
+    public function getEmployeesOnLeaveThisYear()
+    {
+        $startOfYear = Carbon::now()->startOfYear();
+        $endOfYear = Carbon::now()->endOfYear();
+
+        return $this->getEmployeesOnLeaveBetweenDates($startOfYear, $endOfYear);
+    }
+
+    protected function getEmployeesOnLeaveBetweenDates($startDate, $endDate)
+    {
+        $leaves = LeaveAndAbsenceManagement::with('staff.user')
+                    ->whereDate('start_date', '<=', $endDate)
+                    ->whereDate('end_date', '>=', $startDate)
+                    ->get();
+
+        $employeesOnLeave = $leaves->map(function ($leave) {
+            return $leave->staff->user;
+        });
+
+        return $employeesOnLeave->unique('id')->values();
+    }
 }

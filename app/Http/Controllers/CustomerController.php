@@ -270,6 +270,61 @@ class CustomerController extends Controller
      */
     public function store(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'first_name' => 'required',
+            'last_name' => 'required',
+            'gender' => 'required|in:male,female',
+            'email' => ['required', 'email', 
+                Rule::unique('users')->where(fn ($query) =>
+                    $query->where([
+                        'company_id' => $this->sessionDetails('company_id'),
+                        'type' => 'customer'
+                    ])
+                )
+            ],
+            'phone_number' => 'required',
+            'residential_address' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->messages()->first(),
+                'data' => null,
+            ], 412);
+        }
+
+        $attributes = $validator->validated();
+        // Add user
+        $user = app('App\Http\Controllers\CustomerContractController')->createUser($attributes);
+        $data['user_id'] = $user->id;
+
+        // Add customer
+        if ($user) {
+            $customer = app('App\Http\Controllers\CustomerContractController')->createCustomer($data);
+
+            // Log email to customer
+            $email['plot_size'] = null;
+            $email['building_type'] = null;
+            $email['property_type'] = 'Nil';
+            $email['city'] = 'Nil';
+            $email['location'] = 'Nil';
+            $email['estate'] = 'Nil';
+            $email['no_of_units'] = 'Nil';
+            $email['contract_type'] = 'Nil';
+            $email['type'] = 'user.store';
+            $email['name'] =  $user->first_name;
+            $email['email'] =  $user->email;
+            $email['customer_id'] =  $user->customerId;
+            $this->logEmail($email);
+
+            LogService::admin(auth()->user()->id, $user->id, 'Create a customer (' . $customer->id  . ')', 'CREATE');
+            return response()->json(['message' => 'Created successfully', 'data' => $customer], 200); 
+        }
+
+        return response()->json([
+            'error' => 'Resource creation failed due to an unexpected error.', 
+            'data' => null
+        ], 500); 
     }
 
     /**
@@ -346,7 +401,7 @@ class CustomerController extends Controller
             $customer_identification_settings = [];
         }
 
-        return response()->json(['message' => 'Operation successfull', 'data' => $customer_identification_settings], 200);
+        return response()->json(['message' => 'Operation successful', 'data' => $customer_identification_settings], 200);
     }
 
     public function updateCustomerIdentificationSetting(Request $request)
