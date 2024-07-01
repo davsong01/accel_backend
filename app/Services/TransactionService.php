@@ -11,16 +11,14 @@ use \Illuminate\Database\Eloquent\Builder;
 
 class TransactionService
 {
-
     /**
      * Query builder for transaction filtering
      *
-     * @param ChartOfAccount $account
      * @param integer $companyId
      * @param Request $request
      * @return Builder
      */
-    public function fetchAccountTransactionQuery(ChartOfAccount $account, int $companyId, Request $request) : Builder
+    public function filterTransactionQuery(int $companyId, Request $request) : Builder
     {
         $from = $request->input('from');
         $to = $request->input('to');
@@ -28,7 +26,7 @@ class TransactionService
         $query = Transaction::query();
 
         $query
-            ->where('account_id', $account->id)
+            ->where('company_id', $companyId)
             ->when($from && $to, function($query) use ($from, $to){
                 $from = Carbon::parse($from);
                 $to = Carbon::parse($to);
@@ -54,6 +52,39 @@ class TransactionService
                     });
                 });
             });
+
+        return $query;
+    }
+
+    /**
+     * fetchAccountTransactionQuery
+     *
+     * @param ChartOfAccount $account
+     * @param integer $companyId
+     * @param Request $request
+     * @return Builder
+     */
+    public function fetchAccountTransactionQuery(ChartOfAccount $account, int $companyId, Request $request) : Builder
+    {
+        $query = $this->filterTransactionQuery(companyId: $companyId, request: $request);
+        $query->where('account_id', $account->id);
+        return $query;
+    }
+
+    /**
+     * fetchGLAccountTransactionQuery
+     *
+     * @param integer $companyId
+     * @param Request $request
+     * @return Builder
+     */
+    public function fetchGLAccountTransactionQuery(int $companyId, Request $request) : Builder
+    {
+        $query = $this->filterTransactionQuery(companyId: $companyId, request: $request);
+        $query
+            ->with([
+                'account', 'staff:id,user_id', 'staff.user:id,status,type,first_name,middle_name,last_name,phone_number', 'customer:id'
+            ]);
 
         return $query;
     }
