@@ -15,4 +15,9 @@ class Department extends Model
     public function staff(){
         return $this->hasMany(Staff::class);
     }
+
+    public function jobtitles()
+    {
+        return $this->hasMany(JobTitle::class, 'department_id');
+    }
 }

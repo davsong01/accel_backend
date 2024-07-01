@@ -44,7 +44,7 @@ class StaffController extends Controller
     {
         $staff = Staff::with(['bank', 'job_title:id,title'])->where(['staff.company_id' => $this->sessionDetails('company_id')])
             ->join("users", "staff.user_id", "=", "users.id")
-            ->where(['type' => 'staff'])
+            ->where(['users.type' => 'staff'])
             ->join("departments", "staff.department_id", "=", "departments.id")
             ->leftjoin("job_roles", "staff.jobrole_id", "=", "job_roles.id")
             ->leftjoin("job_types", "staff.jobtype_id", "=", "job_types.id")
