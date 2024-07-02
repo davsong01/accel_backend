@@ -1182,4 +1182,48 @@ class CustomerContractController extends Controller
         $contract_id->update(['contract_status' => 'closed']);
         return response()->json(['message' => 'Success', 'data' => []], 200);
     }
+
+
+    public function removeSubscriber(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'subscriber_email' => 'required',
+            'customer_id' => 'required|exists:customers,id,company_id,' . $this->sessionDetails('company_id'),
+            'contract_id' => 'required|exists:customer_contracts,id,company_id,' . $this->sessionDetails('company_id'),
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->messages()->first(),
+                'data' => null,
+            ], 422);
+        }
+
+        $contract = CustomerContract::where(['customer_id' => $request->customer_id, 'id' => $request->contract_id])->whereNotNull('subscribers')->first();
+
+        if(empty($contract)){
+            return response()->json(['error' => 'Invalid contract details sent', 'data' => []], 412);
+        }
+
+        $decodeSubscribers = json_decode($contract->subscribers);
+        $length = count($decodeSubscribers);
+
+        if(!empty($decodeSubscribers)){
+            for ($i = 0; $i < $length; $i++) {
+                if ($decodeSubscribers[$i]->s_email == $request->subscriber_email) {
+                    unset($decodeSubscribers[$i]);
+                    $decodeSubscribers = array_values($decodeSubscribers);
+                    $length--; 
+                    $i--;
+                }
+            }
+        }
+
+        $contract->update([
+            'subscribers' => json_encode($decodeSubscribers),
+        ]);
+
+        return response()->json(['message' => 'Success', 'data' => []], 200);
+
+    }
 }
