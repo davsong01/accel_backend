@@ -191,7 +191,7 @@ class LegalDocumentController extends Controller
                 ];
 
                 $document->location = $document->contract?->estate->location;
-                $document->property_description = $document->contract->contract_name;
+                $document->property_description = $document?->contract->contract_name;
                 unset($document->contract);
             }
         }
