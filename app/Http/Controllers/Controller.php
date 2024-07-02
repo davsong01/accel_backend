@@ -728,7 +728,7 @@ class Controller extends BaseController
         $name = $payment->transaction_id;
         $data['receipt_no'] = $name;
         $pathToSave = $this->getPathToSaveFile('receipts') . '/' . $name . '.pdf';
-
+        
         if(env('ENT') != 'local'){
             $pdf = PDF::loadView('receipts.form-payment', compact('payment', 'data'))->setPaper('a4', 'portrait');
             file_put_contents(base_path() . '/' . config('app.upload_path') . '/' . $pathToSave, $pdf->output());

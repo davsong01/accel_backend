@@ -123,7 +123,8 @@ class ContractPaymentController extends Controller
         $data['name'] =  $contractX->customer->user->first_name;
         $data['email'] =  $contractX->customer->user->email;
         $data['attachments'] = array_column($payments, 'receipt_location');
-
+        $data['contract_ids'] = [$contractX->id];
+        
         $this->logEmail($data);
 
         LogService::admin(auth()->user()->id,  $contractX->customer->user->id, 'Update a company\'s contract, contract payment, contract payment thread and transaction (' . $contractX->id . ')', 'UPDATE');
@@ -743,6 +744,7 @@ class ContractPaymentController extends Controller
         $data['element'] = $request->type;
         $data['name'] =  $payment->customer->user->first_name;
         $data['email'] =  $payment->customer->user->email;
+        $data['contract_ids'] = [$contract->id];
 
         $this->logEmail($data);
 

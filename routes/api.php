@@ -300,9 +300,8 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('get-currencies', [GeneralController::class, 'getCurrencies']);
         Route::get('nudge-customer/{customer_id}', [CustomerFormController::class, 'nudgeCustomer']);
         Route::get('nudge-admin/{form_id}', [CustomerFormController::class, 'nudgeAdmin']);
-
+        
         // Contract payments
-        // Route::resource('contract-payment', ContractPaymentController::class); // causing 503
         Route::post('contract-payment', [ContractPaymentController::class, 'contractPayment']);
         Route::post('setting-excavation-payment', [ContractPaymentController::class, 'makeSettingAndEscavationPayment']);
         Route::get('get-se-escavation-setting/{contract}', [ContractPaymentController::class, 'seEscavationSetting']);
