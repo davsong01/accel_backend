@@ -11,7 +11,7 @@ class ContractCancellation extends Model
 
     protected $fillable = ['branch_id', 'customer_id', 'customer_contract_id', 'company_id', 'comment'];
 
-    protected $with = [ 'customer', 'branch', 'contract'];
+    protected $with = [ 'customer', 'branch', 'contract', 'status'];
 
     public function customer(){
         return $this->belongsTo(Customer::class, 'customer_id');

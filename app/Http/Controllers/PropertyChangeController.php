@@ -92,6 +92,7 @@ class PropertyChangeController extends Controller
                     $fail('The new contract must be different from the original contract.') : null,
             ],
             'comment' => ['sometimes', 'string'],
+            'status' => ['sometimes', 'in:PENDING,DECLINED,APPROVED']
         ]);
 
         if ($validator->fails()) {
