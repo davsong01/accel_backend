@@ -173,7 +173,6 @@ class MessageTransactionController extends Controller
                 <div>
                 <p style="text-align:justify !important">We are delighted to inform you that your payment for ' . $data['element'] . ' has been successfully processed. Attached to this email is your payment receipt<br>';
 
-
                 $content .= $this->propertyDetails($data);
                 $content .= '<br>Best regards,<br><br>' . $this->sessionDetails('company_name') . '</p>
                 </div>';

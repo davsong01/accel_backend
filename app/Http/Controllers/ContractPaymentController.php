@@ -727,12 +727,23 @@ class ContractPaymentController extends Controller
                 'contract_status' => 'closed',
             ]);
         }
+
         $contract->update([
-            'sei_payment_transaction_id' => $payment->transaction_id
+            'sei_payment_transaction_id' => $payment->transaction_id,
         ]);
         
-        $contract->fee = $payment->infrastructure_fee;
+        if($request->type == 'SE'){
+            $contract->update([
+                'se_status' => $balance > 0 ? 'inprogress' : 'paid',
+            ]);
+        }elseif($request->type == 'INFRASTRUCTURE') {
+            $contract->update([
+                'infrastructure_status' => $balance > 0 ? 'in-progress' : 'paid',
+            ]);
+        }
 
+        $contract->fee = $payment->infrastructure_fee;
+        
         $receipt = generateGenericPaymentReceipt($payment, $contract);
         
         $payment->update(['receipt_location' => $receipt['filepath'] ?? null]);
