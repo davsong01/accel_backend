@@ -9,7 +9,7 @@ class CustomerRefund extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['branch_id', 'customer_contract_id', 'customer_id', 'termination_charge', 'company_id', 'comment'];
+    protected $fillable = ['branch_id', 'customer_contract_id', 'customer_id', 'termination_charge', 'company_id', 'comment', 'status'];
 
     protected $with = [ 'customer', 'branch', 'contract'];
 

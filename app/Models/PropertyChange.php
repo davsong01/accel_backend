@@ -10,7 +10,7 @@ class PropertyChange extends Model
     use HasFactory;
 
 
-    protected $fillable = ['branch_id', 'customer_id', 'original_customer_contract_id', 'new_customer_contract_id', 'company_id', 'comment'];
+    protected $fillable = ['branch_id', 'customer_id', 'original_customer_contract_id', 'new_customer_contract_id', 'company_id', 'comment', 'status'];
 
     protected $with = [ 'original_contract', 'new_contract', 'branch', 'customer'];
 
