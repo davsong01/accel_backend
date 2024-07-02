@@ -190,13 +190,14 @@ class LegalDocumentController extends Controller
                     'avatar' => !empty($document->contract->customer->user) ? $document->contract->customer->user->avatar : null,
                 ];
 
-                $document->location = $document->contract?->estate->location;
-                $document->property_description = $document?->contract->contract_name;
+                $document->location = $document->contract->estate->location ?: null;
+                $document->property_description = $document->contract->contract_name ?: null;
+                
                 unset($document->contract);
             }
         }
         
-        
+
         return response()->json(['message' => 'Success', 'data' => $data], 200);
     }
 
