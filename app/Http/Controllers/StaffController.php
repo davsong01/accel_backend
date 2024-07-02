@@ -330,7 +330,7 @@ class StaffController extends Controller
             $staff = Staff::where('id', $request->staff_id)->where('company_id', $this->sessionDetails('company_id'))->first();
             $user = $staff->user;
             $updateUser = Arr::only($data, ['email', 'first_name', 'middle_name', 'last_name', 'username', 'phone_number', 'gender', 'next_of_kin', 'branch_id', 'date_of_birth']);
-            $updateStaff = Arr::only($data, ['jobtype_id', 'date_of_employment', 'department_id', 'jobrole_id', 'commission_id', 'bank_id', 'pfa_id', 'account_name', 'account_name', 'account_number', 'sort_code', 'swift_code', 'nhf_number']);
+            $updateStaff = Arr::only($data, ['jobtype_id', 'date_of_employment', 'department_id', 'jobrole_id', 'commission_id', 'bank_id', 'pfa_id', 'account_name', 'account_number', 'sort_code', 'swift_code', 'nhf_number']);
 
             $user->update($updateUser);
             $staff->update($updateStaff);
@@ -628,7 +628,7 @@ class StaffController extends Controller
 
     public function getSingleStaffProfile($staff_id, $internal = null)
     {
-        $staff = Staff::with('bank')->with(['job_type', 'department', 'roles', 'job_role', 'job_title:id,title'])->whereHas('user', function ($query) {
+        $staff = Staff::with(['bank','job_type', 'department', 'roles', 'job_role', 'job_title:id,title'])->whereHas('user', function ($query) {
             $query->where('type', 'staff')->where('status', 'active');
         })->where('id', $staff_id)->first();
 
@@ -636,25 +636,16 @@ class StaffController extends Controller
             return response()->json(['message' => 'No records found', 'data' => []], 200);
         }
 
-        // ->leftjoin("users", "staff.user_id", "=", "users.id")->where(['users.status' => 'active', 'type' => 'staff'])
-        //     ->leftjoin("job_types", "staff.jobtype_id", "=", "job_types.id")
-        //     ->leftjoin("job_roles", "staff.jobrole_id", "=", "job_roles.id")
-        //     ->leftjoin("branches", "staff.branch_id", "=", "branches.id")
-        //     ->leftjoin("departments", "staff.department_id", "=", "departments.id")
-        //     ->leftjoin("commissions", "staff.commission_id", "=", "commissions.id")
-        //     ->select("staff.id AS staff_id", "users.status", "users.staff_id as employee_id", "staff.created_at", "users.first_name", "users.username", "users.last_name", "users.middle_name", "users.avatar", "users.phone_number", "users.email", "staff.id AS staff_id", "users.type", "users.company_id", "staff.jobtype_id", "users.id AS user_id", "staff.date_of_employment", "staff.branch_id AS branch_id", "branches.name AS branch_name", "departments.id AS department_id", "departments.name AS department_name", "job_roles.id AS job_role_id", "job_roles.name AS job_role_name", "job_types.id AS job_type_id", "job_types.name AS job_type_name", "users.next_of_kin", "users.date_of_birth AS date_of_birth", "users.gender", "staff.commission_id AS commission_id", "commissions.name AS commission_name", "commissions.percentage",)
-        //     ->first();
-
         $profile_completenes = $this->profileCompletenes($staff);
 
-        // $additional_details = !empty($staff->additional_details) ? json_decode($staff->additional_details, true) : [];
         $next_of_kin = $staff->user->next_of_kin;
 
         $time = Carbon::parse($staff->date_of_employment)->diff(Carbon::now());
 
         $time_in_company = ($time->y > 0 ? $time->y . ($time->y > 1 ? 'years, ' : 'year, ') : '') .  ($time->m > 0 ? ($time->m > 1 ? $time->m . ' months' : $time->m . ' month') : 'Less than a month');
         $my_anniversary = Carbon::parse($staff->date_of_employment)->format('jS\\, F');
-        $data['staff_id'] = $staff->user->staff_id;
+        $data['staffId'] = $staff->user->staff_id;
+        $data['staff_id'] = $staff->id;
         // $data['employee_id'] = $staff->employee_id;
         $data['profile_completenes'] = $profile_completenes;
 
@@ -727,7 +718,7 @@ class StaffController extends Controller
             'phone_number' => $next_of_kin['nok_phone_number'] ?? '',
             'relationship' => $next_of_kin['nok_relationship'] ?? '',
         ];
-
+        
         $data['bank_information'] = [
             'account_name' => $staff->account_name,
             'account_number' => $staff->account_number,
