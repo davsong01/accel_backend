@@ -9,9 +9,9 @@ class ContractCancellation extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['branch_id', 'customer_id', 'customer_contract_id', 'company_id', 'comment'];
+    protected $fillable = ['branch_id', 'customer_id', 'customer_contract_id', 'company_id', 'comment', 'status'];
 
-    protected $with = [ 'customer', 'branch', 'contract', 'status'];
+    protected $with = [ 'customer', 'branch', 'contract'];
 
     public function customer(){
         return $this->belongsTo(Customer::class, 'customer_id');
