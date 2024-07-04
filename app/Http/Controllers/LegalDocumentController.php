@@ -19,7 +19,7 @@ use App\Services\GeneratedDocumentService;
 class LegalDocumentController extends Controller
 {
 
-     /**
+    /**
      * Display a listing of the resource.
      */
     public function index()
@@ -37,9 +37,9 @@ class LegalDocumentController extends Controller
     {
         $params = $request->input();
 
-        $types = LegalDocumentType::orderBy('created_at','DESC');
-        
-        if(!empty($params['name'])){
+        $types = LegalDocumentType::orderBy('created_at', 'DESC');
+
+        if (!empty($params['name'])) {
             $types = $types->where('name', $params['name'])->pluck('id');
             return response()->json(['message' => 'Success', 'data' => $types], 200);
         }
@@ -47,7 +47,7 @@ class LegalDocumentController extends Controller
         if (!empty($params['type'])) {
             $types = $types->where('type', $params['type'])->get();
         }
-       
+
         return response()->json(['message' => 'Success', 'data' => $types], 200);
     }
 
@@ -79,14 +79,14 @@ class LegalDocumentController extends Controller
         ];
 
         $data = Arr::except($data, ['file']);
-        
+
         $document = LegalDocumentTemplate::updateOrcreate([
             'estate_id' => $data['estate_id'],
             'company_id' => $this->sessionDetails('company_id'),
             'legal_document_type_id' => $data['legal_document_type_id']
         ], $data);
 
-        LogService::admin(auth()->user()->id, null, 'Update or create a legal document type (' . $document->id  . ')' , 'CREATE');
+        LogService::admin(auth()->user()->id, null, 'Update or create a legal document type (' . $document->id  . ')', 'CREATE');
         return response()->download(base_path($filepath));
     }
 
@@ -98,14 +98,17 @@ class LegalDocumentController extends Controller
         $company_id = $this->sessionDetails('company_id');
         $params = $request->input((new LegalDocumentTemplate)->getFillable());
         $template = LegalDocumentTemplate::select('id', 'file_location', 'template_sample')->where('company_id', $company_id)->where($request->all())->first();
+        if (empty($template)) {
+            return response()->json(['message' => 'No template found', 'data' => []], 200);
+        }
         $template->file_location = !empty($template->file_location) ? $this->encodeUploadedFile($template->file_location) : '';
         $template->template_sample = !empty($template->template_sample) ? $this->encodeUploadedFile($template->template_sample) : '';
-        
-        if(!$template){
+
+        if (!$template) {
             return response()->json(['message' => 'No Legal document template found for sent request parameters at: ' . $this->sessionDetails('company_name'), 'data' => []], 200);
         }
         $is_sample = request()->routeIs('template.preview.sample');
-        
+
         // if($is_sample){
         //     $message = 'No '. $template->legalDocumentType->type . ' ' .  $template->legalDocumentType->name.' sample found for '. $this->sessionDetails('company_name');
         //     $downloadPath = !empty($template->template_sample) ? base_path() . '/' . $template->template_sample : null;
@@ -114,13 +117,13 @@ class LegalDocumentController extends Controller
         //     $message = 'No ' . $template->legalDocumentType->type . ' ' .  $template->legalDocumentType->name . ' uploaded for sent request parameters at: ' . $this->sessionDetails('company_name');
         //     $downloadPath = !empty($template->file_location) ? base_path() . '/' . $template->file_location : null;
         // }
-        
+
         // if(!$downloadPath){
         //     return response()->json(['message' => $message, 'data' => []], 200);
         // }
 
         // return response()->download($downloadPath);
-            
+
         return response()->json(['message' => 'Success', 'data' => $template], 200);
     }
 
@@ -154,29 +157,29 @@ class LegalDocumentController extends Controller
     public function generatedLegalDocuments(Request $request): JsonResponse
     {
         $company_id = $this->sessionDetails('company_id');
-        $documents = GeneratedLegalDocument::select('id','estate_id','contract_id', 'legal_document_template_id', 'legal_document_type_id', 'regenerate_count', 'file_location','updated_at','created_at')->with('estate:id,name', 'legalDocumentType:id,type,name')->where('company_id', $company_id)->orderBy('created_at', 'DESC');
-        
-        if(!empty($request->estate_id)){
+        $documents = GeneratedLegalDocument::select('id', 'estate_id', 'contract_id', 'legal_document_template_id', 'legal_document_type_id', 'regenerate_count', 'file_location', 'updated_at', 'created_at')->with('estate:id,name', 'legalDocumentType:id,type,name')->where('company_id', $company_id)->orderBy('created_at', 'DESC');
+
+        if (!empty($request->estate_id)) {
             $documents = $documents->where('estate_id', $request->estate_id);
         }
 
         if (!empty($request->legal_document_template_id)) {
             $documents = $documents->where('legal_document_template_id', $request->legal_document_template_id);
         }
-        
+
         if (!empty($request->legal_document_type_id)) {
             $documents = $documents->where('legal_document_type_id', $request->legal_document_type_id);
         }
 
         if (!empty($request->legal_document_type_ids)) {
-            $array = explode(",",$request->legal_document_type_ids);
+            $array = explode(",", $request->legal_document_type_ids);
             $documents = $documents->whereIn('legal_document_type_id', $array);
         }
 
         if (!empty($request->contract_id)) {
             $documents = $documents->where('contract_id', $request->contract_id);
         }
-        
+
         $data = $documents->paginate(20)->withQueryString();
 
         if (!empty($data)) {
@@ -190,12 +193,15 @@ class LegalDocumentController extends Controller
                     'avatar' => !empty($document->contract->customer->user) ? $document->contract->customer->user->avatar : null,
                 ];
 
-                $document->location = $document->contract->estate->location;
-                $document->property_description = $document->contract->contract_name;
+
+                $document->location = $document->contract->location->name ?? null;
+                $document->property_description = $document->contract->contract_name ?? null;
+
                 unset($document->contract);
             }
         }
-        
+
+
         return response()->json(['message' => 'Success', 'data' => $data], 200);
     }
 
@@ -223,29 +229,31 @@ class LegalDocumentController extends Controller
             'estate_id' => $request->estate_id,
             'company_id' => $company_id,
         ])->firstOrFail();
-        
-        $contract = CustomerContract::where('id',$request->contract_id)->first();
+
+        $contract = CustomerContract::where('id', $request->contract_id)->first();
         $documentGen = $this->documentGenerator($request->contract_id, $legalDocumentTemplate, $contract);
         $filepath = $documentGen['filepath'] . $documentGen['filename'];
-    
-        $generatedLegalDocument = GeneratedLegalDocument::updateOrCreate([
-            'contract_id' => $request->contract_id,
-            'legal_document_template_id' => $legalDocumentTemplate->id,
-            'legal_document_type_id' => $legalDocumentTemplate->legalDocumentType->id,
-            'estate_id' => $request->estate_id,
-            'company_id' => $this->sessionDetails('company_id'),
-        ],
-        [
-            'file_location' => $filepath,
-        ]);
+
+        $generatedLegalDocument = GeneratedLegalDocument::updateOrCreate(
+            [
+                'contract_id' => $request->contract_id,
+                'legal_document_template_id' => $legalDocumentTemplate->id,
+                'legal_document_type_id' => $legalDocumentTemplate->legalDocumentType->id,
+                'estate_id' => $request->estate_id,
+                'company_id' => $this->sessionDetails('company_id'),
+            ],
+            [
+                'file_location' => $filepath,
+            ]
+        );
 
         // update regenerate_count
-        if($generatedLegalDocument->created_at->diffForHumans() !== $generatedLegalDocument->updated_at->diffForHumans()){
+        if ($generatedLegalDocument->created_at->diffForHumans() !== $generatedLegalDocument->updated_at->diffForHumans()) {
             $generatedLegalDocument->regenerate_count++;
             $generatedLegalDocument->save();
         }
 
-        LogService::admin(auth()->user()->id, null, 'Update a generated legal document (' . $generatedLegalDocument->id  . ')' , 'UPDATE');
+        LogService::admin(auth()->user()->id, null, 'Update a generated legal document (' . $generatedLegalDocument->id  . ')', 'UPDATE');
         return response()->download(base_path($filepath));
     }
 
@@ -259,23 +267,23 @@ class LegalDocumentController extends Controller
 
         $document->update([
             'regenerate_count' => $document->regenerate_count + 1,
-            'file_location' =>$filepath
+            'file_location' => $filepath
         ]);
 
         return response()->download(base_path($filepath));
     }
 
-    private function documentGenerator($contract_id, $legalDocumentTemplate, $contract=null)
+    private function documentGenerator($contract_id, $legalDocumentTemplate, $contract = null)
     {
-        $file = !empty($legalDocumentTemplate->file_location) ? $legalDocumentTemplate->file_location : $legalDocumentTemplate->template_sample; 
-        $file = base_path() . '/' . $file; 
-        
+        $file = !empty($legalDocumentTemplate->file_location) ? $legalDocumentTemplate->file_location : $legalDocumentTemplate->template_sample;
+        $file = base_path() . '/' . $file;
+
         $options = setOptions();
         $values = getOptions($options, $contract_id, $legalDocumentTemplate, $contract);
         $filepath = config('app.upload_path') . '/' . $this->getPathToSaveFile('generated-legal-documents') . '/';
         $filename =  uniqid(11) . '.pdf';
         $destination = base_path($filepath . '/' . $filename);
-        
+
         GeneratedDocumentService::handler($file, $values, $destination);
 
         return [
@@ -284,13 +292,14 @@ class LegalDocumentController extends Controller
         ];
     }
 
-    public function availableTokens(){
+    public function availableTokens()
+    {
         $options = setOptions();
         $modified = [];
-        foreach($options as $key=>$value){
+        foreach ($options as $key => $value) {
             $modified[] = [
                 'key' => $key,
-                'usage' => '${'.$key.'}',
+                'usage' => '${' . $key . '}',
             ];
         }
 

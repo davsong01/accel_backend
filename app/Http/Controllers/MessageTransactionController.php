@@ -10,6 +10,7 @@ use Illuminate\Support\Carbon;
 use App\Models\MessageProvider;
 use App\Models\MessageTransaction;
 use App\Mail\MessageTransactionMail;
+use App\Models\CustomerContract;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\RedirectResponse;
@@ -92,7 +93,8 @@ class MessageTransactionController extends Controller
         $data['subject'] = $this->getMessageContent($data)['subject'];
         $data['schedule_date'] = Carbon::now();
         $data['company_id'] = $this->sessionDetails('company_id') ??  $data['company_id'];
-        
+        $data['purpose'] = $data['type'];
+
         $data = Arr::except($data, ['name']);
 
         $mes = MessageTransaction::create($data);
@@ -169,7 +171,10 @@ class MessageTransactionController extends Controller
                 $subject = $email_template->subject ?? 'Payment Confirmation';
                 $content = $email_template->content ?? '<strong>Dear ' . $data['name'] . ',</strong><br>
                 <div>
-                <p style="text-align:justify !important">We are delighted to inform you that your payment for ' . $data['element'] . ' has been successfully processed. Attached to this email is your payment receipt<br><br>Best regards,<br><br>' . $this->sessionDetails('company_name') . '</p>
+                <p style="text-align:justify !important">We are delighted to inform you that your payment for ' . $data['element'] . ' has been successfully processed. Attached to this email is your payment receipt<br>';
+
+                $content .= $this->propertyDetails($data);
+                $content .= '<br>Best regards,<br><br>' . $this->sessionDetails('company_name') . '</p>
                 </div>';
             }
         }
@@ -225,23 +230,12 @@ class MessageTransactionController extends Controller
                 $subject = 'Welcome to ' . $this->sessionDetails('company_name');
                 $content = '<strong>Dear ' . $data['name'] . ',</strong><br><br>
                 <div>
-                <p style="text-align:justify !important">We are pleased to inform you that your details have been successfully added to our system. We are thrilled to have you with us.<br><br>Here are the details of your contract: <br>
-                 <strong>Property Type: </strong>' . $data['property_type'] . '<br>
-                <strong>City: </strong>' . $data['city'] . '<br>
-                <strong>Location: </strong>' . $data['location'] . '<br>
-                <strong>Estate: </strong>' . $data['estate'] . '<br>
-                <strong>No. of Units: </strong>' . $data['no_of_units'] . '<br>
-                <strong>Contract Type: </strong>' . $data['contract_type'] . '<br>';
+                <p style="text-align:justify !important">We are pleased to inform you that your details have been successfully added to our system. We are thrilled to have you with us.<br>';
 
-                if(!empty($data['plot_size'])){
-                    $content .= '<strong>Plot Size: </strong>' . $data['plot_size'] . '<br>';
-                }
-
-                if (!empty($data['building_type'])) {
-                    $content .= '<strong>Building Type: </strong>' . $data['building_type'] . '<br>';
-                }
-                $content .= '<br><br>Please review the contract details and let us know if there are any discrepancies or if you need further clarification.<br><br>Your Customer ID is: ' . $data['customer_id'] .
-                    '<br><br>Thank you for choosing ' . $this->sessionDetails('company_name') . '. <br><br>We look forward to serving you.<br><br>Best Regards,<br>' . $this->sessionDetails('company_name') . '</div>';
+                $content .= $this->propertyDetails($data);
+            
+                $content .= '<br>Please review the contract details and let us know if there are any discrepancies or if you need further clarification.<br><br>Your Customer ID is<strong>: ' . $data['customer_id'] .
+                '</strong><br><br>Thank you for choosing ' . $this->sessionDetails('company_name') . '. <br><br>We look forward to serving you.<br><br>Best Regards,<br>' . $this->sessionDetails('company_name') . '</div>';
             }
         }
 
@@ -254,25 +248,11 @@ class MessageTransactionController extends Controller
                 $subject = $email_template->subject ?? 'New Contract Added to Your Account';
                 $temp_content = '<strong>Dear ' . $data['name'] . ', </strong><br><br>
                 <div>
-                <p style="text-align:justify !important">This is to inform you that a new contract has been successfully added to your account in our system.
-                <br>Here are the details of the newly added contract:<br><br></p>
-                <p style="text-align:justify !important">
-                <strong>Property Type: </strong>' . $data['property_type'] . '<br>
-                <strong>City: </strong>' . $data['city'] . '<br>
-                <strong>Location: </strong>' . $data['location'] . '<br>
-                <strong>Estate: </strong>' . $data['estate'] . '<br>
-                <strong>No. of Units: </strong>' . $data['no_of_units'] . '<br>
-                <strong>Contract Type: </strong>' . $data['contract_type'] . '<br>';
+                <p style="text-align:justify !important">This is to inform you that a new contract has been successfully added to your account in our system.';
 
-                if (!empty($data['plot_size'])) {
-                    $temp_content .= '<strong>Plot Size: </strong>' . $data['plot_size'] . '<br>';
-                }
+                $temp_content .= $this->propertyDetails($data);
 
-                if (!empty($data['building_type'])) {
-                    $temp_content .= '<strong>Building Type: </strong>' . $data['building_type'] . '<br>';
-                }
-           
-                $content .= '<br><br>
+                $temp_content .= '<br><br>
                 Please review these details and reach out to us for any necessary follow-ups or clarifications.<br>Thank you for your continued trust in our services.<br><br>Best regards,<br><br>' . $this->sessionDetails('company_name') . '
 
                 </p>
@@ -291,23 +271,10 @@ class MessageTransactionController extends Controller
                 $subject = $email_template->subject ?? 'Welcome to Your Joint Property Ownership';
                 $temp_content = '<strong>Dear ' . $data['name'] . ', </strong><br><br>
                 <div>
-                <p style="text-align:justify !important">We are delighted to inform you that you have been added as a joint owner of a property with ' . $this->sessionDetails('company_name') . '. This is a significant step, and we are glad to have you on board.<br><br>As a joint owner, you now share rights and responsibilities related to the property. This includes the ability to make decisions regarding the use, maintenance, and sale of the property. <br><br>Here are some of the details of your property:<br>
-                <strong>Property Type: </strong>' . $data['property_type'] . '<br>
-                <strong>City: </strong>' . $data['city'] . '<br>
-                <strong>Location: </strong>' . $data['location'] . '<br>
-                <strong>Estate: </strong>' . $data['estate'] . '<br>
-                <strong>No. of Units: </strong>' . $data['no_of_units'] . '<br>';
+                <p style="text-align:justify !important">We are delighted to inform you that you have been added as a joint owner of a property with ' . $this->sessionDetails('company_name') . '. This is a significant step, and we are glad to have you on board.<br><br>As a joint owner, you now share rights and responsibilities related to the property. This includes the ability to make decisions regarding the use, maintenance, and sale of the property. <br><br>Here are some of the details of your property:<br>';
 
-                if (!empty($data['plot_size'])) {
-                    $temp_content .= '<strong>Plot Size: </strong>' . $data['plot_size'] . '<br>';
-                }
-
-                if (!empty($data['building_type'])) {
-                    $temp_content .= '<strong>Building Type: </strong>' . $data['building_type'] . '<br>';
-                }
-           
-                $temp_content .= '<strong>Contract Type: </strong>' . $data['contract_type'] . '<br><br>
-                If you have any questions or need further clarification, please do not hesitate to contact us. Our team is always ready to assist you.<br><br>Thank you for choosing us. We look forward to serving you.
+                $temp_content .= $this->propertyDetails($data);
+                $temp_content .= 'If you have any questions or need further clarification, please do not hesitate to contact us. Our team is always ready to assist you.<br><br>Thank you for choosing us. We look forward to serving you.
                 <br><br>Best regards,<br><br>' . $this->sessionDetails('company_name') . '
                 </p>
                 </div>';
@@ -324,24 +291,13 @@ class MessageTransactionController extends Controller
                 $subject = $email_template->subject ?? 'New Contract Added to Your Client\'s Account';
                 $temp_content = '<strong>Dear ' . $data['name'] . ', </strong><br><br>
                 <div>
-                <p style="text-align:justify !important">This is to inform you that a new contract has been successfully added to the account of your client, ' . $data['customer_name'] . '. Here are the details of the customer\'s contract:<br><br>
+                <p style="text-align:justify !important">This is to inform you that a new contract has been successfully added to the account of your client, ' . $data['customer_name'] . ';
+                . Here are the details of the customer:<br><br>
                Name: ' . $data['customer_details']['customer_name'] . '<br> 
                Phone Number: ' . $data['customer_details']['customer_phone'] . '<br> 
-               Customer ID: ' . $data['customer_details']['customerId'] . '<br> <br>
-                <strong>Property Type: </strong>' . $data['property_type'] . '<br>
-                <strong>City: </strong>' . $data['city'] . '<br>
-                <strong>Location: </strong>' . $data['location'] . '<br>
-                <strong>Estate: </strong>' . $data['estate'] . '<br>
-                <strong>No. of Units: </strong>' . $data['no_of_units'] . '<br>
-                <strong>Contract Type: </strong>' . $data['contract_type'] . '<br>';
+               Customer ID: ' . $data['customer_details']['customerId'] . '<br>';
 
-                if(!empty($data['plot_size'])){
-                    $temp_content .= '<strong>Plot Size: </strong>' . $data['plot_size'] . '<br>';
-                }
-
-                if (!empty($data['building_type'])) {
-                    $temp_content .= '<strong>Building Type: </strong>' . $data['building_type'] . '<br>';
-                }
+                $temp_content .= $this->propertyDetails($data);
 
                 $temp_content .= '<br>Please ensure to review these details and reach out to the customer for any necessary follow-ups or clarifications. <br><br>Thank you for your attention to this matter.<br><br>Best regards,
                 <br><br>' . $this->sessionDetails('company_name') . '</p>
@@ -360,29 +316,19 @@ class MessageTransactionController extends Controller
                 $subject = $email_template->subject ?? 'New Customer Added Successfully';
                 $temp_content = '<strong>Dear ' . $data['name'] . ', </strong><br><br>
                 <div>
-                <p style="text-align:justify !important">This is to inform you that a new contract has been successfully added to the account of your client, ' . $data['customer_name'] . '. Here are the details of the customer\'s contract:<br><br>
+                <p style="text-align:justify !important">This is to inform you that a new contract has been successfully added to the account of your client, ' . $data['customer_name'] . '. Here are the details of the customer:<br><br>
                 Name: ' . $data['customer_details']['customer_name'] . '<br> 
                 Phone Number: ' . $data['customer_details']['customer_phone'] . '<br> 
-                Customer ID: ' . $data['customer_details']['customerId'] . '<br> <br>
-                <strong>Property Type: </strong>' . $data['property_type'] . '<br>
-                <strong>City: </strong>' . $data['city'] . '<br>
-                <strong>Location: </strong>' . $data['location'] . '<br>
-                <strong>Estate: </strong>' . $data['estate'] . '<br>
-                <strong>No. of Units: </strong>' . $data['no_of_units'] . '<br>';
+                Customer ID: ' . $data['customer_details']['customerId'] . '<br> <br>';
 
-                if(!empty($data['plot_size'])){
-                    $temp_content .= '<strong>Plot Size: </strong>' . $data['plot_size'] . '<br>';
-                }
+                $temp_content .= $this->propertyDetails($data);
 
-                if (!empty($data['building_type'])) {
-                    $temp_content .= '<strong>Building Type: </strong>' . $data['building_type'] . '<br>';
-                }
-                
-                $temp_content .= '<strong>Contract Type: </strong>' . $data['contract_type'] . '<br><br>Please ensure to review these details and reach out to the customer for any necessary follow-ups or clarifications. <br><br>Thank you for your attention to this matter.<br><br>Best regards,
+                $temp_content .= '<br><br>Please ensure to review these details and reach out to the customer for any necessary follow-ups or clarifications. <br><br>Thank you for your attention to this matter.<br><br>Best regards,
                 <br><br>' . $this->sessionDetails('company_name') . '</p>
                 </div>';
 
                 $content = $email_template->content ?? $temp_content;
+
             }
         }
 
@@ -418,9 +364,12 @@ class MessageTransactionController extends Controller
                 $subject = $email_template->subject ?? 'Receipt for Form payment';
                 $temp_content = '<strong>Dear ' . $data['name'] . ',</strong><br>
                 <div>
-                <p style="text-align:justify !important">We appreciate your business with ' . $this->sessionDetails('company_name') . '. <br>Attached is the receipt for your records.<br><br>If you have any questions or concerns, feel free to reach out to our customer support.<br><br>Best regards,<br><br>' . $this->sessionDetails('company_name') . '</p>
-                </div>';
+                <p style="text-align:justify !important">We appreciate your business with ' . $this->sessionDetails('company_name') . '. <br>Attached is the receipt for your records.<br><br>If you have any questions or concerns, feel free to reach out to our customer support.<br><br>Best regards,<br><br>' . $this->sessionDetails('company_name') . '</p>';
 
+                $temp_content .= $this->propertyDetails($data);
+                $temp_content .= '<br>Best regards,<br><br>' . $this->sessionDetails('company_name') . '</p>
+                </div>';
+                
                 $content = $email_template->content ?? $temp_content;
 
             }
@@ -433,7 +382,11 @@ class MessageTransactionController extends Controller
                 $subject = $email_template->subject ?? 'Payment Confirmation';
                 $content = $email_template->content ?? '<strong>Dear ' . $data['name'] . ',</strong><br>
                 <div>
-                <p style="text-align:justify !important">We are delighted to inform you that your first installment payment for your chosen property has been successfully processed. Congratulations on taking the initial step towards property ownership with ' . $this->sessionDetails('company_name') . '.<br><br>You will receive a separate email with an official receipt for your first and subsequent installment payments. <br><br>Please visit our office to pick up your Provisional Allocation Letter, and if you have any questions, do not hesitate to contact our support team/contact person. <br><br>We look forward to creating a rewarding experience for you as a property owner.<br><br>Best regards,<br><br>' . $this->sessionDetails('company_name') . '</p>
+                <p style="text-align:justify !important">We are delighted to inform you that your first installment payment for your chosen property has been successfully processed. Congratulations on taking the initial step towards property ownership with ' . $this->sessionDetails('company_name') . '.<br><br>You will receive a separate email with an official receipt for your first and subsequent installment payments. <br><br>Please visit our office to pick up your Provisional Allocation Letter, and if you have any questions, do not hesitate to contact our support team/contact person. <br><br>We look forward to creating a rewarding experience for you as a property owner.<br>';
+                
+                $content .= $this->propertyDetails($data);
+
+                $content .= 'Best regards,<br><br>' . $this->sessionDetails('company_name') . '</p>
                 </div>';
             }
         }
@@ -512,5 +465,60 @@ class MessageTransactionController extends Controller
         }
 
         return response()->json('All done');
+    }
+
+    public function propertyDetails($data){
+        if (empty($data['contract_ids'])) return '';
+
+        $masterContent = '<br>Here are the contract(s) details: <br><br>';
+
+        foreach($data['contract_ids'] as $id){
+            $contract = CustomerContract::with(['city:id,name','location:id,name','estate:id,name', 'property_type_details:id,type', 'plot_size:id,size', 'building_type_details:id,name'])->where('id', $id)->first();
+
+            $content = '';
+            $content .= '<strong>Contract: </strong>' . $contract->contract_name . '<br>';
+            
+            if (!empty($contract->property_type->type)) {
+                $data .= '<strong>Property Type: </strong>' . $contract->property_type->type . '<br>';
+            }
+    
+            if (!empty($contract->city->name)) {
+                $content .= '<strong>City: </strong>' . $contract->city->name . '<br>';
+            }
+    
+            if (!empty($contract->location->name)) {
+                $content .= '<strong>Location: </strong>' . $contract->location->name . '<br>';
+            }
+            
+            if (!empty($contract->estate->name)) {
+                $content .= '<strong>Estate: </strong>' . $contract->estate->name . '<br>';
+            }
+    
+            if (!empty($contract->no_of_units)) {
+                $content .= '<strong>No. of Units: </strong>' . $contract->no_of_units . '<br>';
+            }
+    
+            if (!empty($contract->contract_type)) {
+                $content .= '<strong>Contract Type: </strong>' . ucfirst($contract->contract_type) . '<br>';
+            }
+            
+            if(!empty($contract->plotsize->size)){
+                $content .= '<strong>Plot Size: </strong>' . $contract->plotsize->size . '<br>';
+            }
+    
+            if (!empty($contract->building_type_details->name)) {
+                $content .= '<strong>Building Type: </strong>' . $contract->building_type_details->name . '<br>';
+            }
+
+            if(count($data['contract_ids']) > 1){
+                $content .= '<hr><br>';
+            }else{
+                $content .= '<br>';
+            }
+
+            $masterContent .= $content;
+        }
+        
+        return $masterContent;
     }
 }

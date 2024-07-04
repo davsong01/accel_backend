@@ -123,7 +123,8 @@ class ContractPaymentController extends Controller
         $data['name'] =  $contractX->customer->user->first_name;
         $data['email'] =  $contractX->customer->user->email;
         $data['attachments'] = array_column($payments, 'receipt_location');
-
+        $data['contract_ids'] = [$contractX->id];
+        
         $this->logEmail($data);
 
         LogService::admin(auth()->user()->id,  $contractX->customer->user->id, 'Update a company\'s contract, contract payment, contract payment thread and transaction (' . $contractX->id . ')', 'UPDATE');
@@ -726,12 +727,23 @@ class ContractPaymentController extends Controller
                 'contract_status' => 'closed',
             ]);
         }
+
         $contract->update([
-            'sei_payment_transaction_id' => $payment->transaction_id
+            'sei_payment_transaction_id' => $payment->transaction_id,
         ]);
         
-        $contract->fee = $payment->infrastructure_fee;
+        if($request->type == 'SE'){
+            $contract->update([
+                'se_status' => $balance > 0 ? 'inprogress' : 'paid',
+            ]);
+        }elseif($request->type == 'INFRASTRUCTURE') {
+            $contract->update([
+                'infrastructure_status' => $balance > 0 ? 'in-progress' : 'paid',
+            ]);
+        }
 
+        $contract->fee = $payment->infrastructure_fee;
+        
         $receipt = generateGenericPaymentReceipt($payment, $contract);
         
         $payment->update(['receipt_location' => $receipt['filepath'] ?? null]);
@@ -743,6 +755,7 @@ class ContractPaymentController extends Controller
         $data['element'] = $request->type;
         $data['name'] =  $payment->customer->user->first_name;
         $data['email'] =  $payment->customer->user->email;
+        $data['contract_ids'] = [$contract->id];
 
         $this->logEmail($data);
 

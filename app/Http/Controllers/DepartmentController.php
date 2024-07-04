@@ -17,9 +17,15 @@ class DepartmentController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $departments = Department::where('company_id', $this->sessionDetails('company_id'))->latest()->get();
+        $departments = Department::where('company_id', $this->sessionDetails('company_id'));
+
+        if(!empty($request->type) && $request->type == 'strict'){
+            $departments = $departments->where('status',1)->whereHas('jobtitles');
+        }
+
+        $departments = $departments->latest()->get();
         return response()->json(['message' => 'Success', 'data' => $departments], 200);
     }
 

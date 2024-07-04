@@ -10,6 +10,8 @@ class Company extends Model
 {
     use HasFactory;
 
+    protected $table = 'companies';
+
     public function customers(){
         $this->hasMany(Customer::class);
     }

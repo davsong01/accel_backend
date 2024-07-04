@@ -33,6 +33,7 @@ class GeneratedDocumentService
         // $templateProcessor->setMacroOpeningChars('{#');
         // $templateProcessor->setMacroClosingChars('#}');
         // $templateProcessor->setMacroChars('#', '#');
+        // $templateProcessor->setValue("[[$placeholder]]", $value);
         $templateProcessor->setValues($options);
         // $templateProcessor->setImageValue('company_logo', $options['company_logo']);
         $templateProcessor->saveAs($destination . '.docx'); // temp file

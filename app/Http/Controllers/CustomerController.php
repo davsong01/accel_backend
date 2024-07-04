@@ -315,6 +315,7 @@ class CustomerController extends Controller
             $email['name'] =  $user->first_name;
             $email['email'] =  $user->email;
             $email['customer_id'] =  $user->customerId;
+            
             $this->logEmail($email);
 
             LogService::admin(auth()->user()->id, $user->id, 'Create a customer (' . $customer->id  . ')', 'CREATE');

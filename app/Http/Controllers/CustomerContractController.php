@@ -33,7 +33,7 @@ class CustomerContractController extends Controller
      */
     public function index(Request $request, $customer_id)
     {
-        $contracts = CustomerContract::with('contract_payment', 'property_type_details', 'city:name,id', 'estate:name,id', 'location:name,id', 'building_type:id,name', 'plot_size:id,size')->where('customer_id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->select(['id', 'primary_marketer_id', 'property_type_id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'contract_status', 'plot_size', 'building_type', 'subscribers', 'contract_type', 'property_type', 'transaction_date', 'created_at', 'form_payment_transaction_id', 'contract_payment_transaction_id', 'discount']);
+        $contracts = CustomerContract::with('contract_payment', 'property_type_details', 'city:name,id', 'estate:name,id', 'location:name,id', 'building_type:id,name', 'plot_size:id,size')->where('customer_id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->select(['id', 'primary_marketer_id', 'property_type_id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'contract_status', 'plot_size', 'building_type', 'subscribers', 'contract_type', 'property_type', 'transaction_date', 'created_at', 'form_payment_transaction_id', 'contract_payment_transaction_id', 'discount','se_status','infrastructure_status']);
 
         $allContracts = [];
         if ($contracts->exists()) {
@@ -203,37 +203,41 @@ class CustomerContractController extends Controller
             $range = range(1, $data['no_of_units']);
             $data['subscribers'] = json_encode($data['subscribers']);
             $data = Arr::except($data, 'no_of_units');
-
+            
             // Add contract
+            $newContractIds = [];
             foreach ($range as $units) {
                 $data['customer_id'] = $data['customer_id'];
                 $data['primary_marketer_id'] = $data['primary_marketer_id'] ?? null;
                 $data['secondary_marketers'] = isset($data['secondary_marketers']) && !empty($data['secondary_marketers']) ? json_encode($data['secondary_marketers']) : json_encode([]);
 
-                $this->createCustomerContract($data);
+                $newcontract = $this->createCustomerContract($data);
+                $newContractIds[] = $newcontract->id;
             }
             // Send contract email to this existing customer
             $customer = Customer::where('id', $request->customer_id)->first();
-            $city = City::where('id', $request->city_id)->first();
-            $estate = Estate::where('id', $request->estate_id)->first();
-            $location = Location::where('id', $request->location_id)->first();
-            $plotsize = PlotSize::where('id', $request->plot_size)->first();
-            $building_type = BuildingType::where('id', $request->building_type)->first();
 
-            $data['plot_size'] = $plotsize->size ?? null;
-            $data['building_type'] = $building_type->name ?? null;
-            $data['type'] = 'add.contract.to.existing.customer';
+            // $city = City::where('id', $request->city_id)->first();
+            // $estate = Estate::where('id', $request->estate_id)->first();
+            // $location = Location::where('id', $request->location_id)->first();
+            // $plotsize = PlotSize::where('id', $request->plot_size)->first();
+            // $building_type = BuildingType::where('id', $request->building_type)->first();
+
+            // $data['plot_size'] = $plotsize->size ?? null;
+            // $data['building_type'] = $building_type->name ?? null;
+
+            // $data['property_type']  = ucfirst($request->property_type);
+            // $data['city'] = $city->name;
+            // $data['location'] = $location->name;
+            // $data['estate'] = $estate->name;
+            // $data['no_of_units'] = $request->no_of_units;
+            // $data['contract_type'] = ucfirst($data['contract_type']);
             $data['name'] =  $customer->user->first_name;
             $data['email'] =  $customer->user->email;
-            $data['property_type']  = ucfirst($request->property_type);
-            $data['city'] = $city->name;
-            $data['location'] = $location->name;
-            $data['estate'] = $estate->name;
-            $data['no_of_units'] = $request->no_of_units;
-            $data['contract_type'] = ucfirst($data['contract_type']);
-
+            $data['type'] = 'add.contract.to.existing.customer';
+            $data['contract_ids'] = $newContractIds;
             $this->logEmail($data);
-
+            
             // Log Primary marketer email
             if ($data['primary_marketer_id']) {
                 $data['type'] = 'primary.marketer.email.for.new.customer';
@@ -248,20 +252,21 @@ class CustomerContractController extends Controller
                     ];
                     $data['customer_name'] =  $customer->user->first_name;
                     $data['email'] =  $markerter->user->email;
+                    $data['contract_ids'] = $newContractIds;
 
                     $this->logEmail($data);
                 }
             }
 
             // Log subscriber email
-            $email['property_type'] = ucfirst($request->property_type);
-            $email['city'] = $city->name;
-            $email['location'] = $location->name;
-            $email['estate'] = $estate->name;
-            $email['no_of_units'] = $request->no_of_units;
-            $email['contract_type'] = ucfirst($data['contract_type']);
-            $email['plot_size'] = $plotsize->size ?? null;
-            $email['building_type'] = $building_type->name ?? null;
+            // $email['property_type'] = ucfirst($request->property_type);
+            // $email['city'] = $city->name;
+            // $email['location'] = $location->name;
+            // $email['estate'] = $estate->name;
+            // $email['no_of_units'] = $request->no_of_units;
+            // $email['contract_type'] = ucfirst($data['contract_type']);
+            // $email['plot_size'] = $plotsize->size ?? null;
+            // $email['building_type'] = $building_type->name ?? null;
 
             $subscribers = json_decode($data['subscribers']);
             if (!empty($subscribers) && count($subscribers) > 0) {
@@ -269,6 +274,8 @@ class CustomerContractController extends Controller
                     $email['type'] = 'send.email.to.secondary.subscriber';
                     $email['name'] =  $subscribe->s_name;
                     $email['email'] =  $subscribe->s_email;
+                    $email['contract_ids'] = $newContractIds;
+
                     $this->logEmail($email);
                 }
             }
@@ -344,16 +351,32 @@ class CustomerContractController extends Controller
             // Add customer
             if ($user) {
                 $customer = $this->createCustomer($data);
+                // Log subscriber email
+            } else {
+                return response()->json(['message' => 'Could not create user', 'data' => null], 422);
+            }
+
+            if ($customer) {
+                // Add contract
+                $contract_ids =  [];
+
+                foreach ($range as $units) {
+                    $data['customer_id'] = $customer->id;
+                    $data['secondary_marketers'] = isset($data['secondary_marketers']) && !empty($data['secondary_marketers']) ? json_encode($data['secondary_marketers']) : json_encode([]);
+
+                    $newcontract = $this->createCustomerContract($data);
+                    $contract_ids[] = $newcontract->id;
+                }
 
                 // Log email to customer
                 $email['type'] = 'user.store';
                 $email['name'] =  $user->first_name;
                 $email['email'] =  $user->email;
                 $email['customer_id'] =  $user->customerId;
+                $email['contract_ids'] =  $contract_ids;
+                
                 $this->logEmail($email);
 
-
-                // Log subscriber email
                 $subscribers = json_decode($data['subscribers']);
                 if (count($subscribers) > 0) {
                     foreach ($subscribers as $subscribe) {
@@ -363,19 +386,7 @@ class CustomerContractController extends Controller
                         $this->logEmail($email);
                     }
                 }
-            } else {
-                return response()->json(['message' => 'Could not create user', 'data' => null], 422);
-            }
-
-            if ($customer) {
-                // Add contract
-                foreach ($range as $units) {
-                    $data['customer_id'] = $customer->id;
-                    $data['secondary_marketers'] = isset($data['secondary_marketers']) && !empty($data['secondary_marketers']) ? json_encode($data['secondary_marketers']) : json_encode([]);
-
-                    $this->createCustomerContract($data);
-                }
-
+                
                 if ($data['primary_marketer_id']) {
                     $email['type'] = 'primary.marketer.email.for.new.contract';
                     $markerter = Staff::where('id', $data['primary_marketer_id'])->first();
@@ -405,245 +416,247 @@ class CustomerContractController extends Controller
         return response()->json(['message' => 'Success', 'data' => null], 200);
     }
 
-    public function contractPayment(Request $request)
-    {
-        if (!empty($request->customer_id)) {
-            // Existing customer (and contract)
-            $validator = Validator::make($request->all(), [
-                'city_id' => 'required|exists:cities,id,company_id,' . $this->sessionDetails('company_id'),
-                'location_id' => 'required|exists:locations,id,company_id,' . $this->sessionDetails('company_id'),
-                'estate_id' => 'required|exists:estates,id,company_id,' . $this->sessionDetails('company_id'),
-                'property_type_id' => [
-                    'required', Rule::exists('estate_property_type_details', 'id')->where(function ($query) use ($request) {
-                        $query->where('company_id', $this->sessionDetails('company_id'))->where('estate_id', $request->estate_id)->where('type', $request->property_type);
-                    })
-                ],
-                'property_type' => 'required|in:land,building',
-                'plot_size' => 'nullable|exists:plot_sizes,id',
-                'building_type' => 'nullable|exists:building_types,id,company_id,' . $this->sessionDetails('company_id'),
-                'no_of_units' => 'required',
-                'contract_type' => 'required',
-                'customer_id' => 'required|exists:customers,id,company_id,' . $this->sessionDetails('company_id'),
-                'primary_marketer_id' => 'nullable|exists:staff,id,company_id,' . $this->sessionDetails('company_id'),
-                'secondary_marketers' => 'nullable',
-                'subscribers' => 'nullable',
-            ]);
+    // public function contractPayment(Request $request)
+    // {
+    //     if (!empty($request->customer_id)) {
+    //         // Existing customer (and contract)
+    //         $validator = Validator::make($request->all(), [
+    //             'city_id' => 'required|exists:cities,id,company_id,' . $this->sessionDetails('company_id'),
+    //             'location_id' => 'required|exists:locations,id,company_id,' . $this->sessionDetails('company_id'),
+    //             'estate_id' => 'required|exists:estates,id,company_id,' . $this->sessionDetails('company_id'),
+    //             'property_type_id' => [
+    //                 'required', Rule::exists('estate_property_type_details', 'id')->where(function ($query) use ($request) {
+    //                     $query->where('company_id', $this->sessionDetails('company_id'))->where('estate_id', $request->estate_id)->where('type', $request->property_type);
+    //                 })
+    //             ],
+    //             'property_type' => 'required|in:land,building',
+    //             'plot_size' => 'nullable|exists:plot_sizes,id',
+    //             'building_type' => 'nullable|exists:building_types,id,company_id,' . $this->sessionDetails('company_id'),
+    //             'no_of_units' => 'required',
+    //             'contract_type' => 'required',
+    //             'customer_id' => 'required|exists:customers,id,company_id,' . $this->sessionDetails('company_id'),
+    //             'primary_marketer_id' => 'nullable|exists:staff,id,company_id,' . $this->sessionDetails('company_id'),
+    //             'secondary_marketers' => 'nullable',
+    //             'subscribers' => 'nullable',
+    //         ]);
 
 
-            if (isset($request->secondary_marketers) && in_array($request->primary_marketer_id, $request->secondary_marketers)) {
-                return response()->json([
-                    'error' => 'Primary Marketer cannot be a secondary marketer at the same time, please check input',
-                    'data' => null,
-                ], 412);
-            }
+    //         if (isset($request->secondary_marketers) && in_array($request->primary_marketer_id, $request->secondary_marketers)) {
+    //             return response()->json([
+    //                 'error' => 'Primary Marketer cannot be a secondary marketer at the same time, please check input',
+    //                 'data' => null,
+    //             ], 412);
+    //         }
 
-            if ($validator->fails()) {
-                return response()->json([
-                    'error' => $validator->messages()->first(),
-                    'data' => null,
-                ], 412);
-            }
+    //         if ($validator->fails()) {
+    //             return response()->json([
+    //                 'error' => $validator->messages()->first(),
+    //                 'data' => null,
+    //             ], 412);
+    //         }
 
-            $data = $validator->valid();
-            $range = range(1, $data['no_of_units']);
-            $data['subscribers'] = json_encode($data['subscribers']);
-            $data = Arr::except($data, 'no_of_units');
+    //         $data = $validator->valid();
+    //         $range = range(1, $data['no_of_units']);
+    //         $data['subscribers'] = json_encode($data['subscribers']);
+    //         $data = Arr::except($data, 'no_of_units');
 
-            // Add contract
-            foreach ($range as $units) {
-                $data['customer_id'] = $data['customer_id'];
-                $data['primary_marketer_id'] = $data['primary_marketer_id'] ?? null;
-                $data['secondary_marketers'] = isset($data['secondary_marketers']) && !empty($data['secondary_marketers']) ? json_encode($data['secondary_marketers']) : json_encode([]);
+    //         // Add contract
+    //         foreach ($range as $units) {
+    //             $data['customer_id'] = $data['customer_id'];
+    //             $data['primary_marketer_id'] = $data['primary_marketer_id'] ?? null;
+    //             $data['secondary_marketers'] = isset($data['secondary_marketers']) && !empty($data['secondary_marketers']) ? json_encode($data['secondary_marketers']) : json_encode([]);
+                
+    //             $contract = $this->createCustomerContract($data);
+    //         }
 
-                $this->createCustomerContract($data);
-            }
-            // Send contract email to this existing customer
-            $customer = Customer::where('id', $request->customer_id)->first();
-            $city = City::where('id', $request->city_id)->first();
-            $estate = Estate::where('id', $request->estate_id)->first();
-            $location = Location::where('id', $request->location_id)->first();
-            $plotsize = PlotSize::where('id', $request->plot_size)->first();
-            $building_type = BuildingType::where('id', $request->building_type)->first();
+    //         dd($contract);
+    //         // Send contract email to this existing customer
+    //         $customer = Customer::where('id', $request->customer_id)->first();
+    //         $city = City::where('id', $request->city_id)->first();
+    //         $estate = Estate::where('id', $request->estate_id)->first();
+    //         $location = Location::where('id', $request->location_id)->first();
+    //         $plotsize = PlotSize::where('id', $request->plot_size)->first();
+    //         $building_type = BuildingType::where('id', $request->building_type)->first();
 
-            $data['plot_size'] = $plotsize->size ?? null;
-            $data['building_type'] = $building_type->name ?? null;
-            $data['type'] = 'add.contract.to.existing.customer';
-            $data['name'] =  $customer->user->first_name;
-            $data['email'] =  $customer->user->email;
-            $data['property_type']  = ucfirst($request->property_type);
-            $data['city'] = $city->name;
-            $data['location'] = $location->name;
-            $data['estate'] = $estate->name;
-            $data['no_of_units'] = $request->no_of_units;
-            $data['contract_type'] = ucfirst($data['contract_type']);
+    //         $data['plot_size'] = $plotsize->size ?? null;
+    //         $data['building_type'] = $building_type->name ?? null;
+    //         $data['type'] = 'add.contract.to.existing.customer';
+    //         $data['name'] =  $customer->user->first_name;
+    //         $data['email'] =  $customer->user->email;
+    //         $data['property_type']  = ucfirst($request->property_type);
+    //         $data['city'] = $city->name;
+    //         $data['location'] = $location->name;
+    //         $data['estate'] = $estate->name;
+    //         $data['no_of_units'] = $request->no_of_units;
+    //         $data['contract_type'] = ucfirst($data['contract_type']);
 
-            $this->logEmail($data);
+    //         $this->logEmail($data);
 
-            // Log Primary marketer email
-            if ($data['primary_marketer_id']) {
-                $data['type'] = 'primary.marketer.email.for.new.customer';
-                $markerter = Staff::where('id', $data['primary_marketer_id'])->first();
+    //         // Log Primary marketer email
+    //         if ($data['primary_marketer_id']) {
+    //             $data['type'] = 'primary.marketer.email.for.new.customer';
+    //             $markerter = Staff::where('id', $data['primary_marketer_id'])->first();
 
-                if ($markerter->user) {
-                    $data['name'] =  $markerter->user->first_name;
-                    $data['customer_details'] = [
-                        'customer_name' => $customer->user->first_name . ' ' . $customer->user->last_name,
-                        'customer_phone' => $customer->user->phone . ' ' . $customer->user->phone,
-                        'customerId' => $customer->user->customerId,
-                    ];
-                    $data['customer_name'] =  $customer->user->first_name;
-                    $data['email'] =  $markerter->user->email;
+    //             if ($markerter->user) {
+    //                 $data['name'] =  $markerter->user->first_name;
+    //                 $data['customer_details'] = [
+    //                     'customer_name' => $customer->user->first_name . ' ' . $customer->user->last_name,
+    //                     'customer_phone' => $customer->user->phone . ' ' . $customer->user->phone,
+    //                     'customerId' => $customer->user->customerId,
+    //                 ];
+    //                 $data['customer_name'] =  $customer->user->first_name;
+    //                 $data['email'] =  $markerter->user->email;
 
-                    $this->logEmail($data);
-                }
-            }
+    //                 $this->logEmail($data);
+    //             }
+    //         }
 
-            // Log subscriber email
-            $email['property_type'] = ucfirst($request->property_type);
-            $email['city'] = $city->name;
-            $email['location'] = $location->name;
-            $email['estate'] = $estate->name;
-            $email['no_of_units'] = $request->no_of_units;
-            $email['contract_type'] = ucfirst($data['contract_type']);
+    //         // Log subscriber email
+    //         $email['property_type'] = ucfirst($request->property_type);
+    //         $email['city'] = $city->name;
+    //         $email['location'] = $location->name;
+    //         $email['estate'] = $estate->name;
+    //         $email['no_of_units'] = $request->no_of_units;
+    //         $email['contract_type'] = ucfirst($data['contract_type']);
 
-            $subscribers = json_decode($data['subscribers']);
-            if (!empty($subscribers) && count($subscribers) > 0) {
-                foreach ($subscribers as $subscribe) {
-                    $email['type'] = 'send.email.to.secondary.subscriber';
-                    $email['name'] =  $subscribe->s_name;
-                    $email['email'] =  $subscribe->s_email;
-                    $this->logEmail($email);
-                }
-            }
+    //         $subscribers = json_decode($data['subscribers']);
+    //         if (!empty($subscribers) && count($subscribers) > 0) {
+    //             foreach ($subscribers as $subscribe) {
+    //                 $email['type'] = 'send.email.to.secondary.subscriber';
+    //                 $email['name'] =  $subscribe->s_name;
+    //                 $email['email'] =  $subscribe->s_email;
+    //                 $this->logEmail($email);
+    //             }
+    //         }
 
-            LogService::admin(auth()->user()->id, $customer->user->id, 'Create a customer contract', 'CREATE');
-            return response()->json(['message' => 'Success', 'data' => ['customer_id' => $data['customer_id']]], 200);
-        } else {
-            // New customer and contract
-            $validator = Validator::make($request->all(), [
-                'city_id' => 'required|exists:cities,id,company_id,' . $this->sessionDetails('company_id'),
-                'location_id' => 'required|exists:locations,id,company_id,' . $this->sessionDetails('company_id'),
-                'country_id' => 'nullable|exists:countries,id',
-                'estate_id' => 'required|exists:estates,id,company_id,' . $this->sessionDetails('company_id'),
-                'property_type' => 'nullable',
-                'property_type_id' => [
-                    'required', Rule::exists('estate_property_type_details', 'id')->where(function ($query) use ($request) {
-                        $query->where('company_id', $this->sessionDetails('company_id'))->where('estate_id', $request->estate_id);
-                    })
-                ],
-                'plot_size' => 'nullable|exists:plot_sizes,id',
-                'building_type' => 'nullable|exists:building_types,id',
-                'no_of_units' => 'required',
-                'contract_type' => 'required',
-                'subscribers' => 'nullable',
-                'first_name' => 'required',
-                'last_name' => 'required',
-                'gender' => 'required|in:male,female',
-                'email' => [
-                    'required', 'email', Rule::unique('users')->where(function ($query) {
-                        $query->where('company_id', $this->sessionDetails('company_id'))->where('type', 'customer');
-                    })
-                ],
-                'phone_number' => 'required',
-                'residential_address' => 'required',
-                'primary_marketer_id' => 'nullable|exists:staff,id,company_id,' . $this->sessionDetails('company_id'),
-            ]);
+    //         LogService::admin(auth()->user()->id, $customer->user->id, 'Create a customer contract', 'CREATE');
+    //         return response()->json(['message' => 'Success', 'data' => ['customer_id' => $data['customer_id']]], 200);
+    //     } else {
+    //         // New customer and contract
+    //         $validator = Validator::make($request->all(), [
+    //             'city_id' => 'required|exists:cities,id,company_id,' . $this->sessionDetails('company_id'),
+    //             'location_id' => 'required|exists:locations,id,company_id,' . $this->sessionDetails('company_id'),
+    //             'country_id' => 'nullable|exists:countries,id',
+    //             'estate_id' => 'required|exists:estates,id,company_id,' . $this->sessionDetails('company_id'),
+    //             'property_type' => 'nullable',
+    //             'property_type_id' => [
+    //                 'required', Rule::exists('estate_property_type_details', 'id')->where(function ($query) use ($request) {
+    //                     $query->where('company_id', $this->sessionDetails('company_id'))->where('estate_id', $request->estate_id);
+    //                 })
+    //             ],
+    //             'plot_size' => 'nullable|exists:plot_sizes,id',
+    //             'building_type' => 'nullable|exists:building_types,id',
+    //             'no_of_units' => 'required',
+    //             'contract_type' => 'required',
+    //             'subscribers' => 'nullable',
+    //             'first_name' => 'required',
+    //             'last_name' => 'required',
+    //             'gender' => 'required|in:male,female',
+    //             'email' => [
+    //                 'required', 'email', Rule::unique('users')->where(function ($query) {
+    //                     $query->where('company_id', $this->sessionDetails('company_id'))->where('type', 'customer');
+    //                 })
+    //             ],
+    //             'phone_number' => 'required',
+    //             'residential_address' => 'required',
+    //             'primary_marketer_id' => 'nullable|exists:staff,id,company_id,' . $this->sessionDetails('company_id'),
+    //         ]);
 
-            if ($validator->fails()) {
-                return response()->json([
-                    'error' => $validator->messages()->first(),
-                    'data' => null,
-                ], 412);
-            }
+    //         if ($validator->fails()) {
+    //             return response()->json([
+    //                 'error' => $validator->messages()->first(),
+    //                 'data' => null,
+    //             ], 412);
+    //         }
 
-            $data = $validator->valid();
-            $range = range(1, $data['no_of_units']);
+    //         $data = $validator->valid();
+    //         $range = range(1, $data['no_of_units']);
 
-            $data['subscribers'] = json_encode($data['subscribers']);
-            $data = Arr::except($data, 'no_of_units');
+    //         $data['subscribers'] = json_encode($data['subscribers']);
+    //         $data = Arr::except($data, 'no_of_units');
 
-            $customer = Customer::where('id', $request->customer_id)->first();
-            $city = City::where('id', $request->city_id)->first();
-            $estate = Estate::where('id', $request->estate_id)->first();
-            $location = Location::where('id', $request->location_id)->first();
-            $plotsize = PlotSize::where('id', $request->plot_size)->first();
-            $building_type = BuildingType::where('id', $request->building_type)->first();
+    //         $customer = Customer::where('id', $request->customer_id)->first();
+    //         $city = City::where('id', $request->city_id)->first();
+    //         $estate = Estate::where('id', $request->estate_id)->first();
+    //         $location = Location::where('id', $request->location_id)->first();
+    //         $plotsize = PlotSize::where('id', $request->plot_size)->first();
+    //         $building_type = BuildingType::where('id', $request->building_type)->first();
 
-            $email['property_type'] = ucfirst($request->property_type);
-            $email['city'] = $city->name;
-            $email['location'] = $location->name;
-            $email['plot_size'] = $plotsize->size ?? null;
-            $email['building_type'] = $building_type->name ?? null;
-            $email['estate'] = $estate->name;
-            $email['no_of_units'] = $request->no_of_units;
-            $email['contract_type'] = ucfirst($data['contract_type']);
+    //         $email['property_type'] = ucfirst($request->property_type);
+    //         $email['city'] = $city->name;
+    //         $email['location'] = $location->name;
+    //         $email['plot_size'] = $plotsize->size ?? null;
+    //         $email['building_type'] = $building_type->name ?? null;
+    //         $email['estate'] = $estate->name;
+    //         $email['no_of_units'] = $request->no_of_units;
+    //         $email['contract_type'] = ucfirst($data['contract_type']);
 
-            // Add user
-            $user = $this->createUser($data);
-            $data['user_id'] = $user->id;
+    //         // Add user
+    //         $user = $this->createUser($data);
+    //         $data['user_id'] = $user->id;
 
-            // Add customer
-            if ($user) {
-                $customer = $this->createCustomer($data);
+    //         // Add customer
+    //         if ($user) {
+    //             $customer = $this->createCustomer($data);
 
-                // Log email to customer
-                $email['type'] = 'user.store';
-                $email['name'] =  $user->first_name;
-                $email['email'] =  $user->email;
-                $email['customer_id'] =  $user->customerId;
-                $this->logEmail($email);
+    //             // Log email to customer
+    //             $email['type'] = 'user.store';
+    //             $email['name'] =  $user->first_name;
+    //             $email['email'] =  $user->email;
+    //             $email['customer_id'] =  $user->customerId;
+    //             $this->logEmail($email);
 
 
-                // Log subscriber email
-                $subscribers = json_decode($data['subscribers']);
-                if (count($subscribers) > 0) {
-                    foreach ($subscribers as $subscribe) {
-                        $email['type'] = 'send.email.to.secondary.subscriber';
-                        $email['name'] =  $subscribe->s_name;
-                        $email['email'] =  $subscribe->s_email;
-                        $this->logEmail($email);
-                    }
-                }
-            } else {
-                return response()->json(['message' => 'Could not create user', 'data' => null], 422);
-            }
+    //             // Log subscriber email
+    //             $subscribers = json_decode($data['subscribers']);
+    //             if (count($subscribers) > 0) {
+    //                 foreach ($subscribers as $subscribe) {
+    //                     $email['type'] = 'send.email.to.secondary.subscriber';
+    //                     $email['name'] =  $subscribe->s_name;
+    //                     $email['email'] =  $subscribe->s_email;
+    //                     $this->logEmail($email);
+    //                 }
+    //             }
+    //         } else {
+    //             return response()->json(['message' => 'Could not create user', 'data' => null], 422);
+    //         }
 
-            if ($customer) {
-                // Add contract
-                foreach ($range as $units) {
-                    $data['customer_id'] = $customer->id;
-                    $data['secondary_marketers'] = isset($data['secondary_marketers']) && !empty($data['secondary_marketers']) ? json_encode($data['secondary_marketers']) : json_encode([]);
+    //         if ($customer) {
+    //             // Add contract
+    //             foreach ($range as $units) {
+    //                 $data['customer_id'] = $customer->id;
+    //                 $data['secondary_marketers'] = isset($data['secondary_marketers']) && !empty($data['secondary_marketers']) ? json_encode($data['secondary_marketers']) : json_encode([]);
 
-                    $this->createCustomerContract($data);
-                }
+    //                 $this->createCustomerContract($data);
+    //             }
 
-                if ($data['primary_marketer_id']) {
-                    $email['type'] = 'primary.marketer.email.for.new.contract';
-                    $markerter = Staff::where('id', $data['primary_marketer_id'])->first();
+    //             if ($data['primary_marketer_id']) {
+    //                 $email['type'] = 'primary.marketer.email.for.new.contract';
+    //                 $markerter = Staff::where('id', $data['primary_marketer_id'])->first();
 
-                    if ($markerter) {
-                        $email['name'] =  $markerter->user->first_name;
-                        $email['customer_details'] = [
-                            'customer_name' => $customer->user->first_name . ' ' . $customer->user->last_name,
-                            'customer_phone' => $customer->user->phone . ' ' . $customer->user->phone,
-                            'customerId' => $customer->user->customerId,
-                        ];
-                        $email['customer_name'] =  $customer->user->first_name;
-                        $email['email'] =  $markerter->user->email;
+    //                 if ($markerter) {
+    //                     $email['name'] =  $markerter->user->first_name;
+    //                     $email['customer_details'] = [
+    //                         'customer_name' => $customer->user->first_name . ' ' . $customer->user->last_name,
+    //                         'customer_phone' => $customer->user->phone . ' ' . $customer->user->phone,
+    //                         'customerId' => $customer->user->customerId,
+    //                     ];
+    //                     $email['customer_name'] =  $customer->user->first_name;
+    //                     $email['email'] =  $markerter->user->email;
 
-                        $this->logEmail($email);
-                    }
-                }
-            } else {
-                return response()->json(['message' => 'Could not create customer', 'data' => null], 422);
-            }
+    //                     $this->logEmail($email);
+    //                 }
+    //             }
+    //         } else {
+    //             return response()->json(['message' => 'Could not create customer', 'data' => null], 422);
+    //         }
 
-            LogService::admin(auth()->user()->id, $customer->user->id, 'Create a customer contract', 'CREATE');
-            return response()->json(['message' => 'Success', 'data' => ['customer_id' => $customer->id]], 200);
-        }
+    //         LogService::admin(auth()->user()->id, $customer->user->id, 'Create a customer contract', 'CREATE');
+    //         return response()->json(['message' => 'Success', 'data' => ['customer_id' => $customer->id]], 200);
+    //     }
 
-        return response()->json(['message' => 'Success', 'data' => null], 200);
-    }
+    //     return response()->json(['message' => 'Success', 'data' => null], 200);
+    // }
 
     public function createUser($request)
     {
@@ -941,6 +954,7 @@ class CustomerContractController extends Controller
         $data['name'] =  $customer->user->first_name ?? null;
         $data['email'] =  $customer->user->email ?? null;
         $data['attachments'] = $receipts ?? null;
+        $data['contract_ids'] = $contract['contract_ids'];
 
         $this->logEmail($data);
 
@@ -1180,6 +1194,85 @@ class CustomerContractController extends Controller
         }
 
         $contract_id->update(['contract_status' => 'closed']);
+        return response()->json(['message' => 'Success', 'data' => []], 200);
+    }
+
+
+    public function removeSubscriber(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'subscriber_email' => 'required',
+            'customer_id' => 'required|exists:customers,id,company_id,' . $this->sessionDetails('company_id'),
+            'contract_id' => 'required|exists:customer_contracts,id,company_id,' . $this->sessionDetails('company_id'),
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->messages()->first(),
+                'data' => null,
+            ], 422);
+        }
+
+        $contract = CustomerContract::where(['customer_id' => $request->customer_id, 'id' => $request->contract_id])->whereNotNull('subscribers')->first();
+
+        if(empty($contract)){
+            return response()->json(['error' => 'Invalid contract details sent', 'data' => []], 412);
+        }
+
+        $decodeSubscribers = json_decode($contract->subscribers);
+        $length = count($decodeSubscribers);
+
+        if(!empty($decodeSubscribers)){
+            for ($i = 0; $i < $length; $i++) {
+                if ($decodeSubscribers[$i]->s_email == $request->subscriber_email) {
+                    unset($decodeSubscribers[$i]);
+                    $decodeSubscribers = array_values($decodeSubscribers);
+                    $length--; 
+                    $i--;
+                }
+            }
+        }
+
+        $contract->update([
+            'subscribers' => json_encode($decodeSubscribers),
+        ]);
+
+        if (count($decodeSubscribers) < 1) {
+            $contract->update([
+                'contract_type' => 'Single',
+            ]);
+        }
+        // $email['type'] = 'user.store';
+        // $email['name'] =  $user->first_name;
+        // $email['email'] =  $user->email;
+        // $email['customer_id'] =  $user->customerId;
+        // $this->logEmail($email);
+
+        return response()->json(['message' => 'Success', 'data' => []], 200);
+
+    }
+
+    public function makeCoreOwner(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'subscriber_email' => 'required',
+            'customer_id' => 'required|exists:customers,id,company_id,' . $this->sessionDetails('company_id'),
+            'contract_id' => 'required|exists:customer_contracts,id,company_id,' . $this->sessionDetails('company_id'),
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->messages()->first(),
+                'data' => null,
+            ], 422);
+        }
+
+        // $email['type'] = 'user.store';
+        // $email['name'] =  $user->first_name;
+        // $email['email'] =  $user->email;
+        // $email['customer_id'] =  $user->customerId;
+        // $this->logEmail($email);
+
         return response()->json(['message' => 'Success', 'data' => []], 200);
     }
 }
