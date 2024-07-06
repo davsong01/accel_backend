@@ -158,7 +158,7 @@ class LegalDocumentController extends Controller
     {
         $company_id = $this->sessionDetails('company_id');
         $documents = GeneratedLegalDocument::select('id', 'estate_id', 'contract_id', 'legal_document_template_id', 'legal_document_type_id', 'regenerate_count', 'file_location', 'updated_at', 'created_at')->with('estate:id,name', 'legalDocumentType:id,type,name')->where('company_id', $company_id)->orderBy('created_at', 'DESC');
-
+        
         if (!empty($request->estate_id)) {
             $documents = $documents->where('estate_id', $request->estate_id);
         }
@@ -194,8 +194,8 @@ class LegalDocumentController extends Controller
                 ];
 
 
-                $document->location = $document->contract->location->name ?? null;
-                $document->property_description = $document->contract->contract_name ?? null;
+                $document->location = $document->contract->location->name ?? '';
+                $document->property_description = $document->contract->contract_name ?? '';
 
                 unset($document->contract);
             }
@@ -230,8 +230,7 @@ class LegalDocumentController extends Controller
             'company_id' => $company_id,
         ])->firstOrFail();
 
-        $contract = CustomerContract::where('id', $request->contract_id)->first();
-        $documentGen = $this->documentGenerator($request->contract_id, $legalDocumentTemplate, $contract);
+        $documentGen = $this->documentGenerator($request->contract_id, $legalDocumentTemplate, $request->contract_id);
         $filepath = $documentGen['filepath'] . $documentGen['filename'];
 
         $generatedLegalDocument = GeneratedLegalDocument::updateOrCreate(
@@ -273,17 +272,17 @@ class LegalDocumentController extends Controller
         return response()->download(base_path($filepath));
     }
 
-    private function documentGenerator($contract_id, $legalDocumentTemplate, $contract = null)
+    private function documentGenerator($contract_id, $legalDocumentTemplate)
     {
         $file = !empty($legalDocumentTemplate->file_location) ? $legalDocumentTemplate->file_location : $legalDocumentTemplate->template_sample;
         $file = base_path() . '/' . $file;
-
-        $options = setOptions();
-        $values = getOptions($options, $contract_id, $legalDocumentTemplate, $contract);
+        
+        $values = getOptions($contract_id, $legalDocumentTemplate);
+        
         $filepath = config('app.upload_path') . '/' . $this->getPathToSaveFile('generated-legal-documents') . '/';
         $filename =  uniqid(11) . '.pdf';
-        $destination = base_path($filepath . '/' . $filename);
-
+        $destination = base_path($filepath . $filename);
+        
         GeneratedDocumentService::handler($file, $values, $destination);
 
         return [
@@ -300,6 +299,7 @@ class LegalDocumentController extends Controller
             $modified[] = [
                 'key' => $key,
                 'usage' => '${' . $key . '}',
+                'description' => $value,
             ];
         }
 

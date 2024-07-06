@@ -149,7 +149,6 @@ class MessageTransactionController extends Controller
             if (isset($data['medium']) && $data['medium'] == 'sms') {
                 $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'sms')->where('type', 'nudge.customer')->first();
             } else {
-            
                 $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'email')->where('type', 'nudge.customer')->first();
                 $subject = $email_template->subject ?? 'Complete Your Application Form';
                 $content = $email_template->content ?? '<strong>Dear ' . $data['name'] . ',</strong><br><br>
@@ -253,10 +252,7 @@ class MessageTransactionController extends Controller
                 $temp_content .= $this->propertyDetails($data);
 
                 $temp_content .= '<br><br>
-                Please review these details and reach out to us for any necessary follow-ups or clarifications.<br>Thank you for your continued trust in our services.<br><br>Best regards,<br><br>' . $this->sessionDetails('company_name') . '
-
-                </p>
-                </div>';
+                Please review these details and reach out to us for any necessary follow-ups or clarifications.<br>Thank you for your continued trust in our services.<br><br>Best regards,<br><br>' . $this->sessionDetails('company_name') . '</p></div>';
 
                 $content = $email_template->content ?? $temp_content;
             }

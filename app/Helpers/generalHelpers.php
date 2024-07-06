@@ -1,9 +1,12 @@
 <?php
 
 use App\Models\Role;
+use App\Models\Company;
 use App\Models\Package;
 use App\Models\Customer;
+use App\Models\CompanySetting;
 use App\Models\RolePermission;
+use App\Models\CustomerContract;
 use App\Models\LegalDocumentType;
 use App\Http\Controllers\Controller;
 use App\Models\LegalDocumentTemplate;
@@ -216,26 +219,85 @@ if (!function_exists("setOptions")) {
     function setOptions()
     {
         $options = [
-            'CUSTOMER_PHONE' => null,
-            'COMPANY_NAME' => null,
-            'DATE' => null,
-        ];
+            'COMPANY_NAME' => 'This will translate to the company name',
+            'COMPANY_EMAIL' => 'This will translate to the company support email',
+            'COMPANY_URL' => 'This will translate to company website address/url',
+            'CUSTOMER_EMAIL' => 'This will translate to the customer\'s email address',
+            'CUSTOMER_NAME' => 'This will translate to the customer\'s fullname',
+            'CUSTOMER_ADDRESS' =>  'This will translate to the customer\'s address',
+            'CUSTOMER_STATE' =>  'This will translate to the customer\'s state',
+            'CUSTOMER_PHONE' =>  'This will translate to the customer\'s phone number',
+            'DATE' => 'This will translate to the current date of document generation',
 
+            'PLOT_SIZE' => 'This will translate to the contract plot size',
+            'BUILDING_TYPE' => 'This will translate to the contract building type name',
+            'CONTRACT_ESTATE_NAME' => 'This will translate to the contract estate name',
+            'CONTRACT_ESTATE_CITY' => 'This will translate to the contract estate city',
+            'CONTRACT_ESTATE_LOCATION' => 'This will translate to the contract estate location',
+            'CONTRACT_FORM_APPLICATION_FEE' => 'This will translate to the contract form application fee',
+            'CONTRACT_SE_FEE' => 'This will translate to the contract Setting out and excavation fee',
+            'CONTRACT_INFRASTRUCTURE_FEE' => 'This will translate to the contract infrastructure',
+            
+            'CONTRACT_NAME' => 'This will translate to the contract/property name',
+
+            'PROPERTY_NET_VALUE' => 'This will translate to the contract property net value',
+            'PROPERTY_DISCOUNT' => 'This will translate to the contract property net value',
+
+            // 'BANK_NAME' => 'This will translate to contract payment account bank name',
+            // 'BANK_ACCOUNT_NAME' => 'This will translate to contract payment account name',
+            // 'BANK_ACCOUNT_NUMBER' => 'This will translate to contract payment account number',
+
+            // 'COMPANY_REPRESENTATIVE_NAME' => 'This will translate to company representative name',
+        ];
         return $options;
     }
 }
 
 if (!function_exists("getOptions")) {
-    function getOptions($options, $customer_id, $legalDocumentTemplate){
-        $customer = Customer::where('id', $customer_id)->first();
-        $controller = new Controller();
+    function getOptions($contract_id, $legalDocumentTemplate){
+        $contract = CustomerContract::where('id', $contract_id)->first();
+        $customer = Customer::with(['user:id,email,first_name,middle_name,last_name,residential_address,state_id,phone_number'])->where('id', $contract->customer_id)->first();
+        $company = Company::with('settings')->where('id', session()->get('company_id'))->first();
+        $settings = $company->settings;
+
+        $discount = $contract->discount ?? 0;
+        $property_price = $contract->property_type_details->estate_price;
+        $se_fee = $contract->property_type_details->settings_and_excavation;
+        $infrastructural_fee = $contract->property_type_details->infrastructural_fee;
         
+        $user = $customer->user;
+        $options = setOptions();
         $values = [];
 
-        $values['customer_name'] = key_exists('customer_name', $options) ? $customer->user->first_name . ' ' . $customer->user->last_name : null;
-        $values['date'] = key_exists('date', $options) ? date("M jS, Y", strtotime(now())) : null;
-        $values['customer_phone'] = key_exists('customer_phone', $options) ? $customer->user->phone_number : null;
-        $values['company_name'] = key_exists('company_name', $options) ? $controller->sessionDetails('company_name') : null;
+        if (!empty($options)) {
+            foreach ($options as $key => $value) {
+                $values['CUSTOMER_NAME'] = key_exists('CUSTOMER_NAME', $options) ? $user->fullname : null;
+                $values['DATE'] = key_exists('DATE', $options) ? date("M jS, Y", strtotime(now())) : null;
+                $values['CUSTOMER_PHONE'] = key_exists('CUSTOMER_PHONE', $options) ? $user->phone_number : null;
+                $values['COMPANY_NAME'] = key_exists('COMPANY_NAME', $options) ? session()->get('company_name') : null;
+                $values['COMPANY_URL'] = key_exists('COMPANY_URL', $options) ? session()->get('company_url') : null;
+                $values['COMPANY_EMAIL'] = key_exists('COMPANY_EMAIL', $options) ? $settings->company_email : null;
+
+                $values['CUSTOMER_EMAIL'] = key_exists('CUSTOMER_EMAIL', $options) ? $user->email : null;
+                $values['CUSTOMER_ADDRESS'] = key_exists('CUSTOMER_ADDRESS', $options) ? $user->residential_address : null;
+                $values['CUSTOMER_STATE'] = key_exists('CUSTOMER_STATE', $options) ? $user->state->name : null;
+
+                $values['PLOT_SIZE'] = key_exists('PLOT_SIZE', $options) ? $contract->plotSize->size : null;
+                $values['CONTRACT_ESTATE_NAME'] = key_exists('CONTRACT_ESTATE_NAME', $options) ? $contract->estate->name : null;
+                $values['CONTRACT_ESTATE_CITY'] = key_exists('CONTRACT_ESTATE_CITY', $options) ? $contract->estate->location->city->name : null;
+                $values['CONTRACT_ESTATE_LOCATION'] = key_exists('CONTRACT_ESTATE_LOCATION', $options) ? $contract->estate->location->name : null;
+                $values['CONTRACT_FORM_APPLICATION_FEE'] = key_exists('CONTRACT_ESTATE_LOCATION', $options) ? $settings->currencyData->symbol .number_format($contract->form_transactions->sum('amount')) : null;
+                $values['PROPERTY_NET_VALUE'] = key_exists('PROPERTY_NET_VALUE', $options) ? $settings->currencyData->symbol . number_format($property_price) : null;
+                $values['PROPERTY_DISCOUNT'] = key_exists('PROPERTY_DISCOUNT', $options) ? $settings->currencyData->symbol . number_format($discount) : null;
+                $values['CONTRACT_SE_FEE'] = key_exists('CONTRACT_SE_FEE', $options) ? $settings->currencyData->symbol . number_format($se_fee) : null;
+                $values['CONTRACT_INFRASTRUCTURE_FEE'] = key_exists('CONTRACT_INFRASTRUCTURE_FEE', $options) ? $settings->currencyData->symbol . number_format($infrastructural_fee) : null;
+                $values['CONTRACT_NAME'] = key_exists('CONTRACT_NAME', $options) ? $contract->contract_name : null;
+
+                $values['BUILDING_TYPE'] = key_exists('BUILDING_TYPE', $options) ? $contract->building_type_details->name : null;
+
+            }
+        }
+      
 
         return $values;
     }

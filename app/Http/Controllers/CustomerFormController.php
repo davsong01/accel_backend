@@ -163,12 +163,12 @@ class CustomerFormController extends Controller
         ]);
 
         $data['contract_details'] = $this->formatResponseForm($customer_form, 'approve_contract');
-
         $data['type'] = 'formrequest.approve';
         $data['medium'] = 'email';
         // $data['user'] = Customer::where('id', 'customer_id')->user;
         $data['name'] = $customer_form->customer->user->first_name ?? '';
         $data['email'] = $customer_form->customer->user->email ?? '';
+       
         $this->logEmail($data);
 
         LogService::admin(auth()->user()->id, $customer_form->customer->user->id, 'Approve customer form 2 request (' . $customer_form->id .')', 'UPDATE');
@@ -244,14 +244,13 @@ class CustomerFormController extends Controller
             'is_form2_request' => 1
         ]);
         
-        // $data['contract_details'] = $this->getFormRequestContractDetails($customer_form, 'approve_contract');
 
         // $data['type'] = 'formrequest.approve';
         // $data['medium'] = 'email';
         // // $data['user'] = Customer::where('id', 'customer_id')->user;
-        // $data['name'] = $customer_form->first_name ?? '';
-        // $data['email'] = $customer_form->email_address ?? '';
-
+        // $data['name'] = $customer_form->customer->user->first_name ?? '';
+        // $data['email'] = $customer_form->customer->user->email ?? '';
+        
         // $this->logEmail($data);
 
         LogService::admin(auth()->user()->id, $customer_form->customer->user->id, 'Approve customer form 2 response (' . $customer_form->id .')', 'UPDATE');
@@ -292,14 +291,14 @@ class CustomerFormController extends Controller
 
         // $data['contract_details'] = $this->getFormRequestContractDetails($customer_form, 'decline_contract', $request->reason);
 
-        // $data['type'] = 'formrequest.decline';
-        // $data['reason'] = $request->reason;
-        // $data['medium'] = 'email';
-        // // $data['user'] = Customer::where('id', 'customer_id')->user;
-        // $data['name'] = $customer_form->first_name ?? '';
-        // $data['email'] = $customer_form->email_address ?? '';
+        $data['type'] = 'formrequest.decline';
+        $data['reason'] = $request->reason;
+        $data['medium'] = 'email';
+        // $data['user'] = Customer::where('id', 'customer_id')->user;
+        $data['name'] = $customer_form->customer->user->first_name ?? '';
+        $data['email'] = $customer_form->customer->user->email ?? '';
 
-        // $this->logEmail($data);
+        $this->logEmail($data);
         LogService::admin(auth()->user()->id, $customer_form->customer->user->id, 'Decline customer form 2 response (' . $customer_form->id .')', 'UPDATE');
         return response()->json(['message' => 'Successful', 'data' => ['customer_id' => $customer_form->customer_id]], 200);
     }
@@ -600,8 +599,8 @@ class CustomerFormController extends Controller
 
                 // Update the contract
                 $customer_contract_ids[] = $cont['contract_id'];
-                
-                app('App\Http\Controllers\CustomerContractController')->updateCustomerContract($cont, $cont['contract_id'], $request->customer_id);
+
+                app('App\Http\Controllers\CustomerContractController')->updateCustomerContract($cont, $cont['contract_id'], $customer_form->customer_id);
             }
         }
 

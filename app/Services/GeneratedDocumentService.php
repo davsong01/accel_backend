@@ -30,11 +30,11 @@ class GeneratedDocumentService
         }
 
         $templateProcessor = new TemplateProcessor($source);
-        // $templateProcessor->setMacroOpeningChars('{#');
-        // $templateProcessor->setMacroClosingChars('#}');
-        // $templateProcessor->setMacroChars('#', '#');
-        // $templateProcessor->setValue("[[$placeholder]]", $value);
-        $templateProcessor->setValues($options);
+        
+        foreach ($options as $placeholder => $value) {
+            $templateProcessor->setValue($placeholder, " " . $value . " ");
+        }
+
         // $templateProcessor->setImageValue('company_logo', $options['company_logo']);
         $templateProcessor->saveAs($destination . '.docx'); // temp file
         $rendererName = Settings::PDF_RENDERER_DOMPDF;
@@ -47,11 +47,12 @@ class GeneratedDocumentService
         $xmlWriter->save($destination);
             
         unlink($destination . '.docx'); // delete temp file
-    
+        
         if (file_exists($destination))
             return $destination;
         return null;
     }
+
 }
 
 
