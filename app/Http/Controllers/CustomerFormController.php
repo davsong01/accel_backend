@@ -601,8 +601,8 @@ class CustomerFormController extends Controller
 
                 // Update the contract
                 $customer_contract_ids[] = $cont['contract_id'];
-                
-                app('App\Http\Controllers\CustomerContractController')->updateCustomerContract($cont, $cont['contract_id'], $request->customer_id);
+
+                app('App\Http\Controllers\CustomerContractController')->updateCustomerContract($cont, $cont['contract_id'], $customer_form->customer_id);
             }
         }
 
