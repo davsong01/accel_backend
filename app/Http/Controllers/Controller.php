@@ -693,7 +693,7 @@ class Controller extends BaseController
                     'estate' => $contract->estate,
                     'plot_size' => $contract->plotSize,
                     'infrastructural_fee' => $contract->property_type_details->infrastructural_fee,
-                    'net_property_fee' => $contract->net_property_fee,
+                    'net_property_fee' => (float) $contract->property_type_details->estate_price - $contract->discount,
                     'discount' => $contract->discount,
                     'transaction_date' => $contract->transaction_date,
                     'primary_marketer' => $contract->primaryMarketer($contract),
