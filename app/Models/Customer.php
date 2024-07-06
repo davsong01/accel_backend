@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\User;
+use App\Models\State;
 use App\Models\Payment;
 use App\Models\Property;
 use App\Models\Transaction;
@@ -94,6 +95,11 @@ class Customer extends Model
         $next_of_kin = !empty($this->attributes['next_of_kin']) ? json_decode($this->attributes['next_of_kin'], true) : [];
 
         return $next_of_kin;
+    }
+
+    public function state()
+    {
+        return $this->belongsTo(State::class);
     }
 
 }

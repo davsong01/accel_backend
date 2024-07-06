@@ -303,7 +303,7 @@ class MenuController extends Controller
         $data = $this->validate($request, [
             'route_name' => 'required',
         ]);
-
+        
         $name = $data['route_name'];
 
         if (isset($name)) {

@@ -46,6 +46,7 @@ Route::get('/testreceipttemplate', function () {
 
     $payment = App\Models\ContractPayment::find(12);
     $contract = CustomerContract::where('id', 165)->first();
+    
     return view('receipts.template1', compact('data', 'payment', 'contract'));
 });
 
@@ -65,11 +66,15 @@ Route::get('/testreceiptdownload/{payment_id}/{contract_id}/{user_id}', function
         'contract_value' => $payment->contract_value,
         'discount_applied' => $payment->discount_applied,
     ];
-    // dd($payment->customer, $payment->transaction);
-    $pdf = PDF::loadView('receipts.contract-payment', compact('payment', 'data', 'contract', 'others'))->setPaper('a4', 'portrait');
+
+    $pdf = PDF::loadView('receipts.test-payment', compact('payment', 'data', 'contract', 'others'));
+    return $pdf->download('test-receipt-document.pdf');
 
     file_put_contents(base_path() . '/' . config('app.upload_path') . '/' . $pathToSave, $pdf->output());
-    // Rmember to create a public folder in the root directory if there is a PDF error
+
+    // for snappy
+    // $pdf = PDF::loadView('pdf_view', $data);
+    // return $pdf->download('document.pdf');
 
     return [
         'receipt_no' => $name . '.pdf',

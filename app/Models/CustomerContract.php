@@ -105,7 +105,7 @@ class CustomerContract extends Model
             $building =  $this->property_type_details->building_details->name ?? null;
             $name = $building . ' - ' . $this->estate->name;
         }
-
+        
         if ($this->property_type == 'land') {
             $psize = $this->property_type_details->plot_details->size ?? null;
             $building = $this->property_type_details->building_details->name ?? null;

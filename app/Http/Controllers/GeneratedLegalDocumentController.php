@@ -63,7 +63,7 @@ class GeneratedLegalDocumentController extends Controller
             ], 412);
         }
         $legalDocumentTemplate = LegalDocumentTemplate::find($request->document_template_id);
-
+        dd($legalDocumentTemplate);
         $documentGen = $this->documentGenerator($request->customer_id, $legalDocumentTemplate);
 
         $generatedLegalDocument = GeneratedLegalDocument::create([
@@ -110,9 +110,7 @@ class GeneratedLegalDocumentController extends Controller
     {
         $file = getEncodedFileRealPath($legalDocumentTemplate->file_location);
 
-        $options = setOptions();
-        $values = getOptions($options, $customer_id, $legalDocumentTemplate);
-
+        $values = getOptions($customer_id, $legalDocumentTemplate);
         $filepath = $this->getPathToSaveFile('generated-legal-documents');
         $filename =  uniqid(11) . '.pdf';
         $destination = base_path($filepath . '/' . $filename);

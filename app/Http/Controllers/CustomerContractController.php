@@ -810,7 +810,10 @@ class CustomerContractController extends Controller
      */
     public function show($contract_id)
     {
-        $contract = CustomerContract::with('property_type_details:type,id,estate_price,settings_and_excavation,infrastructural_fee', 'city:name,id', 'estate:name,id', 'location:name,id', 'building_type:id,name', 'plot_size:id,size', 'under_construction')->where('id', $contract_id)->select(['id', 'property_type_id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'company_id', 'subscribers', 'contract_type', 'property_type', 'primary_marketer_id'])->orderBy('created_at', 'DESC')->where('company_id', $this->sessionDetails('company_id'))->first();
+        $contract = CustomerContract::with('property_type_details', 'city:name,id', 'estate:name,id', 'location:name,id', 'building_type:id,name', 'plot_size:id,size', 'under_construction', 'contract_payment')->where('id', $contract_id)->select(['id', 'property_type_id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'company_id', 'subscribers', 'contract_type', 'primary_marketer_id'])->orderBy('created_at', 'DESC')->where('company_id', $this->sessionDetails('company_id'))->first();
+
+        // $contract = CustomerContract::with('contract_payment', 'property_type_details', 'city:name,id', 'estate:name,id', 'location:name,id', 'building_type:id,name', 'plot_size:id,size')->where('customer_id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->select(['id', 'primary_marketer_id', 'property_type_id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'contract_status', 'plot_size', 'building_type', 'subscribers', 'contract_type', 'property_type', 'transaction_date', 'created_at', 'form_payment_transaction_id', 'contract_payment_transaction_id', 'discount', 'se_status', 'infrastructure_status']);
+
 
         if ($contract) {
             $contract->subscribers = !empty($contract->subscribers) ? json_decode($contract->subscribers) : '';
