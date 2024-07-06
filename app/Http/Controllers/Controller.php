@@ -688,7 +688,6 @@ class Controller extends BaseController
                     'property_type' => $contract->property_type_details->type,
                     'property_price' => (double) $contract->property_type_details->estate_price,
                     'city' =>  $contract->city,
-                    'building_type' => $contract->building_type,
                     'location' => $contract->location->name,
                     'estate' => $contract->estate,
                     'plot_size' => $contract->plotSize,
@@ -699,7 +698,7 @@ class Controller extends BaseController
                     'primary_marketer' => $contract->primaryMarketer($contract),
                     'settings_and_escavation' => $contract->property_type_details->settings_and_excavation,
                     'contract_name' => $contract->contract_name,
-                    'building_type' => $contract->property_type_details->building_details->name ?? '',
+                    'building_type' => $contract->property_type_details->building_details,
                     // 'form_amount_paid' => $contract->form_amount_paid,
                     'form_payment_status' => $contract->form_payment_status,
                 ];
