@@ -88,6 +88,7 @@ class ChangeOfOwnershipController extends Controller
             'new_owner_id' => ['sometimes', "exists:customers,id,company_id,$company_id"],
             'comment' => ['sometimes', 'string'],
             'amount' => ['sometimes', 'min:1', 'integer'],
+            'status' => ['sometimes', 'in:PENDING,DECLINED,APPROVED']
         ]);
 
         if ($validator->fails()) {

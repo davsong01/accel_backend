@@ -78,6 +78,7 @@ class ContractCancellationController extends Controller
             'customer_id' => ['sometimes', "exists:customers,id,company_id,$company_id"],
             'customer_contract_id' => ['sometimes', "exists:customer_contracts,id,customer_id,$request->customer_id"],
             'comment' => ['sometimes', 'string'],
+            'status' => ['sometimes', 'in:PENDING,DECLINED,APPROVED']
         ]);
 
         if ($validator->fails()) {

@@ -80,6 +80,7 @@ class CustomerRefundController extends Controller
             'customer_contract_id' => ['sometimes', "exists:customer_contracts,id,customer_id,$request->customer_id"],
             'termination_charge' => ['sometimes', 'integer'],
             'comment' => ['sometimes', 'string'],
+            'status' => ['sometimes', 'in:PENDING,DECLINED,APPROVED']
         ]);
 
         if ($validator->fails()) {

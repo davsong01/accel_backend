@@ -9,7 +9,7 @@ class ChangeOfOwnership extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['branch_id', 'original_owner_id', 'customer_contract_id', 'new_owner_id', 'amount', 'company_id', 'comment'];
+    protected $fillable = ['branch_id', 'original_owner_id', 'customer_contract_id', 'new_owner_id', 'amount', 'company_id', 'comment', 'status'];
 
     protected $with = [ 'original_owner', 'new_owner', 'branch', 'contract'];
 
