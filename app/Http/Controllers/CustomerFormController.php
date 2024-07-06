@@ -162,8 +162,7 @@ class CustomerFormController extends Controller
             'form_status' => 'Confirmed',
         ]);
 
-        // $data['contract_details'] = $this->formatResponseForm($customer_form, 'approve_contract');
-
+        $data['contract_details'] = $this->formatResponseForm($customer_form, 'approve_contract');
         $data['type'] = 'formrequest.approve';
         $data['medium'] = 'email';
         // $data['user'] = Customer::where('id', 'customer_id')->user;
@@ -245,15 +244,14 @@ class CustomerFormController extends Controller
             'is_form2_request' => 1
         ]);
         
-        // $data['contract_details'] = $this->getFormRequestContractDetails($customer_form, 'approve_contract');
 
-        $data['type'] = 'formrequest.approve';
-        $data['medium'] = 'email';
-        // $data['user'] = Customer::where('id', 'customer_id')->user;
-        $data['name'] = $customer_form->customer->user->first_name ?? '';
-        $data['email'] = $customer_form->customer->user->email ?? '';
+        // $data['type'] = 'formrequest.approve';
+        // $data['medium'] = 'email';
+        // // $data['user'] = Customer::where('id', 'customer_id')->user;
+        // $data['name'] = $customer_form->customer->user->first_name ?? '';
+        // $data['email'] = $customer_form->customer->user->email ?? '';
         
-        $this->logEmail($data);
+        // $this->logEmail($data);
 
         LogService::admin(auth()->user()->id, $customer_form->customer->user->id, 'Approve customer form 2 response (' . $customer_form->id .')', 'UPDATE');
 
