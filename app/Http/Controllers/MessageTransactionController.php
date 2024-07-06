@@ -252,10 +252,7 @@ class MessageTransactionController extends Controller
                 $temp_content .= $this->propertyDetails($data);
 
                 $temp_content .= '<br><br>
-                Please review these details and reach out to us for any necessary follow-ups or clarifications.<br>Thank you for your continued trust in our services.<br><br>Best regards,<br><br>' . $this->sessionDetails('company_name') . '
-
-                </p>
-                </div>';
+                Please review these details and reach out to us for any necessary follow-ups or clarifications.<br>Thank you for your continued trust in our services.<br><br>Best regards,<br><br>' . $this->sessionDetails('company_name') . '</p></div>';
 
                 $content = $email_template->content ?? $temp_content;
             }
