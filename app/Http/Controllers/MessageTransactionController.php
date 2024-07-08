@@ -454,7 +454,9 @@ class MessageTransactionController extends Controller
                     Mail::to($message->recipient)->send(new MessageTransactionMail($message->toArray(), $providerX));
                     $message->update(['status' => 'sent']);
                 } catch (\Exception $e) {
-                    $message->update(['errors' => $e->getMessage()]);
+                    \Log::info(['Message Transaction process Error: ' => $e->getMessage()]);
+                    $message->errors = $e->getMessage();
+                    $message->save();
                     continue;
                 }
             }

@@ -342,7 +342,7 @@ class StaffController extends Controller
 
     public function updateStaff(Request $request, $internal = null)
     {
-        $staff = Staff::with('roles')->where(['staff.id' => $request->staff_id])
+        $staff = Staff::with('roles','user')->where(['staff.id' => $request->staff_id])
             ->join("users", "staff.user_id", "=", "users.id")->where(['users.status' => 'active', 'type' => 'staff'])
             ->leftjoin("job_types", "staff.jobtype_id", "=", "job_types.id")
             ->leftjoin("job_roles", "staff.jobrole_id", "=", "job_roles.id")
@@ -350,7 +350,7 @@ class StaffController extends Controller
             ->leftjoin("departments", "staff.department_id", "=", "departments.id")
             ->select("users.status", "staff.created_at", "users.first_name", "users.username", "users.last_name", "users.email", "staff.id AS staff_id", "users.type", "users.company_id", "staff.jobtype_id", "users.id AS user_id", "staff.date_of_employment", "branches.id AS branch_id", "branches.name AS branch_name", "departments.id AS department_id", "departments.name AS department_name", "job_roles.id AS job_role_id", "job_roles.name AS job_role_name", "job_types.id AS job_type_id", "job_types.name AS job_type_name", "users.next_of_kin", "users.date_of_birth", "bank_id", "pfa_id", "account_name", "account_number", "sort_code", "swift_code")
             ->first();
-
+        
         if (!$staff) {
             return response()->json(['message' => 'Staff not found!', 'data' => null], 200);
         }
@@ -358,7 +358,7 @@ class StaffController extends Controller
         $validator = Validator::make($request->all(), [
             'email' => [
                 'required', Rule::unique('users')->where(function ($query) use ($staff) {
-                    $query->where('company_id', $this->sessionDetails('company_id'))->where('id', '!=', (int) $staff->user_id);
+                    $query->where('company_id', $this->sessionDetails('company_id'))->where('id', '!=', (int) $staff->user_id)->where('type','staff');
                 })
             ],
             'first_name' => 'nullable',
