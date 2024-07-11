@@ -231,29 +231,35 @@ class LegalDocumentController extends Controller
         ])->firstOrFail();
 
         $documentGen = $this->documentGenerator($request->contract_id, $legalDocumentTemplate, $request->contract_id);
-        $filepath = $documentGen['filepath'] . $documentGen['filename'];
+        
+        if (isset($documentGen) && $documentGen['status'] == 'successful') {
+            $filepath = $documentGen['absolute_path'] . $documentGen['file_name'];
 
-        $generatedLegalDocument = GeneratedLegalDocument::updateOrCreate(
-            [
-                'contract_id' => $request->contract_id,
-                'legal_document_template_id' => $legalDocumentTemplate->id,
-                'legal_document_type_id' => $legalDocumentTemplate->legalDocumentType->id,
-                'estate_id' => $request->estate_id,
-                'company_id' => $this->sessionDetails('company_id'),
-            ],
-            [
-                'file_location' => $filepath,
-            ]
-        );
+            $generatedLegalDocument = GeneratedLegalDocument::updateOrCreate(
+                [
+                    'contract_id' => $request->contract_id,
+                    'legal_document_template_id' => $legalDocumentTemplate->id,
+                    'legal_document_type_id' => $legalDocumentTemplate->legalDocumentType->id,
+                    'estate_id' => $request->estate_id,
+                    'company_id' => $this->sessionDetails('company_id'),
+                ],
+                [
+                    'file_location' => $documentGen['relative_path'] . $documentGen['file_name'],
+                ]
+            );
 
-        // update regenerate_count
-        if ($generatedLegalDocument->created_at->diffForHumans() !== $generatedLegalDocument->updated_at->diffForHumans()) {
-            $generatedLegalDocument->regenerate_count++;
-            $generatedLegalDocument->save();
+            // update regenerate_count
+            if ($generatedLegalDocument->created_at->diffForHumans() !== $generatedLegalDocument->updated_at->diffForHumans()) {
+                $generatedLegalDocument->regenerate_count++;
+                $generatedLegalDocument->save();
+            }
+
+            LogService::admin(auth()->user()->id, null, 'Update a generated legal document (' . $generatedLegalDocument->id  . ')', 'UPDATE');
+
+            return response()->file($filepath);
         }
 
-        LogService::admin(auth()->user()->id, null, 'Update a generated legal document (' . $generatedLegalDocument->id  . ')', 'UPDATE');
-        return response()->download(base_path($filepath));
+        return $documentGen;
     }
 
     /**
@@ -262,14 +268,18 @@ class LegalDocumentController extends Controller
     public function regenerate(Request $request, GeneratedLegalDocument $document)
     {
         $documentGen = $this->documentGenerator($document->contract_id, $document->template);
-        $filepath =  $documentGen['filepath'] . $documentGen['filename'];
+        
+        if(isset($documentGen) && $documentGen['status'] == 'successful'){
+            $filepath = $documentGen['absolute_path'] . $documentGen['file_name'];
+            $document->update([
+                'regenerate_count' => $document->regenerate_count + 1,
+                'file_location' => $documentGen['relative_path']. $documentGen['file_name']
+            ]);
 
-        $document->update([
-            'regenerate_count' => $document->regenerate_count + 1,
-            'file_location' => $filepath
-        ]);
-
-        return response()->download(base_path($filepath));
+            return response()->file($filepath);
+        }else{
+            return $documentGen;
+        }
     }
 
     private function documentGenerator($contract_id, $legalDocumentTemplate)
@@ -279,16 +289,15 @@ class LegalDocumentController extends Controller
         
         $values = getOptions($contract_id, $legalDocumentTemplate);
         
-        $filepath = config('app.upload_path') . '/' . $this->getPathToSaveFile('generated-legal-documents') . '/';
-        $filename =  uniqid(11) . '.pdf';
-        $destination = base_path($filepath . $filename);
+        $pathToSave = config('app.upload_path') . '/' . $this->getPathToSaveFile('generated-legal-documents') . '/';
         
-        GeneratedDocumentService::handler($file, $values, $destination);
-
-        return [
-            'filepath' => $filepath,
-            'filename' => $filename,
-        ];
+        $response = GeneratedDocumentService::handler($file, $values, $pathToSave);
+        return $response;
+        return response()->file($path);
+        // return [
+        //     'filepath' => $filepath,
+        //     'filename' => $filename,
+        // ];
     }
 
     public function availableTokens()

@@ -10,47 +10,51 @@ use PhpOffice\PhpWord\Settings;
 class GeneratedDocumentService
 {
     /**
-     * @param string $source source file eg home/path/template.docx
+     * @param string $template_source source file eg home/path/template.docx
      * @param array $options array of placeholders to replace, key value pair eg
      * ['username' => 'sammy']
      * @param string $destination destination file path eg home/path/template.pdf, 
      */
-    static function handler(string $source, array $options, string $destination)
-    {
-        $directory = dirname($destination);
-        
-        if (!file_exists($source))
-            throw new Exception("Template file doesn't exists, $source does not exists", 1);
+    static function handler(string $template_source, array $options, string $pathToSave){
 
-        if (file_exists($destination))
-            throw new Exception("Destination file already exists, $destination file already exists", 1);
+        $directory = dirname($pathToSave);
+        
+        $response = [
+            'status' => 'failed',
+            'message' => 'failed',
+        ];
+
+        if (!file_exists($template_source)){
+            $response = [
+                'status' => "failed",
+                'message' => "Template file doesn't exists, $template_source does not exists",
+            ];
+            return $response;
+        }
 
         if (!is_dir($directory)) {
             mkdir($directory, 0777, true);
         }
 
-        $templateProcessor = new TemplateProcessor($source);
+        $templateProcessor = new TemplateProcessor($template_source);
         
         foreach ($options as $placeholder => $value) {
             $templateProcessor->setValue($placeholder, " " . $value . " ");
         }
 
-        // $templateProcessor->setImageValue('company_logo', $options['company_logo']);
-        $templateProcessor->saveAs($destination . '.docx'); // temp file
-        $rendererName = Settings::PDF_RENDERER_DOMPDF;
-        $rendererLibraryPath = base_path('vendor/dompdf/dompdf');
-        Settings::setPdfRenderer($rendererName, $rendererLibraryPath);
+        $filename =  uniqid(11) . '.docx';
+        $fullpath = base_path($pathToSave);
 
-        $phpWord = IOFactory::load($destination . '.docx');
-        $xmlWriter = IOFactory::createWriter($phpWord, 'PDF');
-        
-        $xmlWriter->save($destination);
-            
-        unlink($destination . '.docx'); // delete temp file
-        
-        if (file_exists($destination))
-            return $destination;
-        return null;
+        $templateProcessor->saveAs($fullpath.$filename);
+
+        $response = [
+            'status' => "successful",
+            'relative_path' => $pathToSave,
+            'absolute_path' => $fullpath,
+            'file_name' => $filename
+        ];
+
+        return $response;
     }
 
 }
