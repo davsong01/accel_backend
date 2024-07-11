@@ -1085,7 +1085,7 @@ class CustomerContractController extends Controller
 
         $estates = $estates->get();
 
-        $customer = Customer::with('user:id,first_name,last_name,middle_name')->where('id', $customer_id)->first();
+        $customer = Customer::with('user:id,first_name,last_name,middle_name,customerId')->where('id', $customer_id)->first();
         $customerDetails = $customer->user ?? null;
 
         $contracts = CustomerContract::with('location:name,id')->where('customer_id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->select(['id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'property_type_id', 'building_type_id', 'contract_type', 'property_type'])->orderBy('created_at', 'DESC');
@@ -1140,6 +1140,7 @@ class CustomerContractController extends Controller
 
             $data['customer_details'] = [
                 'id' => $customer_id,
+                'customerId' => $customerDetails->customerId,
                 'first_name' => $customerDetails->first_name,
                 'last_name' => $customerDetails->last_name,
                 'middle_name' => $customerDetails->middle_name
