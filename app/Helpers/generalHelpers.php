@@ -282,16 +282,16 @@ if (!function_exists("getOptions")) {
                 $values['CUSTOMER_ADDRESS'] = key_exists('CUSTOMER_ADDRESS', $options) ? $user->residential_address : null;
                 $values['CUSTOMER_STATE'] = key_exists('CUSTOMER_STATE', $options) ? $user->state->name : null;
 
-                $values['PLOT_SIZE'] = key_exists('PLOT_SIZE', $options) ? $contract->plotSize->size : null;
-                $values['CONTRACT_ESTATE_NAME'] = key_exists('CONTRACT_ESTATE_NAME', $options) ? $contract->estate->name : null;
-                $values['CONTRACT_ESTATE_CITY'] = key_exists('CONTRACT_ESTATE_CITY', $options) ? $contract->estate->location->city->name : null;
-                $values['CONTRACT_ESTATE_LOCATION'] = key_exists('CONTRACT_ESTATE_LOCATION', $options) ? $contract->estate->location->name : null;
+                $values['PLOT_SIZE'] = key_exists('PLOT_SIZE', $options) ? $contract->plotSize->size ?? '' : null;
+                $values['CONTRACT_ESTATE_NAME'] = key_exists('CONTRACT_ESTATE_NAME', $options) ? ($contract->estate-> name ?? '') : null;
+                $values['CONTRACT_ESTATE_CITY'] = key_exists('CONTRACT_ESTATE_CITY', $options) ? ($contract->estate->location->city->name ?? '') : null;
+                $values['CONTRACT_ESTATE_LOCATION'] = key_exists('CONTRACT_ESTATE_LOCATION', $options) ? ($contract->estate->location->name ?? ''): null;
                 $values['CONTRACT_FORM_APPLICATION_FEE'] = key_exists('CONTRACT_ESTATE_LOCATION', $options) ? $settings->currencyData->symbol .number_format($contract->form_transactions->sum('amount')) : null;
                 $values['PROPERTY_NET_VALUE'] = key_exists('PROPERTY_NET_VALUE', $options) ? $settings->currencyData->symbol . number_format($property_price) : null;
                 $values['PROPERTY_DISCOUNT'] = key_exists('PROPERTY_DISCOUNT', $options) ? $settings->currencyData->symbol . number_format($discount) : null;
                 $values['CONTRACT_SE_FEE'] = key_exists('CONTRACT_SE_FEE', $options) ? $settings->currencyData->symbol . number_format($se_fee) : null;
                 $values['CONTRACT_INFRASTRUCTURE_FEE'] = key_exists('CONTRACT_INFRASTRUCTURE_FEE', $options) ? $settings->currencyData->symbol . number_format($infrastructural_fee) : null;
-                $values['CONTRACT_NAME'] = key_exists('CONTRACT_NAME', $options) ? $contract->contract_name : null;
+                $values['CONTRACT_NAME'] = key_exists('CONTRACT_NAME', $options) ? ($contract->contract_name ?? ''): null;
 
                 $values['BUILDING_TYPE'] = key_exists('BUILDING_TYPE', $options) ? $contract->building_type_details->name : null;
 
