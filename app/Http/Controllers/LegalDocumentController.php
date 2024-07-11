@@ -262,12 +262,19 @@ class LegalDocumentController extends Controller
     public function regenerate(Request $request, GeneratedLegalDocument $document)
     {
         $documentGen = $this->documentGenerator($document->contract_id, $document->template);
-        $filepath =  $documentGen['filepath'] . $documentGen['filename'];
+        
+        if(isset($documentGen) && $documentGen['status'] == 'successful'){
+            $filepath = $documentGen['absolute_path'] . $documentGen['file_name'];
+            $document->update([
+                'regenerate_count' => $document->regenerate_count + 1,
+                'file_location' => $documentGen['relative_path']. $documentGen['file_name']
+            ]);
 
-        $document->update([
-            'regenerate_count' => $document->regenerate_count + 1,
-            'file_location' => $filepath
-        ]);
+            return response()->file($filepath);
+        }else{
+            return $documentGen;
+        }
+
 
         return response()->download(base_path($filepath));
     }
@@ -279,16 +286,15 @@ class LegalDocumentController extends Controller
         
         $values = getOptions($contract_id, $legalDocumentTemplate);
         
-        $filepath = config('app.upload_path') . '/' . $this->getPathToSaveFile('generated-legal-documents') . '/';
-        $filename =  uniqid(11) . '.pdf';
-        $destination = base_path($filepath . $filename);
+        $pathToSave = config('app.upload_path') . '/' . $this->getPathToSaveFile('generated-legal-documents') . '/';
         
-        GeneratedDocumentService::handler($file, $values, $destination);
-
-        return [
-            'filepath' => $filepath,
-            'filename' => $filename,
-        ];
+        $response = GeneratedDocumentService::handler($file, $values, $pathToSave);
+        return $response;
+        return response()->file($path);
+        // return [
+        //     'filepath' => $filepath,
+        //     'filename' => $filename,
+        // ];
     }
 
     public function availableTokens()
