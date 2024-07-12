@@ -98,21 +98,21 @@ Route::middleware(['auth:sanctum'])->group(function () {
         }
     });
 
-});
+    Route::get('uploads/{filename}', function ($filename) {
+        $filename = base64_decode($filename);
+        $realpath = base_path() .'/'.  $filename;
+        
+        try {
+            return response()->file($realpath);
+            //code...
+        } catch (\Throwable $th) {
+            return response()->json([
+                'error' => 'The file does not exist',
+                'data' => [],
+            ], 200);
+        }
+    });
 
-Route::get('uploads/{filename}', function ($filename) {
-    $filename = base64_decode($filename);
-    $realpath = base_path() .  $filename;
-
-    try {
-        return response()->file($realpath);
-        //code...
-    } catch (\Throwable $th) {
-        return response()->json([
-            'error' => 'The file does not exist',
-            'data' => [],
-        ], 200);
-    }
 });
 
 Route::get('domain-details/{slug}', [CompanySettingController::class, 'domainDetails']);
