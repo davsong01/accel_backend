@@ -1,9 +1,8 @@
 <?php 
-
-    use App\Models\CompanySetting;
-
-    $company_id = \Session::get('company_id') ?? 1;
-    $companySetting = CompanySetting::where('company_id', $company_id)->first();
+  $company_id = \Session::get('company_id') ?? 1;
+  $companySetting = (object) sessionDetails('settings');
+  $website = sessionDetails('company_url');
+  $companySetting->currency_data = (object) $companySetting->currency_data;
 ?>
 
 <!DOCTYPE html>
@@ -115,16 +114,15 @@
       <tr>
         <td align="center">
           <div>
-            <img src="{{ asset($companySetting->company_logo) }}" alt="Logo" width="64" class="logo" />
+            <img src="{{ base_path($companySetting->raw_logo) }}" alt="Logo" width="64" class="logo" />
             <p class="address">{{ $companySetting->address }}</p>
             {{-- <p class="phone">+234 901 234 5678</p> --}}
-            <span class="web">{{ $companySetting->website }}</span>
+            <span class="web">{{ $website }}</span>
           </div>
         </td>
       </tr>
     </table>
   </div>
-
   <div class="information">
     <table width="100%">
       <tr>
@@ -186,9 +184,9 @@ ${payment_bank} --}}
           <td>1</td>
           <td>{{$payment->created_at}}</td>
           <td>{{$payment->description}}</td>
-          <td>{{ $companySetting->currencyData->symbol.number_format($others['contract_value'] ?? $payment->contract_value) }}</td>
-          <td>{{ $companySetting->currencyData->symbol.number_format($others['discount_applied'] ?? $payment->discount_applied ) }}</td>
-          <td>{{ $companySetting->currencyData->symbol.number_format($payment->amount) }}</td>
+          <td>{{ $companySetting->currency_data->symbol.number_format($others['contract_value'] ?? $payment->contract_value) }}</td>
+          <td>{{ $companySetting->currency_data->symbol.number_format($others['discount_applied'] ?? $payment->discount_applied ) }}</td>
+          <td>{{ $companySetting->currency_data->symbol.number_format($payment->amount) }}</td>
           <td></td>
         </tr>
       </tbody>
@@ -201,10 +199,10 @@ ${payment_bank} --}}
           <pre>
               {{-- <span style="border-bottom: 1px solid black; padding-bottom: 0.5rem;">Previous Amount Paid <strong>${previous_amountPaid}</strong></span> --}}
               {{-- <br /><br /> --}}
-            Current Amount Paid <strong>{{ $companySetting->currencyData->symbol.number_format($payment->amount) }}</strong>
+            Current Amount Paid <strong>{{ $companySetting->currency_data->symbol.number_format($payment->amount) }}</strong>
 
-            Total Amount Paid <strong>{{ $companySetting->currencyData->symbol.number_format($others['total_amount_paid'] ?? $payment->amount) }}</strong> <br><br>
-            <span style="border-bottom: 1px solid black; padding-bottom: 0.5rem;">Balance <strong>{{ $companySetting->currencyData->symbol.number_format($others['balance'] ?? $payment->balance) }}</strong></span>
+            Total Amount Paid <strong>{{ $companySetting->currency_data->symbol.number_format($others['total_amount_paid'] ?? $payment->amount) }}</strong> <br><br>
+            <span style="border-bottom: 1px solid black; padding-bottom: 0.5rem;">Balance <strong>{{ $companySetting->currency_data->symbol.number_format($others['balance'] ?? $payment->balance) }}</strong></span>
           </pre>
         </td>
       </tr>

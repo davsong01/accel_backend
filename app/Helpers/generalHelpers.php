@@ -10,6 +10,7 @@ use App\Models\CustomerContract;
 use App\Models\LegalDocumentType;
 use App\Http\Controllers\Controller;
 use App\Models\LegalDocumentTemplate;
+use Illuminate\Support\Facades\Session;
 
 define('SAMPLE_LEGAL_DOCUMENTS', [
     1 => 'land_offer_letter_sample.docx',
@@ -253,13 +254,23 @@ if (!function_exists("setOptions")) {
     }
 }
 
+if (!function_exists("sessionDetails")){
+    function sessionDetails($needle){
+        if (Session::has($needle)) {
+            return Session::get($needle);
+        } else {
+            return null;
+        }
+    }
+}
+
 if (!function_exists("getOptions")) {
     function getOptions($contract_id, $legalDocumentTemplate){
         $contract = CustomerContract::where('id', $contract_id)->first();
         $customer = Customer::with(['user:id,email,first_name,middle_name,last_name,residential_address,state_id,phone_number'])->where('id', $contract->customer_id)->first();
         $company = Company::with('settings')->where('id', session()->get('company_id'))->first();
         $settings = $company->settings;
-
+       
         $discount = $contract->discount ?? 0;
         $property_price = $contract->property_type_details->estate_price;
         $se_fee = $contract->property_type_details->settings_and_excavation;
