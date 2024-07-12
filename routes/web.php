@@ -89,9 +89,9 @@ Route::get('login', function () {
 Route::get('general-uploads/{filename}', function ($filename) {
     $filename = base64_decode($filename);
     $realpath = base_path() . '/' . $filename;
-
+    
     try {
-        return response()->download($realpath);
+        return response()->file($realpath);
         //code...
     } catch (\Throwable $th) {
         return response()->json([
