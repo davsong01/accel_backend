@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class CompanySetting extends Model
 {
     protected $guarded = [];
+    // protected $appends = ['logo_path'];
+
     use HasFactory;
     
     public function currencyData(){

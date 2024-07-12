@@ -29,13 +29,6 @@ Route::get('update-generated-legal-documents', function(){
     }
 });
 
-Route::get('/testemailtemplate', function () {
-    $data['message'] = 'helllosds';
-    $data['company_id'] = 1;
-
-    return new App\Mail\OrderShipped($data);
-});
-
 Route::get('/testfile', function () {
 });
 

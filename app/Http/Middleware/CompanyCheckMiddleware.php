@@ -23,10 +23,18 @@ class CompanyCheckMiddleware
                 $slug = Session::get('company_slug');
             } else {
                 if (auth()->user()) {
-                    $company = Company::whereId(auth()->user()->company_id)->first();
+
+                    $company = Company::with(['settings' => function ($query) {
+                        $query->select('id', 'company_id', 'company_logo', 'company_secondary_logo', 'company_name', 'address', 'about', 'currency');
+                        $query->with(['currencyData' => function ($query) {
+                            $query->select('id', 'symbol', 'identifier', 'name','code'); 
+                        }]);
+                    }])->whereId(auth()->user()->company_id)->first();
+                    // $company = Company::with('settings:id,company_id,company_logo,company_secondary_logo,company_name,address,about,currency')->whereId(auth()->user()->company_id)->first();
                 }
             }
-
+            $company->settings->raw_logo = $company->settings->getRawOriginal('company_logo');
+            
             if (!$company) {
                 return response()->json(['error' => 'Company with slug: ' . $slug . ' not found', 'data' => null], 412);
             } else {
@@ -36,6 +44,7 @@ class CompanyCheckMiddleware
                 Session::put('company_url', $company->url);
                 Session::put('company_location', $company->location);
                 Session::put('company_slug', $company->slug);
+                Session::put('settings', $company->settings->toArray());
             }
         }
         return $next($request);
