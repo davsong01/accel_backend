@@ -1223,6 +1223,13 @@ class CustomerContractController extends Controller
         }
 
         $decodeSubscribers = json_decode($contract->subscribers);
+
+        $checkEmail = $this->getSubscriberByEmail($request->subscriber_email, $decodeSubscribers);
+        
+        if(empty($checkEmail)){
+            return response()->json(['error' => 'Invalid Subscriber email', 'data' => []], 200);
+        }
+        
         $length = count($decodeSubscribers);
 
         if(!empty($decodeSubscribers)){
@@ -1245,14 +1252,35 @@ class CustomerContractController extends Controller
                 'contract_type' => 'Single',
             ]);
         }
-        // $email['type'] = 'user.store';
-        // $email['name'] =  $user->first_name;
-        // $email['email'] =  $user->email;
-        // $email['customer_id'] =  $user->customerId;
-        // $this->logEmail($email);
 
+        // Email remaining subscribers
+        if (count($decodeSubscribers) > 0) {
+            foreach($decodeSubscribers as $subscribers){
+                dd($subscribers);
+                $email['type'] = 'subscriber.remove';
+                $email['name'] =  $user->first_name;
+                $email['email'] =  $user->email;
+                $email['customer_id'] =  $user->customerId;
+                $this->logEmail($email);
+                
+            }
+        }
+
+        // Email Core owner
+        
+        dd('done');
         return response()->json(['message' => 'Success', 'data' => []], 200);
 
+    }
+
+
+    function getSubscriberByEmail($email, $subscribers)
+    {
+        $filteredSubscribers = array_filter($subscribers, function ($subscriber) use ($email) {
+            return $subscriber->s_email === $email;
+        });
+
+        return !empty($filteredSubscribers) ? array_values($filteredSubscribers)[0] : null;
     }
 
     public function makeCoreOwner(Request $request)
