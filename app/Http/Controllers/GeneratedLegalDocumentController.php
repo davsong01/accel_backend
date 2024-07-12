@@ -111,15 +111,8 @@ class GeneratedLegalDocumentController extends Controller
         $file = getEncodedFileRealPath($legalDocumentTemplate->file_location);
 
         $values = getOptions($customer_id, $legalDocumentTemplate);
-        $filepath = $this->getPathToSaveFile('generated-legal-documents');
-        $filename =  uniqid(11) . '.pdf';
-        $destination = base_path($filepath . '/' . $filename);
-        
-        GeneratedDocumentService::handler($file['filepath'], $values, $destination);
+        $destination = base_path($this->getPathToSaveFile('generated-legal-documents'));
 
-        return [
-            'filepath' => str_replace('generated-legal-documents/', '', $filepath) . '/',
-            'filename' => $filename,
-        ];
+        return GeneratedDocumentService::handler($file['filepath'], $values, $destination);
     }
 }

@@ -10,6 +10,7 @@ use App\Models\CustomerContract;
 use App\Models\LegalDocumentType;
 use App\Http\Controllers\Controller;
 use App\Models\LegalDocumentTemplate;
+use Illuminate\Support\Facades\Session;
 
 define('SAMPLE_LEGAL_DOCUMENTS', [
     1 => 'land_offer_letter_sample.docx',
@@ -253,13 +254,23 @@ if (!function_exists("setOptions")) {
     }
 }
 
+if (!function_exists("sessionDetails")){
+    function sessionDetails($needle){
+        if (Session::has($needle)) {
+            return Session::get($needle);
+        } else {
+            return null;
+        }
+    }
+}
+
 if (!function_exists("getOptions")) {
     function getOptions($contract_id, $legalDocumentTemplate){
         $contract = CustomerContract::where('id', $contract_id)->first();
         $customer = Customer::with(['user:id,email,first_name,middle_name,last_name,residential_address,state_id,phone_number'])->where('id', $contract->customer_id)->first();
         $company = Company::with('settings')->where('id', session()->get('company_id'))->first();
         $settings = $company->settings;
-
+       
         $discount = $contract->discount ?? 0;
         $property_price = $contract->property_type_details->estate_price;
         $se_fee = $contract->property_type_details->settings_and_excavation;
@@ -282,16 +293,16 @@ if (!function_exists("getOptions")) {
                 $values['CUSTOMER_ADDRESS'] = key_exists('CUSTOMER_ADDRESS', $options) ? $user->residential_address : null;
                 $values['CUSTOMER_STATE'] = key_exists('CUSTOMER_STATE', $options) ? $user->state->name : null;
 
-                $values['PLOT_SIZE'] = key_exists('PLOT_SIZE', $options) ? $contract->plotSize->size : null;
-                $values['CONTRACT_ESTATE_NAME'] = key_exists('CONTRACT_ESTATE_NAME', $options) ? $contract->estate->name : null;
-                $values['CONTRACT_ESTATE_CITY'] = key_exists('CONTRACT_ESTATE_CITY', $options) ? $contract->estate->location->city->name : null;
-                $values['CONTRACT_ESTATE_LOCATION'] = key_exists('CONTRACT_ESTATE_LOCATION', $options) ? $contract->estate->location->name : null;
+                $values['PLOT_SIZE'] = key_exists('PLOT_SIZE', $options) ? $contract->plotSize->size ?? '' : null;
+                $values['CONTRACT_ESTATE_NAME'] = key_exists('CONTRACT_ESTATE_NAME', $options) ? ($contract->estate-> name ?? '') : null;
+                $values['CONTRACT_ESTATE_CITY'] = key_exists('CONTRACT_ESTATE_CITY', $options) ? ($contract->estate->location->city->name ?? '') : null;
+                $values['CONTRACT_ESTATE_LOCATION'] = key_exists('CONTRACT_ESTATE_LOCATION', $options) ? ($contract->estate->location->name ?? ''): null;
                 $values['CONTRACT_FORM_APPLICATION_FEE'] = key_exists('CONTRACT_ESTATE_LOCATION', $options) ? $settings->currencyData->symbol .number_format($contract->form_transactions->sum('amount')) : null;
                 $values['PROPERTY_NET_VALUE'] = key_exists('PROPERTY_NET_VALUE', $options) ? $settings->currencyData->symbol . number_format($property_price) : null;
                 $values['PROPERTY_DISCOUNT'] = key_exists('PROPERTY_DISCOUNT', $options) ? $settings->currencyData->symbol . number_format($discount) : null;
                 $values['CONTRACT_SE_FEE'] = key_exists('CONTRACT_SE_FEE', $options) ? $settings->currencyData->symbol . number_format($se_fee) : null;
                 $values['CONTRACT_INFRASTRUCTURE_FEE'] = key_exists('CONTRACT_INFRASTRUCTURE_FEE', $options) ? $settings->currencyData->symbol . number_format($infrastructural_fee) : null;
-                $values['CONTRACT_NAME'] = key_exists('CONTRACT_NAME', $options) ? $contract->contract_name : null;
+                $values['CONTRACT_NAME'] = key_exists('CONTRACT_NAME', $options) ? ($contract->contract_name ?? ''): null;
 
                 $values['BUILDING_TYPE'] = key_exists('BUILDING_TYPE', $options) ? $contract->building_type_details->name : null;
 

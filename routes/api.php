@@ -98,31 +98,21 @@ Route::middleware(['auth:sanctum'])->group(function () {
         }
     });
 
+    Route::get('uploads/{filename}', function ($filename) {
+        $filename = base64_decode($filename);
+        $realpath = base_path() .'/'.  $filename;
+        
+        try {
+            return response()->file($realpath);
+            //code...
+        } catch (\Throwable $th) {
+            return response()->json([
+                'error' => 'The file does not exist',
+                'data' => [],
+            ], 200);
+        }
+    });
 
-
-    // Route::get('generated-legal-documents/{filename}', function ($filename) {
-    //     $filename = base64_decode($filename);
-    //     $realpath = base_path() . '/uploads/generated-legal-documents' . '/' . $filename;
-
-    //     return response()->download($realpath);
-    // });
-});
-
-Route::get('uploads/{filename}', function ($filename) {
-    $filename = base64_decode($filename);
-    $realpath = base_path() . '/uploads/' .  $filename;
-
-    return response()->download($realpath);
-
-    try {
-        return response()->download($realpath);
-        //code...
-    } catch (\Throwable $th) {
-        return response()->json([
-            'error' => 'The file does not exist',
-            'data' => [],
-        ], 200);
-    }
 });
 
 Route::get('domain-details/{slug}', [CompanySettingController::class, 'domainDetails']);

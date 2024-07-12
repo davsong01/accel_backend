@@ -76,7 +76,10 @@ class ContractPaymentController extends Controller
         }
 
         $payments = [];
-
+        
+        // Took this outside the loop to reduce db calls
+        $allContractsX = CustomerContract::whereIn('id', array_column($contract_ids, 'contract_id'))->where('customer_id', $request->customer_id)->where('company_id', $this->sessionDetails('company_id'))->get();
+        
         foreach ($contract_ids as $contract) {
             $contract_validator = Validator::make($contract, [
                 'allow_installment' => 'required|In:0,1',
@@ -92,8 +95,8 @@ class ContractPaymentController extends Controller
                 ], 412);
             }
 
-            $contractX = CustomerContract::where('id', $contract['contract_id'])->where('customer_id', $request->customer_id)->where('company_id', $this->sessionDetails('company_id'))->first();
-
+            $contractX = $allContractsX->where('id', $contract['contract_id'])->first();
+            
             $contract = array_merge($contract, $request->all());
 
             $res = $this->processContractPayment($contractX, $contract);
@@ -158,7 +161,9 @@ class ContractPaymentController extends Controller
         }
 
         $payments = [];
-
+        $allContractsX = CustomerContract::whereIn('id', array_column($contract_ids, 'contract_id'))->where('customer_id', $request->customer_id)->where('company_id', $this->sessionDetails('company_id'))->get();
+        $allPaymentX = ContractPayment::whereIn('contract_id', array_column($contract_ids, 'contract_id'))->get();
+        
         foreach ($contract_ids as $contract_id) {
             $contract_validator = Validator::make($contract_id, [
                 'amount' => 'required',
@@ -172,9 +177,9 @@ class ContractPaymentController extends Controller
                 ], 412);
             }
 
-            $contract = CustomerContract::where('id', $contract_id['contract_id'])->first();
-            $payment = ContractPayment::where('contract_id', $contract_id['contract_id'])->first();
-
+            $contract = $allContractsX->where('id', $contract_id['contract_id'])->first();
+            $payment = $allPaymentX->where('contract_id', $contract_id['contract_id'])->first();
+            
             if ($payment->balance == 0) {
                 return response()->json([
                     'error' => 'Full payment has already been made for : ' . $contract->contract_name,
@@ -203,7 +208,7 @@ class ContractPaymentController extends Controller
                 'payment_slip' => $res->filename,
                 'receipt_location' => $res->receipt_location ?? null,
             ];
-    
+            
             // Log email
             LogService::admin(auth()->user()->id,  $contract?->customer?->user?->id, 'Update a company\'s contract, contract payment, contract payment thread and transaction (' . $contract->id . ')', 'UPDATE');
             
@@ -230,94 +235,98 @@ class ContractPaymentController extends Controller
 
     public function processContinueContractPayment($contract, $data, $payment)
     {
-        // try {
-        $transaction_id = $this->generateTransactionId('CTB');
+        try {
+            $transaction_id = $this->generateTransactionId('CTB');
 
-        if (!empty($data['payment_slip'])) {
-            $filename = $this->uploadFile($data['payment_slip'], 'payments');
-        } else {
-            $filename = null;
-        }
+            if (!empty($data['payment_slip'])) {
+                $filename = $this->uploadFile($data['payment_slip'], 'payments');
+            } else {
+                $filename = null;
+            }
 
-        $amount = $data['amount'];
-        $fee = $payment->property_net_fee;
-        $balance = $payment->balance;
-        $newbalance = $fee - ($payment->amount + $data['amount']);
+            $amount = $data['amount'];
+            $fee = $payment->property_net_fee;
+            $balance = $payment->balance;
+            $newbalance = $fee - ($payment->amount + $data['amount']);
 
-        if ($amount > $balance) {
+            if ($amount > $balance) {
+                $res = [
+                    'status' => 'error',
+                    'message' => 'You cannot make payment of more than: ' . $balance . ' for this contract',
+                ];
+
+                \DB::rollback();
+                return $res;
+            }
+
+            $newbalance = $balance - $amount;
+            $newbalance = ($newbalance < 0) ? 0 : $newbalance;
+
+            // Create Payment thread
+            $payment_thread = ContractPaymentThread::create([
+                'contract_payments_id' => $payment->id,
+                'amount' => $data['amount'],
+                'transaction_id' => $transaction_id,
+                'payment_slip' => $filename,
+                'account_id' => $data['account_id'],
+                'branch_id' => $payment->branch_id,
+                'description' => $data['description'],
+                'customer_id' => $data['customer_id'],
+                'company_id' => $this->sessionDetails('company_id')
+            ]);
+
+            Transaction::create([
+                'customer_id' => $payment_thread->customer_id,
+                'amount' => $payment_thread->amount,
+                'transaction_id' => $transaction_id,
+                'account_id' => $data['account_id'] ?? $payment_thread->account_id,
+                'purpose' => 'balance_contract_payment',
+                'payment_slip' => $filename,
+                'description' => $payment_thread->description,
+                'staff_id' => auth()->user()->staff->id,
+                'type' => 'credit',
+                'company_id' => $this->sessionDetails('company_id'),
+            ]);
+
+            $payment->update([
+                'amount' => $payment->amount + $data['amount'],
+                'balance' => $newbalance,
+            ]);
+
+            $others['balance'] = $newbalance;
+            $others['contract_value'] = $payment->contract_value;
+            $others['discount_applied'] = $payment->discount_applied;
+            $others['total_amount_paid'] = $fee - $newbalance;
+
+            if ($newbalance <= 0) {
+                $contract->update([
+                    'contract_status' => 'paid',
+                ]);
+            }
+            // Generate payment receipt
+            $receipt = $this->generateContractPaymentReceipt($payment_thread, $contract, $others);
+            $payment_thread->update(['receipt_location' => $receipt['filepath'] ?? null]);
+
+            \DB::commit();
+            return $payment;
+
+            // Do something with the commission from contract here
+        } catch (\Throwable $th) {
+            //throw $th;
             $res = [
                 'status' => 'error',
-                'message' => 'You cannot make payment of more than: ' . $balance . ' for this contract',
+                'message' => 'An error occurred when making payment for: ' . $contract->contract_name . ' Error: ' . $th->getMessage(),
             ];
 
             return $res;
         }
 
-        $newbalance = $balance - $amount;
-
-        // Create Payment thread
-        $payment_thread = ContractPaymentThread::create([
-            'contract_payments_id' => $payment->id,
-            'amount' => $data['amount'],
-            'transaction_id' => $transaction_id,
-            'payment_slip' => $filename,
-            'account_id' => $data['account_id'],
-            'branch_id' => $payment->branch_id,
-            'description' => $data['description'],
-            'customer_id' => $data['customer_id'],
-            'company_id' => $this->sessionDetails('company_id')
-        ]);
-
-        $transaction = Transaction::create([
-            'customer_id' => $payment_thread->customer_id,
-            'amount' => $payment_thread->amount,
-            'transaction_id' => $transaction_id,
-            'account_id' => $data['account_id'] ?? $payment_thread->account_id,
-            'purpose' => 'balance_contract_payment',
-            'payment_slip' => $filename,
-            'description' => $payment_thread->description,
-            'staff_id' => auth()->user()->staff->id,
-            'type' => 'credit',
-            'company_id' => $this->sessionDetails('company_id'),
-        ]);
-
-        $payment->update([
-            'amount' => $payment->amount + $data['amount'],
-            'balance' => $newbalance,
-        ]);
-
-        $others['balance'] = $newbalance;
-        $others['contract_value'] = $payment->contract_value;
-        $others['discount_applied'] = $payment->discount_applied;
-        $others['total_amount_paid'] = $fee - $newbalance;
-
-        if ($newbalance <= 0) {
-            $contract->update([
-                'contract_status' => 'paid',
-            ]);
-        }
-        // Generate payment receipt
-        $receipt = $this->generateContractPaymentReceipt($payment_thread, $contract, $others);
-        $payment_thread->update(['receipt_location' => $receipt['filepath'] ?? null]);
-        
-        return $payment;
-
-        // Do something with the commission from contract here
-        // } catch (\Throwable $th) {
-        //     //throw $th;
-        //     dd($th->getMessage());
-        //     $res = [
-        //         'status' => 'error',
-        //         'message' => 'An error occurred when making payment for: ' . $contract->contract_name . ' Error: ' . $th->getMessage(),
-        //     ];
-
-        //     return $res;
-        // }
-
     }
 
     public function processContractPayment($contract, $data)
     {
+        \DB::beginTransaction();
+
         try {
             $transaction_id = $this->generateTransactionId('CT');
 
@@ -332,14 +341,27 @@ class ContractPaymentController extends Controller
             $amount_to_pay = $property_price - $discount;
             $balance = ($property_price - $discount) - $data['amount'];
 
+            // handle when incoming amount is above amount to pay
+            if($data['amount'] > $amount_to_pay){
+                $res = [
+                    'status' => 'error',
+                    'message' => 'Amount exceeds amount to pay for: ' . $contract->contract_name,
+                ];
+
+                \DB::rollback();
+                return $res;
+            }
+
             // Get amount
             if ($balance > 0) {
                 $contract_status = 'ongoing';
             } else {
                 $contract_status = 'paid';
             }
-            
+
             // Store Payment
+            $balance = ($balance < 0) ? 0 : $balance;
+            
             $payment = ContractPayment::updateOrCreate(['customer_id' => $data['customer_id'], 'contract_id' => $contract->id, 'no_of_months' => $data['no_of_months'], 'company_id' => $this->sessionDetails('company_id')], [
                 'contract_id' => $contract->id,
                 'contract_value' => $property_price,
@@ -391,19 +413,17 @@ class ContractPaymentController extends Controller
             ];
 
             // Generate payment receipt
-
-            // if (env('ENT') == 'local') {
-                $receipt = $this->generateContractPaymentReceipt($payment, $contract, $others);
-                $payment->update(['receipt_location' => $receipt['filepath'] ?? null]);
-                $payment_thread->update(['receipt_location' => $receipt['filepath'] ?? null]);
-            // }
-
+            $receipt = $this->generateContractPaymentReceipt($payment, $contract, $others);
+            $payment->update(['receipt_location' => $receipt['filepath'] ?? null]);
+            $payment_thread->update(['receipt_location' => $receipt['filepath'] ?? null]);
+            
             $contract->update([
                 'contract_payment_transaction_id' => $payment->transaction_id,
                 'status' => 'subscriber',
                 'contract_status' => $contract_status,
             ]);
 
+            \DB::commit();
             return $payment;
             // Do something with the commission from contract here
         } catch (\Throwable $th) {
@@ -412,25 +432,19 @@ class ContractPaymentController extends Controller
                 'status' => 'error',
                 'message' => 'An error occurred when making payment for: ' . $contract->contract_name . ' Error: ' . $th->getMessage(),
             ];
-            
+            \DB::rollback();
             return $res;
         }
     }
 
     public function generateContractPaymentReceipt($payment, $contract,$others)
     {
-        return [
-            'receipt_no' => 'disabled.pdf',
-            'filename' => 'disabled.pdf',
-            'filepath' => ''
-        ];
-
         $name = $transaction_id ?? $payment->transaction_id;
         $data['receipt_no'] = $name;
         $pathToSave = $this->getPathToSaveFile('receipts') . '/' . $name . '.pdf';
-        // dd($payment->customer, $payment->transaction);
+        
         $pdf = PDF::loadView('receipts.contract-payment', compact('payment', 'data', 'contract','others'))->setPaper('a4', 'portrait');
-
+        
         file_put_contents(base_path() . '/' . config('app.upload_path') . '/' . $pathToSave, $pdf->output());
         // Rmember to create a public folder in the root directory if there is a PDF error
 

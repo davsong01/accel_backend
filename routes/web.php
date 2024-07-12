@@ -29,13 +29,6 @@ Route::get('update-generated-legal-documents', function(){
     }
 });
 
-Route::get('/testemailtemplate', function () {
-    $data['message'] = 'helllosds';
-    $data['company_id'] = 1;
-
-    return new App\Mail\OrderShipped($data);
-});
-
 Route::get('/testfile', function () {
 });
 
@@ -96,9 +89,9 @@ Route::get('login', function () {
 Route::get('general-uploads/{filename}', function ($filename) {
     $filename = base64_decode($filename);
     $realpath = base_path() . '/' . $filename;
-
+    
     try {
-        return response()->download($realpath);
+        return response()->file($realpath);
         //code...
     } catch (\Throwable $th) {
         return response()->json([
