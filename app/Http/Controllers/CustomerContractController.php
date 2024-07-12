@@ -1268,7 +1268,6 @@ class CustomerContractController extends Controller
                     $this->logEmail($email);
                 }
             }
-
             // Email Core owner
             $emailX['type'] = 'notify.core.owner.of.subscriber.removeal';
             $emailX['name'] = $contract->customer->user->name;
