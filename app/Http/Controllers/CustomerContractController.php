@@ -1217,22 +1217,22 @@ class CustomerContractController extends Controller
             ], 422);
         }
 
-        $contract = CustomerContract::where(['customer_id' => $request->customer_id, 'id' => $request->contract_id])->whereNotNull('subscribers')->first();
-
+        $contract = CustomerContract::with('customer:id,user_id')->where(['customer_id' => $request->customer_id, 'id' => $request->contract_id])->whereNotNull('subscribers')->first();
+        
         if(empty($contract)){
             return response()->json(['error' => 'Invalid contract details sent', 'data' => []], 412);
         }
 
         $decodeSubscribers = json_decode($contract->subscribers);
 
-        $checkEmail = $this->getSubscriberByEmail($request->subscriber_email, $decodeSubscribers);
+        $defunctSubscriber = $this->getSubscriberByEmail($request->subscriber_email, $decodeSubscribers);
         
-        if(empty($checkEmail)){
+        if(empty($defunctSubscriber)){
             return response()->json(['error' => 'Invalid Subscriber email', 'data' => []], 200);
         }
         
         $length = count($decodeSubscribers);
-
+        
         if(!empty($decodeSubscribers)){
             for ($i = 0; $i < $length; $i++) {
                 if ($decodeSubscribers[$i]->s_email == $request->subscriber_email) {
@@ -1243,7 +1243,7 @@ class CustomerContractController extends Controller
                 }
             }
         }
-
+        
         $contract->update([
             'subscribers' => json_encode($decodeSubscribers),
         ]);
@@ -1254,22 +1254,32 @@ class CustomerContractController extends Controller
             ]);
         }
 
-        // Email remaining subscribers
-        if (count($decodeSubscribers) > 0) {
-            foreach($decodeSubscribers as $subscribers){
-                dd($subscribers);
-                $email['type'] = 'subscriber.remove';
-                $email['name'] =  $user->first_name;
-                $email['email'] =  $user->email;
-                $email['customer_id'] =  $user->customerId;
-                $this->logEmail($email);
-                
-            }
-        }
+        try {
+            if (count($decodeSubscribers) > 0) {
+                $emailX['contract_ids'] = $email['contract_ids'] = [$contract->id];
+                // Email remaining subscribers
+                foreach ($decodeSubscribers as $subscriber) {
+                    $email['type'] = 'remaining.subscriber.remove.mail';
+                    $email['name'] =  $subscriber->s_name;
+                    $email['email'] =  $subscriber->s_email;
+                    $email['defunctSubscriberEmail'] = $defunctSubscriber->s_email;
+                    $email['defunctSubscriberName'] = $defunctSubscriber->s_name;
 
-        // Email Core owner
+                    $this->logEmail($email);
+                }
+            }
+
+            // Email Core owner
+            $emailX['type'] = 'notify.core.owner.of.subscriber.removeal';
+            $emailX['name'] = $contract->customer->user->name;
+            $emailX['email'] = $contract->customer->user->email;
+            $emailX['defunctSubscriberEmail'] = $defunctSubscriber->s_email;
+            $emailX['defunctSubscriberName'] = $defunctSubscriber->s_name;
+
+            $this->logEmail($emailX);
+        } catch (\Throwable $th) {}
         
-        dd('done');
+
         return response()->json(['message' => 'Success', 'data' => []], 200);
 
     }

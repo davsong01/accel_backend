@@ -279,6 +279,27 @@ class MessageTransactionController extends Controller
             }
         }
 
+        if ($data['type'] == 'remaining.subscriber.remove.mail' || $data['type'] == 'notify.core.owner.of.subscriber.removeal') {
+            if (isset($data['medium']) && $data['medium'] == 'sms') {
+                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'sms')->where('type', 'remaining.subscriber.remove.mail')->orWhere('type', 'notify.core.owner.of.subscriber.removeal')->first();
+                $content = $email_template->content ?? null;
+            } else {
+                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'email')->where('type', 'remaining.subscriber.remove.mail')->orWhere('type', 'notify.core.owner.of.subscriber.removeal')->first();
+                $subject = $email_template->subject ?? 'Joint Property Ownership Removal';
+                $temp_content = '<strong>Dear ' . $data['name'] . ', </strong><br><br>
+                <div>
+                <p style="text-align:justify !important">We wish to inform you that ' . $data['defunctSubscriberName'] . ' has been removed as a joint owner of a property with ' . $this->sessionDetails('company_name') . '.<br><br>As the subscriber has been removed from this contract, he/she will no longer share rights and responsibilities related to the property. This includes the ability to make decisions regarding the use, maintenance, and sale of the property.<br><br>';
+
+                $temp_content .= $this->propertyDetails($data);
+                $temp_content .= 'If you have any questions or need further clarification, please do not hesitate to contact us. Our team is always ready to assist you.<br><br>Thank you for choosing us. We look forward to serving you.
+                <br><br>Best regards,<br><br>' . $this->sessionDetails('company_name') . '
+                </p>
+                </div>';
+
+                $content = $email_template->content ?? $temp_content;
+            }
+        }
+
         if ($data['type'] == 'primary.marketer.email.for.new.contract') {
             if (isset($data['medium']) && $data['medium'] == 'sms') {
                 $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'sms')->where('type', 'primary.marketer.email.for.new.contract')->first();
