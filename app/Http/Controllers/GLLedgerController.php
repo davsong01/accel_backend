@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\Transaction\AccountBalanceUpdateEvent;
 use App\Models\Customer;
 use App\Models\Transaction;
-use App\Models\User;
 use App\Services\LogService;
 use App\Services\TransactionService;
-use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -73,9 +72,12 @@ class GLLedgerController extends Controller
         $attributes = [...$validator->validated(), 'company_id' => $company_id];
 
         $transaction = $this->createTransaction($attributes);
+        
+        event(new AccountBalanceUpdateEvent(transaction: $transaction, user: auth()->user()));
 
         $customer = Customer::find($request->customer_id);
         LogService::admin(auth()->user()->id, $customer?->user?->id, 'New transaction entry (' . $transaction->id . ')', 'CREATE');
+
         return response()->json(['message' => 'Success', 'data' => $transaction], 200);
     }
 
