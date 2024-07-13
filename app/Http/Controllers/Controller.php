@@ -492,7 +492,7 @@ class Controller extends BaseController
         $methods = array_filter($reflector->getMethods(), function ($methods) use ($class) {
             return str_contains($methods, $class) && $methods->getModifiers() == ReflectionMethod::IS_PUBLIC;
         });
-        
+
         $counter = 0;
         $used = [];
         foreach ($methods as $meth) {
@@ -587,7 +587,7 @@ class Controller extends BaseController
     {
         $data['attachments'] = (isset($data['attachments']) && !empty($data['attachments'])) ? json_encode($data['attachments']) : null;
         $mes = new MessageTransactionController();
-        
+
         $mes->logEmailTransaction($data);
 
         return;
@@ -640,7 +640,7 @@ class Controller extends BaseController
         if (isset($input[-1]) && ($input[-1] == "'" || $input[-1] == '"')) {
             $input = substr($input, 0, -1);
         }
-        
+
         $input = json_decode($input, true);
 
         return $input;
@@ -728,7 +728,7 @@ class Controller extends BaseController
         $name = $payment->transaction_id;
         $data['receipt_no'] = $name;
         $pathToSave = $this->getPathToSaveFile('receipts') . '/' . $name . '.pdf';
-        
+
         if(env('ENT') != 'local'){
             $pdf = PDF::loadView('receipts.form-payment', compact('payment', 'data'))->setPaper('a4', 'portrait');
             file_put_contents(base_path() . '/' . config('app.upload_path') . '/' . $pathToSave, $pdf->output());
@@ -751,7 +751,7 @@ class Controller extends BaseController
         return $rand . $year . $month;
     }
 
-    public function createTransaction($attributes)
+    public function createTransaction($attributes): Transaction
     {
         if (key_exists('payment_slip', $attributes)) {
             $filepath = $this->uploadProtectedFile($attributes['payment_slip'], 'payment_slips')['filepath'];
