@@ -9,7 +9,9 @@ use Illuminate\Support\Facades\Event;
 use App\Events\LeaveCreated;
 use App\Listeners\SendLeaveCreatedNotification;
 use App\Events\LeaveStatusUpdated;
+use App\Events\Transaction\AccountBalanceUpdateEvent;
 use App\Listeners\SendLeaveStatusUpdatedNotification;
+use App\Listeners\Transaction\AccountBalanceUpdateListener;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -28,6 +30,9 @@ class EventServiceProvider extends ServiceProvider
         LeaveStatusUpdated::class => [
             SendLeaveStatusUpdatedNotification::class,
         ],
+        AccountBalanceUpdateEvent::class => [
+            AccountBalanceUpdateListener::class,
+        ]
     ];
 
     /**
