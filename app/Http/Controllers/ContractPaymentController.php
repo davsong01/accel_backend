@@ -211,7 +211,6 @@ class ContractPaymentController extends Controller
             
             // Log email
             LogService::admin(auth()->user()->id,  $contract?->customer?->user?->id, 'Update a company\'s contract, contract payment, contract payment thread and transaction (' . $contract->id . ')', 'UPDATE');
-            
         }
         
         $this->logContractEmail($contract, $payments);
@@ -222,10 +221,12 @@ class ContractPaymentController extends Controller
     {
         // Log Email of receipt and provisional letter
         if ($contract->contract_status == 'ongoing') {
-            $data['type'] = 'contract.payment';
+            $data['type'] = 'contract.payment.part';
         } else {
             $data['type'] = 'contract.payment';
         }
+
+        $data['contract_ids'] = [$contract->id];
         $data['name'] =  $contract->customer->user->first_name;
         $data['email'] =  $contract->customer->user->email;
         $data['attachments'] = array_column($payments, 'receipt_location');;

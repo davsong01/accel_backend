@@ -1269,12 +1269,12 @@ class CustomerContractController extends Controller
                 }
             }
             // Email Core owner
-            $emailX['type'] = 'notify.core.owner.of.subscriber.removeal';
-            $emailX['name'] = $contract->customer->user->name;
+            $emailX['type'] = 'notify.core.owner.of.subscriber.removal';
+            $emailX['name'] = $contract->customer->user->first_name;
             $emailX['email'] = $contract->customer->user->email;
             $emailX['defunctSubscriberEmail'] = $defunctSubscriber->s_email;
             $emailX['defunctSubscriberName'] = $defunctSubscriber->s_name;
-
+            
             $this->logEmail($emailX);
         } catch (\Throwable $th) {}
         

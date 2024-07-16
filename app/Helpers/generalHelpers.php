@@ -288,7 +288,7 @@ if (!function_exists("getOptions")) {
                 $values['COMPANY_NAME'] = key_exists('COMPANY_NAME', $options) ? session()->get('company_name') : null;
                 $values['COMPANY_URL'] = key_exists('COMPANY_URL', $options) ? session()->get('company_url') : null;
                 $values['COMPANY_EMAIL'] = key_exists('COMPANY_EMAIL', $options) ? $settings->company_email : null;
-
+                
                 $values['CUSTOMER_EMAIL'] = key_exists('CUSTOMER_EMAIL', $options) ? $user->email : null;
                 $values['CUSTOMER_ADDRESS'] = key_exists('CUSTOMER_ADDRESS', $options) ? $user->residential_address : null;
                 $values['CUSTOMER_STATE'] = key_exists('CUSTOMER_STATE', $options) ? $user->state->name : null;
@@ -305,11 +305,9 @@ if (!function_exists("getOptions")) {
                 $values['CONTRACT_NAME'] = key_exists('CONTRACT_NAME', $options) ? ($contract->contract_name ?? ''): null;
 
                 $values['BUILDING_TYPE'] = key_exists('BUILDING_TYPE', $options) ? $contract->building_type_details?->name : null;
-
             }
         }
-      
-
+        
         return $values;
     }
 }
