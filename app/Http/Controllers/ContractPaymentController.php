@@ -319,8 +319,12 @@ class ContractPaymentController extends Controller
             $receipt = $this->generateContractPaymentReceipt($payment_thread, $contract, $others);
             
             $payment_thread->update(['receipt_location' => $receipt['filepath'] ?? null]);
-
+            
+            
             \DB::commit();
+            
+            // persist file
+            $payment_thread->receipt_location = $receipt['filepath'] ?? null;
 
             return [
                 'status' => 'success',
@@ -443,6 +447,7 @@ class ContractPaymentController extends Controller
 
             \DB::commit();
 
+            $payment->receipt_location = $receipt['filepath'] ?? null;
             // Do something with the commission from contract here
             return [
                 'status' => 'success',
