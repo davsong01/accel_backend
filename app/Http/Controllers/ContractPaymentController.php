@@ -117,7 +117,7 @@ class ContractPaymentController extends Controller
                 'balance' => $res['payment']->balance,
                 'no_of_months' => $res['payment']->no_of_months,
                 'payment_slip' => $res['payment']->filename,
-                'receipt_location' => $res['payment']->receipt_location ?? null,
+                'receipt_location' => $res['receipt_location'] ?? null,
             ];
         }
 
@@ -206,7 +206,7 @@ class ContractPaymentController extends Controller
                 'balance' => $res['payment']->balance,
                 'no_of_months' => $res['payment']->no_of_months,
                 'payment_slip' => $res['payment']->filename,
-                'receipt_location' => $res['payment']->receipt_location ?? null,
+                'receipt_location' => $res['receipt_location'] ?? null,
             ];
         }
         
@@ -319,14 +319,15 @@ class ContractPaymentController extends Controller
             $receipt = $this->generateContractPaymentReceipt($payment_thread, $contract, $others);
             
             $payment_thread->update(['receipt_location' => $receipt['filepath'] ?? null]);
-            
+
+            $receipt_location = $receipt['filepath'] ?? null;
             
             \DB::commit();
             
             // persist file
-            $payment_thread->receipt_location = $receipt['filepath'] ?? null;
 
             return [
+                'receipt_location' => $receipt_location ,
                 'status' => 'success',
                 'payment' => $payment,
                 'processed_contract' => $contract,
@@ -444,12 +445,13 @@ class ContractPaymentController extends Controller
             $receipt = $this->generateContractPaymentReceipt($payment, $contract, $others);
             $payment->update(['receipt_location' => $receipt['filepath'] ?? null]);
             $payment_thread->update(['receipt_location' => $receipt['filepath'] ?? null]);
-
+            
+            $receipt_location = $receipt['filepath'] ?? null;
             \DB::commit();
 
-            $payment->receipt_location = $receipt['filepath'] ?? null;
             // Do something with the commission from contract here
             return [
+                'receipt_location' => $receipt_location,
                 'status' => 'success',
                 'payment' => $payment,
                 'processed_contract' => $contract,
