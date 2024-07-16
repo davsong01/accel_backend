@@ -408,23 +408,22 @@ class MessageTransactionController extends Controller
             }
         }
 
-        if ($data['type'] == 'contract.payment.part') {
-            if (isset($data['medium']) && $data['medium'] == 'sms') {
-            } else {
-                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'email')->where('type', 'contract.payment')->first();
-                $subject = $email_template->subject ?? 'Payment Confirmation';
-                $content = $email_template->content ?? '<strong>Dear ' . $data['name'] . ',</strong><br>
-                <div>
-                <p style="text-align:justify !important">We are delighted to inform you that installment payment for your chosen property has been successfully processed. Congratulations on taking the initial step towards property ownership with ' . $this->sessionDetails('company_name') . '.<br><br>You will receive a separate email with an official receipt for your first and subsequent installment payments. <br><br>Please visit our office to pick up your Provisional Allocation Letter, and if you have any questions, do not hesitate to contact our support team/contact person. <br><br>We look forward to creating a rewarding experience for you as a property owner.<br>';
+        // if ($data['type'] == 'contract.payment.part') {
+        //     if (isset($data['medium']) && $data['medium'] == 'sms') {
+        //     } else {
+        //         $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'email')->where('type', 'contract.payment')->first();
+        //         $subject = $email_template->subject ?? 'Payment Confirmation';
+        //         $content = $email_template->content ?? '<strong>Dear ' . $data['name'] . ',</strong><br>
+        //         <div>
+        //         <p style="text-align:justify !important">We are delighted to inform you that installment payment for your chosen property has been successfully processed. Congratulations on taking the initial step towards property ownership with ' . $this->sessionDetails('company_name') . '.<br><br>You will receive a separate email with an official receipt for your first and subsequent installment payments. <br><br>Please visit our office to pick up your Provisional Allocation Letter, and if you have any questions, do not hesitate to contact our support team/contact person. <br><br>We look forward to creating a rewarding experience for you as a property owner.<br>';
 
-                $content .= $this->propertyDetails($data);
+        //         $content .= $this->propertyDetails($data);
 
-                $content .= 'Best regards,<br><br>' . $this->sessionDetails('company_name') . '</p>
-                </div>';
-            }
-        }
+        //         $content .= 'Best regards,<br><br>' . $this->sessionDetails('company_name') . '</p>
+        //         </div>';
+        //     }
+        // }
         
-
         if ($data['type'] == 'create.leave.request') {
             if (isset($data['medium']) && $data['medium'] == 'sms') {
             } else {

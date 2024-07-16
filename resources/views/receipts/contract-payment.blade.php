@@ -51,9 +51,9 @@
       padding: 1rem 0.5rem;
       color: #344054;
       font-family: Roboto;
-      font-size: 15px;
+      font-size: 10px;
       font-style: normal;
-      line-height: 15px;
+      line-height: 5px;
       /* 125% */
     }
 

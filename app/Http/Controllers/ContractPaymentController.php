@@ -76,10 +76,10 @@ class ContractPaymentController extends Controller
         }
 
         $payments = [];
-        
+
         // Took this outside the loop to reduce db calls
         $allContractsX = CustomerContract::whereIn('id', array_column($contract_ids, 'contract_id'))->where('customer_id', $request->customer_id)->where('company_id', $this->sessionDetails('company_id'))->get();
-        
+
         foreach ($contract_ids as $contract) {
             $contract_validator = Validator::make($contract, [
                 'allow_installment' => 'required|In:0,1',
@@ -96,7 +96,7 @@ class ContractPaymentController extends Controller
             }
 
             $contractX = $allContractsX->where('id', $contract['contract_id'])->first();
-            
+
             $contract = array_merge($contract, $request->all());
 
             $res = $this->processContractPayment($contractX, $contract);
@@ -108,32 +108,27 @@ class ContractPaymentController extends Controller
             $payments[] = [
                 'contract_id' => $contractX->id,
                 'contract_name' => $contractX->contract_name,
-                'contract_value' => $res->contract_value,
-                'discount_applied' => $res->discount_applied,
-                'property_net_fee' => $res->property_net_fee,
-                'transaction_id' => $res->transaction_id,
-                'amount' => $res->amount,
-                'description' => $res->description,
-                'balance' => $res->balance,
-                'no_of_months' => $res->no_of_months,
-                'payment_slip' => $res->filename,
-                'receipt_location' => $res->receipt_location ?? null,
+                'contract_value' => $res['payment']->contract_value,
+                'discount_applied' => $res['payment']->discount_applied,
+                'property_net_fee' => $res['payment']->property_net_fee,
+                'transaction_id' => $res['payment']->transaction_id,
+                'amount' => $res['payment']->amount,
+                'description' => $res['payment']->description,
+                'balance' => $res['payment']->balance,
+                'no_of_months' => $res['payment']->no_of_months,
+                'payment_slip' => $res['payment']->filename,
+                'receipt_location' => $res['payment']->receipt_location ?? null,
             ];
         }
 
         // Log Email of receipt and provisional letter
-        $data['type'] = 'contract.payment';
-        $data['name'] =  $contractX->customer->user->first_name;
-        $data['email'] =  $contractX->customer->user->email;
-        $data['attachments'] = array_column($payments, 'receipt_location');
-        $data['contract_ids'] = [$contractX->id];
-        
-        $this->logEmail($data);
+        $this->logContractEmail($contractX, $payments);
 
         LogService::admin(auth()->user()->id,  $contractX->customer->user->id, 'Update a company\'s contract, contract payment, contract payment thread and transaction (' . $contractX->id . ')', 'UPDATE');
+        
         return response()->json(['message' => 'Payment successful', 'data' => $contractX], 200);
     }
-
+    
     public function continueContractPayment(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -162,6 +157,7 @@ class ContractPaymentController extends Controller
 
         $payments = [];
         $allContractsX = CustomerContract::whereIn('id', array_column($contract_ids, 'contract_id'))->where('customer_id', $request->customer_id)->where('company_id', $this->sessionDetails('company_id'))->get();
+        
         $allPaymentX = ContractPayment::whereIn('contract_id', array_column($contract_ids, 'contract_id'))->get();
         
         foreach ($contract_ids as $contract_id) {
@@ -177,55 +173,62 @@ class ContractPaymentController extends Controller
                 ], 412);
             }
 
-            $contract = $allContractsX->where('id', $contract_id['contract_id'])->first();
+            $contractX = $allContractsX->where('id', $contract_id['contract_id'])->first();
             $payment = $allPaymentX->where('contract_id', $contract_id['contract_id'])->first();
+            
+            if(!$payment){
+                return response()->json(['error' => 'Previous Payment for Contract: '. $contractX->contract_name. ' not found, Please make a payment', 'data' => []], 200);
+            }
             
             if ($payment->balance == 0) {
                 return response()->json([
-                    'error' => 'Full payment has already been made for : ' . $contract->contract_name,
+                    'error' => 'Full payment has already been made for : ' . $contractX->contract_name,
                     'data' => null,
                 ], 422);
             }
             $request['amount'] = $contract_id['amount'];
-
-            $res = $this->processContinueContractPayment($contract, $request->all(), $payment);
-    
+            
+            $res = $this->processContinueContractPayment($contractX, $request->all(), $payment);
+            
             if (isset($res['status']) && $res['status'] == 'error') {
                 return response()->json(['error' => $res['message'], 'data' => []], 200);
             }
-
-            $payments[] = [
-                'contract_id' => $contract->id,
-                'contract_name' => $contract->contract_name,
-                'contract_value' => $res->contract_value,
-                'discount_applied' => $res->discount_applied,
-                'property_net_fee' => $res->property_net_fee,
-                'transaction_id' => $res->transaction_id,
-                'amount' => $res->amount,
-                'description' => $res->description,
-                'balance' => $res->balance,
-                'no_of_months' => $res->no_of_months,
-                'payment_slip' => $res->filename,
-                'receipt_location' => $res->receipt_location ?? null,
-            ];
             
-            // Log email
-            LogService::admin(auth()->user()->id,  $contract?->customer?->user?->id, 'Update a company\'s contract, contract payment, contract payment thread and transaction (' . $contract->id . ')', 'UPDATE');
+            $payments[] = [
+                'contract_id' => $contractX->id,
+                'contract_name' => $contractX->contract_name,
+                'contract_value' => $res['payment']->contract_value,
+                'discount_applied' => $res['payment']->discount_applied,
+                'property_net_fee' => $res['payment']->property_net_fee,
+                'transaction_id' => $res['payment']->transaction_id,
+                'amount' => $res['payment']->amount,
+                'description' => $res['payment']->description,
+                'balance' => $res['payment']->balance,
+                'no_of_months' => $res['payment']->no_of_months,
+                'payment_slip' => $res['payment']->filename,
+                'receipt_location' => $res['payment']->receipt_location ?? null,
+            ];
         }
         
-        $this->logContractEmail($contract, $payments);
-        return response()->json(['message' => 'Payment successful', 'data' => $contract,], 200);
+        // Log email
+        $this->logContractEmail($contractX, $payments);
+        
+        LogService::admin(auth()->user()->id,  $contractX?->customer?->user?->id, 'Update a company\'s contract, contract payment, contract payment thread and transaction (' . $contractX->id . ')', 'UPDATE');
+        
+        return response()->json(['message' => 'Payment successful', 'data' => $contractX,], 200);
     }
 
     public function logContractEmail($contract, $payments)
     {
         // Log Email of receipt and provisional letter
-        if ($contract->contract_status == 'ongoing') {
-            $data['type'] = 'contract.payment.part';
-        } else {
-            $data['type'] = 'contract.payment';
-        }
 
+        // if ($contract->contract_status == 'ongoing') {
+        //     $data['type'] = 'contract.payment.part';
+        // } else {
+        //     $data['type'] = 'contract.payment';
+        // }
+
+        $data['type'] = 'contract.payment';
         $data['contract_ids'] = [$contract->id];
         $data['name'] =  $contract->customer->user->first_name;
         $data['email'] =  $contract->customer->user->email;
@@ -236,9 +239,10 @@ class ContractPaymentController extends Controller
 
     public function processContinueContractPayment($contract, $data, $payment)
     {
+        \DB::beginTransaction();
+
         try {
             $transaction_id = $this->generateTransactionId('CTB');
-
             if (!empty($data['payment_slip'])) {
                 $filename = $this->uploadFile($data['payment_slip'], 'payments');
             } else {
@@ -246,10 +250,10 @@ class ContractPaymentController extends Controller
             }
 
             $amount = $data['amount'];
-            $fee = $payment->property_net_fee;
-            $balance = $payment->balance;
-            $newbalance = $fee - ($payment->amount + $data['amount']);
-
+            $fee = $payment->balance;
+            
+            $balance = $fee - $amount;
+            
             if ($amount > $balance) {
                 $res = [
                     'status' => 'error',
@@ -260,13 +264,15 @@ class ContractPaymentController extends Controller
                 return $res;
             }
 
-            $newbalance = $balance - $amount;
-            $newbalance = ($newbalance < 0) ? 0 : $newbalance;
+            $balance = ($balance < 0) ? 0 : $balance;
+            $others['contract_value'] = $payment->contract_value;
+            $others['discount_applied'] = $payment->discount_applied;
 
+            // 2998451.0
             // Create Payment thread
             $payment_thread = ContractPaymentThread::create([
                 'contract_payments_id' => $payment->id,
-                'amount' => $data['amount'],
+                'amount' => $amount,
                 'transaction_id' => $transaction_id,
                 'payment_slip' => $filename,
                 'account_id' => $data['account_id'],
@@ -276,6 +282,10 @@ class ContractPaymentController extends Controller
                 'company_id' => $this->sessionDetails('company_id')
             ]);
 
+            $totalAmountPaid = ContractPaymentThread::where('contract_payments_id', $payment->id)->sum('amount');
+
+            $others['total_amount_paid'] = $totalAmountPaid;
+            
             Transaction::create([
                 'customer_id' => $payment_thread->customer_id,
                 'amount' => $payment_thread->amount,
@@ -289,28 +299,34 @@ class ContractPaymentController extends Controller
                 'company_id' => $this->sessionDetails('company_id'),
             ]);
 
+            // Update parent payment to reflect all payments
             $payment->update([
-                'amount' => $payment->amount + $data['amount'],
-                'balance' => $newbalance,
+                // 'amount' => $payment->amount + $data['amount'],
+                'amount' => $totalAmountPaid,
+                'balance' => $balance,
             ]);
 
-            $others['balance'] = $newbalance;
-            $others['contract_value'] = $payment->contract_value;
-            $others['discount_applied'] = $payment->discount_applied;
-            $others['total_amount_paid'] = $fee - $newbalance;
-
-            if ($newbalance <= 0) {
-                $contract->update([
-                    'contract_status' => 'paid',
-                ]);
+            if ($balance > 0) {
+                $contract_status = 'ongoing';
+            } else {
+                $contract_status = 'paid';
             }
+            
+            $others['balance'] = $balance;
+
             // Generate payment receipt
+            $contract->contract_status = $contract_status;
             $receipt = $this->generateContractPaymentReceipt($payment_thread, $contract, $others);
+            
             $payment_thread->update(['receipt_location' => $receipt['filepath'] ?? null]);
 
             \DB::commit();
-            return $payment;
 
+            return [
+                'status' => 'success',
+                'payment' => $payment,
+                'processed_contract' => $contract,
+            ];
             // Do something with the commission from contract here
         } catch (\Throwable $th) {
             //throw $th;
@@ -318,7 +334,7 @@ class ContractPaymentController extends Controller
                 'status' => 'error',
                 'message' => 'An error occurred when making payment for: ' . $contract->contract_name . ' Error: ' . $th->getMessage(),
             ];
-
+            \DB::rollback();
             return $res;
         }
 
@@ -426,8 +442,13 @@ class ContractPaymentController extends Controller
             $payment_thread->update(['receipt_location' => $receipt['filepath'] ?? null]);
 
             \DB::commit();
-            return $payment;
+
             // Do something with the commission from contract here
+            return [
+                'status' => 'success',
+                'payment' => $payment,
+                'processed_contract' => $contract,
+            ];
         } catch (\Throwable $th) {
             // \Log::info(['File' => 'ContractPaymentController', 'message' => $th->getMessage(), 'Line' => $th->getLine()]);
             $res = [
@@ -444,7 +465,7 @@ class ContractPaymentController extends Controller
         $name = $transaction_id ?? $payment->transaction_id;
         $data['receipt_no'] = $name;
         $pathToSave = $this->getPathToSaveFile('receipts') . '/' . $name . '.pdf';
-        
+
         $pdf = PDF::loadView('receipts.contract-payment', compact('payment', 'data', 'contract','others'))->setPaper('a4', 'portrait');
         
         file_put_contents(base_path() . '/' . config('app.upload_path') . '/' . $pathToSave, $pdf->output());
