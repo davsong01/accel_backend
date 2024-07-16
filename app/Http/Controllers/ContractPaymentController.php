@@ -412,16 +412,17 @@ class ContractPaymentController extends Controller
                 'discount_applied' => $payment->discount_applied,
             ];
 
-            // Generate payment receipt
-            $receipt = $this->generateContractPaymentReceipt($payment, $contract, $others);
-            $payment->update(['receipt_location' => $receipt['filepath'] ?? null]);
-            $payment_thread->update(['receipt_location' => $receipt['filepath'] ?? null]);
-            
             $contract->update([
                 'contract_payment_transaction_id' => $payment->transaction_id,
                 'status' => 'subscriber',
                 'contract_status' => $contract_status,
             ]);
+
+            // Generate payment receipt
+            $contract->contract_status = $contract_status;
+            $receipt = $this->generateContractPaymentReceipt($payment, $contract, $others);
+            $payment->update(['receipt_location' => $receipt['filepath'] ?? null]);
+            $payment_thread->update(['receipt_location' => $receipt['filepath'] ?? null]);
 
             \DB::commit();
             return $payment;

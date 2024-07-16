@@ -51,9 +51,9 @@
       padding: 1rem 0.5rem;
       color: #344054;
       font-family: Roboto;
-      font-size: 16px;
+      font-size: 15px;
       font-style: normal;
-      line-height: 20px;
+      line-height: 15px;
       /* 125% */
     }
 
@@ -79,18 +79,18 @@
     .information table {
       padding: 10px;
       padding-bottom: 0rem;
-      font-size: 12px;
+      font-size: 10px;
     }
 
     .information1 table {
       padding: 10px;
-      padding-bottom: 0rem;
+      padding-bottom: 0;
     }
 
     .text-header {
       color: #344054;
       font-family: Roboto;
-      font-size: 16px;
+      font-size: 15px;
       font-style: normal;
       font-weight: 600;
       line-height: 24px;
@@ -101,7 +101,7 @@
     .phone,
     .web {
       color: black;
-      font-size: 12px;
+      font-size: 10px;
       font-style: normal;
       font-weight: 700;
     }
@@ -201,7 +201,6 @@ ${payment_bank} --}}
               {{-- <span style="border-bottom: 1px solid black; padding-bottom: 0.5rem;">Previous Amount Paid <strong>${previous_amountPaid}</strong></span> --}}
               {{-- <br /><br /> --}}
             Current Amount Paid <strong>{{ $companySetting->currency_data->identifier.number_format($payment->amount) }}</strong>
-
             Total Amount Paid <strong>{{ $companySetting->currency_data->identifier.number_format($others['total_amount_paid'] ?? $payment->amount) }}</strong> <br><br>
             <span style="border-bottom: 1px solid black; padding-bottom: 0.5rem;">Balance <strong>{{ $companySetting->currency_data->identifier.number_format($others['balance'] ?? $payment->balance) }}</strong></span>
           </pre>
