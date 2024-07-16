@@ -304,7 +304,7 @@ if (!function_exists("getOptions")) {
                 $values['CONTRACT_INFRASTRUCTURE_FEE'] = key_exists('CONTRACT_INFRASTRUCTURE_FEE', $options) ? $settings->currencyData->symbol . number_format($infrastructural_fee) : null;
                 $values['CONTRACT_NAME'] = key_exists('CONTRACT_NAME', $options) ? ($contract->contract_name ?? ''): null;
 
-                $values['BUILDING_TYPE'] = key_exists('BUILDING_TYPE', $options) ? $contract->building_type_details->name : null;
+                $values['BUILDING_TYPE'] = key_exists('BUILDING_TYPE', $options) ? $contract->building_type_details?->name : null;
 
             }
         }
