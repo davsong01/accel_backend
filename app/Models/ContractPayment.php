@@ -46,7 +46,7 @@ class ContractPayment extends Model
     protected function createdAt(): Attribute
     {
         return Attribute::make(
-            get: fn (string $value) => date("M jS, Y", strtotime($value)),
+            get: fn (string $value) => date("M jS, Y h:i a", strtotime($value)),
         );
     }
 }
