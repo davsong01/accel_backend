@@ -208,7 +208,7 @@ if (!function_exists("generateGenericPaymentReceipt")) {
         file_put_contents(base_path() . '/' . config('app.upload_path') . '/' . $pathToSave, $pdf->output());
         // Rmember to create a public folder in the root directory if there is a PDF error
         return [
-            'receipt_no' => $name . '.pdf',
+            'receipt_no' => $name,
             'filename' => $name . '.pdf',
             'filepath' => config('app.upload_path') . '/' . $pathToSave
         ];

@@ -1,9 +1,8 @@
 <?php 
-
-    use App\Models\CompanySetting;
-
-    $company_id = \Session::get('company_id') ?? 1;
-    $companySetting = CompanySetting::where('company_id', $company_id)->first();
+  $company_id = \Session::get('company_id') ?? 1;
+  $companySetting = (object) sessionDetails('settings');
+  $website = sessionDetails('company_url');
+  $companySetting->currency_data = (object) $companySetting->currency_data;
 ?>
 
 <!DOCTYPE html>
@@ -14,7 +13,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{{ $payment->transaction_id }}</title>
 
-  <style type="text/css">
+   <style type="text/css">
     body {
       margin: 0px;
     }
@@ -52,9 +51,9 @@
       padding: 1rem 0.5rem;
       color: #344054;
       font-family: Roboto;
-      font-size: 16px;
+      font-size: 10px;
       font-style: normal;
-      line-height: 20px;
+      line-height: 5px;
       /* 125% */
     }
 
@@ -80,18 +79,18 @@
     .information table {
       padding: 10px;
       padding-bottom: 0rem;
-      font-size: 12px;
+      font-size: 10px;
     }
 
     .information1 table {
       padding: 10px;
-      padding-bottom: 0rem;
+      padding-bottom: 0;
     }
 
     .text-header {
       color: #344054;
       font-family: Roboto;
-      font-size: 16px;
+      font-size: 15px;
       font-style: normal;
       font-weight: 600;
       line-height: 24px;
@@ -102,7 +101,7 @@
     .phone,
     .web {
       color: black;
-      font-size: 12px;
+      font-size: 10px;
       font-style: normal;
       font-weight: 700;
     }
@@ -115,10 +114,10 @@
       <tr>
         <td align="center">
           <div>
-            <img src="{{ asset($companySetting->company_logo) }}" alt="Logo" width="64" class="logo" />
+            <img src="{{ base_path($companySetting->raw_logo) }}" alt="Logo" width="64" class="logo" />
             <p class="address">{{ $companySetting->address }}</p>
             {{-- <p class="phone">+234 901 234 5678</p> --}}
-            <span class="web">{{ $companySetting->website }}</span>
+            <span class="web">{{ $website }}</span>
           </div>
         </td>
       </tr>
@@ -148,6 +147,7 @@ ${payment_bank} --}}
         <td align="right" style="width: 40%">
           <pre>
  <br /><br />
+
  <span class="text-header">Customer name</span>
 {{ $payment->customer->user->first_name .' '.$payment->customer->user->first_name. ' '.$payment->customer->user->last_name}}
 <br /><br />
@@ -185,10 +185,10 @@ ${payment_bank} --}}
         <tr>
           <td>1</td>
           <td>{{$payment->created_at->format('jS F, Y, h:iA')}}</td>
-          <td>{{$payment->description}}</td>
-          <td>{{ $companySetting->currencyData->symbol.number_format($payment->contract_value ?? $contract->fee) }}</td>
-          <td>{{ $companySetting->currencyData->symbol.number_format($payment->discount_applied ?? 0) }}</td>
-          <td>{{ $companySetting->currencyData->symbol.number_format($payment->amount) }}</td>
+          <td>{{$payment->description ??  ucwords(str_replace("_"," ", $payment->transaction->purpose)) }}</td>
+          <td>{{ $companySetting->currency_data->identifier.number_format($payment->contract_value ?? $contract->fee) }}</td>
+          <td>{{ $companySetting->currency_data->identifier.number_format($payment->discount_applied ?? 0) }}</td>
+          <td>{{ $companySetting->currency_data->identifier.number_format($payment->amount) }}</td>
           <td></td>
         </tr>
       </tbody>
@@ -199,11 +199,9 @@ ${payment_bank} --}}
       <tr>
         <td align="right" style="width: 40%">
           <pre>
-              {{-- <span style="border-bottom: 1px solid black; padding-bottom: 0.5rem;">Previous Amount Paid <strong>${previous_amountPaid}</strong></span> --}}
-              {{-- <br /><br /> --}}
-              <span style="border-bottom: 1px solid black; padding-bottom: 0.5rem;">Balance <strong>{{ $companySetting->currencyData->symbol.number_format($payment->balance) }}</strong></span>
+              <span style="border-bottom: 1px solid black; padding-bottom: 0.5rem;">Balance <strong>{{ $companySetting->currency_data->identifier.number_format($payment->balance) }}</strong></span>
               <br /><br />
-            Current Amount Paid <strong>{{ $companySetting->currencyData->symbol.number_format($payment->amount) }}</strong>
+            Current Amount Paid <strong>{{ $companySetting->currency_data->identifier.number_format($payment->current_amount_paid ?? $payment->amount) }}</strong>
           </pre>
         </td>
       </tr>
