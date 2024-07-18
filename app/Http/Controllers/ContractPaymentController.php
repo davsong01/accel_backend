@@ -650,11 +650,11 @@ class ContractPaymentController extends Controller
             
             if($request->type == 'SE'){
                 $contract->update([
-                    'se_status' => $balance > 0 ? 'in-progress' : 'paid',
+                    'se_status' => $balance > 0 ? 'In Progress' : 'Paid',
                 ]);
             }elseif($request->type == 'INFRASTRUCTURE') {
                 $contract->update([
-                    'infrastructure_status' => $balance > 0 ? 'in-progress' : 'paid',
+                    'infrastructure_status' => $balance > 0 ? 'In Progress' : 'Paid',
                 ]);
             }
 
