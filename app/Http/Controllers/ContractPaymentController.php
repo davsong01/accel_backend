@@ -654,7 +654,7 @@ class ContractPaymentController extends Controller
                 ]);
             }elseif($request->type == 'INFRASTRUCTURE') {
                 $contract->update([
-                    'infrastructure_status' => $balance > 0 ? 'in-progress' : 'paid',
+                    'infrastructure_status' => $balance > 0 ? 'inprogress' : 'paid',
                 ]);
             }
 
