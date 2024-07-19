@@ -36,6 +36,14 @@ class AdvanceAndClaimsController extends Controller
             $aac = $aac->where('status', $request->status);
         }
 
+        if($request->start_date && $request->end_date){
+            // Convert search dates to Carbon objects for comparison
+            $startDate = Carbon::parse($request->start_date)->startOfDay();
+            $endDate = Carbon::parse($request->end_date)->endOfDay();
+            // Query leave applications that were created within the specified range
+            $aac = $aac->whereBetween('created_at', [$startDate, $endDate]);
+        }
+
         if (isset($id) && !empty($id)) {
             $aac = $aac->where('id', $id)->first();
             if ($aac) {
