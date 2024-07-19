@@ -12,21 +12,29 @@ class PropertyChange extends Model
 
     protected $fillable = ['branch_id', 'customer_id', 'original_customer_contract_id', 'new_customer_contract_id', 'company_id', 'comment', 'status'];
 
-    protected $with = [ 'original_contract', 'new_contract', 'branch', 'customer'];
+    protected $with = [
+        'original_contract', 'new_contract', 'branch',
+        'customer:id,company_id,branch_id,user_id',
+        'customer.user:id,title,first_name,middle_name,last_name,avatar,phone_number',
+    ];
 
-    public function original_contract(){
+    public function original_contract()
+    {
         return $this->belongsTo(CustomerContract::class, 'original_customer_contract_id');
     }
 
-    public function new_contract(){
+    public function new_contract()
+    {
         return $this->belongsTo(CustomerContract::class, 'new_customer_contract_id');
     }
 
-    public function branch(){
+    public function branch()
+    {
         return $this->belongsTo(Branch::class, 'branch_id');
     }
 
-    public function customer(){
+    public function customer()
+    {
         return $this->belongsTo(Customer::class, 'customer_id');
     }
 
