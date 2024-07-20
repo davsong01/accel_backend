@@ -182,7 +182,7 @@ class CustomerController extends Controller
         $percentage = 0;
 
         foreach($contracts as $contract){
-            if ($contract->contract_status == 'ongoing') {
+            if ($contract->contract_status == 'ongoing' && !empty($contract->contract_payment)) {
                 $total_fee += $contract->contract_payment->property_net_fee;
                 $paid += $contract->contract_payment->amount;
             }
