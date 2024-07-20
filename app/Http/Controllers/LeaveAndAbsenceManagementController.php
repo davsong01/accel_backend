@@ -54,7 +54,7 @@ class LeaveAndAbsenceManagementController extends Controller
             $startDate = Carbon::parse($request->start_date)->startOfDay();
             $endDate = Carbon::parse($request->end_date)->endOfDay();
             // Query leave applications that were created within the specified range
-            $lam = $lam->whereBetween('created_at', [$startDate, $endDate]);
+            $lam = $lam->whereBetween('start_date', [$startDate, $endDate]);
         }
 
         if (isset($id) && !empty($id)) {

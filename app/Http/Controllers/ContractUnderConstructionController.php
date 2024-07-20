@@ -171,7 +171,7 @@ class ContractUnderConstructionController extends Controller
         $params = $request->only(['company_id', 'customer_id', 'contract_id', 'created_by', 'amount_paid', 'total_amount', 'current_building_phase_id', 'chart_of_account_id']);
         $company_id = $this->sessionDetails('company_id');
     
-        if($params['created_by']){
+        if(isset($params['created_by'])){
             $params['created_by_id'] = $params['created_by'];
             unset($params['created_by']);
         }
