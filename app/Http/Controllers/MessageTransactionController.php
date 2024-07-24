@@ -456,6 +456,13 @@ class MessageTransactionController extends Controller
             
         }
 
+        if ($data['type'] == 'send.email.to.admin.for.create.advance-claims') {
+            
+            $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id') ??  $data['company_id'])->where('medium', 'email')->where('type', 'send.email.to.admin.for.create.advance-claims')->first();
+            $subject = $email_template->subject ?? $data['subject'] ?? 'Advance/Claims Application Request';
+            $content = $email_template->content ??  $data['content'] ?? $data['email'] . ' has requested for an/a '. strtolower(explode(' ', $subject)[0] ?? '') .', kindly log into your account to approve or decline the request.';
+            
+        }
 
         return [
             'subject' => $subject,
