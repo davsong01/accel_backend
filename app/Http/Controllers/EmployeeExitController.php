@@ -113,6 +113,31 @@ class EmployeeExitController extends Controller
             'company_id' => $this->sessionDetails('company_id')
         ];
         $this->notify($data);
+
+        $company_id = $this->sessionDetails('company_id');
+    
+        $users = User::with('staff:id,user_id')->where('staff_id', '!=', $staff->id)
+        ->where(['type' => 'staff', 'company_id' => $company_id, 'status' => 'active'])->whereNotNull('staff_id')
+        ->get();
+
+        foreach ($users as $user) {
+            $content = "<strong>{$user->fullname}</strong><br><br>";
+            $content .= "<div><p style=\"text-align:justify !important\">" . auth()->user()->email . " has requested for an exit, kindly log into your account to approve or decline the request.</p><br><br></div>";
+
+            $admin_mail = [
+                'subject' => 'Exit Application Request',
+                'email' => $user->email,
+                'content' =>  $content,
+                'company_id' => $company_id,
+                'user' => $user,
+                'type' => 'send.email.to.admin.for.create.exits',
+                'name' => $user->fullname,
+    
+            ];
+    
+            $this->logEmail($admin_mail);
+        }
+
         
         LogService::admin(auth()->user()->id, $staff->user->id, 'Create or update an employee exit, ' .  $request->reason . ' (' . $ee->id . ')', 'CREATE');
         return response()->json(['message' => 'Success', 'data' => []], 200);

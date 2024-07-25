@@ -17,6 +17,7 @@ use App\Services\LeaveDateService;
 use App\Events\LeaveCreated;
 use App\Events\LeaveStatusUpdated;
 use App\Http\Responses\CustomResponse;
+use App\Models\User;
 use Illuminate\Support\Facades\Event;
 use DB;
 
@@ -54,7 +55,7 @@ class LeaveAndAbsenceManagementController extends Controller
             $startDate = Carbon::parse($request->start_date)->startOfDay();
             $endDate = Carbon::parse($request->end_date)->endOfDay();
             // Query leave applications that were created within the specified range
-            $lam = $lam->whereBetween('created_at', [$startDate, $endDate]);
+            $lam = $lam->whereBetween('start_date', [$startDate, $endDate]);
         }
 
         if (isset($id) && !empty($id)) {
@@ -300,6 +301,30 @@ class LeaveAndAbsenceManagementController extends Controller
             }
 
             $this->logEmail($data);
+
+            $staff = Staff::find($request->input('staff_id', Auth::user()->staff->id));
+            $company_id = $this->sessionDetails('company_id');
+            $users = User::with('staff:id,user_id')->where('staff_id', '!=', $staff->id)
+            ->where(['type' => 'staff', 'company_id' => $company_id, 'status' => 'active'])->whereNotNull('staff_id')
+            ->get();
+    
+            foreach ($users as $user) {
+                $content = "<strong>{$user->fullname}</strong><br><br>";
+                $content .= "<div><p style=\"text-align:justify !important\">" . auth()->user()->email . " has requested for an/a ". ($request->type ?? 'leave') .", kindly log into your account to approve or decline the request.</p><br><br></div>";
+    
+                $admin_mail = [
+                    'subject' => ucfirst($request->type ?? 'Leave') . ' Application Request',
+                    'email' => $user->email,
+                    'content' =>  $content,
+                    'company_id' => $company_id,
+                    'user' => $user,
+                    'type' => 'send.email.to.admin.for.create.leave-absence',
+                    'name' => $user->fullname,
+        
+                ];
+        
+                $this->logEmail($admin_mail);
+            }
 
             LogService::admin(auth()->user()->id, $user?->id, 'Create a leave and absence management (' . $lam->id  . ')', 'CREATE');
 
