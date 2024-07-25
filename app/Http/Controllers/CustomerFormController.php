@@ -27,7 +27,7 @@ class CustomerFormController extends Controller
     {
         // Returns customer details and contract details for admin
         $forms = CustomerForm::with(['customer'])->where('company_id', $this->sessionDetails('company_id'));
-        
+       
         if (\Request::route()->getPrefix() == 'api/customer') {
             if(Auth::check() ){
                 $customer_id = Auth::user()->customer->id ?? null;
@@ -64,17 +64,15 @@ class CustomerFormController extends Controller
         if (!empty($request->status)) {
             $forms = $forms->where('status', $request->status);
         }
-
-        if ($request->paginate && $request->paginate === true) {
+        
+        if ($request->paginate && $request->paginate == true) {
             $forms = $forms->paginate(20)->withQueryString();
         } else {
             $forms = $forms->get();
         }
-
         foreach ($forms as $form) {
             $form->contract_details = $this->formatResponseForm($form);
         }
-
 
         if (!empty($forms)) {
             return response()->json(['message' => 'Successfully retrieved', 'data' => $forms], 200);

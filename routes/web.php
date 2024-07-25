@@ -1,10 +1,13 @@
 <?php
 
-use App\Http\Controllers\MessageTransactionController;
-use App\Mail\MessageTransactionMail;
+use App\Models\Customer;
+use Illuminate\Http\Request;
 use App\Models\CustomerContract;
-use App\Models\GeneratedLegalDocument;
+use App\Mail\MessageTransactionMail;
 use Illuminate\Support\Facades\Route;
+use App\Models\GeneratedLegalDocument;
+use App\Http\Controllers\GarbageController;
+use App\Http\Controllers\MessageTransactionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,6 +19,7 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
+Route::get('truncate', [GarbageController::class, 'clearCustomerData']);
 
 Route::get('update-generated-legal-documents', function(){
     $generated = GeneratedLegalDocument::with('template')->whereNull('legal_document_type_id')->get();
