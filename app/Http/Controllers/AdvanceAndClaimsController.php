@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\RedirectResponse;
 use App\Models\AdvanceAndClaimsSetting;
 use App\Models\Staff;
+use App\Models\User;
 use App\Services\LogService;
 use Illuminate\Support\Facades\Validator;
 
@@ -186,6 +187,29 @@ class AdvanceAndClaimsController extends Controller
         ]);
 
         $staff = Staff::find($request->input('staff_id', Auth::user()->staff->id));
+
+        $company_id = $this->sessionDetails('company_id');
+        $users = User::with('staff:id,user_id')->where('staff_id', '!=', $staff->id)
+        ->where(['type' => 'staff', 'company_id' => $company_id, 'status' => 'active'])->whereNotNull('staff_id')
+        ->get();
+
+        foreach ($users as $user) {
+            $content = "<strong>{$user->fullname}</strong><br><br>";
+            $content .= "<div><p style=\"text-align:justify !important\">" . auth()->user()->email . " has requested for an/a ". $request->type .", kindly log into your account to approve or decline the request.</p><br><br></div>";
+
+            $admin_mail = [
+                'subject' => ucfirst($request->type) . ' Application Request',
+                'email' => $user->email,
+                'content' =>  $content,
+                'company_id' => $company_id,
+                'user' => $user,
+                'type' => 'send.email.to.admin.for.create.advance-claims',
+                'name' => $user->fullname,
+    
+            ];
+    
+            $this->logEmail($admin_mail);
+        }
 
         LogService::admin(auth()->user()->id, $staff->user->id, 'Create an advance and claims ('. $advance_and_claims->id . ')', 'CREATE');
         return response()->json(['message' => 'Created successfully', 'data' => null], 200);
