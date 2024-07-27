@@ -195,7 +195,7 @@ class AdvanceAndClaimsController extends Controller
 
         foreach ($users as $user) {
             $content = "<strong>{$user->fullname}</strong><br><br>";
-            $content .= "<div><p style=\"text-align:justify !important\">" . auth()->user()->email . " has requested for an/a ". $request->type .", kindly log into your account to approve or decline the request.</p><br><br></div>";
+            $content .= "<div><p style=\"text-align:justify !important\">" . auth()->user()->fullname . " has requested for an/a ". $request->type .", kindly log into your account to approve or decline the request.</p><br><br></div>";
 
             $admin_mail = [
                 'subject' => ucfirst($request->type) . ' Application Request',
@@ -204,7 +204,8 @@ class AdvanceAndClaimsController extends Controller
                 'company_id' => $company_id,
                 'user' => $user,
                 'type' => 'send.email.to.admin.for.create.advance-claims',
-                'name' => $user->fullname,
+                'admin_name' => $user->fullname,
+                'staff_name' => auth()->user()->fullname,
     
             ];
     
