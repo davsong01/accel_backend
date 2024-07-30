@@ -19,28 +19,23 @@ class AdvanceAndClaims extends Model
     {
 
         return Attribute::make(
-           
-            get: fn (mixed $value, array $attributes) => new AdvanceAndClaims(
-                $r = $this->getProofs($value, $this),
-                $r
-            ),
+            get: fn (string $value) => !empty($value) ? app('App\Http\Controllers\Controller')->encodeGeneralUploadedFile($value) : ''
         );
     }
 
-    public function getProofs($value, $all){
-        $proofs = [];
-
-        if ($all->type == 'claims') {
-            if (!empty($value)) {
-                $value = json_decode($value, true);
-                foreach ($value as $p) {
-                    $proofs[] = app('App\Http\Controllers\Controller')->encodeUploadedFile($p);
-                }
-            }
-        }
+    // public function getProofs($value, $all){
+    //     $proofs = [];
         
-        return $proofs;
-    }
+    //     if ($all->type == 'claims') {
+    //         if (!empty($value)) {
+    //             $value = json_decode($value, true);
+    //             foreach ($value as $p) {
+    //                 $proofs[] = app('App\Http\Controllers\Controller')->encodeUploadedFile($p);
+    //             }
+    //         }
+    //     }
+        
+    // }
 
     protected function amount(): Attribute
     {

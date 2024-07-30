@@ -22,7 +22,7 @@ class AdvanceAndClaimsController extends Controller
      */
     public function index(Request $request, $id = null)
     {
-        $aac = AdvanceAndClaims::where('company_id', $this->sessionDetails('company_id'));
+        $aac = AdvanceAndClaims::with('staff:id,user_id')->where('company_id', $this->sessionDetails('company_id'));
         
         if (\Request::route()->getPrefix() == 'api/admin/self-service') {
             $staff_id = Auth::user()->staff->id;
@@ -44,16 +44,19 @@ class AdvanceAndClaimsController extends Controller
             // Query leave applications that were created within the specified range
             $aac = $aac->whereBetween('created_at', [$startDate, $endDate]);
         }
-
+        
         if (isset($id) && !empty($id)) {
             $aac = $aac->where('id', $id)->first();
             if ($aac) {
                 if (!empty($aac->staff_id)) {
+                    $staff = $aac->staff()->select('id')->first();
+                    $user = $staff->user()->select('first_name', 'middle_name', 'last_name')->first();
+
                     $aac->request_by = [
-                        'first_name' => $aac->staff->user->first_name,
-                        'middle_name' => $aac->staff->user->middle_name,
-                        'last_name' => $aac->staff->user->last_name,
-                        'id' => $aac->staff->id,
+                        'first_name' => $user->first_name,
+                        'middle_name' => $user->middle_name,
+                        'last_name' => $user->last_name,
+                        'id' => $staff->id,
                     ];
                 }
                 return response()->json(['message' => 'Retrieved Successfully', 'data' => $aac], 200);
@@ -63,7 +66,7 @@ class AdvanceAndClaimsController extends Controller
         }
 
         $aac = $aac->orderBy('created_at', 'DESC')->paginate(20)->withQueryString();
-
+        
         foreach($aac as $l){
             if (!empty($l->staff_id)) {
                 $l->request_by = [
@@ -160,12 +163,17 @@ class AdvanceAndClaimsController extends Controller
 
         $request['date'] = !empty($request->date) ? Carbon::parse($request->start_date . ' 00:00:00') : null;
         $proof = [];
+        
+        // if(!empty($request->proof)){
+        //     foreach($request->proof as $p){
+        //         $proof[] = $this->uploadFile($p, 'advance_claims');
+        //     }
+        // }
+        
         if(!empty($request->proof)){
-            foreach($request->proof as $p){
-                $proof[] = $this->uploadFile($p, 'advance_claims');
-            }
+            $proof = $this->uploadFile($request->proof, 'advance_claims');
         }
-
+        
         if (!empty($request->bypass_approval) && $request->bypass_approval == 'Yes') {
             $status = 'approved';
         }
@@ -181,7 +189,7 @@ class AdvanceAndClaimsController extends Controller
             'amount' => $request->amount,
             'purpose' => $request->purpose,
             'time_sensitivity' => $request->time_sensitivity,
-            'proof' => json_encode($proof),
+            'proof' => $proof,
             'status' => $status ?? 'pending',
             'company_id' => $this->sessionDetails('company_id')
         ]);
