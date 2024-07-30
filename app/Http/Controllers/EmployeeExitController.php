@@ -122,7 +122,7 @@ class EmployeeExitController extends Controller
 
         foreach ($users as $user) {
             $content = "<strong>{$user->fullname}</strong><br><br>";
-            $content .= "<div><p style=\"text-align:justify !important\">" . auth()->user()->email . " has requested for an exit, kindly log into your account to approve or decline the request.</p><br><br></div>";
+            $content .= "<div><p style=\"text-align:justify !important\">" . auth()->user()->fullname . " has requested for an exit, kindly log into your account to approve or decline the request.</p><br><br></div>";
 
             $admin_mail = [
                 'subject' => 'Exit Application Request',
@@ -131,7 +131,8 @@ class EmployeeExitController extends Controller
                 'company_id' => $company_id,
                 'user' => $user,
                 'type' => 'send.email.to.admin.for.create.exits',
-                'name' => $user->fullname,
+                'admin_name' => $user->fullname,
+                'staff_name' => auth()->user()->fullname,
     
             ];
     

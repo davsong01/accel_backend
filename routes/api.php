@@ -113,6 +113,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         }
     });
 
+    Route::get('get-leave-dates', [LeaveAndAbsenceManagementController::class, 'getLeaveDates']);
+
+
 });
 
 Route::get('domain-details/{slug}', [CompanySettingController::class, 'domainDetails']);
@@ -213,8 +216,6 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::resource('department', DepartmentController::class);
         Route::get('sample-bulk-department-import', [DepartmentController::class, 'sampleBulkDepartment']);
         Route::post('import-bulk-department', [DepartmentController::class, 'importBulkDepartment']);
-
-        Route::get('get-leave-dates', [LeaveAndAbsenceManagementController::class, 'getLeaveDates']);
 
         Route::get('leave-and-absence/{id?}', [LeaveAndAbsenceManagementController::class, 'index'])->name("view_leave");
         Route::get('single-staff-leave-and-absence/{staff_id}', [LeaveAndAbsenceManagementController::class, 'staffLeaveAndAbsence']);
