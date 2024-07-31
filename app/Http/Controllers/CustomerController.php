@@ -458,5 +458,5 @@ class CustomerController extends Controller
             $query->whereIn('status',  explode(',', $request->input('status')))
          )->count();
         return response()->json(['message' => 'Successful', 'data' => $count], 200);
-    }   
+    }
 }
