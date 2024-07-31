@@ -22,10 +22,19 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Validator;
 use App\Models\StaffIdentificationSetting;
+use App\Services\ProfileCompletenessService;
 use League\CommonMark\Extension\SmartPunct\EllipsesParser;
 
 class StaffController extends Controller
 {
+
+    protected $profileCompletenessService;
+
+    public function __construct(ProfileCompletenessService $profileCompletenessService)
+    {
+        $this->profileCompletenessService = $profileCompletenessService;
+    }
+
     public function getActiveStaffInRole($staff_id)
     {
         $staff = StaffRole::where("role_id", $staff_id)
@@ -787,5 +796,31 @@ class StaffController extends Controller
         }
 
         return response()->json(['message' => 'Staff Added Succesfully', 'data' => null], 200);
+    }
+
+    public function getCustomerCompletenessScore(Request $request){
+        $profile = Staff::with([
+            "user", 
+            "department", 
+            "job_type", 
+            "job_role", 
+            "bank", "pfa",
+            "staff_documents"
+        ])->findOrFail($request->id);
+        ##################################################################################
+        ####### You have to create a plugin for required documents if it is dynamic#######
+        ##################################################################################
+        $required_documents = [ 'NYSC', 'Drivers Licence' ];
+
+        $completeness = $this->profileCompletenessService
+            ->calculateProfileCompleteness(
+                $profile, 
+                $required_documents
+            );
+        $data = [
+            "profile" => $profile,
+            "completeness" => $completeness
+        ];
+        return response()->json(['message' => 'Successful', 'data' => $data], 200);
     }
 }

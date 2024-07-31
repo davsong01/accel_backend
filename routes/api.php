@@ -115,6 +115,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::get('get-leave-dates', [LeaveAndAbsenceManagementController::class, 'getLeaveDates']);
 
+    Route::get('profile-completeness', [StaffController::class, 'getCustomerCompletenessScore']);
 
 });
 
