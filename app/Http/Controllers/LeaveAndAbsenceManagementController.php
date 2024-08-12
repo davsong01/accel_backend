@@ -304,8 +304,11 @@ class LeaveAndAbsenceManagementController extends Controller
 
             $staff = Staff::find($request->input('staff_id', Auth::user()->staff->id));
             $company_id = $this->sessionDetails('company_id');
-            $users = User::with('staff:id,user_id')->where('staff_id', '!=', $staff->id)
-            ->where(['type' => 'staff', 'company_id' => $company_id, 'status' => 'active'])->whereNotNull('staff_id')
+            
+            $users = User::with(['staff:id,user_id', 'staff.staffRoles'])->where('staff_id', '!=', $staff->id)
+            ->where(['type' => 'staff', 'company_id' => $company_id, 'status' => 'active'])
+            ->whereNotNull('staff_id')
+            ->whereHas('staff.staffRoles')
             ->get();
     
             foreach ($users as $user) {
