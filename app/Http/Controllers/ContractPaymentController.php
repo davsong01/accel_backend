@@ -661,7 +661,7 @@ class ContractPaymentController extends Controller
             $contract->fee = $payment->infrastructure_fee;
             
             $receipt = generateGenericPaymentReceipt($payment, $contract);
-
+            
             unset($payment->current_amount_paid);
             unset($payment->total_amount_paid);
 
@@ -680,7 +680,7 @@ class ContractPaymentController extends Controller
             $data['name'] =  $payment->customer->user->first_name;
             $data['email'] =  $payment->customer->user->email;
             $data['contract_ids'] = [$contract->id];
-           
+            
             $this->logEmail($data);
             \DB::commit();
             

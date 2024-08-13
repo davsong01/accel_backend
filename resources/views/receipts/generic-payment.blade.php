@@ -159,7 +159,11 @@ ${payment_bank} --}}
 {{ $contract->primaryMarketer()['first_name'] . ' ' .  $contract->primaryMarketer()['last_name'] }}
 <br /><br />
 <span class="text-header">Payment Purpose</span>
+@if($payment->transaction->purpose == 'setting_and_escavation')
+Setting out and Excavation
+@else
 {{ucwords(str_replace("_"," ", $payment->transaction->purpose))}}
+@endif
 </pre>
         </td>
       </tr>
@@ -185,7 +189,13 @@ ${payment_bank} --}}
         <tr>
           <td>1</td>
           <td>{{$payment->created_at->format('jS F, Y, h:iA')}}</td>
-          <td>{{$payment->description ??  ucwords(str_replace("_"," ", $payment->transaction->purpose)) }}</td>
+          <td>
+            @if($payment->transaction->purpose == 'setting_and_escavation')
+            Setting out and Excavation
+            @else
+            {{$payment->description ??  ucwords(str_replace("_"," ", $payment->transaction->purpose)) }}
+            @endif
+          </td>
           <td>{{ $companySetting->currency_data->identifier.number_format($payment->contract_value ?? $contract->fee) }}</td>
           <td>{{ $companySetting->currency_data->identifier.number_format($payment->discount_applied ?? 0) }}</td>
           <td>{{ $companySetting->currency_data->identifier.number_format($payment->amount) }}</td>

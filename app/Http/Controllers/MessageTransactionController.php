@@ -162,6 +162,8 @@ class MessageTransactionController extends Controller
         }
 
         if ($data['type'] == 'se.escavation.payment') {
+            $element = $data['element'] == 'SE' ? 'Setting out and Excavation' : 'Infrastructure';
+            
             if (isset($data['medium']) && $data['medium'] == 'sms') {
                 $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'sms')->where('type', 'se.escavation.payment')->first();
             } else {
@@ -170,7 +172,7 @@ class MessageTransactionController extends Controller
                 $subject = $email_template->subject ?? 'Payment Confirmation';
                 $content = $email_template->content ?? '<strong>Dear ' . $data['name'] . ',</strong><br>
                 <div>
-                <p style="text-align:justify !important">We are delighted to inform you that your payment for ' . $data['element'] . ' has been successfully processed. Attached to this email is your payment receipt<br>';
+                <p style="text-align:justify !important">We are delighted to inform you that your payment for ' . $element . ' has been successfully processed. Attached to this email is your payment receipt<br>';
 
                 $content .= $this->propertyDetails($data);
                 $content .= '<br>Best regards,<br><br>' . $this->sessionDetails('company_name') . '</p>
@@ -551,17 +553,18 @@ class MessageTransactionController extends Controller
         if (empty($data['contract_ids'])) return '';
 
         $masterContent = '<br>Here are the contract(s) details: <br><br>';
-
+        
         foreach($data['contract_ids'] as $id){
-            $contract = CustomerContract::with(['city:id,name','location:id,name','estate:id,name', 'property_type_details:id,type', 'plot_size:id,size', 'building_type_details:id,name'])->where('id', $id)->first();
+            $contract = CustomerContract::with(['city:id,name','location:id,name','estate:id,name', 'property_type_details', 'plot_size:id,size', 'building_type_details:id,name'])
+            ->where('id', $id)->first();
 
             $content = '';
             $content .= '<strong>Contract: </strong>' . $contract->contract_name . '<br>';
-            
+
             if (!empty($contract->property_type->type)) {
                 $data .= '<strong>Property Type: </strong>' . $contract->property_type->type . '<br>';
             }
-    
+            
             if (!empty($contract->city->name)) {
                 $content .= '<strong>City: </strong>' . $contract->city->name . '<br>';
             }
