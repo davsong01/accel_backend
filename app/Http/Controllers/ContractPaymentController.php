@@ -563,7 +563,6 @@ class ContractPaymentController extends Controller
             $current_amount_paid = $request->amount;
             $total_amount_paid = $request->amount + $old_amount;
             
-
             if ($request->amount > $fee) {
                 \DB::rollback();
 
@@ -623,7 +622,7 @@ class ContractPaymentController extends Controller
 
             $payment->current_amount_paid = $current_amount_paid;
             $payment->total_amount_paid = $total_amount_paid;
-                     
+        
             // Transaction
             Transaction::updateOrCreate(['customer_id' => $payment->customer_id, 'transaction_id' => $payment->transaction_id, 'company_id' => $this->sessionDetails('company_id')], [
                 'customer_id' => $contract->customer_id,
@@ -637,13 +636,7 @@ class ContractPaymentController extends Controller
                 'type' => 'credit',
                 'company_id' => $this->sessionDetails('company_id'),
             ]);
-
-            if($balance = 0){
-                $contract->update([
-                    'contract_status' => 'closed',
-                ]);
-            }
-
+            
             $contract->update([
                 'sei_payment_transaction_id' => $payment->transaction_id,
             ]);
@@ -658,10 +651,16 @@ class ContractPaymentController extends Controller
                 ]);
             }
 
+            if ($payment->balance <= 0) {
+                $contract->update([
+                    'contract_status' => 'closed',
+                ]);
+            }
+
             $contract->fee = $payment->infrastructure_fee;
             
             $receipt = generateGenericPaymentReceipt($payment, $contract);
-            
+        
             unset($payment->current_amount_paid);
             unset($payment->total_amount_paid);
 

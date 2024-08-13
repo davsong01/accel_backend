@@ -132,13 +132,19 @@ class CustomerController extends Controller
 
     public function getSubscribers(Request $request)
     {
-       
         if (!empty($request->type)) {
-            $subscribers = Customer::with(['user:id,avatar,first_name,last_name,status,gender,phone_number,customerId'])->whereHas('contracts', function ($q) use ($request) {
-                $q->where('status', 'subscriber')->where('contract_status', $request->type);
-            })->withCount(['contracts' => function ($q)  use ($request) {
-                $q->where('status', 'subscriber')->where('contract_status',$request->type);
+            if($request->type == 'completed'){
+                $typeArray = ['closed','completed'];
+            }else{
+                $typeArray = [$request->type];
+            }
+            
+            $subscribers = Customer::with(['user:id,avatar,first_name,last_name,status,gender,phone_number,customerId'])->whereHas('contracts', function ($q) use ($typeArray) {
+                $q->where('status', 'subscriber')->whereIn('contract_status', $typeArray);
+            })->withCount(['contracts' => function ($q)  use ($typeArray) {
+                $q->where('status', 'subscriber')->whereIn('contract_status', $typeArray);
             }])->orderBy('customers.created_at', 'DESC');
+
         }else{
             $subscribers = Customer::with(['user:id,avatar,first_name,last_name,status,gender,phone_number,customerId'])->whereHas('contracts', function ($q) {
                 $q->where('status', 'subscriber');
@@ -146,7 +152,6 @@ class CustomerController extends Controller
                 $q->where('status', 'subscriber');
             }])->orderBy('customers.created_at', 'DESC');
 
-           
         }
 
         // $subscribers = Customer::orderBy('customers.created_at')
