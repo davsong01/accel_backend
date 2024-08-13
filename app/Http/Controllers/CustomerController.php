@@ -144,16 +144,14 @@ class CustomerController extends Controller
             })->withCount(['contracts' => function ($q)  use ($typeArray) {
                 $q->where('status', 'subscriber')->whereIn('contract_status', $typeArray);
             }])->orderBy('customers.created_at', 'DESC');
-
         }else{
             $subscribers = Customer::with(['user:id,avatar,first_name,last_name,status,gender,phone_number,customerId'])->whereHas('contracts', function ($q) {
                 $q->where('status', 'subscriber');
             })->withCount(['contracts' => function ($q) {
                 $q->where('status', 'subscriber');
             }])->orderBy('customers.created_at', 'DESC');
-
         }
-
+        
         // $subscribers = Customer::orderBy('customers.created_at')
         //     ->join('customer_contracts', 'customer_contracts.customer_id','customers.id')
         //     ->join('users', 'users.id','customers.id')
