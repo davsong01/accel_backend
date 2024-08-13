@@ -191,7 +191,7 @@ class ContractPaymentController extends Controller
             $res = $this->processContinueContractPayment($contractX, $request->all(), $payment);
             
             if (isset($res['status']) && $res['status'] == 'error') {
-                return response()->json(['error' => $res['message'], 'data' => []], 200);
+                return response()->json(['error' => $res['message'], 'data' => []], 412);
             }
             
             $payments[] = [
