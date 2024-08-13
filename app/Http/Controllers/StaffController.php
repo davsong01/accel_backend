@@ -106,7 +106,7 @@ class StaffController extends Controller
     {
         $staff_id = !empty($staff_id) ? $staff_id : Auth::user()->staff->id;
 
-        $staff = Staff::with('current_approved_leave', 'user:id,first_name,middle_name,last_name')->where(['staff.company_id' => $this->sessionDetails('company_id')])->where('id', '!=', $staff_id)
+        $staff = Staff::with('current_approved_leave', 'user:id,first_name,middle_name,last_name')->where(['staff.company_id' => $this->sessionDetails('company_id')])->where('staff.id', '!=', $staff_id)
         ->leftJoin('employee_exits', fn($join) => 
             $join->on('employee_exits.staff_id', '=', 'staff.id')
         ->where('employee_exits.status', '=', 'APPROVED')
