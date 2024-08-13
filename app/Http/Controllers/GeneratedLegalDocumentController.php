@@ -112,7 +112,7 @@ class GeneratedLegalDocumentController extends Controller
 
         $values = getOptions($customer_id, $legalDocumentTemplate);
         $destination = base_path($this->getPathToSaveFile('generated-legal-documents'));
-
+        
         return GeneratedDocumentService::handler($file['filepath'], $values, $destination);
     }
 }

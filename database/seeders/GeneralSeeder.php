@@ -89,7 +89,7 @@ class GeneralSeeder extends Seeder
 
         // Role Permission
         $rolePermission =  \App\Models\RolePermission::Create([
-            'role_ids' => $role1->id,
+            // 'role_ids' => $role1->id,
             'status' => 'active',
             'type' => 'Staff',
             'is_menu' => 'yes',
