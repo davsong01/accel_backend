@@ -551,7 +551,7 @@ class ContractPaymentController extends Controller
                 $fee = $contract->property_type_details->infrastructural_fee;
                 $purpose = 'infrastructural_fee';
             }
-       
+            
             $old_payment = SeInfrastructure::where('contract_id', $contract->id)->where('customer_id', $contract->customer_id)->where('type', $request->type)->first();
             $infrastructure_fee = $fee;
 
