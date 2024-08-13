@@ -53,6 +53,10 @@ class Staff extends Model
         return $this->hasMany(LeaveAndAbsenceManagement::class);
     }
 
+    public function staff_documents(){
+        return $this->hasMany(StaffUploadedDocument::class, 'staff_id');
+    }
+
     public function current_approved_leave()
     {
         return $this->hasMany(LeaveAndAbsenceManagement::class)->where('status', 'approved')->where('end_date', '>=', Carbon::now()->toDateTimeString());

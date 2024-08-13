@@ -115,6 +115,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::get('get-leave-dates', [LeaveAndAbsenceManagementController::class, 'getLeaveDates']);
 
+    Route::get('profile-completeness', [StaffController::class, 'getCustomerCompletenessScore']);
 
 });
 
@@ -184,17 +185,17 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('all-staff-and-role/{staff_id?}', [CompanySettingController::class, 'staffAndRoles']);
 
         Route::resource('company-document', CompanyDocumentController::class);
-        Route::get('company-settings', [CompanySettingController::class, 'index']);
-        Route::match(['GET', 'POST', 'PUT', 'PATCH'], 'company-settings/application-settings', [CompanySettingController::class, 'applicationSettings']);
+        Route::get('company-settings', [CompanySettingController::class, 'index'])->name('company-settings');
+        Route::match(['GET', 'POST', 'PUT', 'PATCH'], 'company-settings/application-settings', [CompanySettingController::class, 'applicationSettings'])->name('application-settings');
         // Route::get('get-countries-currencies/{country_id?}', [CompanySettingController::class, 'countryAnCurrencies']);
 
         Route::resource('roles', RoleController::class);
         // Route::get('job-roles-by-department-id/{id}', [JobRoleController::class, 'getJobRoleByDepartmentId']);
 
-        Route::get('get-all-staff', [StaffController::class, 'getAllStaff']);
+        Route::get('get-all-staff', [StaffController::class, 'getAllStaff'])->name('all-staff');
         Route::get('is-not-on-leave', [StaffController::class, 'isNotOnLeave']);
-        Route::post('staff/store', [StaffController::class, 'storeStaff']);
-        Route::post('update-staff', [StaffController::class, 'updateStaff']);
+        Route::post('staff/store', [StaffController::class, 'storeStaff'])->name('add-staff');
+        Route::post('update-staff', [StaffController::class, 'updateStaff'])->name('edit-staff-profile');
         Route::post('update-staff-personal-information', [StaffController::class, 'updateStaffPersonalInfo']);
 
         Route::get('get-active-staff', [StaffController::class, 'getActiveStaff']);
@@ -219,16 +220,16 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
 
         Route::get('leave-and-absence/{id?}', [LeaveAndAbsenceManagementController::class, 'index'])->name("view_leave");
         Route::get('single-staff-leave-and-absence/{staff_id}', [LeaveAndAbsenceManagementController::class, 'staffLeaveAndAbsence']);
-        Route::post('create-leave-and-absence', [LeaveAndAbsenceManagementController::class, 'store']);
-        Route::get('approve-leave-and-absence/{id}', [LeaveAndAbsenceManagementController::class, 'approveLeaveAndAbsence']);
+        Route::post('create-leave-and-absence', [LeaveAndAbsenceManagementController::class, 'store'])->name('apply-for-staff-leave');
+        Route::get('approve-leave-and-absence/{id}', [LeaveAndAbsenceManagementController::class, 'approveLeaveAndAbsence'])->name('approve-decline-leave');
         Route::get('decline-leave-and-absence/{id}', [LeaveAndAbsenceManagementController::class, 'declineLeaveAndAbsence']);
-        Route::get('employees-on-leave/{type}', [LeaveAndAbsenceManagementController::class, 'employeesOnLeave']);
+        Route::get('employees-on-leave/{type}', [LeaveAndAbsenceManagementController::class, 'employeesOnLeave'])->name('view-employee-on-leave');
 
         Route::get('advance-and-claims/{id?}', [AdvanceAndClaimsController::class, 'index']);
         Route::get('single-staff-advance-and-claims/{staff_id}', [AdvanceAndClaimsController::class, 'staffAdvanceAndClaims']);
-        Route::post('create-advance-and-claims', [AdvanceAndClaimsController::class, 'store']);
-        Route::get('approve-advance-and-claims/{id}', [AdvanceAndClaimsController::class, 'approveAdvanceAndClaims']);
-        Route::get('decline-advance-and-claims/{id}', [AdvanceAndClaimsController::class, 'declineAdvanceAndClaims']);
+        Route::post('create-advance-and-claims', [AdvanceAndClaimsController::class, 'store'])->name('apply-for-claims');
+        Route::get('approve-advance-and-claims/{id}', [AdvanceAndClaimsController::class, 'approveAdvanceAndClaims'])->name('approve-advance-claims');
+        Route::get('decline-advance-and-claims/{id}', [AdvanceAndClaimsController::class, 'declineAdvanceAndClaims'])->name('decline-advance-claims');
 
         Route::resource('branch', BranchController::class);
         Route::resource('jobrole', JobRoleController::class);
@@ -322,9 +323,9 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
             Route::get('all-notifications', [SelfServiceController::class, 'fetchAllNotifications']);
             Route::get('{staff_id}/{type}', [EmployeeExitController::class, 'getLeaveAndAbsencePeriodLeft']);
             Route::post('create-exit', [EmployeeExitController::class, 'store']);
-            Route::get('leave-and-absence', [LeaveAndAbsenceManagementController::class, 'index']);
+            Route::get('leave-and-absence', [LeaveAndAbsenceManagementController::class, 'index'])->name('view-leaves');
             // Route::get('single-leave-and-absence', [LeaveAndAbsenceManagementController::class, 'staffLeaveAndAbsence']);
-            Route::get('advance-and-claims', [AdvanceAndClaimsController::class, 'index']);
+            Route::get('advance-and-claims', [AdvanceAndClaimsController::class, 'index'])->name('view-advance');
             // Route::get('single-advance-and-claims', [AdvanceAndClaimsController::class, 'staffAdvanceAndClaims']);
             Route::get('my-deals', [SelfServiceController::class, 'myDeals']);
             Route::get('company-documents', [CompanyDocumentController::class, 'selfService']);
@@ -334,7 +335,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('get-leave-and-absence-setting', [LeaveAndAbsenceManagementController::class, 'getLeaveAndAbsenceSetting']);
 
         Route::get('sample-bulk-staff-import', [StaffController::class, 'sampleBulkStaff']);
-        Route::post('import-bulk-staff', [StaffController::class, 'importBulkStaff']);
+        Route::post('import-bulk-staff', [StaffController::class, 'importBulkStaff'])->name('add-bulk-staff');
         Route::get('generate-staff-id', [Controller::class, 'generateStaffId']);
 
         Route::get('get-staff-leave-remnant/{staff_id}/{type}', [AdvanceAndClaimsController::class, 'getLeaveAndAbsencePeriodLeft']);
@@ -347,9 +348,9 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::get('modify-account-group/{id}', [AccountGroupController::class, 'modifyAccountGroup']);
         Route::post('create-exit', [EmployeeExitController::class, 'store']);
         Route::get('exits/search', [EmployeeExitController::class, 'search']);
-        Route::get('exits/{staff_id?}', [EmployeeExitController::class, 'index']);
+        Route::get('exits/{staff_id?}', [EmployeeExitController::class, 'index'])->name('view-exit-history');
         Route::match(['put', 'patch'],'exits/{employeeExit}', [EmployeeExitController::class, 'update']);
-        Route::get('access-control-list', [MenuController::class, 'adminAccessControls']);
+        Route::get('access-control-list', [MenuController::class, 'adminAccessControls'])->name('access-control');
 
         Route::get('staff-documents/{staff_id}', [SelfServiceController::class, 'getStaffDocument']);
         Route::get('staff-documents-by-document-setting-id/{id}/{staff_id}', [SelfServiceController::class, 'getStaffDocumentBySettingId']);
@@ -372,10 +373,10 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         });
 
         Route::controller(GLLedgerController::class)->name('finance.')->prefix('finance')->group(function () {
-            Route::get('gl-ledger', 'index');
+            Route::get('gl-ledger', 'index')->name('transaction-entry');
             Route::post('gl-ledger/create', 'create');
             Route::get('gl-ledger/search', 'search');
-            Route::get('gl-ledger/{transaction}', 'show');
+            Route::get('gl-ledger/{transaction}', 'show')->name('view-transaction');
         });
 
         Route::controller(GLAccountController::class)->name('finance.')->prefix('finance')->group(function () {
