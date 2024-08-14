@@ -226,7 +226,7 @@ class MenuController extends Controller
         $permission = RolePermission::where('slug', 'special-requests')
         // ->where('company_id', $this->sessionDetails('company_id'))
         ->first();
-        
+
         if ($permission) {
             if ($permission->status == 'active') {
                 $permission->update(['status' => 'inactive']);
@@ -251,7 +251,7 @@ class MenuController extends Controller
         } else {
             $packageAccess = getPackageAccess($access);
         }
-
+        
         $accessControls = RolePermission::with(['children' => function ($query) use ($packageAccess) {
             return $query->where(['status' => 'active', 'type' => 'staff'])->whereIn('id', $packageAccess)->orderBy('order', 'asc')->select('id', 'category', 'status', 'type', 'is_menu', 'menu_name', 'description', 'order', 'parent');
         }])->where(['status' => 'active', 'type' => 'staff'])
