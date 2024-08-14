@@ -134,16 +134,23 @@ class CustomerController extends Controller
     {
         if (!empty($request->type)) {
             if($request->type == 'completed'){
-                $typeArray = ['closed','completed'];
+                $typeArray = ['completed'];
             }else{
                 $typeArray = [$request->type];
             }
-            
-            $subscribers = Customer::with(['user:id,avatar,first_name,last_name,status,gender,phone_number,customerId'])->whereHas('contracts', function ($q) use ($typeArray) {
-                $q->where('status', 'subscriber')->whereIn('contract_status', $typeArray);
-            })->withCount(['contracts' => function ($q)  use ($typeArray) {
-                $q->where('status', 'subscriber')->whereIn('contract_status', $typeArray);
-            }])->orderBy('customers.created_at', 'DESC');
+
+            $subscribers = Customer::with(['user:id,avatar,first_name,last_name,status,gender,phone_number,customerId'])
+            ->whereHas('contracts', function ($q) use ($typeArray) {
+                $q->where('status', 'subscriber')
+                ->whereNotNull('contract_status')
+                ->whereIn('contract_status', $typeArray);
+            })
+            ->withCount(['contracts' => function ($q) use ($typeArray) {
+                $q->where('status', 'subscriber')
+                    ->whereNotNull('contract_status')
+                    ->whereIn('contract_status', $typeArray);
+            }])
+            ->orderBy('customers.created_at', 'DESC');
         }else{
             $subscribers = Customer::with(['user:id,avatar,first_name,last_name,status,gender,phone_number,customerId'])->whereHas('contracts', function ($q) {
                 $q->where('status', 'subscriber');
