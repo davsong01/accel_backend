@@ -252,27 +252,17 @@ class ContractPaymentController extends Controller
             $amount = $data['amount'];
             $fee = $payment->property_net_fee;
 
-            if ($amount > $fee) {
+            $balance = $fee - ($data['amount'] + $payment->amount);
+
+            if ($amount > $payment->balance) {
                 \DB::rollback();
 
-                return response()->json([
+                return [
                     'status' => 'error',
-                    'error' => 'Cannot pay more than set price',
-                    'data' => null,
-                ], 412);
+                    'message' => 'You cannot pay more than the balance of : ' . $payment->balance . ' for this contract',
+                ];
             }
 
-            $balance = $fee - ($data['amount'] + $payment->amount);
-            // dd($balance, $amount);
-            // if ($amount > $balance) {
-            //     $res = [
-            //         'status' => 'error',
-            //         'message' => 'You cannot make payment of more than: ' . $balance . ' for this contract',
-            //     ];
-
-            //     \DB::rollback();
-            //     return $res;
-            // }
 
             $balance = ($balance < 0) ? 0 : $balance;
             $others['contract_value'] = $payment->contract_value;
@@ -291,7 +281,7 @@ class ContractPaymentController extends Controller
                 'company_id' => $this->sessionDetails('company_id')
             ]);
 
-            $totalAmountPaid = ContractPaymentThread::where('contract_payments_id', $payment->id)->sum('amount');
+            $totalAmountPaid = $payment->amount + $amount;
 
             $others['total_amount_paid'] = $totalAmountPaid;
             
@@ -325,6 +315,8 @@ class ContractPaymentController extends Controller
 
             // Generate payment receipt
             $contract->contract_status = $contract_status;
+            $contract->save();
+            
             $receipt = $this->generateContractPaymentReceipt($payment_thread, $contract, $others);
             
             $payment_thread->update(['receipt_location' => $receipt['filepath'] ?? null]);
@@ -333,8 +325,7 @@ class ContractPaymentController extends Controller
             
             \DB::commit();
             
-            // persist file
-
+            // Persist file
             return [
                 'receipt_location' => $receipt_location ,
                 'status' => 'success',
