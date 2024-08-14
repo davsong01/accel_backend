@@ -94,8 +94,10 @@ class MenuController extends Controller
         // Get permissions from staff roles
         if (Session::has('staff_id')) {
             $access = getAllAccess();
-            dd($access);
-            $links = RolePermission::whereIn('id', $access)->where(['status' => 'active', 'is_menu' => 'yes', 'parent' => NULL, 'type' => 'staff', 'company_id' => $this->sessionDetails('company_id')])->orderBy('order', 'ASC')->get();
+            $links = RolePermission::whereIn('id', $access)
+            ->where(['status' => 'active', 'is_menu' => 'yes', 'parent' => NULL, 'type' => 'staff'])
+            // ->where('company_id', $this->sessionDetails('company_id'))
+            ->orderBy('order', 'ASC')->get();
         }
 
         $lo = [];
@@ -221,7 +223,10 @@ class MenuController extends Controller
 
     public function changeSpecialRequestStatus()
     {
-        $permission = RolePermission::where('slug', 'special-requests')->where('company_id', $this->sessionDetails('company_id'))->first();
+        $permission = RolePermission::where('slug', 'special-requests')
+        // ->where('company_id', $this->sessionDetails('company_id'))
+        ->first();
+        
         if ($permission) {
             if ($permission->status == 'active') {
                 $permission->update(['status' => 'inactive']);
