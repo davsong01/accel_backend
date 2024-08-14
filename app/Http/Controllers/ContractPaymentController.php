@@ -250,24 +250,34 @@ class ContractPaymentController extends Controller
             }
 
             $amount = $data['amount'];
-            $fee = $payment->balance;
-            
-            $balance = $fee - $amount;
-            
-            if ($amount > $balance) {
-                $res = [
-                    'status' => 'error',
-                    'message' => 'You cannot make payment of more than: ' . $balance . ' for this contract',
-                ];
+            $fee = $payment->property_net_fee;
 
+            if ($amount > $fee) {
                 \DB::rollback();
-                return $res;
+
+                return response()->json([
+                    'status' => 'error',
+                    'error' => 'Cannot pay more than set price',
+                    'data' => null,
+                ], 412);
             }
+
+            $balance = $fee - ($data['amount'] + $payment->amount);
+            // dd($balance, $amount);
+            // if ($amount > $balance) {
+            //     $res = [
+            //         'status' => 'error',
+            //         'message' => 'You cannot make payment of more than: ' . $balance . ' for this contract',
+            //     ];
+
+            //     \DB::rollback();
+            //     return $res;
+            // }
 
             $balance = ($balance < 0) ? 0 : $balance;
             $others['contract_value'] = $payment->contract_value;
             $others['discount_applied'] = $payment->discount_applied;
-
+            
             // Create Payment thread
             $payment_thread = ContractPaymentThread::create([
                 'contract_payments_id' => $payment->id,
