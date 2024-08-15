@@ -162,6 +162,8 @@ class MessageTransactionController extends Controller
         }
 
         if ($data['type'] == 'se.escavation.payment') {
+            $element = $data['element'] == 'SE' ? 'Setting out and Excavation' : 'Infrastructure';
+            
             if (isset($data['medium']) && $data['medium'] == 'sms') {
                 $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'sms')->where('type', 'se.escavation.payment')->first();
             } else {
@@ -170,7 +172,7 @@ class MessageTransactionController extends Controller
                 $subject = $email_template->subject ?? 'Payment Confirmation';
                 $content = $email_template->content ?? '<strong>Dear ' . $data['name'] . ',</strong><br>
                 <div>
-                <p style="text-align:justify !important">We are delighted to inform you that your payment for ' . $data['element'] . ' has been successfully processed. Attached to this email is your payment receipt<br>';
+                <p style="text-align:justify !important">We are delighted to inform you that your payment for ' . $element . ' has been successfully processed. Attached to this email is your payment receipt<br>';
 
                 $content .= $this->propertyDetails($data);
                 $content .= '<br>Best regards,<br><br>' . $this->sessionDetails('company_name') . '</p>
@@ -289,6 +291,27 @@ class MessageTransactionController extends Controller
                 $temp_content = '<strong>Dear ' . $data['name'] . ', </strong><br><br>
                 <div>
                 <p style="text-align:justify !important">We wish to inform you that ' . $data['defunctSubscriberName'] . ' has been removed as a joint owner of a property with ' . $this->sessionDetails('company_name') . '.<br><br>As the subscriber has been removed from this contract, he/she will no longer share rights and responsibilities related to the property. This includes the ability to make decisions regarding the use, maintenance, and sale of the property.<br><br>';
+
+                $temp_content .= $this->propertyDetails($data);
+                $temp_content .= 'If you have any questions or need further clarification, please do not hesitate to contact us. Our team is always ready to assist you.<br><br>Thank you for choosing us. We look forward to serving you.
+                <br><br>Best regards,<br><br>' . $this->sessionDetails('company_name') . '
+                </p>
+                </div>';
+
+                $content = $email_template->content ?? $temp_content;
+            }
+        }
+
+        if ($data['type'] == 'notify.defunct.subscriber') {
+            if (isset($data['medium']) && $data['medium'] == 'sms') {
+                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'sms')->where('type', 'notify.defunct.subscriber')->first();
+                $content = $email_template->content ?? null;
+            } else {
+                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'email')->where('type', 'notify.defunct.subscriber')->first();
+                $subject = $email_template->subject ?? 'Joint Property Ownership Removal';
+                $temp_content = '<strong>Dear ' . $data['name'] . ', </strong><br><br>
+                <div>
+                <p style="text-align:justify !important">We are sorry to inform you that you have been removed as a joint owner of a property with ' . $this->sessionDetails('company_name') . '. This is a decision made by the core owner of the property.<br><br>As you have been removed from this contract, you no longer share rights and responsibilities related to the property. This includes the ability to make decisions regarding the use, maintenance, and sale of the property.<br><br>';
 
                 $temp_content .= $this->propertyDetails($data);
                 $temp_content .= 'If you have any questions or need further clarification, please do not hesitate to contact us. Our team is always ready to assist you.<br><br>Thank you for choosing us. We look forward to serving you.
@@ -530,17 +553,18 @@ class MessageTransactionController extends Controller
         if (empty($data['contract_ids'])) return '';
 
         $masterContent = '<br>Here are the contract(s) details: <br><br>';
-
+        
         foreach($data['contract_ids'] as $id){
-            $contract = CustomerContract::with(['city:id,name','location:id,name','estate:id,name', 'property_type_details:id,type', 'plot_size:id,size', 'building_type_details:id,name'])->where('id', $id)->first();
+            $contract = CustomerContract::with(['city:id,name','location:id,name','estate:id,name', 'property_type_details', 'plot_size:id,size', 'building_type_details:id,name'])
+            ->where('id', $id)->first();
 
             $content = '';
             $content .= '<strong>Contract: </strong>' . $contract->contract_name . '<br>';
-            
+
             if (!empty($contract->property_type->type)) {
                 $data .= '<strong>Property Type: </strong>' . $contract->property_type->type . '<br>';
             }
-    
+            
             if (!empty($contract->city->name)) {
                 $content .= '<strong>City: </strong>' . $contract->city->name . '<br>';
             }

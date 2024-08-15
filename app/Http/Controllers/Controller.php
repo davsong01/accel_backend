@@ -392,13 +392,12 @@ class Controller extends BaseController
                 }
             }
         }
-
+        
         $file->storeAs($folder, $name, config('app.upload_path'));
-
+        
         return [
             'filename' => $name,
-            'filepath' => $folder . '/' . $name
-            // 'filepath' => $folder . '/' . $name
+            'filepath' => config('app.upload_path').'/'.$folder . '/' . $name
         ];
     }
 

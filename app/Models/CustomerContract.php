@@ -25,7 +25,6 @@ class CustomerContract extends Model
     protected $table = 'customer_contracts';
     protected $guarded = [];
     protected $appends = ['form_payment_status','contract_name','contract_deal_status', 'contract_history_status'];
-    protected $prepends = ['contract_name'];
 
     public function customer(){
         return $this->belongsTo(Customer::class, 'customer_id');
@@ -109,11 +108,17 @@ class CustomerContract extends Model
         if ($this->property_type == 'land') {
             $psize = $this->property_type_details->plot_details->size ?? null;
             $building = $this->property_type_details->building_details->name ?? null;
+            $name .= $psize . ' - ';
 
-            $name = $psize .' - '. $building . ' - '. $this->estate->name;
+            if(!empty($building)){
+                $name .= $building . ' - ';
+            }
+
+            $name .= $this->estate->name;
+            
         }
-        return $name;
 
+        return $name;
     }
 
     public function getContractHistoryStatusAttribute()

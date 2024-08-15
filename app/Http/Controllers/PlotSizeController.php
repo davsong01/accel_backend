@@ -41,7 +41,8 @@ class PlotSizeController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'size' => [
-                'required', Rule::unique('plot_sizes')->where(function ($query) {
+                'required',
+                Rule::unique('plot_sizes')->where(function ($query) use ($request) {
                     $query->where('company_id', $this->sessionDetails('company_id'));
                 })
             ],

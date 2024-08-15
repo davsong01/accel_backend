@@ -191,7 +191,7 @@ class ContractPaymentController extends Controller
             $res = $this->processContinueContractPayment($contractX, $request->all(), $payment);
             
             if (isset($res['status']) && $res['status'] == 'error') {
-                return response()->json(['error' => $res['message'], 'data' => []], 200);
+                return response()->json(['error' => $res['message'], 'data' => []], 412);
             }
             
             $payments[] = [
@@ -250,24 +250,24 @@ class ContractPaymentController extends Controller
             }
 
             $amount = $data['amount'];
-            $fee = $payment->balance;
-            
-            $balance = $fee - $amount;
-            
-            if ($amount > $balance) {
-                $res = [
-                    'status' => 'error',
-                    'message' => 'You cannot make payment of more than: ' . $balance . ' for this contract',
-                ];
+            $fee = $payment->property_net_fee;
 
+            $balance = $fee - ($data['amount'] + $payment->amount);
+
+            if ($amount > $payment->balance) {
                 \DB::rollback();
-                return $res;
+
+                return [
+                    'status' => 'error',
+                    'message' => 'You cannot pay more than the balance of : ' . $payment->balance . ' for this contract',
+                ];
             }
+
 
             $balance = ($balance < 0) ? 0 : $balance;
             $others['contract_value'] = $payment->contract_value;
             $others['discount_applied'] = $payment->discount_applied;
-
+            
             // Create Payment thread
             $payment_thread = ContractPaymentThread::create([
                 'contract_payments_id' => $payment->id,
@@ -281,7 +281,7 @@ class ContractPaymentController extends Controller
                 'company_id' => $this->sessionDetails('company_id')
             ]);
 
-            $totalAmountPaid = ContractPaymentThread::where('contract_payments_id', $payment->id)->sum('amount');
+            $totalAmountPaid = $payment->amount + $amount;
 
             $others['total_amount_paid'] = $totalAmountPaid;
             
@@ -315,6 +315,8 @@ class ContractPaymentController extends Controller
 
             // Generate payment receipt
             $contract->contract_status = $contract_status;
+            $contract->save();
+            
             $receipt = $this->generateContractPaymentReceipt($payment_thread, $contract, $others);
             
             $payment_thread->update(['receipt_location' => $receipt['filepath'] ?? null]);
@@ -323,8 +325,7 @@ class ContractPaymentController extends Controller
             
             \DB::commit();
             
-            // persist file
-
+            // Persist file
             return [
                 'receipt_location' => $receipt_location ,
                 'status' => 'success',
@@ -551,7 +552,7 @@ class ContractPaymentController extends Controller
                 $fee = $contract->property_type_details->infrastructural_fee;
                 $purpose = 'infrastructural_fee';
             }
-       
+            
             $old_payment = SeInfrastructure::where('contract_id', $contract->id)->where('customer_id', $contract->customer_id)->where('type', $request->type)->first();
             $infrastructure_fee = $fee;
 
@@ -563,7 +564,6 @@ class ContractPaymentController extends Controller
             $current_amount_paid = $request->amount;
             $total_amount_paid = $request->amount + $old_amount;
             
-
             if ($request->amount > $fee) {
                 \DB::rollback();
 
@@ -623,7 +623,7 @@ class ContractPaymentController extends Controller
 
             $payment->current_amount_paid = $current_amount_paid;
             $payment->total_amount_paid = $total_amount_paid;
-                     
+        
             // Transaction
             Transaction::updateOrCreate(['customer_id' => $payment->customer_id, 'transaction_id' => $payment->transaction_id, 'company_id' => $this->sessionDetails('company_id')], [
                 'customer_id' => $contract->customer_id,
@@ -637,13 +637,7 @@ class ContractPaymentController extends Controller
                 'type' => 'credit',
                 'company_id' => $this->sessionDetails('company_id'),
             ]);
-
-            if($balance = 0){
-                $contract->update([
-                    'contract_status' => 'closed',
-                ]);
-            }
-
+            
             $contract->update([
                 'sei_payment_transaction_id' => $payment->transaction_id,
             ]);
@@ -658,10 +652,16 @@ class ContractPaymentController extends Controller
                 ]);
             }
 
+            if ($payment->balance <= 0) {
+                $contract->update([
+                    'contract_status' => 'closed',
+                ]);
+            }
+
             $contract->fee = $payment->infrastructure_fee;
             
             $receipt = generateGenericPaymentReceipt($payment, $contract);
-
+        
             unset($payment->current_amount_paid);
             unset($payment->total_amount_paid);
 
@@ -680,7 +680,7 @@ class ContractPaymentController extends Controller
             $data['name'] =  $payment->customer->user->first_name;
             $data['email'] =  $payment->customer->user->email;
             $data['contract_ids'] = [$contract->id];
-           
+            
             $this->logEmail($data);
             \DB::commit();
             

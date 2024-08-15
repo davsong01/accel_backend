@@ -132,23 +132,33 @@ class CustomerController extends Controller
 
     public function getSubscribers(Request $request)
     {
-       
         if (!empty($request->type)) {
-            $subscribers = Customer::with(['user:id,avatar,first_name,last_name,status,gender,phone_number,customerId'])->whereHas('contracts', function ($q) use ($request) {
-                $q->where('status', 'subscriber')->where('contract_status', $request->type);
-            })->withCount(['contracts' => function ($q)  use ($request) {
-                $q->where('status', 'subscriber')->where('contract_status',$request->type);
-            }])->orderBy('customers.created_at', 'DESC');
+            if($request->type == 'completed'){
+                $typeArray = ['completed'];
+            }else{
+                $typeArray = [$request->type];
+            }
+
+            $subscribers = Customer::with(['user:id,avatar,first_name,last_name,status,gender,phone_number,customerId'])
+            ->whereHas('contracts', function ($q) use ($typeArray) {
+                $q->where('status', 'subscriber')
+                ->whereNotNull('contract_status')
+                ->whereIn('contract_status', $typeArray);
+            })
+            ->withCount(['contracts' => function ($q) use ($typeArray) {
+                $q->where('status', 'subscriber')
+                    ->whereNotNull('contract_status')
+                    ->whereIn('contract_status', $typeArray);
+            }])
+            ->orderBy('customers.created_at', 'DESC');
         }else{
             $subscribers = Customer::with(['user:id,avatar,first_name,last_name,status,gender,phone_number,customerId'])->whereHas('contracts', function ($q) {
                 $q->where('status', 'subscriber');
             })->withCount(['contracts' => function ($q) {
                 $q->where('status', 'subscriber');
             }])->orderBy('customers.created_at', 'DESC');
-
-           
         }
-
+        
         // $subscribers = Customer::orderBy('customers.created_at')
         //     ->join('customer_contracts', 'customer_contracts.customer_id','customers.id')
         //     ->join('users', 'users.id','customers.id')

@@ -259,7 +259,7 @@ Route::group(['prefix' => 'admin', 'before' => 'admin'], function () {
         Route::resource('account-type', AccountTypeController::class);
         Route::get('modify-account-type/{id}', [AccountTypeController::class, 'modifyAccountType']);
         Route::post('remove-subscriber', [CustomerContractController::class, 'removeSubscriber']);
-        Route::post('make-core-owner', [CustomerContractController::class, 'removeSubscriber']);
+        Route::post('make-core-owner', [CustomerContractController::class, 'makeCoreOwner']);
 
 
         Route::resource('account-classification', AccountClassificationController::class);

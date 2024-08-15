@@ -58,7 +58,6 @@ class LegalDocumentController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'estate_id' => ['required', 'exists:estates,id'],
-            // 'company_id' => ['required', 'exists:companies,id'],
             'file' => ['required', 'mimes:docx,doc'],
             'legal_document_type_id' => ['required', 'exists:legal_document_types,id'],
         ]);
@@ -71,6 +70,7 @@ class LegalDocumentController extends Controller
         }
 
         $filepath = $this->uploadProtectedFile($request->file, 'uploaded_legal_document_templates')['filepath'];
+        
         $data = [
             ...$validator->validated(),
             'company_id' => $this->sessionDetails('company_id'),
@@ -103,26 +103,11 @@ class LegalDocumentController extends Controller
         }
         $template->file_location = !empty($template->file_location) ? $this->encodeUploadedFile($template->file_location) : '';
         $template->template_sample = !empty($template->template_sample) ? $this->encodeUploadedFile($template->template_sample) : '';
-
+        
         if (!$template) {
             return response()->json(['message' => 'No Legal document template found for sent request parameters at: ' . $this->sessionDetails('company_name'), 'data' => []], 200);
         }
         $is_sample = request()->routeIs('template.preview.sample');
-
-        // if($is_sample){
-        //     $message = 'No '. $template->legalDocumentType->type . ' ' .  $template->legalDocumentType->name.' sample found for '. $this->sessionDetails('company_name');
-        //     $downloadPath = !empty($template->template_sample) ? base_path() . '/' . $template->template_sample : null;
-        // }
-        // else{
-        //     $message = 'No ' . $template->legalDocumentType->type . ' ' .  $template->legalDocumentType->name . ' uploaded for sent request parameters at: ' . $this->sessionDetails('company_name');
-        //     $downloadPath = !empty($template->file_location) ? base_path() . '/' . $template->file_location : null;
-        // }
-
-        // if(!$downloadPath){
-        //     return response()->json(['message' => $message, 'data' => []], 200);
-        // }
-
-        // return response()->download($downloadPath);
 
         return response()->json(['message' => 'Success', 'data' => $template], 200);
     }

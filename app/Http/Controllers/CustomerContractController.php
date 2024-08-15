@@ -1268,6 +1268,15 @@ class CustomerContractController extends Controller
                     $this->logEmail($email);
                 }
             }
+
+            // Email defunct subscriber
+            $emailD['type'] = 'notify.defunct.subscriber';
+            $emailD['name'] = $defunctSubscriber->s_name;
+            $emailD['email'] = $defunctSubscriber->s_email;
+            $emailD['defunctSubscriberEmail'] = $defunctSubscriber->s_email;
+            $emailD['defunctSubscriberName'] = $defunctSubscriber->s_name;
+            $this->logEmail($emailD);
+
             // Email Core owner
             $emailX['type'] = 'notify.core.owner.of.subscriber.removal';
             $emailX['name'] = $contract->customer->user->first_name;

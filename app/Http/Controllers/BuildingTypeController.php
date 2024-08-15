@@ -40,12 +40,13 @@ class BuildingTypeController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => [
-                'required', Rule::unique('building_types')->where(function ($query) {
+                'required',
+                Rule::unique('building_types')->where(function ($query) use ($request) {
                     $query->where('company_id', $this->sessionDetails('company_id'));
                 })
             ],
         ]);
-
+        
         if ($validator->fails()) {
             return response()->json([
                 'error' => $validator->messages()->first(),
