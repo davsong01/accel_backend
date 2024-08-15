@@ -170,7 +170,7 @@ if (!function_exists("permissionsCheck")) {
 
             // $allowed_roles = explode(",", $permission->role_ids);
             // Link permissions to permission id
-            $allowed_roles = explode(",", $permission->role_ids);
+            $allowed_roles = explode(",", $permission->id);
             $check = !empty(array_intersect($allowed_roles, $user_role_ids));
 
             if (!$check) {
