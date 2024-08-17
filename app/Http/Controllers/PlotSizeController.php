@@ -76,7 +76,7 @@ class PlotSizeController extends Controller
 
         Excel::import(new PlotSizeImport(), request()->file('file'));
 
-        return response()->json(['message' => 'Plot Sizes Added Succesfully', 'data' => null], 200);
+        return response()->json(['message' => 'Plot Sizes Added Successfully', 'data' => null], 200);
     }
 
     public function sampleBulkPlotSize()
