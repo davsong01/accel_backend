@@ -5,6 +5,7 @@ namespace App\Imports;
 use App\Models\BuildingType;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
@@ -30,7 +31,10 @@ class BuildingTypeImport implements ToCollection, WithHeadingRow
             Validator::make(
                 $row->toArray(),
                 [
-                    'name' => 'required',
+                    'name' => [
+                        'required',
+                        Rule::unique('building_types')->where(fn($query) => $query->where('company_id', $company_id)),
+                    ],
                 ],
                 [
                     'name.required' => 'One or more rows do not have name, please check and try again',
