@@ -48,7 +48,6 @@ class CustomerContract extends Model
     public function contract_payment()
     {
         return $this->hasOne(ContractPayment::class, 'contract_id');
-        // ->select('id','contract_id','customer_id','amount','property_net_fee','balance','transaction_id');
     }
 
     public function building_type()
@@ -188,6 +187,11 @@ class CustomerContract extends Model
     public function seInfrastructurePayment(): HasOne
     {
         return $this->hasOne(SeInfrastructure::class, 'transaction_id','sei_payment_transaction_id', );
+    }
+
+    public function seInfrastructurePaymentDetails()
+    {
+        return $this->hasOne(SeInfrastructure::class, 'contract_id');
     }
 
     public function under_construction(): HasOne

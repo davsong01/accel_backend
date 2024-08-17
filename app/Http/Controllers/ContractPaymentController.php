@@ -38,7 +38,7 @@ class ContractPaymentController extends Controller
             'payment_history' => $paymentHistory?->payment_thread,
         ];
 
-        return response()->json(['message' => 'Succee', 'data' => $history], 200);
+        return response()->json(['message' => 'Success', 'data' => $history], 200);
     }
     /**
      * Store a newly created resource in storage.

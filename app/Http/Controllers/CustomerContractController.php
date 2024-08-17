@@ -33,8 +33,8 @@ class CustomerContractController extends Controller
      */
     public function index(Request $request, $customer_id)
     {
-        $contracts = CustomerContract::with('contract_payment', 'property_type_details', 'city:name,id', 'estate:name,id', 'location:name,id', 'building_type:id,name', 'plot_size:id,size')->where('customer_id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->select(['id', 'primary_marketer_id', 'property_type_id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'contract_status', 'plot_size', 'building_type', 'subscribers', 'contract_type', 'property_type', 'transaction_date', 'created_at', 'form_payment_transaction_id', 'contract_payment_transaction_id', 'discount','se_status','infrastructure_status']);
-
+        $contracts = CustomerContract::with(['property_type_details', 'city:name,id', 'estate:name,id', 'location:name,id', 'building_type:id,name', 'plot_size:id,size'])->where('customer_id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->select(['id', 'primary_marketer_id', 'property_type_id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'contract_status', 'plot_size', 'building_type', 'subscribers', 'contract_type', 'property_type', 'transaction_date', 'created_at', 'form_payment_transaction_id', 'contract_payment_transaction_id', 'discount','se_status','infrastructure_status']);
+        
         $allContracts = [];
         if ($contracts->exists()) {
             if (!empty($request->contract_type)) {
@@ -64,6 +64,35 @@ class CustomerContractController extends Controller
                 'customerID' => $customerY->user->customerId
             ];
             foreach ($contracts as $key => $contract) {
+                $paymentDetails = $contract->contract_payment;
+                $seinfrastructureDetails = $contract->seInfrastructurePaymentDetails;
+                
+                if(!empty($contract->contract_payment)){
+                    $contract->contract_payment_details = [
+                        'id' => $paymentDetails->id,
+                        'amount_paid' => $paymentDetails->amount,
+                        'balance' => $paymentDetails->balance,
+                        'contract_value' => $paymentDetails->contract_value,
+                        'property_net_fee' => $paymentDetails->property_net_fee,
+                        'no_of_months' => $paymentDetails->no_of_months,
+                        'discount_applied' => $paymentDetails->discount_applied,
+                    ];
+                }
+
+                if (!empty($contract->seInfrastructurePaymentDetails)) {
+                    $contract->se_infrastructure_payment_details = [
+                        'id' => $seinfrastructureDetails->id,
+                        'type' => $seinfrastructureDetails->type,
+                        'amount_paid' => $seinfrastructureDetails->amount,
+                        'balance' => $seinfrastructureDetails->balance,
+                        'infrastructure_fee' => $seinfrastructureDetails->infrastructure_fee,
+                        'transaction_id' => $seinfrastructureDetails->transaction_id,
+                    ];
+                }
+
+                
+                unset($contract->seInfrastructurePaymentDetails);
+                // dd($paymentDetails->id, $contract->payment_details);
                 // $estate->load('city', 'location', 'estate_property_type')
                 $contract->primary_marketer = $contract->primaryMarketer($contract);
                 $contract->subscribers = !empty($contract->subscribers) ? json_decode($contract->subscribers) : '';
