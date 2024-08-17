@@ -92,6 +92,7 @@ class CustomerContractController extends Controller
 
                 
                 unset($contract->seInfrastructurePaymentDetails);
+                unset($contract->contract_payment);
                 // dd($paymentDetails->id, $contract->payment_details);
                 // $estate->load('city', 'location', 'estate_property_type')
                 $contract->primary_marketer = $contract->primaryMarketer($contract);
