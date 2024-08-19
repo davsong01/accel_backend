@@ -5,6 +5,7 @@ namespace App\Imports;
 use App\Models\PlotSize;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
@@ -29,6 +30,7 @@ class PlotSizeImport implements ToCollection, WithHeadingRow
                 $row->toArray(),
                 [
                     'size' => 'required',
+                    Rule::unique('plot_sizes')->where(fn($query) => $query->where('company_id', $company_id)),
                 ],
                 [
                     'size.required' => 'One or more rows do not have size, please check and try again',

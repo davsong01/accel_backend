@@ -364,9 +364,10 @@ class Controller extends BaseController
                     });
                 }
             }
+            $imageFile->save(base_path() . '/' . config('app.upload_path') . '/' . $folder . '/' . $name);
+        } else {
+            $file->save(base_path() . '/' . config('app.upload_path') . '/' . $folder . '/' . $name);
         }
-
-        $imageFile->save(base_path() . '/' . config('app.upload_path') . '/' . $folder . '/' . $name);
 
         return config('app.upload_path') . '/' . $folder . '/' . $name;
     }
