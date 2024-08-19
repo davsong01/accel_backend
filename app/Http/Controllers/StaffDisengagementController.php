@@ -22,7 +22,7 @@ class StaffDisengagementController extends Controller
             'createdBy.user:id,first_name,middle_name,last_name,avatar,email',
             'disengaged:id,user_id',
             'disengaged.user:id,first_name,middle_name,last_name,avatar,email',
-        ])->where('company_id', $this->sessionDetails('company_id'))->latest()->paginate(20);
+        ])->where('company_id', sessionDetails('company_id'))->latest()->paginate(20);
         return response()->json(['message' => 'Success', 'data' => $list], 200);
     }
 
@@ -31,7 +31,7 @@ class StaffDisengagementController extends Controller
      */
     public function store(Request $request)
     {
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
 
         $from  = $request->from ?: now();
 
@@ -128,7 +128,7 @@ class StaffDisengagementController extends Controller
     public function search(Request $request)
     {
         $params = $request->only(['status']);
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
 
         $query = StaffDisengagement::with([
             'createdBy:id,user_id',

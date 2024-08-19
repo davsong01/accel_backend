@@ -19,13 +19,13 @@ class LocationController extends Controller
      */
     public function index()
     {
-        $location = Location::with('city')->where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'desc')->get();
+        $location = Location::with('city')->where('company_id', sessionDetails('company_id'))->orderBy('created_at', 'desc')->get();
         return response()->json(['message' => 'Success', 'data' => $location], 200);
     }
 
     public function cityLocations($city_id)
     {
-        $locations = Location::where(['company_id' => $this->sessionDetails('company_id'), 'city_id' => $city_id])->get();
+        $locations = Location::where(['company_id' => sessionDetails('company_id'), 'city_id' => $city_id])->get();
 
         if (($locations->count() <= 0)) {
             return response()->json(['message' => 'No records found', 'data' => $locations], 200);
@@ -61,7 +61,7 @@ class LocationController extends Controller
         $location = Location::updateOrcreate([
             'name' => $request->name,
             'city_id' => $request->city,
-            'company_id' => $this->sessionDetails('company_id'),
+            'company_id' => sessionDetails('company_id'),
         ]);
 
         LogService::admin(auth()->user()->id, null, 'Create a location (' . $location->id  . ')' , 'UPDATE');
@@ -104,7 +104,7 @@ class LocationController extends Controller
         $location->update([
             'name' => $request->name,
             'city_id' => $request->city,
-            'company_id' => $this->sessionDetails('company_id'),
+            'company_id' => sessionDetails('company_id'),
         ]);
 
         LogService::admin(auth()->user()->id, null, 'Update a location (' . $location->id  . ')' , 'UPDATE');
@@ -135,7 +135,7 @@ class LocationController extends Controller
     public function search(Request $request)
     {
         $params = $request->only(['city_ids']);
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
 
         $query = Location::where('company_id', $company_id);
 

@@ -59,7 +59,7 @@ class Controller extends BaseController
     public function getContractFormAmount($estate_contracts, $single = null)
     {
         $buildAmount = [];
-        $settings = EstateSettings::select(['form_payment_for_land', 'form_payment_for_building'])->where('company_id', $this->sessionDetails('company_id'))->first();
+        $settings = EstateSettings::select(['form_payment_for_land', 'form_payment_for_building'])->where('company_id', sessionDetails('company_id'))->first();
 
         if (isset($single)) {
             $buildAmount = 0;
@@ -110,9 +110,9 @@ class Controller extends BaseController
     {
         $created_at = !empty($date_of_employment) ? Carbon::parse($date_of_employment) : Carbon::today();
 
-        $settings = StaffIdentificationSetting::where('company_id', $this->sessionDetails('company_id'))->first();
+        $settings = StaffIdentificationSetting::where('company_id', sessionDetails('company_id'))->first();
 
-        $lastUser = User::where('company_id', $this->sessionDetails('company_id'))->where('type', 'staff')->latest()->first();
+        $lastUser = User::where('company_id', sessionDetails('company_id'))->where('type', 'staff')->latest()->first();
         $lastUserId = $lastUser->id + 1;
         $lastStaffId = $lastUser->staff->id ?? 1;
 
@@ -168,8 +168,8 @@ class Controller extends BaseController
     {
         $created_at = !empty($created_at) ? Carbon::parse($created_at) : Carbon::today();
 
-        $settings = CustomerIdentificationSetting::where('company_id', $this->sessionDetails('company_id'))->first();
-        $lastUser = User::where('company_id', $this->sessionDetails('company_id'))->where('type', 'customer')->latest()->first();
+        $settings = CustomerIdentificationSetting::where('company_id', sessionDetails('company_id'))->first();
+        $lastUser = User::where('company_id', sessionDetails('company_id'))->where('type', 'customer')->latest()->first();
         $lastUserId = $lastUser->id + 1;
         $lastCustomerId = $lastUser->customerId ?? 1;
 
@@ -303,11 +303,11 @@ class Controller extends BaseController
             $location = $year . '/' . $month . '/' . $day;
         }
 
-        if (!is_dir(base_path() . '/' . config('app.upload_path') . '/' . $this->sessionDetails('company_slug') . '/' . $location)) {
-            mkdir(base_path() . '/' . config('app.upload_path') . '/' . $this->sessionDetails('company_slug') . '/' . $location, 0777, true);
+        if (!is_dir(base_path() . '/' . config('app.upload_path') . '/' . sessionDetails('company_slug') . '/' . $location)) {
+            mkdir(base_path() . '/' . config('app.upload_path') . '/' . sessionDetails('company_slug') . '/' . $location, 0777, true);
         }
 
-        return $this->sessionDetails('company_slug') . '/' . $location;
+        return sessionDetails('company_slug') . '/' . $location;
     }
 
     public function deleteFile($file)
@@ -484,8 +484,8 @@ class Controller extends BaseController
 
     public function getLeaveAndAbsencePeriodLeft($staff_id, $type, $internal = false)
     {
-        $allowedPeriod = LeaveAndAbsenceSetting::where('company_id', $this->sessionDetails('company_id'))->where('type', $type)->first();
-        $allapproved = LeaveAndAbsenceManagement::where(['company_id' => $this->sessionDetails('company_id'), 'type' => $type, 'staff_id' => $staff_id, 'status' => 'approved'])->sum('period');
+        $allowedPeriod = LeaveAndAbsenceSetting::where('company_id', sessionDetails('company_id'))->where('type', $type)->first();
+        $allapproved = LeaveAndAbsenceManagement::where(['company_id' => sessionDetails('company_id'), 'type' => $type, 'staff_id' => $staff_id, 'status' => 'approved'])->sum('period');
         // ->count('period');
         if ($allowedPeriod) {
             $left = $allowedPeriod->period - $allapproved;
@@ -502,9 +502,9 @@ class Controller extends BaseController
 
     public function getAdvanceAndClaimsPeriodLeft($staff_id, $type, $internal = false)
     {
-        $allowedPeriod = LeaveAndAbsenceSetting::where('company_id', $this->sessionDetails('company_id'))->where('type', $type)->first();
+        $allowedPeriod = LeaveAndAbsenceSetting::where('company_id', sessionDetails('company_id'))->where('type', $type)->first();
 
-        $allapproved = AdvanceAndClaims::where(['company_id' => $this->sessionDetails('company_id'), 'type' => $type, 'staff_id' => $staff_id ?? Auth::user()->staff->id, 'status' => 'approved'])->sum('period');
+        $allapproved = AdvanceAndClaims::where(['company_id' => sessionDetails('company_id'), 'type' => $type, 'staff_id' => $staff_id ?? Auth::user()->staff->id, 'status' => 'approved'])->sum('period');
 
 
         if ($allowedPeriod) {
@@ -544,7 +544,7 @@ class Controller extends BaseController
         // Get contracts in prospoect and attach to response form
         $prospectContracts = CustomerContract::where('status', 'prospect')
             ->where('customer_id', $forms->customer_id)
-            ->where('company_id', $this->sessionDetails('company_id'))
+            ->where('company_id', sessionDetails('company_id'))
             ->orderBy('estate_id', 'DESC')
             ->get();
 

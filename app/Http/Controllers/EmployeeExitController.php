@@ -22,7 +22,7 @@ class EmployeeExitController extends Controller
     public function index(Request $request, $staff_id = null)
     {
 
-        $exit = EmployeeExit::with('staff.user')->where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'DESC');
+        $exit = EmployeeExit::with('staff.user')->where('company_id', sessionDetails('company_id'))->orderBy('created_at', 'DESC');
 
         if (!empty($staff_id)) {
             $exit = $exit->where('staff_id', $staff_id);
@@ -59,14 +59,14 @@ class EmployeeExitController extends Controller
                 'sometimes',
                 Rule::exists('employ_exits', 'id')->where(function ($query) {
                     $query->where('status', 'APPROVED');
-                    $query->where('company_id', $this->sessionDetails('company_id'));
+                    $query->where('company_id', sessionDetails('company_id'));
                 }),
                 ]
         ]);
 
         if (\Request::route()->getPrefix() != 'api/admin/self-service') {
             $validator = Validator::make($request->all(), [
-                'staff_id' => 'required|exists:staff,id,company_id,' . $this->sessionDetails('company_id'),
+                'staff_id' => 'required|exists:staff,id,company_id,' . sessionDetails('company_id'),
             ]);
         }
 
@@ -100,7 +100,7 @@ class EmployeeExitController extends Controller
             'reason' => $request->reason,
             'file' => $resignation_letter,
             'comment' => $request->comment,
-            'company_id' => $this->sessionDetails('company_id')
+            'company_id' => sessionDetails('company_id')
         ]);
 
         $staff = Staff::find($request->staff_id ?? $staff_id);
@@ -110,11 +110,11 @@ class EmployeeExitController extends Controller
             'link' => '',
             'user_type' => 'staff',
             'staff_id' => $staff->id,
-            'company_id' => $this->sessionDetails('company_id')
+            'company_id' => sessionDetails('company_id')
         ];
         $this->notify($data);
 
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
     
         $users = User::with(['staff:id,user_id', 'staff.staffRoles'])->where('staff_id', '!=', $staff->id)
         ->where(['type' => 'staff', 'company_id' => $company_id, 'status' => 'active'])
@@ -187,7 +187,7 @@ class EmployeeExitController extends Controller
             'link' => '',
             'user_type' => 'staff',
             'staff_id' => $employeeExit->staff->id,
-            'company_id' => $this->sessionDetails('company_id')
+            'company_id' => sessionDetails('company_id')
         ];
         $this->notify($data);
 
@@ -210,11 +210,11 @@ class EmployeeExitController extends Controller
     public function search(Request $request)
     {
         $params = $request->only(['status']);
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
 
         $query = EmployeeExit::with([
             'staff:id,user_id', 'staff.user:id,first_name,middle_name,last_name',
-        ])->where('company_id', $this->sessionDetails('company_id'))
+        ])->where('company_id', sessionDetails('company_id'))
             ->where($params)->orderBy('created_at', 'DESC');
 
         $from = $request->input('from');

@@ -19,7 +19,7 @@ class DepartmentController extends Controller
      */
     public function index(Request $request)
     {
-        $departments = Department::where('company_id', $this->sessionDetails('company_id'));
+        $departments = Department::where('company_id', sessionDetails('company_id'));
 
         if(!empty($request->type) && $request->type == 'strict'){
             $departments = $departments->where('status',1)->whereHas('jobtitles');
@@ -45,7 +45,7 @@ class DepartmentController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => [
                 'required', Rule::unique('departments')->where(function ($query) {
-                    $query->where('company_id', $this->sessionDetails('company_id'));
+                    $query->where('company_id', sessionDetails('company_id'));
                 })
             ],
             'description' => 'sometimes',
@@ -59,11 +59,11 @@ class DepartmentController extends Controller
             ], 412);
         }
 
-        $department = Department::updateOrcreate(['name' => $request->name, 'company_id' => $this->sessionDetails('company_id')], [
+        $department = Department::updateOrcreate(['name' => $request->name, 'company_id' => sessionDetails('company_id')], [
             'name' => $request->name,
             'description' => $request->description,
             'status' => $request->status,
-            'company_id' => $this->sessionDetails('company_id'),
+            'company_id' => sessionDetails('company_id'),
         ]);
 
         LogService::admin(auth()->user()->id, NULL, 'Create or update a company department (' . $department->id .')', 'CREATE');
@@ -108,7 +108,7 @@ class DepartmentController extends Controller
             'name' => $request->name,
             'description' => $request->description,
             'status' => $request->status,
-            'company_id' => $this->sessionDetails('company_id'),
+            'company_id' => sessionDetails('company_id'),
         ]);
 
         LogService::admin(auth()->user()->id, NULL, 'Update a company department (' . $department->id .')', 'UPDATE');

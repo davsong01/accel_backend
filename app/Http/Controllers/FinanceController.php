@@ -19,7 +19,7 @@ class FinanceController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
         $query = Transaction::where(['company_id' => $company_id]);
 
         $from = $request->input('from');
@@ -38,7 +38,7 @@ class FinanceController extends Controller
         return response()->json(['message' => 'Success', 'data' => $transactions], 200);
     }
 
-        // $company_id = $this->sessionDetails('company_id');
+        // $company_id = sessionDetails('company_id');
 
     // }
 

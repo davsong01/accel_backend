@@ -17,7 +17,7 @@ class CompanyDocumentController extends Controller
      */
     public function index()
     {
-        $documents = CompanyDocument::where('company_id', $this->sessionDetails('company_id'))->latest()->get();
+        $documents = CompanyDocument::where('company_id', sessionDetails('company_id'))->latest()->get();
         return response()->json(['message' => 'Success', 'data' => $documents], 200);
     }
 
@@ -36,7 +36,7 @@ class CompanyDocumentController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => [
                 'required', Rule::unique('company_documents')->where(function ($query) {
-                    $query->where('company_id', $this->sessionDetails('company_id'));
+                    $query->where('company_id', sessionDetails('company_id'));
                 })
             ],
             'description' => 'sometimes',
@@ -55,7 +55,7 @@ class CompanyDocumentController extends Controller
             'name' => $request->name,
             'description' => $request->description,
             'visible_to_staff' => $request->visible_to_staff,
-            'company_id' => $this->sessionDetails('company_id'),
+            'company_id' => sessionDetails('company_id'),
         ];
 
         if (!empty($request->file)) {
@@ -107,7 +107,7 @@ class CompanyDocumentController extends Controller
             'name' => $request->name ?? null,
             'description' => $request->description,
             'visible_to_staff' => $request->visible_to_staff,
-            'company_id' => $this->sessionDetails('company_id'),
+            'company_id' => sessionDetails('company_id'),
         ];
 
         if (!empty($request->file)) {
@@ -135,7 +135,7 @@ class CompanyDocumentController extends Controller
 
     public function selfService(){
         $documents = CompanyDocument::where([
-            'company_id' => $this->sessionDetails('company_id'),
+            'company_id' => sessionDetails('company_id'),
             'visible_to_staff' => 1,
         ])->latest()->get();
         return response()->json(['message' => 'Success', 'data' => $documents], 200);

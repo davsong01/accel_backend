@@ -11,8 +11,8 @@ class ContractAllocationController extends Controller
 {
     public function allocateContract(Request $request){
         $validator = Validator::make($request->all(), [
-            'customer_id' => 'required|exists:customers,id,company_id,' . $this->sessionDetails('company_id'),
-            'contract_id' => 'required|exists:customer_contracts,id,company_id,' . $this->sessionDetails('company_id'),
+            'customer_id' => 'required|exists:customers,id,company_id,' . sessionDetails('company_id'),
+            'contract_id' => 'required|exists:customer_contracts,id,company_id,' . sessionDetails('company_id'),
             'plot_number' => 'nullable',
             'building_number' => 'nullable',
             'number_of_months' => 'nullable'
@@ -41,7 +41,7 @@ class ContractAllocationController extends Controller
             'building_number' => $request->building_number,
             'number_of_months' => $request->number_of_months,
             'staff_id' => auth()->user()->staff->id,
-            'company_id' => $this->sessionDetails('company_id'),
+            'company_id' => sessionDetails('company_id'),
         ]);
 
         $contract->update(['contract_status' => 'completed']);

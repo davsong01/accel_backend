@@ -19,7 +19,7 @@ class ClearanceController extends Controller
      */
     public function index()
     {
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
         $list = Clearance::where('company_id', $company_id)->latest()->paginate();
         return response()->json(['message' => 'Success', 'data' => $list], 200);
     }
@@ -29,7 +29,7 @@ class ClearanceController extends Controller
      */
     public function store(Request $request)
     {
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
 
         $validator = Validator::make($request->all(), [
             'customer_id' => ['required', "exists:customers,id,company_id,$company_id"],
@@ -71,7 +71,7 @@ class ClearanceController extends Controller
      */
     public function update(Request $request, Clearance $clearance)
     {
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
 
         $user = auth()->user();
         $customer = Customer::find($clearance->customer_id);
@@ -118,7 +118,7 @@ class ClearanceController extends Controller
     public function search(Request $request)
     {
         $params = $request->only(['company_id', 'customer_id', 'customer_contract_id', 'status']);
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
 
         $query = Clearance::where('company_id', $company_id)->where($params);
 

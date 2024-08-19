@@ -76,7 +76,7 @@ class MessageTransactionController extends Controller
 
     public function getActiveProvider($type, $company_id = null)
     {
-        $company_id = $this->sessionDetails('company_id') ?? $company_id;
+        $company_id = sessionDetails('company_id') ?? $company_id;
         $provider = MessageProvider::where(['type' => $type, 'status' => 'active', 'company_id' => $company_id])->first();
         return $provider;
     }
@@ -92,7 +92,7 @@ class MessageTransactionController extends Controller
         $data['message'] = $this->getMessageContent($data)['content'];
         $data['subject'] = $this->getMessageContent($data)['subject'];
         $data['schedule_date'] = Carbon::now();
-        $data['company_id'] = $this->sessionDetails('company_id') ??  $data['company_id'];
+        $data['company_id'] = sessionDetails('company_id') ??  $data['company_id'];
         $data['purpose'] = $data['type'];
 
         $data = Arr::except($data, ['name']);
@@ -114,7 +114,7 @@ class MessageTransactionController extends Controller
 
     public function getMessageContent($data)
     {
-        $company_setting = CompanySetting::where('company_id', $this->sessionDetails('company_id') ??  $data['company_id'])->first();
+        $company_setting = CompanySetting::where('company_id', sessionDetails('company_id') ??  $data['company_id'])->first();
         $url = $company_setting->website;
         $button_style = "background: " . $company_setting->primary_color . ";text-decoration: none; padding: 10px;color: white;border: none;color: white;border-radius: 5px;cursor: pointer;";
         $all = [];
@@ -123,7 +123,7 @@ class MessageTransactionController extends Controller
 
         if ($data['type'] == 'password-reset' || $data['type'] == 'forgot-password') {
             if (isset($data['medium']) && $data['medium'] == 'sms') {
-                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id') ??  $data['company_id'])->where('medium', 'sms')->where('type', 'password-reset')->first();
+                $email_template = MessageTemplate::where('company_id', sessionDetails('company_id') ??  $data['company_id'])->where('medium', 'sms')->where('type', 'password-reset')->first();
                 $content = $email_template->content ?? null;
 
                 if (!empty($content)) {
@@ -133,30 +133,30 @@ class MessageTransactionController extends Controller
                     $content .= 'Hello, your password reset token is: ' . $data['token'];
                 }
             } else {
-                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id') ??  $data['company_id'])->where('medium', 'email')->where('type', 'password-reset')->first();
+                $email_template = MessageTemplate::where('company_id', sessionDetails('company_id') ??  $data['company_id'])->where('medium', 'email')->where('type', 'password-reset')->first();
                 $subject = $email_template->subject ?? null;
                 $content = $email_template->content ?? null;
 
                 $subject = $subject ?? 'Password Token Link';
                 $content .= $content ?? '<strong>Dear ' . $data['name'] . ', </strong><br><br>
                 <div>
-                <p style="text-align:justify !important">You asked for a password RESET mail on ' . $this->sessionDetails('company_name') . ', your password reset token is: ' . $data['token'] . ' Thank you.</p>
+                <p style="text-align:justify !important">You asked for a password RESET mail on ' . sessionDetails('company_name') . ', your password reset token is: ' . $data['token'] . ' Thank you.</p>
                 </div>';
             }
         }
 
         if ($data['type'] == 'nudge.customer') {
             if (isset($data['medium']) && $data['medium'] == 'sms') {
-                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'sms')->where('type', 'nudge.customer')->first();
+                $email_template = MessageTemplate::where('company_id', sessionDetails('company_id'))->where('medium', 'sms')->where('type', 'nudge.customer')->first();
             } else {
-                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'email')->where('type', 'nudge.customer')->first();
+                $email_template = MessageTemplate::where('company_id', sessionDetails('company_id'))->where('medium', 'email')->where('type', 'nudge.customer')->first();
                 $subject = $email_template->subject ?? 'Complete Your Application Form';
                 $content = $email_template->content ?? '<strong>Dear ' . $data['name'] . ',</strong><br><br>
-                <div><p style="text-align:justify !important">I hope this email finds you well. We appreciate your interest in ' . $this->sessionDetails('company_name') . ' and are excited to have you on board.<br><br>There are some sections of the application form we want you to fill out to ensure that we have all the necessary information to provide you with the best possible experience. <br><br>To expedite the process, here are the details to access your application form:<br><br>
+                <div><p style="text-align:justify !important">I hope this email finds you well. We appreciate your interest in ' . sessionDetails('company_name') . ' and are excited to have you on board.<br><br>There are some sections of the application form we want you to fill out to ensure that we have all the necessary information to provide you with the best possible experience. <br><br>To expedite the process, here are the details to access your application form:<br><br>
                 Please click the button below to login to your personalized dashboard and fill your application form:<br><br><a style="' . $button_style . '" href="' . $url . '/customer-login" target="_blank">LOGIN</a><br><br>
                 <strong>Email:</strong> ' . $data['email'] . '<br>
                 <strong>Customer ID:</strong> ' . $data['customerId'] . '<br>
-                <br> If you encounter any challenges or have questions while filling out the form, please don\'t hesitate to contact us. Thank you for your prompt attention to this matter. We value your partnership and look forward to serving you.<br><br>Best regards,<br><br>' . $this->sessionDetails('company_name') . '</p>
+                <br> If you encounter any challenges or have questions while filling out the form, please don\'t hesitate to contact us. Thank you for your prompt attention to this matter. We value your partnership and look forward to serving you.<br><br>Best regards,<br><br>' . sessionDetails('company_name') . '</p>
                 </div>';
             }
         }
@@ -165,9 +165,9 @@ class MessageTransactionController extends Controller
             $element = $data['element'] == 'SE' ? 'Setting out and Excavation' : 'Infrastructure';
             
             if (isset($data['medium']) && $data['medium'] == 'sms') {
-                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'sms')->where('type', 'se.escavation.payment')->first();
+                $email_template = MessageTemplate::where('company_id', sessionDetails('company_id'))->where('medium', 'sms')->where('type', 'se.escavation.payment')->first();
             } else {
-                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'email')->where('type', 'se.escavation.payment')->first();
+                $email_template = MessageTemplate::where('company_id', sessionDetails('company_id'))->where('medium', 'email')->where('type', 'se.escavation.payment')->first();
 
                 $subject = $email_template->subject ?? 'Payment Confirmation';
                 $content = $email_template->content ?? '<strong>Dear ' . $data['name'] . ',</strong><br>
@@ -175,35 +175,35 @@ class MessageTransactionController extends Controller
                 <p style="text-align:justify !important">We are delighted to inform you that your payment for ' . $element . ' has been successfully processed. Attached to this email is your payment receipt<br>';
 
                 $content .= $this->propertyDetails($data);
-                $content .= '<br>Best regards,<br><br>' . $this->sessionDetails('company_name') . '</p>
+                $content .= '<br>Best regards,<br><br>' . sessionDetails('company_name') . '</p>
                 </div>';
             }
         }
 
         if ($data['type'] == 'nudge.admin') {
             if (isset($data['medium']) && $data['medium'] == 'sms') {
-                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'sms')->where('type', 'nudge.admin')->first();
+                $email_template = MessageTemplate::where('company_id', sessionDetails('company_id'))->where('medium', 'sms')->where('type', 'nudge.admin')->first();
             } else {
-                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'email')->where('type', 'nudge.admin')->first();
+                $email_template = MessageTemplate::where('company_id', sessionDetails('company_id'))->where('medium', 'email')->where('type', 'nudge.admin')->first();
 
                 $subject = $email_template->subject ?? 'Your Attention is Needed';
                 $content = $email_template->content ?? '<strong>Dear ' . $data['name'] . ',</strong><br>
                 <div>
-                <p style="text-align:justify !important">Could you please take a moment to look into ' . $data['form']->form_name . '<br><br>Your timely review and feedback are essential for us to proceed smoothly.<br><br>Thank you for your prompt attention to this matter.<br><br>Please click the button below to attend to this form<br><br><a target="_blank" href="' . $url . '/customer-form-response/' . $data['form']->id . '"><button style="' . $button_style . '">CHECK IT OUT</button></a><br><br>Best regards,<br><br>' . $this->sessionDetails('company_name') . '</p>
+                <p style="text-align:justify !important">Could you please take a moment to look into ' . $data['form']->form_name . '<br><br>Your timely review and feedback are essential for us to proceed smoothly.<br><br>Thank you for your prompt attention to this matter.<br><br>Please click the button below to attend to this form<br><br><a target="_blank" href="' . $url . '/customer-form-response/' . $data['form']->id . '"><button style="' . $button_style . '">CHECK IT OUT</button></a><br><br>Best regards,<br><br>' . sessionDetails('company_name') . '</p>
                 </div>';
             }
         }
 
         if ($data['type'] == 'allocation.email') {
             if (isset($data['medium']) && $data['medium'] == 'sms') {
-                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'sms')->where('type', 'allocation.email')->first();
+                $email_template = MessageTemplate::where('company_id', sessionDetails('company_id'))->where('medium', 'sms')->where('type', 'allocation.email')->first();
             } else {
-                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'email')->where('type', 'allocation.email')->first();
+                $email_template = MessageTemplate::where('company_id', sessionDetails('company_id'))->where('medium', 'email')->where('type', 'allocation.email')->first();
 
                 $subject = $email_template->subject ?? 'Congratulations on Completing Your Property Payment';
                 $content = $email_template->content ?? '<strong>Dear ' . $data['name'] . ',</strong><br>
                 <div>
-                <p style="text-align:justify !important">Warmest congratulations! <br><br>We are thrilled to inform you that your final payment for your property has been successfully received, marking an important milestone and officially becoming a property owner with ' . $this->sessionDetails('company_name') . '<br><br>Find attached to this email a copy of your payment receipt. Please visit our office to pick up your Allocation Letter, other documents, timelines, and requirements needed will be communicated on your visit. If you have any questions, please contact our support team/contact person.<br><br>Once again, congratulations on this remarkable achievement.<br><br>Best regards,<br><br>' . $this->sessionDetails('company_name') . '</p>
+                <p style="text-align:justify !important">Warmest congratulations! <br><br>We are thrilled to inform you that your final payment for your property has been successfully received, marking an important milestone and officially becoming a property owner with ' . sessionDetails('company_name') . '<br><br>Find attached to this email a copy of your payment receipt. Please visit our office to pick up your Allocation Letter, other documents, timelines, and requirements needed will be communicated on your visit. If you have any questions, please contact our support team/contact person.<br><br>Once again, congratulations on this remarkable achievement.<br><br>Best regards,<br><br>' . sessionDetails('company_name') . '</p>
                 </div>';
             }
         }
@@ -212,7 +212,7 @@ class MessageTransactionController extends Controller
         if ($data['type'] == 'staff.store') {
             if (isset($data['medium']) && $data['medium'] == 'sms') {
             } else {
-                $subject = 'Welcome to ' . $this->sessionDetails('company_name');
+                $subject = 'Welcome to ' . sessionDetails('company_name');
                 $content .= '<strong>Dear ' . $data['name'] . ',</strong><br><br>
                 <div>
                 <p style="text-align:justify !important">Your new staff details have been created. Please find details below: <br><br>
@@ -228,7 +228,7 @@ class MessageTransactionController extends Controller
         if ($data['type'] == 'user.store') {
             if (isset($data['medium']) && $data['medium'] == 'sms') {
             } else {
-                $subject = 'Welcome to ' . $this->sessionDetails('company_name');
+                $subject = 'Welcome to ' . sessionDetails('company_name');
                 $content = '<strong>Dear ' . $data['name'] . ',</strong><br><br>
                 <div>
                 <p style="text-align:justify !important">We are pleased to inform you that your details have been successfully added to our system. We are thrilled to have you with us.<br>';
@@ -236,16 +236,16 @@ class MessageTransactionController extends Controller
                 $content .= $this->propertyDetails($data);
             
                 $content .= '<br>Please review the contract details and let us know if there are any discrepancies or if you need further clarification.<br><br>Your Customer ID is<strong>: ' . $data['customer_id'] .
-                '</strong><br><br>Thank you for choosing ' . $this->sessionDetails('company_name') . '. <br><br>We look forward to serving you.<br><br>Best Regards,<br>' . $this->sessionDetails('company_name') . '</div>';
+                '</strong><br><br>Thank you for choosing ' . sessionDetails('company_name') . '. <br><br>We look forward to serving you.<br><br>Best Regards,<br>' . sessionDetails('company_name') . '</div>';
             }
         }
 
         if ($data['type'] == 'add.contract.to.existing.customer') {
             if (isset($data['medium']) && $data['medium'] == 'sms') {
-                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'sms')->where('type', 'add.contract.to.existing.customer')->first();
+                $email_template = MessageTemplate::where('company_id', sessionDetails('company_id'))->where('medium', 'sms')->where('type', 'add.contract.to.existing.customer')->first();
                 $content = $email_template->content ?? null;
             } else {
-                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'email')->where('type', 'add.contract.to.existing.customer')->first();
+                $email_template = MessageTemplate::where('company_id', sessionDetails('company_id'))->where('medium', 'email')->where('type', 'add.contract.to.existing.customer')->first();
                 $subject = $email_template->subject ?? 'New Contract Added to Your Account';
                 $temp_content = '<strong>Dear ' . $data['name'] . ', </strong><br><br>
                 <div>
@@ -254,7 +254,7 @@ class MessageTransactionController extends Controller
                 $temp_content .= $this->propertyDetails($data);
 
                 $temp_content .= '<br><br>
-                Please review these details and reach out to us for any necessary follow-ups or clarifications.<br>Thank you for your continued trust in our services.<br><br>Best regards,<br><br>' . $this->sessionDetails('company_name') . '</p></div>';
+                Please review these details and reach out to us for any necessary follow-ups or clarifications.<br>Thank you for your continued trust in our services.<br><br>Best regards,<br><br>' . sessionDetails('company_name') . '</p></div>';
 
                 $content = $email_template->content ?? $temp_content;
             }
@@ -262,18 +262,18 @@ class MessageTransactionController extends Controller
 
         if ($data['type'] == 'send.email.to.secondary.subscriber') {
             if (isset($data['medium']) && $data['medium'] == 'sms') {
-                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'sms')->where('type', 'send.email.to.secondary.subscriber')->first();
+                $email_template = MessageTemplate::where('company_id', sessionDetails('company_id'))->where('medium', 'sms')->where('type', 'send.email.to.secondary.subscriber')->first();
                 $content = $email_template->content ?? null;
             } else {
-                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'email')->where('type', 'send.email.to.secondary.subscriber')->first();
+                $email_template = MessageTemplate::where('company_id', sessionDetails('company_id'))->where('medium', 'email')->where('type', 'send.email.to.secondary.subscriber')->first();
                 $subject = $email_template->subject ?? 'Welcome to Your Joint Property Ownership';
                 $temp_content = '<strong>Dear ' . $data['name'] . ', </strong><br><br>
                 <div>
-                <p style="text-align:justify !important">We are delighted to inform you that you have been added as a joint owner of a property with ' . $this->sessionDetails('company_name') . '. This is a significant step, and we are glad to have you on board.<br><br>As a joint owner, you now share rights and responsibilities related to the property. This includes the ability to make decisions regarding the use, maintenance, and sale of the property. <br><br>Here are some of the details of your property:<br>';
+                <p style="text-align:justify !important">We are delighted to inform you that you have been added as a joint owner of a property with ' . sessionDetails('company_name') . '. This is a significant step, and we are glad to have you on board.<br><br>As a joint owner, you now share rights and responsibilities related to the property. This includes the ability to make decisions regarding the use, maintenance, and sale of the property. <br><br>Here are some of the details of your property:<br>';
 
                 $temp_content .= $this->propertyDetails($data);
                 $temp_content .= 'If you have any questions or need further clarification, please do not hesitate to contact us. Our team is always ready to assist you.<br><br>Thank you for choosing us. We look forward to serving you.
-                <br><br>Best regards,<br><br>' . $this->sessionDetails('company_name') . '
+                <br><br>Best regards,<br><br>' . sessionDetails('company_name') . '
                 </p>
                 </div>';
 
@@ -283,18 +283,18 @@ class MessageTransactionController extends Controller
 
         if ($data['type'] == 'remaining.subscriber.remove.mail' || $data['type'] == 'notify.core.owner.of.subscriber.removal') {
             if (isset($data['medium']) && $data['medium'] == 'sms') {
-                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'sms')->where('type', 'remaining.subscriber.remove.mail')->orWhere('type', 'notify.core.owner.of.subscriber.removal')->first();
+                $email_template = MessageTemplate::where('company_id', sessionDetails('company_id'))->where('medium', 'sms')->where('type', 'remaining.subscriber.remove.mail')->orWhere('type', 'notify.core.owner.of.subscriber.removal')->first();
                 $content = $email_template->content ?? null;
             } else {
-                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'email')->where('type', 'remaining.subscriber.remove.mail')->orWhere('type', 'notify.core.owner.of.subscriber.removal')->first();
+                $email_template = MessageTemplate::where('company_id', sessionDetails('company_id'))->where('medium', 'email')->where('type', 'remaining.subscriber.remove.mail')->orWhere('type', 'notify.core.owner.of.subscriber.removal')->first();
                 $subject = $email_template->subject ?? 'Joint Property Ownership Removal';
                 $temp_content = '<strong>Dear ' . $data['name'] . ', </strong><br><br>
                 <div>
-                <p style="text-align:justify !important">We wish to inform you that ' . $data['defunctSubscriberName'] . ' has been removed as a joint owner of a property with ' . $this->sessionDetails('company_name') . '.<br><br>As the subscriber has been removed from this contract, he/she will no longer share rights and responsibilities related to the property. This includes the ability to make decisions regarding the use, maintenance, and sale of the property.<br><br>';
+                <p style="text-align:justify !important">We wish to inform you that ' . $data['defunctSubscriberName'] . ' has been removed as a joint owner of a property with ' . sessionDetails('company_name') . '.<br><br>As the subscriber has been removed from this contract, he/she will no longer share rights and responsibilities related to the property. This includes the ability to make decisions regarding the use, maintenance, and sale of the property.<br><br>';
 
                 $temp_content .= $this->propertyDetails($data);
                 $temp_content .= 'If you have any questions or need further clarification, please do not hesitate to contact us. Our team is always ready to assist you.<br><br>Thank you for choosing us. We look forward to serving you.
-                <br><br>Best regards,<br><br>' . $this->sessionDetails('company_name') . '
+                <br><br>Best regards,<br><br>' . sessionDetails('company_name') . '
                 </p>
                 </div>';
 
@@ -304,18 +304,18 @@ class MessageTransactionController extends Controller
 
         if ($data['type'] == 'notify.defunct.subscriber') {
             if (isset($data['medium']) && $data['medium'] == 'sms') {
-                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'sms')->where('type', 'notify.defunct.subscriber')->first();
+                $email_template = MessageTemplate::where('company_id', sessionDetails('company_id'))->where('medium', 'sms')->where('type', 'notify.defunct.subscriber')->first();
                 $content = $email_template->content ?? null;
             } else {
-                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'email')->where('type', 'notify.defunct.subscriber')->first();
+                $email_template = MessageTemplate::where('company_id', sessionDetails('company_id'))->where('medium', 'email')->where('type', 'notify.defunct.subscriber')->first();
                 $subject = $email_template->subject ?? 'Joint Property Ownership Removal';
                 $temp_content = '<strong>Dear ' . $data['name'] . ', </strong><br><br>
                 <div>
-                <p style="text-align:justify !important">We are sorry to inform you that you have been removed as a joint owner of a property with ' . $this->sessionDetails('company_name') . '. This is a decision made by the core owner of the property.<br><br>As you have been removed from this contract, you no longer share rights and responsibilities related to the property. This includes the ability to make decisions regarding the use, maintenance, and sale of the property.<br><br>';
+                <p style="text-align:justify !important">We are sorry to inform you that you have been removed as a joint owner of a property with ' . sessionDetails('company_name') . '. This is a decision made by the core owner of the property.<br><br>As you have been removed from this contract, you no longer share rights and responsibilities related to the property. This includes the ability to make decisions regarding the use, maintenance, and sale of the property.<br><br>';
 
                 $temp_content .= $this->propertyDetails($data);
                 $temp_content .= 'If you have any questions or need further clarification, please do not hesitate to contact us. Our team is always ready to assist you.<br><br>Thank you for choosing us. We look forward to serving you.
-                <br><br>Best regards,<br><br>' . $this->sessionDetails('company_name') . '
+                <br><br>Best regards,<br><br>' . sessionDetails('company_name') . '
                 </p>
                 </div>';
 
@@ -325,9 +325,9 @@ class MessageTransactionController extends Controller
 
         if ($data['type'] == 'primary.marketer.email.for.new.contract') {
             if (isset($data['medium']) && $data['medium'] == 'sms') {
-                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'sms')->where('type', 'primary.marketer.email.for.new.contract')->first();
+                $email_template = MessageTemplate::where('company_id', sessionDetails('company_id'))->where('medium', 'sms')->where('type', 'primary.marketer.email.for.new.contract')->first();
             } else {
-                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'email')->where('type', 'primary.marketer.email.for.new.contract')->first();
+                $email_template = MessageTemplate::where('company_id', sessionDetails('company_id'))->where('medium', 'email')->where('type', 'primary.marketer.email.for.new.contract')->first();
                 $subject = $email_template->subject ?? 'New Contract Added to Your Client\'s Account';
                 $temp_content = '<strong>Dear ' . $data['name'] . ', </strong><br><br>
                 <div>
@@ -340,7 +340,7 @@ class MessageTransactionController extends Controller
                 $temp_content .= $this->propertyDetails($data);
 
                 $temp_content .= '<br>Please ensure to review these details and reach out to the customer for any necessary follow-ups or clarifications. <br><br>Thank you for your attention to this matter.<br><br>Best regards,
-                <br><br>' . $this->sessionDetails('company_name') . '</p>
+                <br><br>' . sessionDetails('company_name') . '</p>
                 </div>';
 
                 $content = $email_template->content ?? $temp_content;
@@ -349,10 +349,10 @@ class MessageTransactionController extends Controller
 
         if ($data['type'] == 'primary.marketer.email.for.new.customer') {
             if (isset($data['medium']) && $data['medium'] == 'sms') {
-                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'sms')->where('type', 'primary.marketer.email.for.new.customer')->first();
+                $email_template = MessageTemplate::where('company_id', sessionDetails('company_id'))->where('medium', 'sms')->where('type', 'primary.marketer.email.for.new.customer')->first();
                 $content = $email_template->content ?? null;
             } else {
-                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'email')->where('type', 'primary.marketer.email.for.new.customer')->first();
+                $email_template = MessageTemplate::where('company_id', sessionDetails('company_id'))->where('medium', 'email')->where('type', 'primary.marketer.email.for.new.customer')->first();
                 $subject = $email_template->subject ?? 'New Customer Added Successfully';
                 $temp_content = '<strong>Dear ' . $data['name'] . ', </strong><br><br>
                 <div>
@@ -364,7 +364,7 @@ class MessageTransactionController extends Controller
                 $temp_content .= $this->propertyDetails($data);
 
                 $temp_content .= '<br><br>Please ensure to review these details and reach out to the customer for any necessary follow-ups or clarifications. <br><br>Thank you for your attention to this matter.<br><br>Best regards,
-                <br><br>' . $this->sessionDetails('company_name') . '</p>
+                <br><br>' . sessionDetails('company_name') . '</p>
                 </div>';
 
                 $content = $email_template->content ?? $temp_content;
@@ -375,12 +375,12 @@ class MessageTransactionController extends Controller
         if ($data['type'] == 'formrequest.approve') {
             if (isset($data['medium']) && $data['medium'] == 'sms') {
             } else {
-                $subject = 'Subscriber Application Approved - Welcome to ' . $this->sessionDetails('company_name');
+                $subject = 'Subscriber Application Approved - Welcome to ' . sessionDetails('company_name');
                 $content .= '<strong>Dear ' . $data['name'] . ',</strong><br><br>
                 <div>
-                <p style="text-align:justify !important">We are pleased to inform you that your recent application to ' . $this->sessionDetails('company_name') . ' has been carefully reviewed and approved.<br><br>We are excited to welcome you as a customer and look forward to a fruitful relationship.<br><br>
+                <p style="text-align:justify !important">We are pleased to inform you that your recent application to ' . sessionDetails('company_name') . ' has been carefully reviewed and approved.<br><br>We are excited to welcome you as a customer and look forward to a fruitful relationship.<br><br>
                 Please visit our office to pick up your Offer Letter, and if you have any questions, do not hesitate to contact our support team/contact person.
-                <br><br> Once again, congratulations, and we anticipate a fruitful association. <br><br>Best regards,<br>' . $this->sessionDetails('company_name') . '</p>
+                <br><br> Once again, congratulations, and we anticipate a fruitful association. <br><br>Best regards,<br>' . sessionDetails('company_name') . '</p>
                 </div>';
             }
         }
@@ -391,8 +391,8 @@ class MessageTransactionController extends Controller
                 $subject = 'Subscriber Application Declined - Missing/Incorrect Information';
                 $content .= '<strong>Dear ' . $data['name'] . ',</strong><br>
                 <div>
-                <p style="text-align:justify !important">Thank you for submitting your application to ' . $this->sessionDetails('company_name') . '. Unfortunately, we are unable to proceed with the processing of your application as certain crucial information is missing/incorrect.<br><br>Please review the provided feedback below and make the necessary corrections before resubmitting your application.<br><div style="margin:5px;padding:10px;background:#d8e6f1 "><strong>' . $data['reason'] . '</strong></div>
-                We appreciate your understanding and encourage you to reach out if you have any questions or need further clarification.<br><br>Best regards,<br><br>' . $this->sessionDetails('company_name') . '</p>
+                <p style="text-align:justify !important">Thank you for submitting your application to ' . sessionDetails('company_name') . '. Unfortunately, we are unable to proceed with the processing of your application as certain crucial information is missing/incorrect.<br><br>Please review the provided feedback below and make the necessary corrections before resubmitting your application.<br><div style="margin:5px;padding:10px;background:#d8e6f1 "><strong>' . $data['reason'] . '</strong></div>
+                We appreciate your understanding and encourage you to reach out if you have any questions or need further clarification.<br><br>Best regards,<br><br>' . sessionDetails('company_name') . '</p>
                 </div>';
             }
         }
@@ -400,14 +400,14 @@ class MessageTransactionController extends Controller
         if ($data['type'] == 'form.payment') {
             if (isset($data['medium']) && $data['medium'] == 'sms') {
             } else {
-                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'email')->where('type', 'form.payment')->first();
+                $email_template = MessageTemplate::where('company_id', sessionDetails('company_id'))->where('medium', 'email')->where('type', 'form.payment')->first();
                 $subject = $email_template->subject ?? 'Receipt for Form payment';
                 $temp_content = '<strong>Dear ' . $data['name'] . ',</strong><br>
                 <div>
-                <p style="text-align:justify !important">We appreciate your business with ' . $this->sessionDetails('company_name') . '. <br>Attached is the receipt for your records.<br><br>If you have any questions or concerns, feel free to reach out to our customer support.<br><br>Best regards,<br><br>' . $this->sessionDetails('company_name') . '</p>';
+                <p style="text-align:justify !important">We appreciate your business with ' . sessionDetails('company_name') . '. <br>Attached is the receipt for your records.<br><br>If you have any questions or concerns, feel free to reach out to our customer support.<br><br>Best regards,<br><br>' . sessionDetails('company_name') . '</p>';
 
                 $temp_content .= $this->propertyDetails($data);
-                $temp_content .= '<br>Best regards,<br><br>' . $this->sessionDetails('company_name') . '</p>
+                $temp_content .= '<br>Best regards,<br><br>' . sessionDetails('company_name') . '</p>
                 </div>';
                 
                 $content = $email_template->content ?? $temp_content;
@@ -418,15 +418,15 @@ class MessageTransactionController extends Controller
         if ($data['type'] == 'contract.payment') {
             if (isset($data['medium']) && $data['medium'] == 'sms') {
             } else {
-                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'email')->where('type', 'contract.payment')->first();
+                $email_template = MessageTemplate::where('company_id', sessionDetails('company_id'))->where('medium', 'email')->where('type', 'contract.payment')->first();
                 $subject = $email_template->subject ?? 'Payment Confirmation';
                 $content = $email_template->content ?? '<strong>Dear ' . $data['name'] . ',</strong><br>
                 <div>
-                <p style="text-align:justify !important">We are delighted to inform you that payment for your chosen property has been successfully processed. Congratulations on taking the initial step towards property ownership with ' . $this->sessionDetails('company_name') . '.<br><br>You will receive a separate email with an official receipt for your first and subsequent installment payments. <br><br>Please visit our office to pick up your Provisional Allocation Letter, and if you have any questions, do not hesitate to contact our support team/contact person. <br><br>We look forward to creating a rewarding experience for you as a property owner.<br>';
+                <p style="text-align:justify !important">We are delighted to inform you that payment for your chosen property has been successfully processed. Congratulations on taking the initial step towards property ownership with ' . sessionDetails('company_name') . '.<br><br>You will receive a separate email with an official receipt for your first and subsequent installment payments. <br><br>Please visit our office to pick up your Provisional Allocation Letter, and if you have any questions, do not hesitate to contact our support team/contact person. <br><br>We look forward to creating a rewarding experience for you as a property owner.<br>';
                 
                 $content .= $this->propertyDetails($data);
 
-                $content .= 'Best regards,<br><br>' . $this->sessionDetails('company_name') . '</p>
+                $content .= 'Best regards,<br><br>' . sessionDetails('company_name') . '</p>
                 </div>';
             }
         }
@@ -434,15 +434,15 @@ class MessageTransactionController extends Controller
         // if ($data['type'] == 'contract.payment.part') {
         //     if (isset($data['medium']) && $data['medium'] == 'sms') {
         //     } else {
-        //         $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'email')->where('type', 'contract.payment')->first();
+        //         $email_template = MessageTemplate::where('company_id', sessionDetails('company_id'))->where('medium', 'email')->where('type', 'contract.payment')->first();
         //         $subject = $email_template->subject ?? 'Payment Confirmation';
         //         $content = $email_template->content ?? '<strong>Dear ' . $data['name'] . ',</strong><br>
         //         <div>
-        //         <p style="text-align:justify !important">We are delighted to inform you that installment payment for your chosen property has been successfully processed. Congratulations on taking the initial step towards property ownership with ' . $this->sessionDetails('company_name') . '.<br><br>You will receive a separate email with an official receipt for your first and subsequent installment payments. <br><br>Please visit our office to pick up your Provisional Allocation Letter, and if you have any questions, do not hesitate to contact our support team/contact person. <br><br>We look forward to creating a rewarding experience for you as a property owner.<br>';
+        //         <p style="text-align:justify !important">We are delighted to inform you that installment payment for your chosen property has been successfully processed. Congratulations on taking the initial step towards property ownership with ' . sessionDetails('company_name') . '.<br><br>You will receive a separate email with an official receipt for your first and subsequent installment payments. <br><br>Please visit our office to pick up your Provisional Allocation Letter, and if you have any questions, do not hesitate to contact our support team/contact person. <br><br>We look forward to creating a rewarding experience for you as a property owner.<br>';
 
         //         $content .= $this->propertyDetails($data);
 
-        //         $content .= 'Best regards,<br><br>' . $this->sessionDetails('company_name') . '</p>
+        //         $content .= 'Best regards,<br><br>' . sessionDetails('company_name') . '</p>
         //         </div>';
         //     }
         // }
@@ -452,10 +452,10 @@ class MessageTransactionController extends Controller
             } else {
                 $user = $data['user'];
                 $lam = $data['lam'];
-                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'email')->where('type', 'create.leave.request')->first();
+                $email_template = MessageTemplate::where('company_id', sessionDetails('company_id'))->where('medium', 'email')->where('type', 'create.leave.request')->first();
                 $subject = $email_template->subject ?? 'Leave Application Acknowledgment';
                 $content = $email_template->content ?? '<div>
-                <p style="text-align:justify !important">Dear '.$user->firstname.', Your leave application dated '.$lam->created_at.' has been received. It is under review by HR. We will update you soon.<br>If you have any questions or concerns, please do not hesitate to contact me or our HR department.<br><br><br>Best regards,<br><br>' . $this->sessionDetails('company_name') . '</p>
+                <p style="text-align:justify !important">Dear '.$user->firstname.', Your leave application dated '.$lam->created_at.' has been received. It is under review by HR. We will update you soon.<br>If you have any questions or concerns, please do not hesitate to contact me or our HR department.<br><br><br>Best regards,<br><br>' . sessionDetails('company_name') . '</p>
                 </div>';
             }
         }
@@ -463,17 +463,17 @@ class MessageTransactionController extends Controller
         if ($data['type'] == 'approve.leave.request') {
             if (isset($data['medium']) && $data['medium'] == 'sms') {
             } else {
-                $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id'))->where('medium', 'email')->where('type', 'approve.leave.request')->first();
+                $email_template = MessageTemplate::where('company_id', sessionDetails('company_id'))->where('medium', 'email')->where('type', 'approve.leave.request')->first();
                 $subject = $email_template->subject ?? 'Leave Request';
                 $content = $email_template->content ?? '<div>
-                <p style="text-align:justify !important">' . $data['content'] . '.<br><br><br><br>Best regards,<br><br>' . $this->sessionDetails('company_name') . '</p>
+                <p style="text-align:justify !important">' . $data['content'] . '.<br><br><br><br>Best regards,<br><br>' . sessionDetails('company_name') . '</p>
                 </div>';
             }
         }
 
         if ($data['type'] == 'send.email.to.admin.for.create.exits') {
             
-            $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id') ??  $data['company_id'])->where('medium', 'email')->where('type', 'send.email.to.admin.for.create.exits')->first();
+            $email_template = MessageTemplate::where('company_id', sessionDetails('company_id') ??  $data['company_id'])->where('medium', 'email')->where('type', 'send.email.to.admin.for.create.exits')->first();
             $subject = $email_template->subject ?? $data['subject'] ?? 'Exit Application Request';
             $content = $email_template->content ??  $data['content'] ?? $data['staff_name'] . ' has requested for an exit, kindly log into your account to approve or decline the request.';
             
@@ -481,7 +481,7 @@ class MessageTransactionController extends Controller
 
         if ($data['type'] == 'send.email.to.admin.for.create.advance-claims') {
             
-            $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id') ??  $data['company_id'])->where('medium', 'email')->where('type', 'send.email.to.admin.for.create.advance-claims')->first();
+            $email_template = MessageTemplate::where('company_id', sessionDetails('company_id') ??  $data['company_id'])->where('medium', 'email')->where('type', 'send.email.to.admin.for.create.advance-claims')->first();
             $subject = $email_template->subject ?? $data['subject'] ?? 'Advance/Claims Application Request';
             $content = $email_template->content ??  $data['content'] ?? $data['staff_name'] . ' has requested for an/a '. strtolower(explode(' ', $subject)[0] ?? '') .', kindly log into your account to approve or decline the request.';
             
@@ -489,7 +489,7 @@ class MessageTransactionController extends Controller
 
         if ($data['type'] == 'send.email.to.admin.for.create.leave-absence') {
             
-            $email_template = MessageTemplate::where('company_id', $this->sessionDetails('company_id') ??  $data['company_id'])->where('medium', 'email')->where('type', 'send.email.to.admin.for.create.leave-absence')->first();
+            $email_template = MessageTemplate::where('company_id', sessionDetails('company_id') ??  $data['company_id'])->where('medium', 'email')->where('type', 'send.email.to.admin.for.create.leave-absence')->first();
             $subject = $email_template->subject ?? $data['subject'] ?? 'Leave Application Request';
             $content = $email_template->content ??  $data['content'] ?? $data['staff_name'] . ' has requested for an/a '. strtolower(explode(' ', $subject)[0] ?? '') .', kindly log into your account to approve or decline the request.';
             
@@ -525,7 +525,7 @@ class MessageTransactionController extends Controller
                     'mail.encryption' => $provider->credentials['MAIL_ENCRYPTION'],
                     'mail.username' => $provider->credentials['MAIL_USERNAME'],
                     'mail.password' => $provider->credentials['MAIL_PASSWORD'],
-                    'mail.replyToName' => $provider->credentials['MAIL_REPLY_TO_NAME'] ?? $this->sessionDetails('company_name'),
+                    'mail.replyToName' => $provider->credentials['MAIL_REPLY_TO_NAME'] ?? sessionDetails('company_name'),
                     'mail.replyToAddress' => $provider->credentials['MAIL_REPLY_TO_ADDRESS'] ?? 'no-reply@mail.com',
                     'mail.from' => [
                         'address' => $provider->credentials['MAIL_REPLY_FROM_ADDRESS'],

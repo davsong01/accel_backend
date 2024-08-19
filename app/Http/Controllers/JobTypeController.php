@@ -17,7 +17,7 @@ class JobTypeController extends Controller
      */
     public function index()
     {
-        $jobtype = JobType::where('company_id', $this->sessionDetails('company_id'))->get();
+        $jobtype = JobType::where('company_id', sessionDetails('company_id'))->get();
         return response()->json(['message' => 'Success', 'data' => $jobtype], 200);
     }
 
@@ -37,7 +37,7 @@ class JobTypeController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => [
                 'required', Rule::unique('job_roles')->where(function ($query) {
-                    $query->where('company_id', $this->sessionDetails('company_id'));
+                    $query->where('company_id', sessionDetails('company_id'));
                 })
             ],
         ]);
@@ -51,7 +51,7 @@ class JobTypeController extends Controller
 
         $jobtype = Jobtype::updateOrcreate([
             'name' => $request->name,
-            'company_id' => $this->sessionDetails('company_id'),
+            'company_id' => sessionDetails('company_id'),
         ]);
 
         LogService::admin(auth()->user()->id, null, 'Create or update a job type (' . $jobtype->id  . ')' , 'CREATE');
@@ -92,7 +92,7 @@ class JobTypeController extends Controller
 
         $jobtype->update([
             'name' => $request->name,
-            'company_id' => $this->sessionDetails('company_id'),
+            'company_id' => sessionDetails('company_id'),
         ]);
 
         LogService::admin(auth()->user()->id, null, 'Update a job role (' . $jobtype->id  . ')' , 'UPDATE');

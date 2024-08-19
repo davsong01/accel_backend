@@ -17,7 +17,7 @@ class AccountClassificationController extends Controller
      */
     public function index()
     {
-        $account_classification = AccountClassification::where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'desc')->get();
+        $account_classification = AccountClassification::where('company_id', sessionDetails('company_id'))->orderBy('created_at', 'desc')->get();
         return response()->json(['message' => 'Success', 'data' => $account_classification], 200);
     }
 
@@ -37,7 +37,7 @@ class AccountClassificationController extends Controller
         $validator = Validator::make($request->all(), [
             'class' => [
                 'required', Rule::unique('account_classifications')->where(function ($query) {
-                    $query->where('company_id', $this->sessionDetails('company_id'));
+                    $query->where('company_id', sessionDetails('company_id'));
                 })
             ],
         ]);
@@ -51,7 +51,7 @@ class AccountClassificationController extends Controller
 
         $account_class = AccountClassification::updateOrcreate([
             'class' => $request->class,
-            'company_id' => $this->sessionDetails('company_id'),
+            'company_id' => sessionDetails('company_id'),
         ]);
 
         LogService::admin(auth()->user()->id, null, 'Create or update an account classification(' . $account_class->id . ')', 'CREATE');
@@ -96,7 +96,7 @@ class AccountClassificationController extends Controller
 
         $accountClassification->update([
             'class' => $request->class,
-            'company_id' => $this->sessionDetails('company_id'),
+            'company_id' => sessionDetails('company_id'),
         ]);
 
         LogService::admin(auth()->user()->id, null, 'Update an account classification(' . $accountClassification->id . ')', 'UPDATE');
