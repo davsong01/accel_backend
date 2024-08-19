@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
-use App\Models\Staff;
+
+
+use App\Traits\CompanyIdTrait;use App\Models\Staff;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -10,7 +12,7 @@ class Department extends Model
 {
     protected $guarded = [];
 
-    use HasFactory;
+    use HasFactory, CompanyIdTrait;
 
     public function staff(){
         return $this->hasMany(Staff::class);

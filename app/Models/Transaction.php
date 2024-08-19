@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
-use App\Models\Staff;
+
+
+use App\Traits\CompanyIdTrait;use App\Models\Staff;
 use App\Models\Customer;
 use App\Models\ChartOfAccount;
 use App\Models\CustomerContract;
@@ -13,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Transaction extends Model
 {
-    use HasFactory;
+    use HasFactory, CompanyIdTrait;
     protected $guarded = [];
     protected $table = 'transactions';
     protected $appends = ['receipt_location'];

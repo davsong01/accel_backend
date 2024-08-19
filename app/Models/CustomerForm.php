@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
-use App\Models\Lga;
+
+
+use App\Traits\CompanyIdTrait;use App\Models\Lga;
 use App\Models\States;
 use App\Models\Country;
 use App\Models\Customer;
@@ -12,7 +14,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class CustomerForm extends Model
 {
-    use HasFactory;
+    use HasFactory, CompanyIdTrait;
 
     protected $guarded = [];
 

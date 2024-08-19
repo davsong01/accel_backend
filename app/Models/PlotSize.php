@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
-use App\Models\CustomerContract;
+
+
+use App\Traits\CompanyIdTrait;use App\Models\CustomerContract;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\EstatePropertyTypeDetails;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -11,7 +13,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class PlotSize extends Model
 {
     protected $fillable = ['size', 'company_id'];
-    use HasFactory;
+    use HasFactory, CompanyIdTrait;
 
     public function estate(){
         return $this->belongsTo(Estate::class);

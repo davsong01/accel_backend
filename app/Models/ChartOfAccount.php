@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+
+
+use App\Traits\CompanyIdTrait;
 use App\Models\Currency;
 use App\Models\AccountType;
 use App\Models\Transaction;
@@ -12,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ChartOfAccount extends Model
 {
-    use HasFactory;
+    use HasFactory, CompanyIdTrait;
     protected $guarded = [];
     protected $appends = ['gl_no'];
 

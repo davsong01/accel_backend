@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Casts\Attribute;
+
+
+use App\Traits\CompanyIdTrait;use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class LegalDocumentTemplate extends Model
 {
-    use HasFactory;
+    use HasFactory, CompanyIdTrait;
 
     protected $fillable = ['estate_id', 'company_id', 'created_by', 'legal_document_type_id', 'property_type_id', 'file_location', 'template_sample'];
    

@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+
+
+use App\Traits\CompanyIdTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class ChangeOfOwnership extends Model
 {
-    use HasFactory;
+    use HasFactory, CompanyIdTrait;
 
     protected $fillable = ['branch_id', 'original_owner_id', 'customer_contract_id', 'new_owner_id', 'amount', 'company_id', 'comment', 'status'];
 

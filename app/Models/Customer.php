@@ -9,6 +9,7 @@ use App\Models\Property;
 use App\Models\Transaction;
 use App\Models\CustomerForm;
 use App\Models\CustomerRole;
+
 use App\Traits\CompanyIdTrait;
 use App\Models\CustomerContract;
 use App\Models\CustomerProperty;

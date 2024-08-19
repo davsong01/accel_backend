@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
-use App\Models\Bank;
+
+
+use App\Traits\CompanyIdTrait;use App\Models\Bank;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\JobType;
@@ -15,7 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Staff extends Model
 {
-    use HasFactory;
+    use HasFactory, CompanyIdTrait;
     protected $guarded = [];
 
     protected $table = 'staff';

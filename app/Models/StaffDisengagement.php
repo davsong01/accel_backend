@@ -2,14 +2,16 @@
 
 namespace App\Models;
 
-use Carbon\Carbon;
+
+
+use App\Traits\CompanyIdTrait;use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class StaffDisengagement extends Model
 {
-    use HasFactory;
+    use HasFactory, CompanyIdTrait;
 
     protected $fillable = ['staff_id', 'created_by', 'reason', 'from', 'to', 'company_id', 'status'];
 

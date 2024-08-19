@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
-use App\Models\Customer;
+
+
+use App\Traits\CompanyIdTrait;use App\Models\Customer;
 use App\Models\Branch;
 use App\Models\Company;
 use Illuminate\Database\Eloquent\Model;
@@ -11,7 +13,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class SpecialRequest extends Model
 {
-    use HasFactory;
+    use HasFactory, CompanyIdTrait;
 
     protected $fillable = ['type', 'company_id'];
 

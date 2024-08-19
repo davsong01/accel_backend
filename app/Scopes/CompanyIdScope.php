@@ -11,6 +11,8 @@ class CompanyIdScope implements Scope
 {
     public function apply(Builder $builder, Model $model): void
     {
-        $builder->where($model->getTable() . '.company_id',sessionDetails('company_id'));
+        if ($model->getConnection()->getSchemaBuilder()->hasColumn($model->getTable(), 'company_id')) {
+            $builder->where($model->getTable() . '.company_id', sessionDetails('company_id'));
+        }
     }
 }

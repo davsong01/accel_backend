@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
-use App\Models\Branch;
+
+
+use App\Traits\CompanyIdTrait;use App\Models\Branch;
 use App\Models\Transaction;
 use App\Models\ContractPaymentThread;
 use Illuminate\Database\Eloquent\Model;
@@ -11,7 +13,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class ContractPayment extends Model
 {
-    use HasFactory;
+    use HasFactory, CompanyIdTrait;
 
     protected $guarded = [];
 

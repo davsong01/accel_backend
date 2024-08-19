@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+
+
+use App\Traits\CompanyIdTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class ContractUnderConstructionThread extends Model
 {
-    use HasFactory;
+    use HasFactory, CompanyIdTrait;
 
     protected $fillable = [
         'company_id',

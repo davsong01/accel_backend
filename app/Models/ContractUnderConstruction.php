@@ -2,14 +2,16 @@
 
 namespace App\Models;
 
-use App\Traits\HasManyJson;
+
+
+use App\Traits\CompanyIdTrait;use App\Traits\HasManyJson;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
 class ContractUnderConstruction extends Model
 {
-    use HasFactory;
+    use HasFactory, CompanyIdTrait;
     use HasManyJson;
 
     protected $appends = ['payment_progress'];

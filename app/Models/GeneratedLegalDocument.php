@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
-use App\Models\CustomerContract;
+
+
+use App\Traits\CompanyIdTrait;use App\Models\CustomerContract;
 use App\Models\LegalDocumentType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -12,7 +14,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class GeneratedLegalDocument extends Model
 {
-    use HasFactory;
+    use HasFactory, CompanyIdTrait;
 
     protected $fillable = [ 'estate_id', 'regenerate_count', 'file_location', 'company_id', 'legal_document_template_id', 'contract_id', 'legal_document_type_id'];
     protected $append = ['file_location'];

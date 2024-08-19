@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+// 
+
+use App\Traits\CompanyIdTrait;use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Models\Lga;
 use App\Models\City;
 use App\Models\State;

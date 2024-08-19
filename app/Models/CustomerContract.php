@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
-use App\Models\City;
+
+
+use App\Traits\CompanyIdTrait;use App\Models\City;
 use App\Models\User;
 use App\Models\Estate;
 use App\Models\Customer;

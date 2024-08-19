@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+
+
+use App\Traits\CompanyIdTrait;use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class ContractPaymentThread extends Model
 {
-    use HasFactory;
+    use HasFactory, CompanyIdTrait;
     protected $guarded = [];
 
     // protected function payment_slip(): Attribute
