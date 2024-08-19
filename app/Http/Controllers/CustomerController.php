@@ -25,7 +25,7 @@ class CustomerController extends Controller
     {
         $customers = Customer::with(['user', 'contracts:id,property_type_id,status,customer_id'])->withCount('contracts')
             ->where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'DESC');
-       
+    
         if (!empty($request->name)) {
             $customers = $customers->whereHas('user', function ($query) use ($request) {
                 $query->where('first_name', 'LIKE', "%{$request->name}%")

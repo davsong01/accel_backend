@@ -6,13 +6,14 @@ use App\Models\City;
 use App\Models\Location;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\EstatePropertyTypeDetails;
+use App\Traits\CompanyIdTrait;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Estate extends Model
 {
     protected $fillable = ['name', 'city_id', 'location_id', 'company_id', 'branch_id', 'property_type', 'project_supervisor', 'description', 'status','form_amount'];
-    use HasFactory;
+    use HasFactory, CompanyIdTrait;
 
     public function location()
     {

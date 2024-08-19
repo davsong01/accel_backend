@@ -27,8 +27,7 @@ class EstateController extends Controller
      */
     public function index(Request $request)
     {
-        $estates = Estate::with(['location:id,name', 'city:id,name', 'estate_property_type'])
-            ->where('company_id', $this->sessionDetails('company_id'));
+        $estates = Estate::with(['location:id,name', 'city:id,name', 'estate_property_type']);
 
         if ($request->has('name') && !is_null($request->name)) {
             $estates = $estates->where('name', 'LIKE', "%{$request->name}%");

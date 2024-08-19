@@ -92,7 +92,6 @@ class Controller extends BaseController
 
     public function generateFormPayment(int $estate_id)
     {
-        // Expects an array of estate ids with their sub array of contract ids
         $amount = Estate::where('id', $estate_id)->first()->form_amount;
 
         return $amount;
@@ -106,117 +105,7 @@ class Controller extends BaseController
             return  time() . rand(1111111111, 9999999999);
         }
     }
-    // public function generateFormPayment(array $contract_ids, $customer_id)
-    // {
-    //     $contracts = [];
-    //     $ids = [];
-    //     $estates = [];
-
-    //     foreach ($contract_ids as $contract_id) {
-    //         // Get estates
-    //         $est = CustomerContract::select('estate_id')->where('id', $contract_id)
-    //             ->where('customer_id', $customer_id)
-    //             ->where('company_id', $this->sessionDetails('company_id'))->value('estate_id');
-
-    //         if (!empty($est)) {
-    //             $estates[] = $est;
-    //             $ids[] = $contract_id;
-    //         }
-    //     }
-
-    //     $estateContracts = [];
-
-    //     foreach ($estates as $e) {
-    //         // Get the contracts for each estate
-    //         $es = Estate::where('id', $e)->first();
-
-    //         $estateContracts[$e] = [
-    //             'estate_id' => $es->id,
-    //             'form_payment' => $es->form_amount,
-    //             'contracts' => $es->contracts($customer_id)
-    //         ];
-    //     }
-
-    //     $form_payment = [];
-
-    //     foreach ($estateContracts as $contract) {
-
-    //         $contract['i_form_payment'] = [];
-    //         $s_ids = array_intersect($contract['contracts'], $ids);
-    //         if (array_diff($contract['contracts'], $ids)) {
-    //             $dif = (count($contract['contracts']) - count(array_diff($contract['contracts'], $ids)));
-    //             $contract['i_form_payment']['form_amount'] = $dif *  $contract['form_payment'];
-    //         } else {
-    //             $contract['i_form_payment']['form_amount'] = $contract['form_payment'];
-    //         }
-
-    //         $contract['i_form_payment']['contracts'] =  array_values($s_ids);
-    //         $form_payment[$contract['estate_id']] = $contract['i_form_payment'];
-    //     }
-
-    //     $amount = array_sum(array_column($form_payment, 'form_amount'));
-    //     return [
-    //         'form_payment' => $amount,
-    //         'explanation' => $form_payment
-    //     ];
-    // }
-
-    // public function generateStaffId($date_of_employment = null, $internal = false)
-    // {
-    //     $date_of_employment = !empty($date_of_employment) ? Carbon::parse($date_of_employment) : Carbon::today();
-
-    //     $settings = StaffIdentificationSetting::where('company_id', $this->sessionDetails('company_id'))->first();
-
-    //     $lastUser = User::where('company_id', $this->sessionDetails('company_id'))->where('type', 'staff')->latest()->first();
-    //     $lastUserId = $lastUser->id + 1;
-    //     $lastStaffId = $lastUser->staff_id ?? 1;
-
-
-    //     if (!$settings) {
-    //         $id =  sprintf('%06d', $lastUserId);
-    //     } else {
-    //         $id = '';
-
-    //         if ($settings->use_id_generator == 1) {
-    //             if ($settings->id_generator_type == 'employment_year') {
-    //                 $id = $date_of_employment->format('Y') . sprintf('%06d', $lastUserId);
-    //             }
-
-    //             if ($settings->id_generator_type == 'employment_month') {
-    //                 $id = $date_of_employment->format('m') . sprintf('%06d', $lastUserId);
-    //             }
-
-    //             if ($settings->id_generator_type == 'employment_day') {
-    //                 $id = $date_of_employment->format('d') . sprintf('%06d', $lastUserId);
-    //             }
-
-    //             if ($settings->id_generator_type == 'auto_increment_number') {
-    //                 // $id = $date_of_employment->format('d');
-    //                 $digits = $settings->auto_increment_number_digit;
-    //                 $id = $lastUserId + $digits;
-
-    //                 return sprintf('%06d', $id);
-    //             }
-
-    //             if ($settings->id_generator_type == 'random_number') {
-    //                 $count = strlen($lastStaffId);
-    //                 $min = pow(10, $count - 1);
-    //                 $id = mt_rand($min, $min * 9);
-    //             }
-    //         } else {
-    //             $count = strlen($lastStaffId);
-    //             $min = pow(10, $count - 1);
-    //             $id = mt_rand($min, $min * 9);
-    //         }
-    //     }
-
-
-    //     if ($internal && $internal == true) {
-    //         return $id;
-    //     }
-
-    //     return response()->json(['message' => 'Successful', 'data' => $id], 200);
-    // }
+    
     public function generateStaffId($date_of_employment = null, $isJson = false)
     {
         $created_at = !empty($date_of_employment) ? Carbon::parse($date_of_employment) : Carbon::today();
