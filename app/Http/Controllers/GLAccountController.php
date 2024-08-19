@@ -24,7 +24,7 @@ class GLAccountController extends Controller
      */
     public function index(): JsonResponse
     {
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
 
         $accounts = ChartOfAccount::with(['account_category', 'account_type'])->where(['status' => 'active', 'company_id' => $company_id])->latest()->paginate(20);
         return response()->json(['message' => 'Success', 'data' => $accounts], 200);
@@ -39,7 +39,7 @@ class GLAccountController extends Controller
      */
     public function transactions(Request $request, ChartOfAccount $account): JsonResponse
     {
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
         $transactions = $this->transactionService
             ->fetchAccountTransactionQuery(
                 account: $account,
@@ -67,7 +67,7 @@ class GLAccountController extends Controller
     public function search(Request $request)
     {
         $params = $request->only(['status', 'accounttype_id']);
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
 
         $query = ChartOfAccount::with(['account_category', 'account_type'])->where('company_id', $company_id)->where($params);
 

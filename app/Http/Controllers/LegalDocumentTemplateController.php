@@ -35,9 +35,9 @@ class LegalDocumentTemplateController extends Controller
             'property_type_id' => $request->property_type_id,
             'legal_document_type_id' => $request->legal_document_type_id,
             'estate_id' => $request->estate_id,
-            'company_id' => $this->sessionDetails('company_id'), // $request->company_id,
+            'company_id' => sessionDetails('company_id'), // $request->company_id,
             'created_by' => 1,
-            'file_location' =>  $this->uploadProtectedFile($request->file, $this->sessionDetails('company_slug'))['filepath']
+            'file_location' =>  $this->uploadProtectedFile($request->file, sessionDetails('company_slug'))['filepath']
         ];
 
         $document = LegalDocumentTemplate::create($data);

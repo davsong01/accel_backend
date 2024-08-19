@@ -27,7 +27,7 @@ class EstateSettingController extends Controller
             ], 412);
         }
 
-        $estateSettings = EstateSettings::where('company_id',$this->sessionDetails('company_id'))->first();
+        $estateSettings = EstateSettings::where('company_id',sessionDetails('company_id'))->first();
        
         if ($request->has('form_payment_for_land') && !is_null($request->form_payment_for_land)) {
             $data['form_payment_for_land'] = $request->form_payment_for_land;
@@ -63,7 +63,7 @@ class EstateSettingController extends Controller
             
         }
        
-        $data['company_id'] = $this->sessionDetails('company_id');
+        $data['company_id'] = sessionDetails('company_id');
         
         if(!$estateSettings){
             EstateSettings::create($data);
@@ -76,7 +76,7 @@ class EstateSettingController extends Controller
     }
 
     public function getEstateSettings(){
-        $estateSettings = EstateSettings::where('company_id', $this->sessionDetails('company_id'))->first();
+        $estateSettings = EstateSettings::where('company_id', sessionDetails('company_id'))->first();
         $other = $estateSettings->customer_settings ? json_decode($estateSettings->customer_settings) : (object) [];
         $estateSettings->special_request_status = $other->special_request_status ?? null;
         $estateSettings->expiry_date = $other->expiry_date ?? null;

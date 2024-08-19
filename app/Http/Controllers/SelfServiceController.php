@@ -25,7 +25,7 @@ class SelfServiceController extends Controller
 {
     public function dashboard()
     {
-        $staffs = Staff::where('staff.company_id', $this->sessionDetails('company_id'))
+        $staffs = Staff::where('staff.company_id', sessionDetails('company_id'))
             ->where('staff.id', '!=', Auth::user()->staff->id)
             ->join('users', 'users.id', '=', 'staff.user_id')
             ->where('users.status', '=', 'active')
@@ -40,7 +40,7 @@ class SelfServiceController extends Controller
             ->take(10)
             ->get();
 
-        $staffsX = Staff::where('staff.company_id', $this->sessionDetails('company_id'))
+        $staffsX = Staff::where('staff.company_id', sessionDetails('company_id'))
             ->where('staff.id', '!=', Auth::user()->staff->id)
             ->join('users', 'users.id', '=', 'staff.user_id')
             ->where('users.status', '=', 'active')
@@ -56,7 +56,7 @@ class SelfServiceController extends Controller
             ->get();
 
 
-        $col = Staff::where('staff.company_id', $this->sessionDetails('company_id'))
+        $col = Staff::where('staff.company_id', sessionDetails('company_id'))
             ->where('staff.id', '!=', Auth::user()->staff->id)
             ->join('users', 'users.id', '=', 'staff.user_id')
             ->where('users.status', '=', 'active')
@@ -220,8 +220,8 @@ class SelfServiceController extends Controller
         $validator = Validator::make(
             $request->all(),
             [
-                'id' => 'required|exists:staff_document_settings,id,company_id,' . $this->sessionDetails('company_id'),
-                'staff_id' => 'required|exists:staff,id,company_id,' . $this->sessionDetails('company_id'),
+                'id' => 'required|exists:staff_document_settings,id,company_id,' . sessionDetails('company_id'),
+                'staff_id' => 'required|exists:staff,id,company_id,' . sessionDetails('company_id'),
                 'files' => 'required|array',
                 'files.*' => 'mimes:pdf,jpeg,jpg,png|max:2048',
             ],
@@ -247,7 +247,7 @@ class SelfServiceController extends Controller
             $staff_id = $request->staff_id;
         }
 
-        $setting = StaffDocumentSetting::where(['company_id' => $this->sessionDetails('company_id'), 'id' => $request->id])->first();
+        $setting = StaffDocumentSetting::where(['company_id' => sessionDetails('company_id'), 'id' => $request->id])->first();
 
         if (!$setting) {
             return response()->json([
@@ -287,7 +287,7 @@ class SelfServiceController extends Controller
                     'name' => $setting->name,
                     'file' => $save['filepath'],
                     'filename' => $save['filename'],
-                    'company_id' => $this->sessionDetails('company_id')
+                    'company_id' => sessionDetails('company_id')
                 ]);
             } else {
                 return response()->json([
@@ -304,9 +304,9 @@ class SelfServiceController extends Controller
     public function deleteDocument($id)
     {
         if (\Request::route()->getPrefix() == 'api/admin/self-service') {
-            $document = StaffUploadedDocument::where(['staff_id' => auth()->user()->staff->id, 'company_id' => $this->sessionDetails('company_id')])->first();
+            $document = StaffUploadedDocument::where(['staff_id' => auth()->user()->staff->id, 'company_id' => sessionDetails('company_id')])->first();
         } else {
-            $document = StaffUploadedDocument::where(['id' => $id, 'company_id' => $this->sessionDetails('company_id')])->first();
+            $document = StaffUploadedDocument::where(['id' => $id, 'company_id' => sessionDetails('company_id')])->first();
         }
 
         if ($document) {
@@ -434,7 +434,7 @@ class SelfServiceController extends Controller
         $staff = Staff::where('id', $staff_id)->first();
         $user = User::find($staff->user->id);
 
-        $unread = Auth::user()->unreadnotifications()->where('company_id', $this->sessionDetails('company_id'));
+        $unread = Auth::user()->unreadnotifications()->where('company_id', sessionDetails('company_id'));
 
         if (!empty($request->to) && !empty($request->from)) {
             $from = Carbon::parse($request->from . ' 00:00:00');
@@ -472,7 +472,7 @@ class SelfServiceController extends Controller
 
         $user = Auth::user();
         $notifications = [];
-        $read = $user->readNotifications()->where('company_id', $this->sessionDetails('company_id'));
+        $read = $user->readNotifications()->where('company_id', sessionDetails('company_id'));
 
         if (!empty($request->to) && !empty($request->from)) {
             $from = Carbon::parse($request->from . ' 00:00:00');
@@ -518,7 +518,7 @@ class SelfServiceController extends Controller
                 ->first();
             if($notification) $notification->markAsRead();
         } else {
-            $userUnreadNotification = $user->unreadNotifications->where('company_id', $this->sessionDetails('company_id'));
+            $userUnreadNotification = $user->unreadNotifications->where('company_id', sessionDetails('company_id'));
 
             foreach ($userUnreadNotification as $notification) {
                 $notification->markAsRead();

@@ -17,7 +17,7 @@ class AccountController extends Controller
      */
     public function index()
     {
-        $coa = Account::where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'desc')->get();
+        $coa = Account::where('company_id', sessionDetails('company_id'))->orderBy('created_at', 'desc')->get();
         return response()->json(['message' => 'Success', 'data' => $coa], 200);
     }
 
@@ -35,11 +35,11 @@ class AccountController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'accounttype_id' => 'required|exists:account_types,id,company_id,' . $this->sessionDetails('company_id'),
-            'accountclassification_id' => 'required|exists:account_classifications,id,company_id,' . $this->sessionDetails('company_id'),
+            'accounttype_id' => 'required|exists:account_types,id,company_id,' . sessionDetails('company_id'),
+            'accountclassification_id' => 'required|exists:account_classifications,id,company_id,' . sessionDetails('company_id'),
             'name' => [
                 'required', Rule::unique('accounts')->where(function ($query) {
-                    $query->where('company_id', $this->sessionDetails('company_id'));
+                    $query->where('company_id', sessionDetails('company_id'));
                 })
             ],
             'number' => 'required',
@@ -58,7 +58,7 @@ class AccountController extends Controller
             'name' => $request->name,
             'number' => $request->number,
             'status' => 1,
-            'company_id' => $this->sessionDetails('company_id'),
+            'company_id' => sessionDetails('company_id'),
         ]);
 
         LogService::admin(auth()->user()->id, null, 'Create or update an account(' . $account->id . ')', 'CREATE');
@@ -91,8 +91,8 @@ class AccountController extends Controller
     public function update(Request $request, Account $account)
     {
         $validator = Validator::make($request->all(), [
-            'accounttype_id' => 'required|exists:account_types,id,company_id,' . $this->sessionDetails('company_id'),
-            'accountclassification_id' => 'required|exists:account_classifications,id,company_id,' . $this->sessionDetails('company_id'),
+            'accounttype_id' => 'required|exists:account_types,id,company_id,' . sessionDetails('company_id'),
+            'accountclassification_id' => 'required|exists:account_classifications,id,company_id,' . sessionDetails('company_id'),
             'name' => 'required',
             'number' => 'required',
             'status' => 'nullable',
@@ -111,7 +111,7 @@ class AccountController extends Controller
             'name' => $request->name,
             'number' => $request->number,
             'status' => $request->status ?? $account->status,
-            'company_id' => $this->sessionDetails('company_id'),
+            'company_id' => sessionDetails('company_id'),
         ]);
 
         LogService::admin(auth()->user()->id, null, 'Update an account(' . $account->id . ')', 'UPDATE');

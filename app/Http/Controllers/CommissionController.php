@@ -18,9 +18,9 @@ class CommissionController extends Controller
     public function index(Request $request)
     {
         if (!empty($request->paginate) && $request->paginate == 'false') {
-            $commissions = Commission::where('company_id', $this->sessionDetails('company_id'))->get();
+            $commissions = Commission::where('company_id', sessionDetails('company_id'))->get();
         } else {
-            $commissions = Commission::where('company_id', $this->sessionDetails('company_id'))->paginate(20)->withQueryString();
+            $commissions = Commission::where('company_id', sessionDetails('company_id'))->paginate(20)->withQueryString();
         }
         return response()->json(['message' => 'Success', 'data' => $commissions], 200);
     }
@@ -41,7 +41,7 @@ class CommissionController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => [
                 'required', Rule::unique('commissions')->where(function ($query) {
-                    $query->where('company_id', $this->sessionDetails('company_id'));
+                    $query->where('company_id', sessionDetails('company_id'));
                 })
             ],
             'percentage' => 'required|numeric',
@@ -54,9 +54,9 @@ class CommissionController extends Controller
             ], 412);
         }
 
-        $commission = Commission::updateOrcreate(['name' => $request->name, 'company_id' => $this->sessionDetails('company_id')], [
+        $commission = Commission::updateOrcreate(['name' => $request->name, 'company_id' => sessionDetails('company_id')], [
             'percentage' => $request->percentage,
-            'company_id' => $this->sessionDetails('company_id'),
+            'company_id' => sessionDetails('company_id'),
         ]);
 
         LogService::admin(auth()->user()->id, NULL, 'Create a commission (' . $commission->id . ')', 'CREATE');
@@ -87,7 +87,7 @@ class CommissionController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => [
                 'required', Rule::unique('commissions')->where(function ($query) use ($commission) {
-                    $query->where('company_id', $this->sessionDetails('company_id'))->where('name', '!=', $commission->name);
+                    $query->where('company_id', sessionDetails('company_id'))->where('name', '!=', $commission->name);
                 })
             ],
             'percentage' => 'required|numeric',
@@ -103,7 +103,7 @@ class CommissionController extends Controller
         $commission->update([
             'name' => $request->name,
             'percentage' => $request->percentage,
-            'company_id' => $this->sessionDetails('company_id'),
+            'company_id' => sessionDetails('company_id'),
         ]);
 
         LogService::admin(auth()->user()->id, NULL, 'Update a commission (' . $commission->id . ')', 'UPDATE');

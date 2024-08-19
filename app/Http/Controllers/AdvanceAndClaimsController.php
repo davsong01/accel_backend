@@ -22,7 +22,7 @@ class AdvanceAndClaimsController extends Controller
      */
     public function index(Request $request, $id = null)
     {
-        $aac = AdvanceAndClaims::with('staff:id,user_id')->where('company_id', $this->sessionDetails('company_id'));
+        $aac = AdvanceAndClaims::with('staff:id,user_id')->where('company_id', sessionDetails('company_id'));
         
         if (\Request::route()->getPrefix() == 'api/admin/self-service') {
             $staff_id = Auth::user()->staff->id;
@@ -88,7 +88,7 @@ class AdvanceAndClaimsController extends Controller
         if (\Request::route()->getPrefix() == 'api/admin/self-service') {
             $staff_id = Auth::user()->staff->id;
         } 
-        $lam = AdvanceAndClaims::where('company_id', $this->sessionDetails('company_id'))->where('staff_id',$staff_id);
+        $lam = AdvanceAndClaims::where('company_id', sessionDetails('company_id'))->where('staff_id',$staff_id);
        
         if (isset($request->type) && !empty($request->type)) {
             $lam = $lam->where('type', $request->type);
@@ -147,7 +147,7 @@ class AdvanceAndClaimsController extends Controller
                 'amount' => 'required|numeric',
                 'date' => [
                     'required',Rule::unique('advance_and_claims')->where(function ($query) {
-                        $query->where('company_id', $this->sessionDetails('company_id'));
+                        $query->where('company_id', sessionDetails('company_id'));
                     })
                 ],
                 'proof' => 'nullable',
@@ -191,12 +191,12 @@ class AdvanceAndClaimsController extends Controller
             'time_sensitivity' => $request->time_sensitivity,
             'proof' => $proof,
             'status' => $status ?? 'pending',
-            'company_id' => $this->sessionDetails('company_id')
+            'company_id' => sessionDetails('company_id')
         ]);
 
         $staff = Staff::find($request->input('staff_id', Auth::user()->staff->id));
 
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
         
         $users = User::with(['staff:id,user_id', 'staff.staffRoles'])->where('staff_id', '!=', $staff->id)
             ->where(['type' => 'staff', 'company_id' => $company_id, 'status' => 'active'])
@@ -244,7 +244,7 @@ class AdvanceAndClaimsController extends Controller
             'link' => url('/') . '/api/admin/advance-and-claims/' . $lam->id,
             'user_type' => 'staff',
             'staff_id' => $lam->staff_id,
-            'company_id' => $this->sessionDetails('company_id')
+            'company_id' => sessionDetails('company_id')
         ];
         
         $this->notify($data);
@@ -263,7 +263,7 @@ class AdvanceAndClaimsController extends Controller
             'link' => url('/') . '/api/admin/advance-and-claims/' . $lam->id,
             'user_type' => 'staff',
             'staff_id' => $lam->staff_id,
-            'company_id' => $this->sessionDetails('company_id')
+            'company_id' => sessionDetails('company_id')
         ];
 
         $this->notify($data);
@@ -286,7 +286,7 @@ class AdvanceAndClaimsController extends Controller
             ], 412);
         }
 
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
 
         $setting = AdvanceAndClaimsSetting::updateOrCreate(['company_id' => $company_id, 'type' => $request->type], [
             'type' => $request->type,
@@ -299,7 +299,7 @@ class AdvanceAndClaimsController extends Controller
 
     // public function getLeaveAndAbsenceSetting(Request $request)
     // {
-    //     $settings = LeaveAndAbsenceSetting::where('company_id', $this->sessionDetails('company_id'));
+    //     $settings = LeaveAndAbsenceSetting::where('company_id', sessionDetails('company_id'));
 
     //     if (!empty($request->type)) {
     //         $settings = $settings->where('type', $request->type)->first();

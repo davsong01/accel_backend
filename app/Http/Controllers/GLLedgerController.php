@@ -25,7 +25,7 @@ class GLLedgerController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
 
         $transactions = $this->transactionService
             ->fetchGLAccountTransactionQuery(
@@ -45,7 +45,7 @@ class GLLedgerController extends Controller
      */
     public function create(Request $request): JsonResponse
     {
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
 
         $validator = Validator::make($request->all(), [
             'type' => 'required|in:CREDIT,DEBIT',
@@ -88,7 +88,7 @@ class GLLedgerController extends Controller
     public function search(Request $request): JsonResponse
     {
         $params = $request->only(['type', 'account_id']);
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
 
         $transactions = $this->transactionService
             ->fetchGLAccountTransactionQuery(

@@ -51,10 +51,10 @@ class ContractPaymentController extends Controller
     public function contractPayment(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'account_id' => 'required|exists:chart_of_accounts,id,company_id,' . $this->sessionDetails('company_id'),
-            'customer_id' => 'required|exists:customers,id,company_id,' . $this->sessionDetails('company_id'),
+            'account_id' => 'required|exists:chart_of_accounts,id,company_id,' . sessionDetails('company_id'),
+            'customer_id' => 'required|exists:customers,id,company_id,' . sessionDetails('company_id'),
             'contract_ids' => 'required',
-            'branch_id' => 'nullable|exists:branches,id,company_id,' . $this->sessionDetails('company_id'),
+            'branch_id' => 'nullable|exists:branches,id,company_id,' . sessionDetails('company_id'),
             'description' => 'nullable',
             'payment_slip' => 'nullable',
         ]);
@@ -78,12 +78,12 @@ class ContractPaymentController extends Controller
         $payments = [];
 
         // Took this outside the loop to reduce db calls
-        $allContractsX = CustomerContract::whereIn('id', array_column($contract_ids, 'contract_id'))->where('customer_id', $request->customer_id)->where('company_id', $this->sessionDetails('company_id'))->get();
+        $allContractsX = CustomerContract::whereIn('id', array_column($contract_ids, 'contract_id'))->where('customer_id', $request->customer_id)->where('company_id', sessionDetails('company_id'))->get();
 
         foreach ($contract_ids as $contract) {
-            // 'required|exists:customer_contracts,id,form_approval_status,approved,company_id,' . $this->sessionDetails('company_id'),
+            // 'required|exists:customer_contracts,id,form_approval_status,approved,company_id,' . sessionDetails('company_id'),
             //     'customer_id',
-            
+
             //if customer is confirmed(if customer form_status == confirmed ) and contract offer letter has been generated
             $contract_validator = Validator::make($contract, [
                 'allow_installment' => 'required|In:0,1',
@@ -92,7 +92,7 @@ class ContractPaymentController extends Controller
                 'contract_id' =>
                 
                 $request->customer_id,
-                'contract_id' => 'required|exists:customer_contracts,id,form_approval_status,approved,company_id,' . $this->sessionDetails('company_id'), 'customer_id', $request->customer_id,
+                'contract_id' => 'required|exists:customer_contracts,id,form_approval_status,approved,company_id,' . sessionDetails('company_id'), 'customer_id', $request->customer_id,
             ]);
 
             if ($contract_validator->fails()) {
@@ -139,8 +139,8 @@ class ContractPaymentController extends Controller
     public function continueContractPayment(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'account_id' => 'required|exists:chart_of_accounts,id,company_id,' . $this->sessionDetails('company_id'),
-            'customer_id' => 'required|exists:customers,id,company_id,' . $this->sessionDetails('company_id'),
+            'account_id' => 'required|exists:chart_of_accounts,id,company_id,' . sessionDetails('company_id'),
+            'customer_id' => 'required|exists:customers,id,company_id,' . sessionDetails('company_id'),
             'payment_slip' => 'nullable',
             'contract_ids' => 'required',
             'description' => 'nullable',
@@ -163,14 +163,14 @@ class ContractPaymentController extends Controller
         }
 
         $payments = [];
-        $allContractsX = CustomerContract::whereIn('id', array_column($contract_ids, 'contract_id'))->where('customer_id', $request->customer_id)->where('company_id', $this->sessionDetails('company_id'))->get();
+        $allContractsX = CustomerContract::whereIn('id', array_column($contract_ids, 'contract_id'))->where('customer_id', $request->customer_id)->where('company_id', sessionDetails('company_id'))->get();
         
         $allPaymentX = ContractPayment::whereIn('contract_id', array_column($contract_ids, 'contract_id'))->get();
         
         foreach ($contract_ids as $contract_id) {
             $contract_validator = Validator::make($contract_id, [
                 'amount' => 'required',
-                'contract_id' => 'required|exists:customer_contracts,id,form_approval_status,approved,company_id,' . $this->sessionDetails('company_id'), 'customer_id', $request->customer_id,
+                'contract_id' => 'required|exists:customer_contracts,id,form_approval_status,approved,company_id,' . sessionDetails('company_id'), 'customer_id', $request->customer_id,
             ]);
 
             if ($contract_validator->fails()) {
@@ -285,7 +285,7 @@ class ContractPaymentController extends Controller
                 'branch_id' => $payment->branch_id,
                 'description' => $data['description'],
                 'customer_id' => $data['customer_id'],
-                'company_id' => $this->sessionDetails('company_id')
+                'company_id' => sessionDetails('company_id')
             ]);
 
             $totalAmountPaid = $payment->amount + $amount;
@@ -302,7 +302,7 @@ class ContractPaymentController extends Controller
                 'description' => $payment_thread->description,
                 'staff_id' => auth()->user()->staff->id,
                 'type' => 'credit',
-                'company_id' => $this->sessionDetails('company_id'),
+                'company_id' => sessionDetails('company_id'),
             ]);
 
             // Update parent payment to reflect all payments
@@ -391,7 +391,7 @@ class ContractPaymentController extends Controller
             // Store Payment
             $balance = ($balance < 0) ? 0 : $balance;
             
-            $payment = ContractPayment::updateOrCreate(['customer_id' => $data['customer_id'], 'contract_id' => $contract->id, 'no_of_months' => $data['no_of_months'], 'company_id' => $this->sessionDetails('company_id')], [
+            $payment = ContractPayment::updateOrCreate(['customer_id' => $data['customer_id'], 'contract_id' => $contract->id, 'no_of_months' => $data['no_of_months'], 'company_id' => sessionDetails('company_id')], [
                 'contract_id' => $contract->id,
                 'contract_value' => $property_price,
                 'amount' => $data['amount'],
@@ -406,11 +406,11 @@ class ContractPaymentController extends Controller
                 'payment_slip' => $filename,
                 'property_net_fee' => $property_price - $discount,
                 'discount_applied' => $discount,
-                'company_id' => $this->sessionDetails('company_id')
+                'company_id' => sessionDetails('company_id')
             ]);
 
             // Create Payment thread
-            $payment_thread = ContractPaymentThread::updateOrCreate(['contract_payments_id' => $payment->id, 'company_id' => $this->sessionDetails('company_id')], [
+            $payment_thread = ContractPaymentThread::updateOrCreate(['contract_payments_id' => $payment->id, 'company_id' => sessionDetails('company_id')], [
                 'contract_payments_id' => $payment->id,
                 'amount' => $data['amount'],
                 'transaction_id' => $payment->transaction_id . 'CPT',
@@ -419,11 +419,11 @@ class ContractPaymentController extends Controller
                 'branch_id' => $payment->branch_id,
                 'description' => $payment->description,
                 'customer_id' => $payment->customer_id,
-                'company_id' => $this->sessionDetails('company_id')
+                'company_id' => sessionDetails('company_id')
             ]);
 
             // Transaction
-            Transaction::updateOrCreate(['customer_id' => $payment->customer_id, 'transaction_id' => $payment->transaction_id, 'company_id' => $this->sessionDetails('company_id')], [
+            Transaction::updateOrCreate(['customer_id' => $payment->customer_id, 'transaction_id' => $payment->transaction_id, 'company_id' => sessionDetails('company_id')], [
                 'customer_id' => $payment->customer_id,
                 'amount' => $payment->amount,
                 'transaction_id' => $payment->transaction_id,
@@ -433,7 +433,7 @@ class ContractPaymentController extends Controller
                 'description' => $payment->description,
                 'staff_id' => auth()->user()->staff->id,
                 'type' => 'credit',
-                'company_id' => $this->sessionDetails('company_id'),
+                'company_id' => sessionDetails('company_id'),
             ]);
 
             $others = [
@@ -533,8 +533,8 @@ class ContractPaymentController extends Controller
     public function makeSettingAndEscavationPayment(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'account_id' => 'required|exists:chart_of_accounts,id,company_id,' . $this->sessionDetails('company_id'),
-            'contract_id' => 'required|exists:customer_contracts,id,company_id,' . $this->sessionDetails('company_id'),
+            'account_id' => 'required|exists:chart_of_accounts,id,company_id,' . sessionDetails('company_id'),
+            'contract_id' => 'required|exists:customer_contracts,id,company_id,' . sessionDetails('company_id'),
             'amount' => 'required|numeric|gt:0',
             'type' => 'required|in:SE,INFRASTRUCTURE',
             'payment_slip' => 'nullable',
@@ -603,7 +603,7 @@ class ContractPaymentController extends Controller
                 'contract_id' => $contract->id,
                 'customer_id' => $contract->customer_id,
                 'type' => $request->type,
-                'company_id' => $this->sessionDetails('company_id')
+                'company_id' => sessionDetails('company_id')
             ],[
                 'contract_id' => $contract->id,
                 'amount' => $total_amount_paid,
@@ -614,25 +614,25 @@ class ContractPaymentController extends Controller
                 'account_id' => $request->account_id,
                 'payment_slip' => $filename,
                 'infrastructure_fee' => $infrastructure_fee,
-                'company_id' => $this->sessionDetails('company_id')
+                'company_id' => sessionDetails('company_id')
             ]);
 
             $payment_thread = SeInfrastructureThread::create([
                 'se_infrastructures_id' => $payment->id,
                 'amount' => $current_amount_paid,
                 'customer_id' => $contract->customer_id,
-                'branch_id' => $this->sessionDetails('branch_id'),
+                'branch_id' => sessionDetails('branch_id'),
                 'account_id' => $request->account_id,
                 'transaction_id' => $payment->transaction_id,
                 'payment_slip' => $filename,
-                'company_id' => $this->sessionDetails('company_id')
+                'company_id' => sessionDetails('company_id')
             ]);
 
             $payment->current_amount_paid = $current_amount_paid;
             $payment->total_amount_paid = $total_amount_paid;
         
             // Transaction
-            Transaction::updateOrCreate(['customer_id' => $payment->customer_id, 'transaction_id' => $payment->transaction_id, 'company_id' => $this->sessionDetails('company_id')], [
+            Transaction::updateOrCreate(['customer_id' => $payment->customer_id, 'transaction_id' => $payment->transaction_id, 'company_id' => sessionDetails('company_id')], [
                 'customer_id' => $contract->customer_id,
                 'amount' => $request->amount,
                 'transaction_id' => $payment->transaction_id,
@@ -642,7 +642,7 @@ class ContractPaymentController extends Controller
                 'description' => null,
                 'staff_id' => auth()->user()->staff->id,
                 'type' => 'credit',
-                'company_id' => $this->sessionDetails('company_id'),
+                'company_id' => sessionDetails('company_id'),
             ]);
             
             $contract->update([

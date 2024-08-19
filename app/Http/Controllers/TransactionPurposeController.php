@@ -15,7 +15,7 @@ class TransactionPurposeController extends Controller
      */
     public function index(): JsonResponse
     {
-        $list = TransactionPurpose::with(['transactionType'])->where('company_id', $this->sessionDetails('company_id'))->latest()->paginate(20);
+        $list = TransactionPurpose::with(['transactionType'])->where('company_id', sessionDetails('company_id'))->latest()->paginate(20);
         return response()->json(['message' => 'Success', 'data' => $list], 200);
     }
 
@@ -26,7 +26,7 @@ class TransactionPurposeController extends Controller
     {
         $name = $request->input('name');
 
-        $query = TransactionPurpose::where('company_id', $this->sessionDetails('company_id'))
+        $query = TransactionPurpose::where('company_id', sessionDetails('company_id'))
         ->where('name', 'LIKE', "%$name%")->latest()->paginate(20);
 
         return response()->json(['message' => 'Success', 'data' => $query], 200);
@@ -37,7 +37,7 @@ class TransactionPurposeController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
-        $company_id = $this->sessionDetails('company_id'); 
+        $company_id = sessionDetails('company_id'); 
         $validator = Validator::make($request->all(), [
             'name' => 'required|string',
             'transaction_type_id' => 'required|exists:transaction_types,id,company_id,' . $company_id,
@@ -72,7 +72,7 @@ class TransactionPurposeController extends Controller
     public function update(Request $request, TransactionPurpose $purpose)
     {
 
-        $company_id = $this->sessionDetails('company_id'); 
+        $company_id = sessionDetails('company_id'); 
         $validator = Validator::make($request->all(), [
             'name' => 'required|string',
             'transaction_type_id' => 'exists:transaction_types,id,company_id,' . $company_id,

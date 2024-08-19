@@ -18,7 +18,8 @@ class CityController extends Controller
      */
     public function index()
     {
-        $cities = City::where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'desc')->get();
+        $cities = City::orderBy('created_at', 'desc')->get();
+        
         return response()->json(['message' => 'Success', 'data' => $cities], 200);
     }
 
@@ -38,7 +39,7 @@ class CityController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => [
                 'required', Rule::unique('cities')->where(function ($query) {
-                    $query->where('company_id', $this->sessionDetails('company_id'));
+                    $query->where('company_id', sessionDetails('company_id'));
                 })
             ],
         ]);
@@ -52,7 +53,7 @@ class CityController extends Controller
 
         $city = City::updateOrcreate([
             'name' => $request->name,
-            'company_id' => $this->sessionDetails('company_id'),
+            'company_id' => sessionDetails('company_id'),
         ]);
         
         LogService::admin(auth()->user()->id, NULL, 'Create a city ('. $city->id .')', 'CREATE');
@@ -92,7 +93,7 @@ class CityController extends Controller
 
         $city->update([
             'name' => $request->name,
-            'company_id' => $this->sessionDetails('company_id'),
+            'company_id' => sessionDetails('company_id'),
         ]);
 
         LogService::admin(auth()->user()->id, NULL, 'Update a city ('. $city->id .')', 'UPDATE');

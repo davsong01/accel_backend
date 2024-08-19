@@ -16,7 +16,7 @@ class EstateConstructionSettingController extends Controller
      */
     public function index()
     {
-        $branches = EstateConstructionSetting::with('building_type')->where('company_id', $this->sessionDetails('company_id'))->latest()->get();
+        $branches = EstateConstructionSetting::with('building_type')->where('company_id', sessionDetails('company_id'))->latest()->get();
         if ($branches->count() > 0) {
             return response()->json(['message' => 'Retrieved Successfully', 'data' => $branches], 200);
         } else {
@@ -53,7 +53,7 @@ class EstateConstructionSettingController extends Controller
         $setting = EstateConstructionSetting::updateOrcreate([
             'name' => $request->name,
             'price' => $request->price,
-            'company_id' => $this->sessionDetails('company_id'),
+            'company_id' => sessionDetails('company_id'),
             'building_type_id' => $request->building_type_id,
         ]);
 
@@ -97,7 +97,7 @@ class EstateConstructionSettingController extends Controller
 
         $estateConstructionSetting->update([
             ...$validator->validated(),
-            'company_id' => $this->sessionDetails('company_id'),
+            'company_id' => sessionDetails('company_id'),
         ]);
 
         LogService::admin(auth()->user()->id, null, 'Update an estate construct settings (' . $estateConstructionSetting->id .')', 'UPDATE');

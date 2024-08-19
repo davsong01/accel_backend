@@ -24,7 +24,7 @@ class LegalDocumentController extends Controller
      */
     public function index()
     {
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
 
         $documents = GeneratedLegalDocument::where('company_id', $company_id)->latest()->paginate(20);
         return response()->json(['message' => 'Success', 'data' => $documents], 200);
@@ -73,7 +73,7 @@ class LegalDocumentController extends Controller
         
         $data = [
             ...$validator->validated(),
-            'company_id' => $this->sessionDetails('company_id'),
+            'company_id' => sessionDetails('company_id'),
             'created_by' => Auth::user()->id,
             'file_location' =>  $filepath
         ];
@@ -82,7 +82,7 @@ class LegalDocumentController extends Controller
 
         $document = LegalDocumentTemplate::updateOrcreate([
             'estate_id' => $data['estate_id'],
-            'company_id' => $this->sessionDetails('company_id'),
+            'company_id' => sessionDetails('company_id'),
             'legal_document_type_id' => $data['legal_document_type_id']
         ], $data);
 
@@ -95,7 +95,7 @@ class LegalDocumentController extends Controller
      */
     public function preview(Request $request)
     {
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
         $params = $request->input((new LegalDocumentTemplate)->getFillable());
         $template = LegalDocumentTemplate::select('id', 'file_location', 'template_sample')->where('company_id', $company_id)->where($request->all())->first();
         if (empty($template)) {
@@ -105,7 +105,7 @@ class LegalDocumentController extends Controller
         $template->template_sample = !empty($template->template_sample) ? $this->encodeUploadedFile($template->template_sample) : '';
         
         if (!$template) {
-            return response()->json(['message' => 'No Legal document template found for sent request parameters at: ' . $this->sessionDetails('company_name'), 'data' => []], 200);
+            return response()->json(['message' => 'No Legal document template found for sent request parameters at: ' . sessionDetails('company_name'), 'data' => []], 200);
         }
         $is_sample = request()->routeIs('template.preview.sample');
 
@@ -123,7 +123,7 @@ class LegalDocumentController extends Controller
      */
     // public function estateContracts(Request $request): JsonResponse
     // {
-    //     $company_id = $this->sessionDetails('company_id');
+    //     $company_id = sessionDetails('company_id');
 
     //     $params = $request->only((new LegalDocumentTemplate)->getFillable());
     //     $legalDocumentTemplate = LegalDocumentTemplate::where('company_id', $company_id)->where($params)->firstOrFail();
@@ -141,7 +141,7 @@ class LegalDocumentController extends Controller
 
     public function generatedLegalDocuments(Request $request): JsonResponse
     {
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
         $documents = GeneratedLegalDocument::select('id', 'estate_id', 'contract_id', 'legal_document_template_id', 'legal_document_type_id', 'regenerate_count', 'file_location', 'updated_at', 'created_at')->with('estate:id,name', 'legalDocumentType:id,type,name')->where('company_id', $company_id)->orderBy('created_at', 'DESC');
         
         if (!empty($request->estate_id)) {
@@ -195,7 +195,7 @@ class LegalDocumentController extends Controller
      */
     public function generate(Request $request)
     {
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
         $validator = Validator::make($request->all(), [
             'contract_id' => ['required', 'exists:customer_contracts,id,company_id,' . $company_id],
             'legal_document_type_id' => ['required', 'exists:legal_document_types,id'],
@@ -226,7 +226,7 @@ class LegalDocumentController extends Controller
                     'legal_document_template_id' => $legalDocumentTemplate->id,
                     'legal_document_type_id' => $legalDocumentTemplate->legalDocumentType->id,
                     'estate_id' => $request->estate_id,
-                    'company_id' => $this->sessionDetails('company_id'),
+                    'company_id' => sessionDetails('company_id'),
                 ],
                 [
                     'file_location' => $documentGen['relative_path'] . $documentGen['file_name'],

@@ -15,7 +15,7 @@ class TransactionTypeController extends Controller
      */
     public function index(): JsonResponse
     {
-        $list = TransactionType::with(['purposes'])->where('company_id', $this->sessionDetails('company_id'))->latest()->paginate(20);
+        $list = TransactionType::with(['purposes'])->where('company_id', sessionDetails('company_id'))->latest()->paginate(20);
         return response()->json(['message' => 'Success', 'data' => $list], 200);
     }
 
@@ -26,7 +26,7 @@ class TransactionTypeController extends Controller
     {
         $name = $request->input('name');
 
-        $query = TransactionType::with(['purposes'])->where('company_id', $this->sessionDetails('company_id'))
+        $query = TransactionType::with(['purposes'])->where('company_id', sessionDetails('company_id'))
         ->where('name', 'LIKE', "%$name%")->latest()->paginate(20);
 
         return response()->json(['message' => 'Success', 'data' => $query], 200);
@@ -51,7 +51,7 @@ class TransactionTypeController extends Controller
             ], 412);
         }
 
-        $attributes = [...$validator->validated(), 'company_id' => $this->sessionDetails('company_id')];
+        $attributes = [...$validator->validated(), 'company_id' => sessionDetails('company_id')];
         $created = TransactionType::create($attributes);
 
         LogService::admin(auth()->user()->id, null, 'Create transaction type (' . $created->id  . ')' , 'CREATE');

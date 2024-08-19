@@ -19,7 +19,7 @@ class JobRoleController extends Controller
      */
     public function index(Request $request)
     {
-        $jobroles = JobRole::with('department:id,name')->where('company_id', $this->sessionDetails('company_id'))->get();
+        $jobroles = JobRole::with('department:id,name')->where('company_id', sessionDetails('company_id'))->get();
 
         // if(!empty($request->type)){
         //     $jobroles = $jobroles->whereType($request->type);
@@ -44,10 +44,10 @@ class JobRoleController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => [
                 'required', Rule::unique('job_roles')->where(function ($query) {
-                    $query->where('company_id', $this->sessionDetails('company_id'));
+                    $query->where('company_id', sessionDetails('company_id'));
                 })
             ],
-            'department_id' => 'required|exists:departments,id,company_id,' . $this->sessionDetails('company_id'),
+            'department_id' => 'required|exists:departments,id,company_id,' . sessionDetails('company_id'),
         ]);
 
         if ($validator->fails()) {
@@ -60,7 +60,7 @@ class JobRoleController extends Controller
         $jobrole = JobRole::updateOrcreate([
             'name' => $request->name,
             'department_id' => $request->department_id,
-            'company_id' => $this->sessionDetails('company_id'),
+            'company_id' => sessionDetails('company_id'),
         ]);
 
         LogService::admin(auth()->user()->id, null, 'Create or update a job role (' . $jobrole->id  . ')' , 'CREATE');
@@ -70,7 +70,7 @@ class JobRoleController extends Controller
     public function getJobRoleByDepartmentId($id)
     {
         $roles = JobRole::where('department_id', $id)
-            ->where('company_id', $this->sessionDetails('company_id'))
+            ->where('company_id', sessionDetails('company_id'))
             ->select('id', 'department_id', 'name')
             ->get();
 
@@ -100,7 +100,7 @@ class JobRoleController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required',
-            'department_id' => 'required|exists:departments,id,company_id,' . $this->sessionDetails('company_id'),
+            'department_id' => 'required|exists:departments,id,company_id,' . sessionDetails('company_id'),
         ]);
 
         if ($validator->fails()) {
@@ -113,7 +113,7 @@ class JobRoleController extends Controller
         $jobrole->update([
             'name' => $request->name,
             'department_id' => $request->department_id,
-            'company_id' => $this->sessionDetails('company_id'),
+            'company_id' => sessionDetails('company_id'),
         ]);
 
         LogService::admin(auth()->user()->id, null, 'Update a job role (' . $jobrole->id  . ')' , 'UPDATE');
