@@ -2,7 +2,8 @@
 
 namespace App\Models;
 
-use App\Models\CustomerContract;
+
+use App\Traits\CompanyIdTrait;use App\Models\CustomerContract;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\EstatePropertyTypeDetails;
 use Illuminate\Database\Eloquent\Casts\Attribute;

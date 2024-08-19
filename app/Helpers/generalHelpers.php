@@ -269,7 +269,7 @@ if (!function_exists("getOptions")) {
         $customer = Customer::with(['user:id,email,first_name,middle_name,last_name,residential_address,state_id,phone_number'])->where('id', $contract->customer_id)->first();
         $company = Company::with('settings')->where('id', session()->get('company_id'))->first();
         $settings = $company->settings;
-       
+        
         $discount = $contract->discount ?? 0;
         $property_price = $contract->property_type_details->estate_price;
         $se_fee = $contract->property_type_details->settings_and_excavation;

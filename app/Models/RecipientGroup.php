@@ -2,7 +2,8 @@
 
 namespace App\Models;
 
-use App\Traits\HasManyJson;
+
+use App\Traits\CompanyIdTrait;use App\Traits\HasManyJson;
 use App\Traits\WhereHasManyThrough;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

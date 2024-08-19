@@ -2,7 +2,8 @@
 
 namespace App\Models;
 
-use App\Models\ChartOfAccount;
+
+use App\Traits\CompanyIdTrait;use App\Models\ChartOfAccount;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 

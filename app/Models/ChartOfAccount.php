@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\CompanyIdTrait;
 use App\Models\Currency;
 use App\Models\AccountType;
 use App\Models\Transaction;

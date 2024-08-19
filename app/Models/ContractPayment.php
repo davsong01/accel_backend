@@ -2,7 +2,8 @@
 
 namespace App\Models;
 
-use App\Models\Branch;
+
+use App\Traits\CompanyIdTrait;use App\Models\Branch;
 use App\Models\Transaction;
 use App\Models\ContractPaymentThread;
 use Illuminate\Database\Eloquent\Model;

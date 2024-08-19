@@ -2,7 +2,8 @@
 
 namespace App\Models;
 
-use App\Models\PlotSize;
+
+use App\Traits\CompanyIdTrait;use App\Models\PlotSize;
 use App\Models\BuildingType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;

@@ -2,7 +2,8 @@
 
 namespace App\Models;
 
-use App\Models\Staff;
+
+use App\Traits\CompanyIdTrait;use App\Models\Staff;
 use App\Models\Customer;
 use App\Models\ChartOfAccount;
 use App\Models\CustomerContract;
