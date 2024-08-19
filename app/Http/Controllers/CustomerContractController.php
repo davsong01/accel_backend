@@ -33,7 +33,7 @@ class CustomerContractController extends Controller
      */
     public function index(Request $request, $customer_id)
     {
-        $contracts = CustomerContract::with(['property_type_details', 'city:name,id', 'estate:name,id', 'location:name,id', 'building_type:id,name', 'plot_size:id,size'])->where('customer_id', $customer_id)->where('company_id', sessionDetails('company_id'))->select(['id', 'primary_marketer_id', 'property_type_id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'contract_status', 'plot_size', 'building_type', 'subscribers', 'contract_type', 'property_type', 'transaction_date', 'created_at', 'form_payment_transaction_id', 'contract_payment_transaction_id', 'discount','se_status','infrastructure_status']);
+        $contracts = CustomerContract::with(['property_type_details', 'city:name,id', 'estate:name,id', 'location:name,id', 'building_type:id,name', 'plot_size:id,size'])->where('customer_id', $customer_id)->select(['id', 'primary_marketer_id', 'property_type_id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'contract_status', 'plot_size', 'building_type', 'subscribers', 'contract_type', 'property_type', 'transaction_date', 'created_at', 'form_payment_transaction_id', 'contract_payment_transaction_id', 'discount','se_status','infrastructure_status']);
         
         $allContracts = [];
         if ($contracts->exists()) {
@@ -44,7 +44,7 @@ class CustomerContractController extends Controller
             $contracts = $contracts->orderBy('created_at', 'DESC')
                 ->get();
             // get the customer
-            $customer = Customer::withCount(['singleContract', 'jointContract', 'contracts'])->where('id', $customer_id)->where('company_id', sessionDetails('company_id'))->first();
+            $customer = Customer::withCount(['singleContract', 'jointContract', 'contracts'])->where('id', $customer_id)->first();
 
             $customerX = $customer;
             $customerY = $customer;
@@ -199,7 +199,7 @@ class CustomerContractController extends Controller
                 'estate_id' => 'required|exists:estates,id,company_id,' . sessionDetails('company_id'),
                 'property_type_id' => [
                     'required', Rule::exists('estate_property_type_details', 'id')->where(function ($query) use ($request) {
-                        $query->where('company_id', sessionDetails('company_id'))->where('estate_id', $request->estate_id)->where('type', $request->property_type);
+                        $query->where('estate_id', $request->estate_id)->where('type', $request->property_type);
                     })
                 ],
                 'property_type' => 'required|in:land,building',
@@ -306,7 +306,7 @@ class CustomerContractController extends Controller
                 'property_type' => 'nullable',
                 'property_type_id' => [
                     'required', Rule::exists('estate_property_type_details', 'id')->where(function ($query) use ($request) {
-                        $query->where('company_id', sessionDetails('company_id'))->where('estate_id', $request->estate_id);
+                        $query->where('estate_id', $request->estate_id);
                     })
                 ],
                 'plot_size' => 'nullable|exists:plot_sizes,id',
@@ -320,7 +320,7 @@ class CustomerContractController extends Controller
                 'gender' => 'required|in:male,female',
                 'email' => [
                     'required', 'email', Rule::unique('users')->where(function ($query) {
-                        $query->where('company_id', sessionDetails('company_id'))->where('type', 'customer');
+                        $query->where('type', 'customer');
                     })
                 ],
                 'phone_number' => 'required',
@@ -582,9 +582,9 @@ class CustomerContractController extends Controller
      */
     public function show($contract_id)
     {
-        $contract = CustomerContract::with('property_type_details', 'city:name,id', 'estate:name,id', 'location:name,id', 'building_type:id,name', 'plot_size:id,size', 'under_construction', 'contract_payment')->where('id', $contract_id)->select(['id', 'property_type_id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'company_id', 'subscribers', 'contract_type', 'primary_marketer_id'])->orderBy('created_at', 'DESC')->where('company_id', sessionDetails('company_id'))->first();
+        $contract = CustomerContract::with('property_type_details', 'city:name,id', 'estate:name,id', 'location:name,id', 'building_type:id,name', 'plot_size:id,size', 'under_construction', 'contract_payment')->where('id', $contract_id)->select(['id', 'property_type_id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'company_id', 'subscribers', 'contract_type', 'primary_marketer_id'])->orderBy('created_at', 'DESC')->first();
 
-        // $contract = CustomerContract::with('contract_payment', 'property_type_details', 'city:name,id', 'estate:name,id', 'location:name,id', 'building_type:id,name', 'plot_size:id,size')->where('customer_id', $customer_id)->where('company_id', sessionDetails('company_id'))->select(['id', 'primary_marketer_id', 'property_type_id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'contract_status', 'plot_size', 'building_type', 'subscribers', 'contract_type', 'property_type', 'transaction_date', 'created_at', 'form_payment_transaction_id', 'contract_payment_transaction_id', 'discount', 'se_status', 'infrastructure_status']);
+        // $contract = CustomerContract::with('contract_payment', 'property_type_details', 'city:name,id', 'estate:name,id', 'location:name,id', 'building_type:id,name', 'plot_size:id,size')->where('customer_id', $customer_id)->select(['id', 'primary_marketer_id', 'property_type_id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'contract_status', 'plot_size', 'building_type', 'subscribers', 'contract_type', 'property_type', 'transaction_date', 'created_at', 'form_payment_transaction_id', 'contract_payment_transaction_id', 'discount', 'se_status', 'infrastructure_status']);
 
 
         if ($contract) {
@@ -776,7 +776,7 @@ class CustomerContractController extends Controller
             'estate_id' => 'required|exists:estates,id,company_id,' . sessionDetails('company_id'),
             'property_type_id' => [
                 'required', Rule::exists('estate_property_type_details', 'id')->where(function ($query) use ($request) {
-                    $query->where('company_id', sessionDetails('company_id'))->where('estate_id', $request->estate_id)->where('type', $request->property_type);
+                    $query->where('estate_id', $request->estate_id)->where('type', $request->property_type);
                 })
             ],
             'property_type' => 'required|in:land,building',
@@ -860,7 +860,7 @@ class CustomerContractController extends Controller
         $customer = Customer::with('user:id,first_name,last_name,middle_name,customerId')->where('id', $customer_id)->first();
         $customerDetails = $customer->user ?? null;
 
-        $contracts = CustomerContract::with('location:name,id')->where('customer_id', $customer_id)->where('company_id', sessionDetails('company_id'))->select(['id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'property_type_id', 'building_type_id', 'contract_type', 'property_type'])->orderBy('created_at', 'DESC');
+        $contracts = CustomerContract::with('location:name,id')->where('customer_id', $customer_id)->select(['id', 'customer_id', 'city_id', 'location_id', 'estate_id', 'property_type', 'status', 'plot_size', 'building_type', 'property_type_id', 'building_type_id', 'contract_type', 'property_type'])->orderBy('created_at', 'DESC');
 
         if (!empty($request->status)) {
             $contracts = $contracts->where('status', $request->status);
@@ -875,7 +875,7 @@ class CustomerContractController extends Controller
         $allContracts = [];
         if ($contracts) {
             // get the customer
-            $customer = Customer::withCount(['singleContract', 'jointContract', 'contracts'])->where('id', $customer_id)->where('company_id', sessionDetails('company_id'))->first();
+            $customer = Customer::withCount(['singleContract', 'jointContract', 'contracts'])->where('id', $customer_id)->first();
             $customerX = $customer;
             $customerY = $customer;
 

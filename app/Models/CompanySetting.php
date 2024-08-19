@@ -4,7 +4,8 @@ namespace App\Models;
 
 
 
-use App\Traits\CompanyIdTrait;use App\Models\Currency;
+use App\Traits\CompanyIdTrait;
+use App\Models\Currency;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

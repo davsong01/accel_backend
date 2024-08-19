@@ -18,7 +18,7 @@ class AccountCategoryController extends Controller
      */
     public function index(Request $request)
     {
-        $account_category = AccountCategory::where('company_id', sessionDetails('company_id'))->orderBy('created_at', 'desc');
+        $account_category = AccountCategory::orderBy('created_at', 'desc');
 
         if (!empty($request->status)) {
             $account_category = $account_category->where('status', $request->status);
@@ -35,7 +35,7 @@ class AccountCategoryController extends Controller
 
     public function modifyAccountCategory($id)
     {
-        $account_cat = AccountCategory::where('company_id', sessionDetails('company_id'))->where('id', $id)->first();
+        $account_cat = AccountCategory::where('id', $id)->first();
         if ($account_cat) {
             if ($account_cat->status == 'active') {
                 $account_cat->update(['status' => 'inactive']);

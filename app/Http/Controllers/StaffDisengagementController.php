@@ -22,7 +22,7 @@ class StaffDisengagementController extends Controller
             'createdBy.user:id,first_name,middle_name,last_name,avatar,email',
             'disengaged:id,user_id',
             'disengaged.user:id,first_name,middle_name,last_name,avatar,email',
-        ])->where('company_id', sessionDetails('company_id'))->latest()->paginate(20);
+        ])->latest()->paginate(20);
         return response()->json(['message' => 'Success', 'data' => $list], 200);
     }
 

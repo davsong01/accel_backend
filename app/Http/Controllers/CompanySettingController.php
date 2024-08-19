@@ -18,7 +18,7 @@ class CompanySettingController extends Controller
      */
     public function index()
     {
-        $companySetting = CompanySetting::where('company_id', sessionDetails('company_id'))->first();
+        $companySetting = CompanySetting::first();
 
         if (!$companySetting) {
             $companySetting = CompanySetting::create([
@@ -159,7 +159,7 @@ class CompanySettingController extends Controller
             ], 412);
         }
 
-        $companySetting = CompanySetting::where('company_id', sessionDetails('company_id'))->first();
+        $companySetting = CompanySetting::first();
 
         $data = [
             'main_color' => $request->main_color,

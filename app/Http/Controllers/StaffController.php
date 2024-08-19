@@ -199,7 +199,7 @@ class StaffController extends Controller
             $validator = Validator::make($request->all(), [
                 'email' => [
                     'required', 'email', Rule::unique('users')->where(function ($query) {
-                        $query->where('company_id', sessionDetails('company_id'))->where('type', 'staff');
+                        $query->where('type', 'staff');
                     })
                 ],
                 'first_name' => 'required',
@@ -336,7 +336,7 @@ class StaffController extends Controller
 
             $this->logEmail($data);
         } else {
-            $staff = Staff::where('id', $request->staff_id)->where('company_id', sessionDetails('company_id'))->first();
+            $staff = Staff::where('id', $request->staff_id)->first();
             $user = $staff->user;
             $updateUser = Arr::only($data, ['email', 'first_name', 'middle_name', 'last_name', 'username', 'phone_number', 'gender', 'next_of_kin', 'branch_id', 'date_of_birth']);
             $updateStaff = Arr::only($data, ['jobtype_id', 'date_of_employment', 'department_id', 'jobrole_id', 'commission_id', 'bank_id', 'pfa_id', 'account_name', 'account_number', 'sort_code', 'swift_code', 'nhf_number']);
@@ -367,7 +367,7 @@ class StaffController extends Controller
         $validator = Validator::make($request->all(), [
             'email' => [
                 'required', Rule::unique('users')->where(function ($query) use ($staff) {
-                    $query->where('company_id', sessionDetails('company_id'))->where('id', '!=', (int) $staff->user_id)->where('type','staff');
+                    $query->where('id', '!=', (int) $staff->user_id)->where('type','staff');
                 })
             ],
             'first_name' => 'nullable',
@@ -450,13 +450,13 @@ class StaffController extends Controller
             $rolesx = explode(',', $request->roles);
             $newRoles = [];
             foreach ($rolesx as $rlid) {
-                $dt = Role::where('id', $rlid)->where('company_id', sessionDetails('company_id'))->where('type', 'staff')->count();
+                $dt = Role::where('id', $rlid)->where('type', 'staff')->count();
                 if ($dt > 0) {
                     $newRoles[] = $rlid;
                 }
             }
 
-            StaffRole::where('staff_id', $staff->staff_id)->where('company_id', sessionDetails('company_id'))->delete();
+            StaffRole::where('staff_id', $staff->staff_id)->delete();
             foreach ($newRoles as $new) {
                 StaffRole::Create([
                     'role_id' => $new,

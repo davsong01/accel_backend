@@ -69,8 +69,7 @@ class EstateController extends Controller
     {
         return response()->json(['error' => 'Deprecated', 'data' => ''], 404);
 
-        $estates = Estate::with(['location:id,name', 'city:id,name', 'estate_property_type'])
-            ->where('company_id', sessionDetails('company_id'));
+        $estates = Estate::with(['location:id,name', 'city:id,name', 'estate_property_type']);
 
         if ($request->has('name') && !is_null($request->name)) {
             $estates = $estates->where('name', 'LIKE', "%{$request->name}%");
@@ -129,9 +128,9 @@ class EstateController extends Controller
     public function getPropertyCount()
     {
         $data = [
-            'estate_count' => Estate::where('company_id', sessionDetails('company_id'))->count(),
-            'building_count' => EstatePropertyTypeDetails::where('company_id', sessionDetails('company_id'))->where('type', 'building')->count(),
-            'land_count' => EstatePropertyTypeDetails::where('company_id', sessionDetails('company_id'))->where('type', 'land')->count(),
+            'estate_count' => Estate::count(),
+            'building_count' => EstatePropertyTypeDetails::where('type', 'building')->count(),
+            'land_count' => EstatePropertyTypeDetails::where('type', 'land')->count(),
         ];
 
         return response()->json(['message' => 'Success', 'data' => $data]);
@@ -482,7 +481,7 @@ class EstateController extends Controller
 
     public function getEstateInLocation($location_id)
     {
-        $estates = Estate::where('location_id', $location_id)->where('company_id', sessionDetails('company_id'))->get();
+        $estates = Estate::where('location_id', $location_id)->get();
         return response()->json(['message' => 'Retrieved succesfully', 'data' => $estates], 200);
     }
 

@@ -19,7 +19,7 @@ class JobRoleController extends Controller
      */
     public function index(Request $request)
     {
-        $jobroles = JobRole::with('department:id,name')->where('company_id', sessionDetails('company_id'))->get();
+        $jobroles = JobRole::with('department:id,name')->get();
 
         // if(!empty($request->type)){
         //     $jobroles = $jobroles->whereType($request->type);

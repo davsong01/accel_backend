@@ -17,7 +17,7 @@ class AccountClassificationController extends Controller
      */
     public function index()
     {
-        $account_classification = AccountClassification::where('company_id', sessionDetails('company_id'))->orderBy('created_at', 'desc')->get();
+        $account_classification = AccountClassification::orderBy('created_at', 'desc')->get();
         return response()->json(['message' => 'Success', 'data' => $account_classification], 200);
     }
 
@@ -53,7 +53,7 @@ class AccountClassificationController extends Controller
             'class' => $request->class,
             'company_id' => sessionDetails('company_id'),
         ]);
-
+        
         LogService::admin(auth()->user()->id, null, 'Create or update an account classification(' . $account_class->id . ')', 'CREATE');
         return response()->json(['message' => 'Created successfully', 'data' => $account_class], 200);
     }

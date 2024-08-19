@@ -17,7 +17,7 @@ class BranchController extends Controller
      */
     public function index()
     {
-        $branches = Branch::where('company_id', sessionDetails('company_id'))->get();
+        $branches = Branch::get();
         if ($branches->count() > 0) {
             return response()->json(['message' => 'Retrieved Successfully', 'data' => $branches], 200);
         } else {

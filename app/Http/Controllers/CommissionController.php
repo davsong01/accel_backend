@@ -18,9 +18,9 @@ class CommissionController extends Controller
     public function index(Request $request)
     {
         if (!empty($request->paginate) && $request->paginate == 'false') {
-            $commissions = Commission::where('company_id', sessionDetails('company_id'))->get();
+            $commissions = Commission::get();
         } else {
-            $commissions = Commission::where('company_id', sessionDetails('company_id'))->paginate(20)->withQueryString();
+            $commissions = Commission::paginate(20)->withQueryString();
         }
         return response()->json(['message' => 'Success', 'data' => $commissions], 200);
     }
@@ -87,7 +87,7 @@ class CommissionController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => [
                 'required', Rule::unique('commissions')->where(function ($query) use ($commission) {
-                    $query->where('company_id', sessionDetails('company_id'))->where('name', '!=', $commission->name);
+                    $query->where('name', '!=', $commission->name);
                 })
             ],
             'percentage' => 'required|numeric',

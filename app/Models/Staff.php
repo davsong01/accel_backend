@@ -4,7 +4,8 @@ namespace App\Models;
 
 
 
-use App\Traits\CompanyIdTrait;use App\Models\Bank;
+use App\Traits\CompanyIdTrait;
+use App\Models\Bank;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\JobType;

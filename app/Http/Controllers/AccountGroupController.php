@@ -18,16 +18,16 @@ class AccountGroupController extends Controller
     public function index(Request $request)
     {
 
-        $account_group = AccountGroup::where('company_id', sessionDetails('company_id'))->latest();
+        $account_group = AccountGroup::latest();
 
         if (!empty($request->status)) {
             $account_group = $account_group->where('status', $request->status);
         }
 
         if (!empty($request->paginate) && $request->paginate == 'false') {
-            $account_group = AccountGroup::where('company_id', sessionDetails('company_id'))->latest()->get();
+            $account_group = AccountGroup::latest()->get();
         } else {
-            $account_group = AccountGroup::where('company_id', sessionDetails('company_id'))->latest()->paginate(20)->withQueryString();
+            $account_group = AccountGroup::latest()->paginate(20)->withQueryString();
         }
 
         return response()->json(['message' => 'Success', 'data' => $account_group], 200);
@@ -39,7 +39,7 @@ class AccountGroupController extends Controller
 
     public function modifyAccountGroup($id)
     {
-        $account_group = AccountGroup::where('company_id', sessionDetails('company_id'))->where('id', $id)->first();
+        $account_group = AccountGroup::where('id', $id)->first();
         if ($account_group) {
             if ($account_group->status == 'active') {
                 $account_group->update(['status' => 'inactive']);

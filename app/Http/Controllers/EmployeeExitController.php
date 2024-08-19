@@ -22,7 +22,7 @@ class EmployeeExitController extends Controller
     public function index(Request $request, $staff_id = null)
     {
 
-        $exit = EmployeeExit::with('staff.user')->where('company_id', sessionDetails('company_id'))->orderBy('created_at', 'DESC');
+        $exit = EmployeeExit::with('staff.user')->orderBy('created_at', 'DESC');
 
         if (!empty($staff_id)) {
             $exit = $exit->where('staff_id', $staff_id);

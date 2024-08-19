@@ -15,4 +15,9 @@ class CompanyIdScope implements Scope
             $builder->where($model->getTable() . '.company_id', sessionDetails('company_id'));
         }
     }
+
+    public function applyCompanyIdScope($query)
+    {
+        return $query->where('company_id', sessionDetails('company_id'));
+    }
 }

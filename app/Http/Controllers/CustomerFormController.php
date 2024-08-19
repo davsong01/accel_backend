@@ -142,7 +142,7 @@ class CustomerFormController extends Controller
 
     public function approveForm2Request($id)
     {
-        $customer_form = CustomerForm::with('customer')->where('id', $id)->where('company_id', sessionDetails('company_id'))->first();
+        $customer_form = CustomerForm::with('customer')->where('id', $id)->first();
         
         if (!$customer_form) {
             return response()->json(['message' => 'No records found', 'data' => []], 200);
@@ -186,7 +186,7 @@ class CustomerFormController extends Controller
             ], 412);
         }
 
-        $customer_form = CustomerForm::with('customer')->where('id', $id)->where('company_id', sessionDetails('company_id'))->first();
+        $customer_form = CustomerForm::with('customer')->where('id', $id)->first();
 
         if (!$customer_form) {
             return response()->json([
@@ -269,7 +269,7 @@ class CustomerFormController extends Controller
             ], 412);
         }
 
-        $customer_form = CustomerForm::with('customer')->where('id', $id)->where('company_id', sessionDetails('company_id'))->first();
+        $customer_form = CustomerForm::with('customer')->where('id', $id)->first();
 
         if (!$customer_form) {
             return response()->json([
@@ -378,7 +378,7 @@ class CustomerFormController extends Controller
                     'location_id' => 'required|exists:locations,id,company_id,' . sessionDetails('company_id'),
                     'property_type_id' => [
                         'required', Rule::exists('estate_property_type_details', 'id')->where(function ($query) use ($cont) {
-                            $query->where('company_id', sessionDetails('company_id'))->where('estate_id', $cont['estate_id'])->where('type', $cont['property_type']);
+                            $query->where('estate_id', $cont['estate_id'])->where('type', $cont['property_type']);
                         })
                     ],
                     // Other details
@@ -539,7 +539,7 @@ class CustomerFormController extends Controller
             ], 412);
         }
 
-        $customer_form = CustomerForm::with('customer')->where('id', $request->form_id)->where('company_id', sessionDetails('company_id'))->where('is_customer_response', 1)->first();
+        $customer_form = CustomerForm::with('customer')->where('id', $request->form_id)->where('is_customer_response', 1)->first();
 
         if (!$customer_form) {
             return response()->json(['message' => 'No record found', 'data' => []], 200);
@@ -558,7 +558,7 @@ class CustomerFormController extends Controller
 
                     'property_type_id' => [
                         'required', Rule::exists('estate_property_type_details', 'id')->where(function ($query) use ($cont) {
-                            $query->where('company_id', sessionDetails('company_id'))->where('estate_id', $cont['estate_id'])->where('type', $cont['property_type']);
+                            $query->where('estate_id', $cont['estate_id'])->where('type', $cont['property_type']);
                         })
                     ],
                     // Other details

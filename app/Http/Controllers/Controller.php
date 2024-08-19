@@ -59,7 +59,7 @@ class Controller extends BaseController
     public function getContractFormAmount($estate_contracts, $single = null)
     {
         $buildAmount = [];
-        $settings = EstateSettings::select(['form_payment_for_land', 'form_payment_for_building'])->where('company_id', sessionDetails('company_id'))->first();
+        $settings = EstateSettings::select(['form_payment_for_land', 'form_payment_for_building'])->first();
 
         if (isset($single)) {
             $buildAmount = 0;

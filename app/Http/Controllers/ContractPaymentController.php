@@ -78,7 +78,7 @@ class ContractPaymentController extends Controller
         $payments = [];
 
         // Took this outside the loop to reduce db calls
-        $allContractsX = CustomerContract::whereIn('id', array_column($contract_ids, 'contract_id'))->where('customer_id', $request->customer_id)->where('company_id', sessionDetails('company_id'))->get();
+        $allContractsX = CustomerContract::whereIn('id', array_column($contract_ids, 'contract_id'))->where('customer_id', $request->customer_id)->get();
 
         foreach ($contract_ids as $contract) {
             // 'required|exists:customer_contracts,id,form_approval_status,approved,company_id,' . sessionDetails('company_id'),
@@ -163,7 +163,7 @@ class ContractPaymentController extends Controller
         }
 
         $payments = [];
-        $allContractsX = CustomerContract::whereIn('id', array_column($contract_ids, 'contract_id'))->where('customer_id', $request->customer_id)->where('company_id', sessionDetails('company_id'))->get();
+        $allContractsX = CustomerContract::whereIn('id', array_column($contract_ids, 'contract_id'))->where('customer_id', $request->customer_id)->get();
         
         $allPaymentX = ContractPayment::whereIn('contract_id', array_column($contract_ids, 'contract_id'))->get();
         

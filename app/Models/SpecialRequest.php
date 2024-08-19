@@ -4,7 +4,8 @@ namespace App\Models;
 
 
 
-use App\Traits\CompanyIdTrait;use App\Models\Customer;
+use App\Traits\CompanyIdTrait;
+use App\Models\Customer;
 use App\Models\Branch;
 use App\Models\Company;
 use Illuminate\Database\Eloquent\Model;

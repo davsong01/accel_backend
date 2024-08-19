@@ -267,9 +267,11 @@ if (!function_exists("getOptions")) {
     function getOptions($contract_id, $legalDocumentTemplate){
         $contract = CustomerContract::where('id', $contract_id)->first();
         $customer = Customer::with(['user:id,email,first_name,middle_name,last_name,residential_address,state_id,phone_number'])->where('id', $contract->customer_id)->first();
-        $company = Company::with('settings')->where('id', session()->get('company_id'))->first();
+        
+        $company = Company::with('settings')->get('company_id')->first();
+
         $settings = $company->settings;
-       
+        
         $discount = $contract->discount ?? 0;
         $property_price = $contract->property_type_details->estate_price;
         $se_fee = $contract->property_type_details->settings_and_excavation;

@@ -15,7 +15,7 @@ class TransactionPurposeController extends Controller
      */
     public function index(): JsonResponse
     {
-        $list = TransactionPurpose::with(['transactionType'])->where('company_id', sessionDetails('company_id'))->latest()->paginate(20);
+        $list = TransactionPurpose::with(['transactionType'])->latest()->paginate(20);
         return response()->json(['message' => 'Success', 'data' => $list], 200);
     }
 

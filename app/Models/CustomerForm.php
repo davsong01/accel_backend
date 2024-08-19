@@ -4,7 +4,8 @@ namespace App\Models;
 
 
 
-use App\Traits\CompanyIdTrait;use App\Models\Lga;
+use App\Traits\CompanyIdTrait;
+use App\Models\Lga;
 use App\Models\States;
 use App\Models\Country;
 use App\Models\Customer;

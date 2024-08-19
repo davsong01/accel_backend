@@ -19,7 +19,7 @@ class LocationController extends Controller
      */
     public function index()
     {
-        $location = Location::with('city')->where('company_id', sessionDetails('company_id'))->orderBy('created_at', 'desc')->get();
+        $location = Location::with('city')->orderBy('created_at', 'desc')->get();
         return response()->json(['message' => 'Success', 'data' => $location], 200);
     }
 

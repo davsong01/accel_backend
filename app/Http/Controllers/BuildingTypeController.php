@@ -21,7 +21,7 @@ class BuildingTypeController extends Controller
      */
     public function index()
     {
-        $building_types = BuildingType::where('company_id', sessionDetails('company_id'))->orderBy('created_at', 'desc')->get();
+        $building_types = BuildingType::orderBy('created_at', 'desc')->get();
         return response()->json(['message' => 'Success', 'data' => $building_types], 200);
     }
 

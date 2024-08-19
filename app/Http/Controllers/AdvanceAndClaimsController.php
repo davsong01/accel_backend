@@ -88,7 +88,7 @@ class AdvanceAndClaimsController extends Controller
         if (\Request::route()->getPrefix() == 'api/admin/self-service') {
             $staff_id = Auth::user()->staff->id;
         } 
-        $lam = AdvanceAndClaims::where('company_id', sessionDetails('company_id'))->where('staff_id',$staff_id);
+        $lam = AdvanceAndClaims::where('staff_id',$staff_id);
        
         if (isset($request->type) && !empty($request->type)) {
             $lam = $lam->where('type', $request->type);
