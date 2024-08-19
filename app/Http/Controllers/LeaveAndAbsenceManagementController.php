@@ -169,11 +169,11 @@ class LeaveAndAbsenceManagementController extends Controller
     public function getLeaveDates(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'start_date' => 'required',
-            'period' => 'required',
+            'start_date' => 'required|date_format:d/m/Y',
+            'period' => 'required|integer|min:1',
         ]);
         $leaveDays = $request->period;
-        $start = $request->start_date;
+        $start = Carbon::createFromFormat('d/m/Y', $request->start_date);
         $leaveDates = $this->leaveDateService->calculateLeaveDates($start, $leaveDays, true, []);
         
         return CustomResponse::success(

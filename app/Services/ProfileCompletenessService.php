@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Staff;
+use Illuminate\Support\Facades\Storage;
 
 class ProfileCompletenessService
 {
@@ -40,6 +41,13 @@ class ProfileCompletenessService
     {
         $this->setRequiredDocumentTypes($requiredDocumentNames);
         // Calculate section completeness
+        // Check profile of set
+        if ($profile->user->avatar != "" && isset($profile->user->avatar)){
+            $profile_status = true;
+        } else {
+            $profile_status = false;
+        }
+
         $this->completeness = [
             'personal_details' => $this->calculateSectionCompleteness([
                 isset($profile->user->first_name) ? $profile->user->first_name : null,
@@ -67,7 +75,7 @@ class ProfileCompletenessService
                 isset($profile->user->lga_id) ? $profile->user->lga_id : null,
                 isset($profile->user->residential_address) ? $profile->user->residential_address : null,
             ]),
-            'profile_picture' => isset($profile->user->avatar) ? 1 : 0,
+            'profile_picture' => $profile_status ? 1 : 0,
             'bank_account_details' => $this->calculateSectionCompleteness([
                 isset($profile->bank->name) ? $profile->bank->name : null,
                 isset($profile->account_number) ? $profile->account_number : null,
@@ -94,6 +102,7 @@ class ProfileCompletenessService
         // dd($this->completeness);
         foreach ($this->weights as $section => $weight) {
             $sectionCompleteness = $this->calculateSectionPercentage($this->completeness[$section], $this->getFieldCount($section));
+            \Log::info($section . "====" . $sectionCompleteness);
             $totalCompleteness += $sectionCompleteness * ($weight / 100);
         }
 
