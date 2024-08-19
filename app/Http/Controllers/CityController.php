@@ -104,11 +104,17 @@ class CityController extends Controller
      */
     public function destroy(City $city)
     {
+        if ($this->definedRelations('City', $city) > 0) {
+            return response()->json(['message' => 'Unable to delete, resource in use', 'data' => []], 412);
+        }
+        
         $count = Estate::where(['city_id' => $city->id, 'company_id' => $city->company_id])->count();
 
         if ($count > 0) {
             return response()->json(['message' => 'Unable to delete, resource in use', 'data' => null], 412);
         }
+
+        
 
         LogService::admin(auth()->user()->id, NULL, 'Delete a city ('. $city->id .')', 'DELETE');
 

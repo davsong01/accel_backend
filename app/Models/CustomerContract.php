@@ -148,7 +148,6 @@ class CustomerContract extends Model
             ];
             
             return $details;
-
         }else{
             return null;
         }

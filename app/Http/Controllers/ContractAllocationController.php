@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\Validator;
 
 class ContractAllocationController extends Controller
 {
-
     public function allocateContract(Request $request){
         $validator = Validator::make($request->all(), [
             'customer_id' => 'required|exists:customers,id,company_id,' . $this->sessionDetails('company_id'),

@@ -81,10 +81,17 @@ class ContractPaymentController extends Controller
         $allContractsX = CustomerContract::whereIn('id', array_column($contract_ids, 'contract_id'))->where('customer_id', $request->customer_id)->where('company_id', $this->sessionDetails('company_id'))->get();
 
         foreach ($contract_ids as $contract) {
+            // 'required|exists:customer_contracts,id,form_approval_status,approved,company_id,' . $this->sessionDetails('company_id'),
+            //     'customer_id',
+            
+            //if customer is confirmed(if customer form_status == confirmed ) and contract offer letter has been generated
             $contract_validator = Validator::make($contract, [
                 'allow_installment' => 'required|In:0,1',
                 'no_of_months' => 'nullable',
                 'amount' => 'required',
+                'contract_id' =>
+                
+                $request->customer_id,
                 'contract_id' => 'required|exists:customer_contracts,id,form_approval_status,approved,company_id,' . $this->sessionDetails('company_id'), 'customer_id', $request->customer_id,
             ]);
 
