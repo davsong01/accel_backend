@@ -55,7 +55,6 @@ class JobTitleController extends Controller
     public function getJobRoleByDepartmentId($id)
     {
         $jobtitles = JobTitle::where('department_id', $id)
-            ->where('company_id', sessionDetails('company_id'))
             ->select('id', 'department_id', 'title')
             ->get();
 

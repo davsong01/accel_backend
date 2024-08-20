@@ -26,7 +26,7 @@ class CustomerFormController extends Controller
     public function index(Request $request, $id = null, $customer_id = null)
     {
         // Returns customer details and contract details for admin
-        $forms = CustomerForm::with(['customer'])->where('company_id', sessionDetails('company_id'));
+        $forms = CustomerForm::with(['customer']);
        
         if (\Request::route()->getPrefix() == 'api/customer') {
             if(Auth::check() ){
@@ -221,7 +221,7 @@ class CustomerFormController extends Controller
 
     public function approveCustomerFormResponse($id)
     {
-        $customer_form = CustomerForm::with('customer')->where('id', $id)->where('company_id', sessionDetails('company_id'))
+        $customer_form = CustomerForm::with('customer')->where('id', $id)
         ->where('is_customer_response', 1)
         // ->where('type', 'customer-response')
         ->first();

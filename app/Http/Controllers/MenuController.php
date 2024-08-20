@@ -96,7 +96,6 @@ class MenuController extends Controller
             $access = getAllAccess();
             $links = RolePermission::whereIn('id', $access)
             ->where(['status' => 'active', 'is_menu' => 'yes', 'parent' => NULL, 'type' => 'staff'])
-            // ->where('company_id', sessionDetails('company_id'))
             ->orderBy('order', 'ASC')->get();
         }
 
@@ -224,7 +223,6 @@ class MenuController extends Controller
     public function changeSpecialRequestStatus()
     {
         $permission = RolePermission::where('slug', 'special-requests')
-        // ->where('company_id', sessionDetails('company_id'))
         ->first();
 
         if ($permission) {

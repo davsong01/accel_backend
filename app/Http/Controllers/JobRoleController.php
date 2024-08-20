@@ -70,7 +70,6 @@ class JobRoleController extends Controller
     public function getJobRoleByDepartmentId($id)
     {
         $roles = JobRole::where('department_id', $id)
-            ->where('company_id', sessionDetails('company_id'))
             ->select('id', 'department_id', 'name')
             ->get();
 

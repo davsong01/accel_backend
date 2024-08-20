@@ -26,8 +26,7 @@ class TransactionTypeController extends Controller
     {
         $name = $request->input('name');
 
-        $query = TransactionType::with(['purposes'])->where('company_id', sessionDetails('company_id'))
-        ->where('name', 'LIKE', "%$name%")->latest()->paginate(20);
+        $query = TransactionType::with(['purposes'])->where('name', 'LIKE', "%$name%")->latest()->paginate(20);
 
         return response()->json(['message' => 'Success', 'data' => $query], 200);
     }
