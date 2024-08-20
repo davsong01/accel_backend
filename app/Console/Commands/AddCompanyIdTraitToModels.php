@@ -30,7 +30,6 @@ class AddCompanyIdTraitToModels extends Command
 
             if (strpos($contents, $traitToAdd) === false) {
                 if (strpos($contents, $useStatementToFind) !== false) {
-                    // Add CompanyIdTrait to the existing use HasFactory;
                     $newUseStatement = str_replace(
                         $useStatementToFind,
                         'use HasFactory, ' . $traitToAdd . ';',

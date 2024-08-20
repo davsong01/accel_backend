@@ -30,17 +30,14 @@ use App\Traits\CompanyIdTrait;';
             $contents = File::get($path);
 
             if (strpos($contents, $trait) === false) {
-                // Find the appropriate location to insert the trait
                 $namespacePos = strpos($contents, 'namespace');
                 $semicolonPos = strpos($contents, ';', $namespacePos) + 1;
                 $useStatementsPos = strpos($contents, 'use', $semicolonPos);
 
                 if ($useStatementsPos === false) {
-                    // No other use statements, add it before the class declaration
                     $classPos = strpos($contents, 'class');
                     $contents = substr_replace($contents, "\n$trait\n", $classPos, 0);
                 } else {
-                    // Add the trait after existing use statements
                     $contents = substr_replace($contents, "\n$trait", $useStatementsPos, 0);
                 }
 

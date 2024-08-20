@@ -21,10 +21,8 @@ class MakeModelWithCompanyTrait extends Command
 
     public function handle()
     {
-        // Call the default make:model command
         Artisan::call('make:model', ['name' => $this->argument('name')]);
 
-        // Get the path of the generated model file
         $modelPath = app_path('Models/' . $this->argument('name') . '.php');
 
         if ($this->filesystem->exists($modelPath)) {
@@ -37,16 +35,12 @@ class MakeModelWithCompanyTrait extends Command
 
     protected function insertTraits($modelPath)
     {
-        // Read the contents of the model file
         $content = $this->filesystem->get($modelPath);
 
-        // Insert the traits into the model
         $content = str_replace('use HasFactory;', 'use HasFactory, CompanyIdTrait;', $content);
 
-        // Insert the correct import for the CompanyIdTrait
         $content = preg_replace('/namespace (.*);/', "namespace $1;\n\nuse App\\Traits\\CompanyIdTrait;", $content);
 
-        // Save the modified content back to the model file
         $this->filesystem->put($modelPath, $content);
     }
 }
