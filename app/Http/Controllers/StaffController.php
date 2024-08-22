@@ -30,7 +30,7 @@ class StaffController extends Controller
 
     protected $profileCompletenessService;
 
-    public function __construct(ProfileCompletenessService $profileCompletenessService)
+    public function __construct(ProfileCompletenessService $profileCompletenessService=null)
     {
         $this->profileCompletenessService = $profileCompletenessService;
     }
