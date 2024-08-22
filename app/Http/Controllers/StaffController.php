@@ -644,7 +644,7 @@ class StaffController extends Controller
         if (empty($staff)) {
             return response()->json(['message' => 'No records found', 'data' => []], 200);
         }
-
+        
         $profile_completenes = $this->profileCompletenes($staff);
 
         $next_of_kin = $staff->user->next_of_kin;
@@ -660,6 +660,7 @@ class StaffController extends Controller
 
         $employment_date = $staff->date_of_employment ? date("jS\\, F Y", strtotime($staff->date_of_employment)) : '';
         $date_of_birth = $staff->user->date_of_birth ? date("jS\\, F Y", strtotime($staff->user->date_of_birth)) : '';
+        
         $data['job_information'] = [
             'jobtype' => [
                 'id' => $staff->job_type->id ?? '',
@@ -673,13 +674,13 @@ class StaffController extends Controller
                 'name' => $staff->department->name ?? ''
             ],
             'job_role' => [
-                'id' => $staff->job_role_id ?? '',
-                'name' => $staff->job_role_name ?? '',
+                'id' => $staff->job_role->id ?? '',
+                'name' => $staff->job_role->name ?? '',
             ],
-            'role' => [
-                'id' => $staff->role->id ?? '',
-                'name' => $staff->role->name ?? '',
-            ],
+            // 'role' => [
+            //     'id' => $staff->role->id ?? '',
+            //     'name' => $staff->role->name ?? '',
+            // ],
             'branch' => [
                 'id' => $staff->branch_id ?? '',
                 'name' => $staff->branch_name ?? '',
