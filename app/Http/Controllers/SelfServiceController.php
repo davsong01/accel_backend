@@ -211,7 +211,7 @@ class SelfServiceController extends Controller
 
         LogService::admin(auth()->user()->id, $user->id, 'Delete an avatar (' . $user->id  . ')', 'UPDATE');
 
-        return response()->json(['message' => 'Delete succesful', 'data' => null], 200);
+        return response()->json(['message' => 'Delete successful', 'data' => null], 200);
     }
 
     public function uploadDocuments(Request $request)
@@ -315,7 +315,7 @@ class SelfServiceController extends Controller
             LogService::admin(auth()->user()->id, null, 'Delete a document an avatar (' . $id  . ')', 'DELETE');
 
             $document->delete();
-            return response()->json(['message' => 'Delete succesful', 'data' => []], 200);
+            return response()->json(['message' => 'Delete successful', 'data' => []], 200);
         } else {
             return response()->json(['message' => 'No record found', 'data' => []], 200);
         }

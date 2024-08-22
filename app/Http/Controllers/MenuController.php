@@ -217,7 +217,7 @@ class MenuController extends Controller
         
         $permission->update($data);
 
-        return back()->with('message', 'Update succesful');
+        return back()->with('message', 'Update successful');
     }
 
     public function changeSpecialRequestStatus()
