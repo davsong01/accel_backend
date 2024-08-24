@@ -8,10 +8,11 @@ use App\Models\Estate;
 use App\Models\Location;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
+use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
-class EstateImport implements ToCollection, WithHeadingRow
+class EstateImport implements ToCollection, WithHeadingRow, SkipsEmptyRows
 {
     private $session;
 
