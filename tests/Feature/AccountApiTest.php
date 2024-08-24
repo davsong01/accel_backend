@@ -155,7 +155,10 @@ class AccountApiTest extends TestCase
             ->where('data', fn (Collection $data) => is_array($data->toArray()))
         );
     
-        $this->created = $response['data'];
+        $created = $response['data'];
+        $response = $this->withCookie('token', $this->token)
+        ->actingAs($this->user)
+        ->deleteJson("{$this->url}/{$created['id']}");
     }
 
     /**
