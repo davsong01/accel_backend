@@ -23,14 +23,19 @@ class PropertyChange extends Model
         return $this->belongsTo(CustomerContract::class, 'original_customer_contract_id');
     }
 
-    public function new_contract()
-    {
-        return $this->belongsTo(CustomerContract::class, 'new_customer_contract_id');
-    }
-
     public function branch()
     {
         return $this->belongsTo(Branch::class, 'branch_id');
+    }
+
+    public function estate()
+    {
+        return $this->belongsTo(Estate::class, 'estate_id');
+    }
+
+    public function city()
+    {
+        return $this->belongsTo(City::class, 'city_id');
     }
 
     public function customer()
