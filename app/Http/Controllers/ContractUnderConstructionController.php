@@ -19,7 +19,7 @@ class ContractUnderConstructionController extends Controller
      */
     public function index()
     {
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
         $list = ContractUnderConstruction::where('company_id', $company_id)->latest()->paginate();
         return response()->json(['message' => 'Success', 'data' => $list], 200);
     }
@@ -29,7 +29,7 @@ class ContractUnderConstructionController extends Controller
      */
     public function store(StoreContractUnderConstructionRequest $request)
     {
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
 
         $user =  auth()->user();
         $customer = Customer::find($request->customer_id);
@@ -74,7 +74,7 @@ class ContractUnderConstructionController extends Controller
     {
         $user = auth()->user();
         $customer = Customer::find($contract->customer_id);
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
         $balance = intval($contract->total_amount) - intval($contract->amount_paid);
 
 
@@ -113,7 +113,7 @@ class ContractUnderConstructionController extends Controller
     {
         $user = auth()->user();
         $customer = Customer::find($contract->customer_id);
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
 
         $balance_before = intval($request->total_amount) - intval($contract->amount_paid);
         $stagers = array_unique(array_merge($request->estate_construction_setting_ids ?? [], $contract->estate_construction_setting_ids ?? []));
@@ -169,7 +169,7 @@ class ContractUnderConstructionController extends Controller
     public function search(Request $request)
     {
         $params = $request->only(['company_id', 'customer_id', 'contract_id', 'created_by', 'amount_paid', 'total_amount', 'current_building_phase_id', 'chart_of_account_id']);
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
     
         if(isset($params['created_by'])){
             $params['created_by_id'] = $params['created_by'];

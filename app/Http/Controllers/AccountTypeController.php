@@ -16,7 +16,7 @@ class AccountTypeController extends Controller
      */
     public function index(Request $request)
     {
-        $account_type = AccountType::with('account_category')->where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'desc');
+        $account_type = AccountType::with('account_category')->where('company_id', sessionDetails('company_id'))->orderBy('created_at', 'desc');
 
         if (!empty($request->status)) {
             $account_type = $account_type->where('status', $request->status);
@@ -29,7 +29,7 @@ class AccountTypeController extends Controller
 
     public function modifyAccountType($id)
     {
-        $account_type = AccountType::where('company_id', $this->sessionDetails('company_id'))->where('id', $id)->first();
+        $account_type = AccountType::where('company_id', sessionDetails('company_id'))->where('id', $id)->first();
         if ($account_type) {
             if ($account_type->status == 'active') {
                 $account_type->update(['status' => 'inactive']);
@@ -57,7 +57,7 @@ class AccountTypeController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'type' => 'required',
-            'account_category_id' => 'required|exists:account_categories,id,company_id,' . $this->sessionDetails('company_id'),
+            'account_category_id' => 'required|exists:account_categories,id,company_id,' . sessionDetails('company_id'),
         ]);
 
         if ($validator->fails()) {
@@ -70,7 +70,7 @@ class AccountTypeController extends Controller
         $account_type = AccountType::updateOrcreate([
             'type' => $request->type,
             'account_category_id' => $request->account_category_id,
-            'company_id' => $this->sessionDetails('company_id'),
+            'company_id' => sessionDetails('company_id'),
         ]);
 
         LogService::admin(auth()->user()->id, null, 'Create an account type(' . $account_type->id . ')', 'CREATE');
@@ -104,7 +104,7 @@ class AccountTypeController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'type' => 'required',
-            'account_category_id' => 'required|exists:account_categories,id,company_id,' . $this->sessionDetails('company_id'),
+            'account_category_id' => 'required|exists:account_categories,id,company_id,' . sessionDetails('company_id'),
         ]);
 
         if ($validator->fails()) {

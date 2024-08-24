@@ -14,7 +14,7 @@ class HCMController extends Controller
      */
     public function index()
     {
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
 
         $totals = User::Where('company_id', $company_id)
             ->selectRaw('COUNT(*) as users, SUM(type = "staff") as staffs, SUM(type = "customer") as customers')->first();

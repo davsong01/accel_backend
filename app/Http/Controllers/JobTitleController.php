@@ -17,7 +17,7 @@ class JobTitleController extends Controller
      */
     public function index()
     {
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
 
         $jobs = JobTitle::with(['department', 'company'])->where('company_id', $company_id)->latest()->paginate(20);
         return response()->json(['message' => 'Success', 'data' => $jobs], 200);
@@ -28,7 +28,7 @@ class JobTitleController extends Controller
      */
     public function store(Request $request)
     {
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
 
         $validator = Validator::make($request->all(), [
             'title' => ['required', Rule::unique('job_titles')->where(function ($query) use ($request) {
@@ -55,7 +55,7 @@ class JobTitleController extends Controller
     public function getJobRoleByDepartmentId($id)
     {
         $jobtitles = JobTitle::where('department_id', $id)
-            ->where('company_id', $this->sessionDetails('company_id'))
+            ->where('company_id', sessionDetails('company_id'))
             ->select('id', 'department_id', 'title')
             ->get();
 
@@ -125,7 +125,7 @@ class JobTitleController extends Controller
      */
     public function update(Request $request, JobTitle $title)
     {
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
 
         $validator = Validator::make($request->all(), [
             'department_id' => 'exists:departments,id,company_id,' . $company_id,

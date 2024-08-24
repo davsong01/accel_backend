@@ -27,8 +27,7 @@ class EstateController extends Controller
      */
     public function index(Request $request)
     {
-        $estates = Estate::with(['location:id,name', 'city:id,name', 'estate_property_type'])
-            ->where('company_id', $this->sessionDetails('company_id'));
+        $estates = Estate::with(['location:id,name', 'city:id,name', 'estate_property_type']);
 
         if ($request->has('name') && !is_null($request->name)) {
             $estates = $estates->where('name', 'LIKE', "%{$request->name}%");
@@ -71,7 +70,7 @@ class EstateController extends Controller
         return response()->json(['error' => 'Deprecated', 'data' => ''], 404);
 
         $estates = Estate::with(['location:id,name', 'city:id,name', 'estate_property_type'])
-            ->where('company_id', $this->sessionDetails('company_id'));
+            ->where('company_id', sessionDetails('company_id'));
 
         if ($request->has('name') && !is_null($request->name)) {
             $estates = $estates->where('name', 'LIKE', "%{$request->name}%");
@@ -130,9 +129,9 @@ class EstateController extends Controller
     public function getPropertyCount()
     {
         $data = [
-            'estate_count' => Estate::where('company_id', $this->sessionDetails('company_id'))->count(),
-            'building_count' => EstatePropertyTypeDetails::where('company_id', $this->sessionDetails('company_id'))->where('type', 'building')->count(),
-            'land_count' => EstatePropertyTypeDetails::where('company_id', $this->sessionDetails('company_id'))->where('type', 'land')->count(),
+            'estate_count' => Estate::where('company_id', sessionDetails('company_id'))->count(),
+            'building_count' => EstatePropertyTypeDetails::where('company_id', sessionDetails('company_id'))->where('type', 'building')->count(),
+            'land_count' => EstatePropertyTypeDetails::where('company_id', sessionDetails('company_id'))->where('type', 'land')->count(),
         ];
 
         return response()->json(['message' => 'Success', 'data' => $data]);
@@ -146,11 +145,11 @@ class EstateController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => [
                 'required', Rule::unique('estates')->where(function ($query) {
-                    $query->where('company_id', $this->sessionDetails('company_id'));
+                    $query->where('company_id', sessionDetails('company_id'));
                 })
             ],
-            'city' => 'required|exists:cities,id,company_id,' . $this->sessionDetails('company_id'),
-            'location' => 'required|exists:locations,id,company_id,' . $this->sessionDetails('company_id'),
+            'city' => 'required|exists:cities,id,company_id,' . sessionDetails('company_id'),
+            'location' => 'required|exists:locations,id,company_id,' . sessionDetails('company_id'),
             'property_type' => 'required|in:land,building,both',
             'project_supervisor' => 'sometimes|exists:staff,id',
             'form_amount' => 'required|numeric',
@@ -201,8 +200,8 @@ class EstateController extends Controller
             'project_supervisor' => $request->project_supervisor,
             'form_amount' => $request->form_amount,
             'description' => $request->description,
-            'company_id' => $this->sessionDetails('company_id'),
-            'branch_id' => $this->sessionDetails('branch_id'),
+            'company_id' => sessionDetails('company_id'),
+            'branch_id' => sessionDetails('branch_id'),
         ]);
 
         // Create document template
@@ -219,7 +218,7 @@ class EstateController extends Controller
                     'estate_price' => $details['estate_price'],
                     'settings_and_excavation' => $details['settings_and_excavation'] ?? null,
                     'infrastructural_fee' => $details['infrastructural_fee'] ?? null,
-                    'company_id' => $this->sessionDetails('company_id') ?? null
+                    'company_id' => sessionDetails('company_id') ?? null
                 ]);
             }
         }
@@ -233,7 +232,7 @@ class EstateController extends Controller
                     "estate_price" => $details['estate_price'],
                     "settings_and_excavation" => $details['settings_and_excavation'] ?? null,
                     "infrastructural_fee" => $details['infrastructural_fee'] ?? null,
-                    "company_id" => $this->sessionDetails('company_id') ?? null
+                    "company_id" => sessionDetails('company_id') ?? null
                 ]);
             }
         }
@@ -248,8 +247,8 @@ class EstateController extends Controller
             "estate_id" => 'required|exists:estates,id',
             "type" => "required|in:land,building,both",
             "estate_price" => "sometimes",
-            'plot_size' => 'nullable|exists:plot_sizes,id,company_id,' . $this->sessionDetails('company_id'),
-            'building_type' => 'nullable|exists:building_types,id,company_id,' . $this->sessionDetails('company_id'),
+            'plot_size' => 'nullable|exists:plot_sizes,id,company_id,' . sessionDetails('company_id'),
+            'building_type' => 'nullable|exists:building_types,id,company_id,' . sessionDetails('company_id'),
             "estate_price" => "sometimes",
             "settings_and_excavation" => "sometimes",
             "infrastructural_fee" => "sometimes"
@@ -270,7 +269,7 @@ class EstateController extends Controller
             "estate_price" => $request->estate_price ?? null,
             "settings_and_excavation" => $request->settings_and_excavation ?? null,
             "infrastructural_fee" => $request->infrastructural_fee ?? null,
-            "company_id" => $this->sessionDetails('company_id') ?? null
+            "company_id" => sessionDetails('company_id') ?? null
         ]);
 
         LogService::admin(auth()->user()->id, null, 'Create or update an estate property type details (' . $p_type->id .')', 'CREATE');
@@ -321,9 +320,9 @@ class EstateController extends Controller
             'city_id' => $request->city,
             'location_id' => $request->location,
             'property_type' => $request->property_type,
-            'company_id' => $this->sessionDetails('company_id'),
+            'company_id' => sessionDetails('company_id'),
             'project_supervisor' => $request->project_supervisor,
-            'branch_id' => $this->sessionDetails('branch_id'),
+            'branch_id' => sessionDetails('branch_id'),
             'description' => $request->description,
             'form_amount' => $request->form_amount,
         ]);
@@ -374,8 +373,8 @@ class EstateController extends Controller
     public function updateEstatePropertyType(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
-            'plot_size' => 'nullable|exists:plot_sizes,id,company_id,' . $this->sessionDetails('company_id'),
-            'building_type' => 'nullable|exists:building_types,id,company_id,' . $this->sessionDetails('company_id'),
+            'plot_size' => 'nullable|exists:plot_sizes,id,company_id,' . sessionDetails('company_id'),
+            'building_type' => 'nullable|exists:building_types,id,company_id,' . sessionDetails('company_id'),
             "estate_price" => 'required',
             "settings_and_excavation" => 'nullable',
             "infrastructural_fee" => 'required',
@@ -441,7 +440,7 @@ class EstateController extends Controller
             ], 412);
         }
 
-        $estateSettings = EstateSettings::where('company_id', $this->sessionDetails('company_id'))->update(['form_expiry_date' => $request->form_expiry]);
+        $estateSettings = EstateSettings::where('company_id', sessionDetails('company_id'))->update(['form_expiry_date' => $request->form_expiry]);
 
         LogService::admin(auth()->user()->id, null, 'Update an estate setting form expiry (' . $estateSettings->id .')', 'UPDATE');
         return response()->json(['message' => 'Updated Successfully.', 'data' => null], 200);
@@ -483,7 +482,7 @@ class EstateController extends Controller
 
     public function getEstateInLocation($location_id)
     {
-        $estates = Estate::where('location_id', $location_id)->where('company_id', $this->sessionDetails('company_id'))->get();
+        $estates = Estate::where('location_id', $location_id)->where('company_id', sessionDetails('company_id'))->get();
         return response()->json(['message' => 'Retrieved succesfully', 'data' => $estates], 200);
     }
 
@@ -493,7 +492,7 @@ class EstateController extends Controller
      */
     public function search(Request $request)
     {
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
 
         $query = Estate::where('company_id', $company_id);
 

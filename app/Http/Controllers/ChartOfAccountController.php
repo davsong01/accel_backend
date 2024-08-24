@@ -16,7 +16,7 @@ class ChartOfAccountController extends Controller
      */
     public function index(Request $request)
     {
-        $coa = ChartOfAccount::with('currency', 'account_category:id,name', 'account_type:id,type')->where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'desc');
+        $coa = ChartOfAccount::with('currency', 'account_category:id,name', 'account_type:id,type')->where('company_id', sessionDetails('company_id'))->orderBy('created_at', 'desc');
 
         if (!empty($request->status)) {
             $coa = $coa->where('status', $request->status);
@@ -29,7 +29,7 @@ class ChartOfAccountController extends Controller
 
     public function modifyChartOfAccount($id)
     {
-        $coa = ChartOfAccount::where('company_id', $this->sessionDetails('company_id'))->where('id', $id)->first();
+        $coa = ChartOfAccount::where('company_id', sessionDetails('company_id'))->where('id', $id)->first();
         if ($coa) {
             if ($coa->status == 'active') {
                 $coa->update(['status' => 'inactive']);
@@ -55,8 +55,8 @@ class ChartOfAccountController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'accounttype_id' => 'required|exists:account_types,id,company_id,' . $this->sessionDetails('company_id'),
-            'account_category_id' => 'required|exists:account_categories,id,company_id,' . $this->sessionDetails('company_id'),
+            'accounttype_id' => 'required|exists:account_types,id,company_id,' . sessionDetails('company_id'),
+            'account_category_id' => 'required|exists:account_categories,id,company_id,' . sessionDetails('company_id'),
             'currency' => 'required|exists:currencies,id',
             'name' => 'required',
             'account_number' => 'nullable',
@@ -77,7 +77,7 @@ class ChartOfAccountController extends Controller
             'name' => $request->name,
             'account_number' => $request->account_number,
             'input_method' => $request->input_method,
-            'company_id' => $this->sessionDetails('company_id'),
+            'company_id' => sessionDetails('company_id'),
         ]);
 
         LogService::admin(auth()->user()->id, NULL, 'Create chart of account status ('. $account_class->id .')', 'CREATE');
@@ -110,8 +110,8 @@ class ChartOfAccountController extends Controller
     public function update(Request $request, ChartOfAccount $chartOfAccount)
     {
         $validator = Validator::make($request->all(), [
-            'accounttype_id' => 'required|exists:account_types,id,company_id,' . $this->sessionDetails('company_id'),
-            'account_category_id' => 'required|exists:account_categories,id,company_id,' . $this->sessionDetails('company_id'),
+            'accounttype_id' => 'required|exists:account_types,id,company_id,' . sessionDetails('company_id'),
+            'account_category_id' => 'required|exists:account_categories,id,company_id,' . sessionDetails('company_id'),
             'currency' => 'required',
             'name' => 'required',
             'input_method' => 'required|in:direct,indirect',
@@ -134,7 +134,7 @@ class ChartOfAccountController extends Controller
             'input_method' => $request->input_method,
             'status' => $request->status,
             'account_number' => $request->account_number,
-            'company_id' => $this->sessionDetails('company_id'),
+            'company_id' => sessionDetails('company_id'),
         ]);
 
         LogService::admin(auth()->user()->id, NULL, 'Update a chart of account status ('. $chartOfAccount->id .')', 'UPDATE');

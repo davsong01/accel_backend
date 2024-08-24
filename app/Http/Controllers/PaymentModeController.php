@@ -15,7 +15,7 @@ class PaymentModeController extends Controller
      */
     public function index()
     {
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
         $list = PaymentMode::where('company_id', $company_id)->latest()->paginate();
         return response()->json(['message' => 'Success', 'data' => $list], 200);
     }
@@ -64,7 +64,7 @@ class PaymentModeController extends Controller
      */
     public function update(Request $request, PaymentMode $mode)
     {
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
         $user = auth()->user();
 
         $validator = Validator::make($request->all(), [
@@ -96,7 +96,7 @@ class PaymentModeController extends Controller
     public function search(Request $request)
     {
 
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
 
         $query = PaymentMode::where('company_id', $company_id);
 

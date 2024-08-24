@@ -15,7 +15,7 @@ class LogController extends Controller
      */
     public function audit(): JsonResponse
     {
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
 
         $logs = AdminLog::with(['createdBy:id,type,status,first_name,last_name,middle_name,title,avatar', 'causee:id,type,status,first_name,last_name,middle_name,title,avatar'])->where('company_id', $company_id)->latest()->paginate(20);
         return response()->json(['message' => 'Success', 'data' => $logs], 200);
@@ -27,7 +27,7 @@ class LogController extends Controller
     public function search(Request $request): JsonResponse
     {
         $params = $request->only(['crud_type']);
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
 
         $query = AdminLog::with(['createdBy:id,type,status,first_name,last_name,middle_name,title,avatar', 'causee:id,type,status,first_name,last_name,middle_name,title,avatar'])->where('company_id', $company_id)->where($params);
 
@@ -82,7 +82,7 @@ class LogController extends Controller
     public function operations(Request $request): JsonResponse
     {
         $params = $request->only(['crud_type']);
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
 
 
         $query = AdminLog::with(['createdBy:id,type,status,first_name,last_name,middle_name,title,avatar', 'causee:id,type,status,first_name,last_name,middle_name,title,avatar'])

@@ -17,7 +17,7 @@ class BranchController extends Controller
      */
     public function index()
     {
-        $branches = Branch::where('company_id', $this->sessionDetails('company_id'))->get();
+        $branches = Branch::where('company_id', sessionDetails('company_id'))->get();
         if ($branches->count() > 0) {
             return response()->json(['message' => 'Retrieved Successfully', 'data' => $branches], 200);
         } else {
@@ -42,7 +42,7 @@ class BranchController extends Controller
             'location' => 'sometimes',
             'name' => [
                 'required', Rule::unique('branches')->where(function ($query) {
-                    $query->where('company_id', $this->sessionDetails('company_id'));
+                    $query->where('company_id', sessionDetails('company_id'));
                 })
             ],
         ]);
@@ -57,7 +57,7 @@ class BranchController extends Controller
         $branch = Branch::updateOrcreate([
             'name' => $request->name,
             'location' => $request->location,
-            'company_id' => $this->sessionDetails('company_id'),
+            'company_id' => sessionDetails('company_id'),
         ]);
 
         LogService::admin(auth()->user()->id, NULL, 'Create or update a branch ('. $branch->id . ')', 'CREATE');
@@ -102,7 +102,7 @@ class BranchController extends Controller
             'name' => $request->name,
             'location' => $request->location,
             'status' => $request->status,
-            'company_id' => $this->sessionDetails('company_id'),
+            'company_id' => sessionDetails('company_id'),
         ]);
 
         LogService::admin(auth()->user()->id, NULL, 'Update a branch ('. $branch->id . ')', 'UPDATE');
