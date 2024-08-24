@@ -25,9 +25,17 @@ class AccountApiTest extends TestCase
 
         // Prepare a user and related data
         $this->user = \App\Models\User::firstWhere(['email' => 'davedeloper@gmail.com']);
+
         $account_type = \App\Models\AccountType::firstWhere('company_id', $this->user->company_id);
         $account_classification = \App\Models\AccountClassification::firstWhere('company_id', $this->user->company_id);
+
         $this->account = \App\Models\Account::firstWhere('company_id', $this->user->company_id);
+        $this->created = \App\Models\Account::create([
+            'name' => fake()->words(3, true),
+            'number' => '' . fake()->numberBetween(9999999, 2147483647),
+            'accounttype_id' => $account_type?->id,
+            'accountclassification_id' => $account_classification?->id,
+        ]);
         $this->url = '/api/admin/account';
 
         $this->data = [
@@ -36,14 +44,6 @@ class AccountApiTest extends TestCase
             'accounttype_id' => $account_type?->id,
             'accountclassification_id' => $account_classification?->id,
         ];
-
-        // Create a resource
-        // $response = $this->withCookie('token', $this->token)
-        //     ->actingAs($this->user)
-        //     ->postJson('/api/admin/account', $this->data);
-
-        // Save the created resource for use in other tests
-        $this->created = [];
     }
 
     protected function tearDown(): void
@@ -156,6 +156,52 @@ class AccountApiTest extends TestCase
         );
     
         $this->created = $response['data'];
+    }
+
+    /**
+     * Test update resource without authentication.
+     */
+    public function test_update_account_without_authentication(): void
+    {
+        $data = [];
+        $response = $this->patchJson("{$this->url}/{$this->created['id']}", $data);
+
+        $response->assertStatus(401)
+            ->assertJson(['message' => 'Unauthenticated.']);
+    }
+
+
+    /**
+     * Test update resource with authentication with validation error.
+     */
+    public function test_update_account_with_authentication_with_validation_error(): void
+    {
+        $response = $this->withCookie('token', $this->token)
+            ->actingAs($this->user)
+            ->patchJson("{$this->url}/{$this->created['id']}", []);
+
+        $response->assertStatus(412)
+            ->assertJson(fn (AssertableJson $json) =>
+                $json->hasAll(['error', 'data'])
+            );
+    }
+
+
+    /**
+     * Test update resource with authentication without validation error.
+     */
+    public function test_update_account_with_authentication_without_validation_error(): void
+    {
+        $response = $this->withCookie('token', $this->token)
+            ->actingAs($this->user)
+            ->patchJson("{$this->url}/{$this->created['id']}", $this->data);
+
+    
+        $response->assertStatus(200)
+        ->assertJson(fn (AssertableJson $json) =>
+            $json->whereType('message', 'string')
+            ->where('data', fn (Collection $data) => is_array($data->toArray()))
+        );
     }
 
 
