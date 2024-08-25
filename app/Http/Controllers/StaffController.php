@@ -62,7 +62,7 @@ class StaffController extends Controller
                 ->where('employee_exits.status', '=', 'APPROVED')
             )
             ->whereNull('employee_exits.id')
-            ->select("staff.id AS staff_id", "users.id As user_id", "users.staff_id As staffID", "users.status", "staff.created_at", "job_title_id", "users.first_name", "users.middle_name", "users.last_name", "users.email", "users.type", "users.company_id", "job_roles.name AS job_role", "job_types.name AS job_type", "departments.name AS department", "users.type", "users.phone_number",  "users.avatar", "staff.jobtype_id AS jobtype_id", "staff.jobrole_id AS jobrole_id", "staff.department_id AS department_id", "bank_id")->orderBy("staff.created_at", "desc");
+            ->select("staff.id AS staff_id", "users.id As user_id", "users.staff_id As staffID", "users.status", "staff.created_at", "job_title_id", "users.first_name", "users.middle_name", "users.last_name", "users.email", "users.type","users.avatar", "users.company_id", "job_roles.name AS job_role", "job_types.name AS job_type", "departments.name AS department", "users.type", "users.phone_number",  "users.avatar", "staff.jobtype_id AS jobtype_id", "staff.jobrole_id AS jobrole_id", "staff.department_id AS department_id", "bank_id")->orderBy("staff.created_at", "desc");
 
 
         if (!empty($request->name)) {
@@ -96,7 +96,7 @@ class StaffController extends Controller
         }
 
         foreach ($staff as $st) {
-            $st->avatar = $st->user->avatar;
+            $st->avatar = !empty($st->avatar) ? app('App\Http\Controllers\Controller')->encodeGeneralUploadedFile($st->avatar) : '';
         }
 
         return response()->json(['message' => 'Success', 'data' => $staff], 200);
