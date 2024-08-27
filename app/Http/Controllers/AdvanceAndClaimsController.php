@@ -162,7 +162,7 @@ class AdvanceAndClaimsController extends Controller
         }
 
         $request['date'] = !empty($request->date) ? Carbon::parse($request->start_date . ' 00:00:00') : null;
-        $proof = [];
+        $proof = "";
         
         // if(!empty($request->proof)){
         //     foreach($request->proof as $p){
