@@ -140,6 +140,19 @@ class StaffImport implements ToCollection, SkipsEmptyRows, WithHeadingRow
                     // 'commision_percentage' => $row['commision_percentage'] ?? '',
                     'company_id' => $this->company_id,
                 ]);
+
+                $data = [
+                    ...$row, 'nationality' => $nationality, 'lga' => $lga, 
+                    'date_of_employment' => $date_of_employment,
+                ];
+
+                $data['type'] = 'staff.store';
+                $data['medium'] = 'email';
+                $data['user'] = $user;
+                $data['name'] = $user->first_name;
+                $data['recipient'] = $user->email ?? 'Staff';
+    
+                app('App\Http\Controllers\Controller')->logEmail($data);
                 //code...
             } catch (\Throwable $th) {
                 dd($th->getMessage(), $th->getLine());
