@@ -13,7 +13,7 @@ class LegalDocumentTemplate extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['estate_id', 'company_id', 'created_by', 'legal_document_type_id', 'property_type_id', 'file_location'];
+    protected $fillable = ['estate_id', 'company_id', 'created_by', 'legal_document_type_id', 'property_type_id', 'file_location', 'template_sample'];
    
 
     // protected function fileLocation(): Attribute

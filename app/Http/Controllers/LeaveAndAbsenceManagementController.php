@@ -37,9 +37,9 @@ class LeaveAndAbsenceManagementController extends Controller
     {
         if (\Request::route()->getPrefix() == 'api/admin/self-service') {
             $staff_id = Auth::user()->staff->id;
-            $lam = LeaveAndAbsenceManagement::where('company_id', $this->sessionDetails('company_id'))->where('staff_id', $staff_id);
+            $lam = LeaveAndAbsenceManagement::where('company_id', sessionDetails('company_id'))->where('staff_id', $staff_id);
         } else {
-            $lam = LeaveAndAbsenceManagement::where('company_id', $this->sessionDetails('company_id'));
+            $lam = LeaveAndAbsenceManagement::where('company_id', sessionDetails('company_id'));
         }
 
         if (isset($request->type) && !empty($request->type)) {
@@ -110,7 +110,7 @@ class LeaveAndAbsenceManagementController extends Controller
             $staff_id = Auth::user()->staff->id;
         }
 
-        $lam = LeaveAndAbsenceManagement::where('company_id', $this->sessionDetails('company_id'))->where('staff_id', $staff_id);
+        $lam = LeaveAndAbsenceManagement::where('company_id', sessionDetails('company_id'))->where('staff_id', $staff_id);
 
         if (isset($request->type) && !empty($request->type)) {
             $lam = $lam->where('type', $request->type);
@@ -191,7 +191,7 @@ class LeaveAndAbsenceManagementController extends Controller
             'file_path' => "required|mimes:docx,doc,pdf|max:5120",
             'delegate_duty' => [
                 'required',
-                'exists:staff,id,company_id,' . $this->sessionDetails('company_id'),
+                'exists:staff,id,company_id,' . sessionDetails('company_id'),
                 Rule::notIn([$request->staff_id ?? Auth::user()->staff->id]),
                 Rule::unique('leave_and_absence_management')->where(
                     fn ($query) => $query->where('end_date', $request->end_date)
@@ -269,7 +269,7 @@ class LeaveAndAbsenceManagementController extends Controller
                 'type' => $request->type ?? 'leave',
                 'delegate_duty' => $request->delegate_duty,
                 'status' => $status ?? 'pending',
-                'company_id' => $this->sessionDetails('company_id'),
+                'company_id' => sessionDetails('company_id'),
                 'file_path' =>  $filepath
             ]);
 
@@ -280,7 +280,7 @@ class LeaveAndAbsenceManagementController extends Controller
                 'link' => url('/') . '/single-staff-leave-and-absence/api/admin/' . $lam->staff_id . '?type=leave',
                 'user_type' => 'staff',
                 'staff_id' => $lam->staff_id,
-                'company_id' => $this->sessionDetails('company_id')
+                'company_id' => sessionDetails('company_id')
             ];
 
             $this->notify($data);
@@ -303,9 +303,12 @@ class LeaveAndAbsenceManagementController extends Controller
             $this->logEmail($data);
 
             $staff = Staff::find($request->input('staff_id', Auth::user()->staff->id));
-            $company_id = $this->sessionDetails('company_id');
-            $users = User::with('staff:id,user_id')->where('staff_id', '!=', $staff->id)
-            ->where(['type' => 'staff', 'company_id' => $company_id, 'status' => 'active'])->whereNotNull('staff_id')
+            $company_id = sessionDetails('company_id');
+            
+            $users = User::with(['staff:id,user_id', 'staff.staffRoles'])->where('staff_id', '!=', $staff->id)
+            ->where(['type' => 'staff', 'company_id' => $company_id, 'status' => 'active'])
+            ->whereNotNull('staff_id')
+            ->whereHas('staff.staffRoles')
             ->get();
     
             foreach ($users as $user) {
@@ -371,7 +374,7 @@ class LeaveAndAbsenceManagementController extends Controller
                 'link' => url('/') . '/single-staff-leave-and-absence/api/admin/' . $lam->staff_id . '?type=' . $lam->type,
                 'user_type' => 'staff',
                 'staff_id' => $lam->staff_id,
-                'company_id' => $this->sessionDetails('company_id')
+                'company_id' => sessionDetails('company_id')
             ];
 
             $this->notify($data);
@@ -409,7 +412,7 @@ class LeaveAndAbsenceManagementController extends Controller
                 'link' => url('/') . '/api/admin/leave-and-absence/' . $lam->id,
                 'user_type' => 'staff',
                 'staff_id' => $lam->staff_id,
-                'company_id' => $this->sessionDetails('company_id')
+                'company_id' => sessionDetails('company_id')
             ];
 
             $this->notify($data);
@@ -449,7 +452,7 @@ class LeaveAndAbsenceManagementController extends Controller
             );
         }
 
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
 
         $setting = LeaveAndAbsenceSetting::updateOrCreate(['company_id' => $company_id, 'type' => $request->type], [
             'type' => $request->type,
@@ -465,7 +468,7 @@ class LeaveAndAbsenceManagementController extends Controller
 
     public function getLeaveAndAbsenceSetting(Request $request)
     {
-        $settings = LeaveAndAbsenceSetting::where('company_id', $this->sessionDetails('company_id'));
+        $settings = LeaveAndAbsenceSetting::where('company_id', sessionDetails('company_id'));
 
         if (!empty($request->type)) {
             $settings = $settings->where('type', $request->type)->first();

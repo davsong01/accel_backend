@@ -18,7 +18,7 @@ class AccountCategoryController extends Controller
      */
     public function index(Request $request)
     {
-        $account_category = AccountCategory::where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'desc');
+        $account_category = AccountCategory::where('company_id', sessionDetails('company_id'))->orderBy('created_at', 'desc');
 
         if (!empty($request->status)) {
             $account_category = $account_category->where('status', $request->status);
@@ -35,7 +35,7 @@ class AccountCategoryController extends Controller
 
     public function modifyAccountCategory($id)
     {
-        $account_cat = AccountCategory::where('company_id', $this->sessionDetails('company_id'))->where('id', $id)->first();
+        $account_cat = AccountCategory::where('company_id', sessionDetails('company_id'))->where('id', $id)->first();
         if ($account_cat) {
             if ($account_cat->status == 'active') {
                 $account_cat->update(['status' => 'inactive']);
@@ -64,10 +64,10 @@ class AccountCategoryController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => [
                 'required', Rule::unique('account_categories')->where(function ($query) {
-                    $query->where('company_id', $this->sessionDetails('company_id'));
+                    $query->where('company_id', sessionDetails('company_id'));
                 })
             ],
-            'account_group_id' => 'required|exists:account_groups,id,company_id,' . $this->sessionDetails('company_id'),
+            'account_group_id' => 'required|exists:account_groups,id,company_id,' . sessionDetails('company_id'),
         ]);
 
         if ($validator->fails()) {
@@ -77,7 +77,7 @@ class AccountCategoryController extends Controller
             ], 412);
         }
 
-        $account_group_id = AccountCategory::updateOrCreate(['name' => $request->name, 'company_id' => $this->sessionDetails('company_id')], [
+        $account_group_id = AccountCategory::updateOrCreate(['name' => $request->name, 'company_id' => sessionDetails('company_id')], [
             'account_group_id' => $request->account_group_id,
         ]);
 
@@ -109,11 +109,11 @@ class AccountCategoryController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => [
                 'required', Rule::unique('account_categories')->where(function ($query) use ($accountCategory) {
-                    $query->where('company_id', $this->sessionDetails('company_id'));
+                    $query->where('company_id', sessionDetails('company_id'));
                     $query->where('name', '!=', $accountCategory->name);
                 })
             ],
-            'account_group_id' => 'required|exists:account_groups,id,company_id,' . $this->sessionDetails('company_id'),
+            'account_group_id' => 'required|exists:account_groups,id,company_id,' . sessionDetails('company_id'),
         ]);
 
         if ($validator->fails()) {
@@ -126,7 +126,7 @@ class AccountCategoryController extends Controller
         $accountCategory->update([
             'name' => $request->name,
             'account_group_id' => $request->account_group_id,
-            'company_id' => $this->sessionDetails('company_id'),
+            'company_id' => sessionDetails('company_id'),
         ]);
 
         LogService::admin(auth()->user()->id, null, 'Update an account category(' . $accountCategory->id . ')', 'UPDATE');

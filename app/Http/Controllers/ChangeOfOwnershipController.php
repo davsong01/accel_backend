@@ -17,7 +17,7 @@ class ChangeOfOwnershipController extends Controller
      */
     public function index()
     {
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
         $list = ChangeOfOwnership::where('company_id', $company_id)->latest()->paginate();
         return response()->json(['message' => 'Success', 'data' => $list], 200);
     }
@@ -27,7 +27,7 @@ class ChangeOfOwnershipController extends Controller
      */
     public function store(Request $request)
     {
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
 
         $validator = Validator::make($request->all(), [
             'branch_id' => ['required', "exists:branches,id,company_id,$company_id"],
@@ -76,7 +76,7 @@ class ChangeOfOwnershipController extends Controller
      */
     public function update(Request $request, ChangeOfOwnership $change_of_ownership)
     {
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
         $user = auth()->user();
 
         $customer = Customer::find($change_of_ownership->original_owner_id);
@@ -126,7 +126,7 @@ class ChangeOfOwnershipController extends Controller
     public function search(Request $request)
     {
         $params = $request->only(['branch_id', 'original_owner_id', 'customer_contract_id', 'new_owner_id', 'amount']);
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
 
         $query = ChangeOfOwnership::where('company_id', $company_id)->where($params);
 

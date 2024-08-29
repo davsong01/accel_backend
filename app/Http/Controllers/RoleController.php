@@ -23,7 +23,7 @@ class RoleController extends Controller
             return response()->json(['error' => 'The role type is required as a query param!'], 412);
         }
         $roles = Role::where('type', $type)
-            ->where('company_id', $this->sessionDetails('company_id'))
+            ->where('company_id', sessionDetails('company_id'))
             ->where('id', '!=', env("DEFAULT_ROLE_ID"))
             ->get();
 
@@ -47,7 +47,7 @@ class RoleController extends Controller
             'name' => 'required',
             'access' => 'required',
             'description' => 'nullable',
-            // 'department_id' => 'required|exists:departments,id,company_id,' . $this->sessionDetails('company_id'),
+            // 'department_id' => 'required|exists:departments,id,company_id,' . sessionDetails('company_id'),
             'type' => 'required|in:customer,staff',
         ]);
 
@@ -75,7 +75,7 @@ class RoleController extends Controller
         }
 
         $role = Role::updateOrcreate(
-            ['name' => $request->name, 'company_id' => $this->sessionDetails('company_id'), 'type' => $request->type],
+            ['name' => $request->name, 'company_id' => sessionDetails('company_id'), 'type' => $request->type],
             [
                 'access' => $access_control,
                 'description' => $request->description
@@ -115,7 +115,7 @@ class RoleController extends Controller
             'access' => 'required',
             'description' => 'nullable',
             'type' => 'required|in:customer,staff',
-            // 'department_id' => 'required|exists:departments,id,company_id,' . $this->sessionDetails('company_id'),
+            // 'department_id' => 'required|exists:departments,id,company_id,' . sessionDetails('company_id'),
         ]);
 
         if ($validator->fails()) {

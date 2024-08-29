@@ -92,7 +92,7 @@ class StaffImport implements ToCollection, SkipsEmptyRows, WithHeadingRow
             $nationality = !empty($row['nationality']) ? $this->getCountryId(trim($row['nationality']), $company_id) : null;
             $state_id = !empty($row['state']) ? $this->getStateId(trim($row['state']), $company_id) : null;
             $lga = !empty($row['lga']) ? $this->getLgaId(trim($row['lga']), $company_id) : null;
-            $date_of_employment = !empty($row['date_of_employment']) ? Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject(trim($row['date_of_employment']))) : null;
+            $date_of_employment = !empty($row['date_of_employment']) ? Carbon::createFromFormat('d/m/Y', trim($row['date_of_employment'])) : null;
             
             $data['additional_details'] = json_encode([
                 'alternate_number' => trim($row['alternate_number']) ?? '',
@@ -123,7 +123,7 @@ class StaffImport implements ToCollection, SkipsEmptyRows, WithHeadingRow
                     'username' => $row['username'] ?? '',
                     'phone_number' => $row['phone_number'] ?? '',
                     'gender' => $row['gender'] ?? '',
-                    'additional_details' => $data['additional_details'],
+                    // 'additional_details' => $data['additional_details'],
                     'next_of_kin' => $data['next_of_kin'],
                     'branch_id' => $row['branch_id'] ?? '',
                     'date_of_birth' => !empty($row['date_of_birth']) ? Carbon::parse($row['date_of_birth']) : null,

@@ -22,11 +22,12 @@ class JobTitleImport implements ToModel, SkipsEmptyRows, WithValidation, WithHea
     public function model(array $row)
     {
         $row = array_filter($row);
+        $company_id = session()->get('company_id', null);
 
         return new JobTitle([
             'title'          => $row['title'],
-            'department_id'  => Department::where('name', $row['department_name'])->firstWhere('company_id', session()->get('company_id', null))->id,
-            'company_id' => session()->get('company_id', null)
+            'department_id'  => Department::where('name', $row['department_name'])->firstWhere('company_id', $company_id)->id,
+            'company_id' => $company_id
         ]);
     }
 

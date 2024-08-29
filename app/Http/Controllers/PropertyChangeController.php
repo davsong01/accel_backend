@@ -17,7 +17,7 @@ class PropertyChangeController extends Controller
      */
     public function index()
     {
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
         $list = PropertyChange::where('company_id', $company_id)->latest()->paginate();
         return response()->json(['message' => 'Success', 'data' => $list], 200);
     }
@@ -27,7 +27,7 @@ class PropertyChangeController extends Controller
      */
     public function store(Request $request)
     {
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
 
         $validator = Validator::make($request->all(), [
             'branch_id' => ['required', "exists:branches,id,company_id,$company_id"],
@@ -75,7 +75,7 @@ class PropertyChangeController extends Controller
      */
     public function update(Request $request, PropertyChange $property_change)
     {
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
         $user = auth()->user();
 
         $customer = $property_change->customer;
@@ -130,7 +130,7 @@ class PropertyChangeController extends Controller
     public function search(Request $request)
     {
         $params = $request->only(['branch_id', 'customer_id', 'original_customer_contract_id', 'new_customer_contract_id', 'company_id']);
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
 
         $query = PropertyChange::where('company_id', $company_id)->where($params);
 

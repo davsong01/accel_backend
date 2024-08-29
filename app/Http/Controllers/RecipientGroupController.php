@@ -31,7 +31,7 @@ class RecipientGroupController extends Controller
      */
     public function store(RecipientGroupRequest $request)
     {
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
         $user = auth()->user();
         $admin = Staff::where('user_id', $user->id)->first();
 
@@ -88,7 +88,7 @@ class RecipientGroupController extends Controller
     public function search(Request $request)
     {
         $params = $request->only(['customer_status', 'all_customers', 'subscriber_status', 'completed_subscriber_status']);
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
 
         $query = RecipientGroup::where('company_id', $company_id)->where($params);
 

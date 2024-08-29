@@ -26,7 +26,7 @@ class CustomerFormController extends Controller
     public function index(Request $request, $id = null, $customer_id = null)
     {
         // Returns customer details and contract details for admin
-        $forms = CustomerForm::with(['customer'])->where('company_id', $this->sessionDetails('company_id'));
+        $forms = CustomerForm::with(['customer'])->where('company_id', sessionDetails('company_id'));
        
         if (\Request::route()->getPrefix() == 'api/customer') {
             if(Auth::check() ){
@@ -127,10 +127,10 @@ class CustomerFormController extends Controller
             $data = [
                 'title' => 'Your Attention is needed for: '.$form->form_name,
                 'content' => 'Could you please take a moment to look into the form response: ' . $form->form_name,
-                'link' => $this->sessionDetails('company_url') . '/customer-form-response/' . $form->id,
+                'link' => sessionDetails('company_url') . '/customer-form-response/' . $form->id,
                 'user_type' => 'staff',
                 'staff_id' => $staff->id,
-                'company_id' => $this->sessionDetails('company_id')
+                'company_id' => sessionDetails('company_id')
             ];
 
             $this->notify($data);
@@ -142,7 +142,7 @@ class CustomerFormController extends Controller
 
     public function approveForm2Request($id)
     {
-        $customer_form = CustomerForm::with('customer')->where('id', $id)->where('company_id', $this->sessionDetails('company_id'))->first();
+        $customer_form = CustomerForm::with('customer')->where('id', $id)->where('company_id', sessionDetails('company_id'))->first();
         
         if (!$customer_form) {
             return response()->json(['message' => 'No records found', 'data' => []], 200);
@@ -186,7 +186,7 @@ class CustomerFormController extends Controller
             ], 412);
         }
 
-        $customer_form = CustomerForm::with('customer')->where('id', $id)->where('company_id', $this->sessionDetails('company_id'))->first();
+        $customer_form = CustomerForm::with('customer')->where('id', $id)->where('company_id', sessionDetails('company_id'))->first();
 
         if (!$customer_form) {
             return response()->json([
@@ -221,7 +221,7 @@ class CustomerFormController extends Controller
 
     public function approveCustomerFormResponse($id)
     {
-        $customer_form = CustomerForm::with('customer')->where('id', $id)->where('company_id', $this->sessionDetails('company_id'))
+        $customer_form = CustomerForm::with('customer')->where('id', $id)->where('company_id', sessionDetails('company_id'))
         ->where('is_customer_response', 1)
         // ->where('type', 'customer-response')
         ->first();
@@ -269,7 +269,7 @@ class CustomerFormController extends Controller
             ], 412);
         }
 
-        $customer_form = CustomerForm::with('customer')->where('id', $id)->where('company_id', $this->sessionDetails('company_id'))->first();
+        $customer_form = CustomerForm::with('customer')->where('id', $id)->where('company_id', sessionDetails('company_id'))->first();
 
         if (!$customer_form) {
             return response()->json([
@@ -353,7 +353,7 @@ class CustomerFormController extends Controller
             "marital_status" => 'nullable',
 
             // 'bypass_approval' => 'nullable',
-            'customer_id' => 'required|exists:customers,id,company_id,' . $this->sessionDetails('company_id'),
+            'customer_id' => 'required|exists:customers,id,company_id,' . sessionDetails('company_id'),
 
             // Contracts
             'contract' => 'required',
@@ -373,12 +373,12 @@ class CustomerFormController extends Controller
             foreach ($contracts as $cont) {
                 // Make each contract a request
                 $contract_validator = Validator::make($cont, [
-                    'estate_id' => 'required|exists:estates,id,company_id,' . $this->sessionDetails('company_id'),
-                    'city_id' => 'required|exists:cities,id,company_id,' . $this->sessionDetails('company_id'),
-                    'location_id' => 'required|exists:locations,id,company_id,' . $this->sessionDetails('company_id'),
+                    'estate_id' => 'required|exists:estates,id,company_id,' . sessionDetails('company_id'),
+                    'city_id' => 'required|exists:cities,id,company_id,' . sessionDetails('company_id'),
+                    'location_id' => 'required|exists:locations,id,company_id,' . sessionDetails('company_id'),
                     'property_type_id' => [
                         'required', Rule::exists('estate_property_type_details', 'id')->where(function ($query) use ($cont) {
-                            $query->where('company_id', $this->sessionDetails('company_id'))->where('estate_id', $cont['estate_id'])->where('type', $cont['property_type']);
+                            $query->where('company_id', sessionDetails('company_id'))->where('estate_id', $cont['estate_id'])->where('type', $cont['property_type']);
                         })
                     ],
                     // Other details
@@ -389,18 +389,18 @@ class CustomerFormController extends Controller
                     'description' => 'nullable',
 
                     // Marketer
-                    'primary_marketer' => 'nullable|exists:staff,id,company_id,' . $this->sessionDetails('company_id'),
+                    'primary_marketer' => 'nullable|exists:staff,id,company_id,' . sessionDetails('company_id'),
                     'secondary_marketers' => 'nullable',
                     'subscribers' => 'nullable',
 
                     'property_type' => 'required|in:land,building',
                     'building_type_id' => 'nullable|exists:building_types,id',
                     'plot_size_id' => 'nullable|exists:plot_sizes,id',
-                    'branch_id' => 'nullable|exists:branches,id,company_id,' . $this->sessionDetails('company_id'),
+                    'branch_id' => 'nullable|exists:branches,id,company_id,' . sessionDetails('company_id'),
                     'contract_type' => 'nullable',
                     'transaction_date' => 'nullable',
 
-                    'contract_id' => 'required|exists:customer_contracts,id,company_id,' . $this->sessionDetails('company_id'),
+                    'contract_id' => 'required|exists:customer_contracts,id,company_id,' . sessionDetails('company_id'),
                 ]);
 
                 if ($contract_validator->fails()) {
@@ -451,7 +451,7 @@ class CustomerFormController extends Controller
             'nok_relationship' => $data['nok_relationship'] ?? null,
         ]);
 
-        $data['company_id'] = $this->sessionDetails('company_id');
+        $data['company_id'] = sessionDetails('company_id');
         $data['date_of_birth'] = Carbon::parse($request->date_of_birth);
        
         // Update user
@@ -505,10 +505,10 @@ class CustomerFormController extends Controller
                 $data = [
                     'title' => 'Your Attention is needed for: ' . $customer->response_form->form_name,
                     'content' => 'Could you please take a moment to look into the form response: ' . $customer->response_form->form_name,
-                    'link' => $this->sessionDetails('company_url') . '/customer-form-response/' . $customer->response_form->id,
+                    'link' => sessionDetails('company_url') . '/customer-form-response/' . $customer->response_form->id,
                     'user_type' => 'staff',
                     'staff_id' => $staff->id,
-                    'company_id' => $this->sessionDetails('company_id')
+                    'company_id' => sessionDetails('company_id')
                 ];
 
                 $this->notify($data);
@@ -529,7 +529,7 @@ class CustomerFormController extends Controller
         $validator = Validator::make($request->all(), [
             // Contracts
             'contract' => 'required',
-            'form_id' => 'required|exists:customer_forms,id,company_id,' . $this->sessionDetails('company_id'),
+            'form_id' => 'required|exists:customer_forms,id,company_id,' . sessionDetails('company_id'),
         ]);
 
         if ($validator->fails()) {
@@ -539,7 +539,7 @@ class CustomerFormController extends Controller
             ], 412);
         }
 
-        $customer_form = CustomerForm::with('customer')->where('id', $request->form_id)->where('company_id', $this->sessionDetails('company_id'))->where('is_customer_response', 1)->first();
+        $customer_form = CustomerForm::with('customer')->where('id', $request->form_id)->where('company_id', sessionDetails('company_id'))->where('is_customer_response', 1)->first();
 
         if (!$customer_form) {
             return response()->json(['message' => 'No record found', 'data' => []], 200);
@@ -552,13 +552,13 @@ class CustomerFormController extends Controller
             foreach ($contracts as $cont) {
                 // Make each contract a request
                 $contract_validator = Validator::make($cont, [
-                    'estate_id' => 'required|exists:estates,id,company_id,' . $this->sessionDetails('company_id'),
-                    'city_id' => 'required|exists:cities,id,company_id,' . $this->sessionDetails('company_id'),
-                    'location_id' => 'required|exists:locations,id,company_id,' . $this->sessionDetails('company_id'),
+                    'estate_id' => 'required|exists:estates,id,company_id,' . sessionDetails('company_id'),
+                    'city_id' => 'required|exists:cities,id,company_id,' . sessionDetails('company_id'),
+                    'location_id' => 'required|exists:locations,id,company_id,' . sessionDetails('company_id'),
 
                     'property_type_id' => [
                         'required', Rule::exists('estate_property_type_details', 'id')->where(function ($query) use ($cont) {
-                            $query->where('company_id', $this->sessionDetails('company_id'))->where('estate_id', $cont['estate_id'])->where('type', $cont['property_type']);
+                            $query->where('company_id', sessionDetails('company_id'))->where('estate_id', $cont['estate_id'])->where('type', $cont['property_type']);
                         })
                     ],
                     // Other details
@@ -569,18 +569,18 @@ class CustomerFormController extends Controller
                     'description' => 'nullable',
 
                     // Marketer
-                    'primary_marketer' => 'nullable|exists:staff,id,company_id,' . $this->sessionDetails('company_id'),
+                    'primary_marketer' => 'nullable|exists:staff,id,company_id,' . sessionDetails('company_id'),
                     'secondary_marketers' => 'nullable',
                     'subscribers' => 'nullable',
 
                     'property_type' => 'required|in:land,building',
                     'building_type_id' => 'nullable|exists:building_types,id',
                     'plot_size_id' => 'nullable|exists:plot_sizes,id',
-                    'branch_id' => 'nullable|exists:branches,id,company_id,' . $this->sessionDetails('company_id'),
+                    'branch_id' => 'nullable|exists:branches,id,company_id,' . sessionDetails('company_id'),
                     'contract_type' => 'nullable',
                     'transaction_date' => 'nullable',
 
-                    'contract_id' => 'required|exists:customer_contracts,id,company_id,' . $this->sessionDetails('company_id'),
+                    'contract_id' => 'required|exists:customer_contracts,id,company_id,' . sessionDetails('company_id'),
                 ]);
 
                 if ($contract_validator->fails()) {

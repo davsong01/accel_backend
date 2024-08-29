@@ -25,7 +25,6 @@ class CustomerContract extends Model
     protected $table = 'customer_contracts';
     protected $guarded = [];
     protected $appends = ['form_payment_status','contract_name','contract_deal_status', 'contract_history_status'];
-    protected $prepends = ['contract_name'];
 
     public function customer(){
         return $this->belongsTo(Customer::class, 'customer_id');
@@ -49,7 +48,6 @@ class CustomerContract extends Model
     public function contract_payment()
     {
         return $this->hasOne(ContractPayment::class, 'contract_id');
-        // ->select('id','contract_id','customer_id','amount','property_net_fee','balance','transaction_id');
     }
 
     public function building_type()
@@ -109,11 +107,17 @@ class CustomerContract extends Model
         if ($this->property_type == 'land') {
             $psize = $this->property_type_details->plot_details->size ?? null;
             $building = $this->property_type_details->building_details->name ?? null;
+            $name .= $psize . ' - ';
 
-            $name = $psize .' - '. $building . ' - '. $this->estate->name;
+            if(!empty($building)){
+                $name .= $building . ' - ';
+            }
+
+            $name .= $this->estate->name;
+            
         }
-        return $name;
 
+        return $name;
     }
 
     public function getContractHistoryStatusAttribute()
@@ -144,7 +148,6 @@ class CustomerContract extends Model
             ];
             
             return $details;
-
         }else{
             return null;
         }
@@ -183,6 +186,11 @@ class CustomerContract extends Model
     public function seInfrastructurePayment(): HasOne
     {
         return $this->hasOne(SeInfrastructure::class, 'transaction_id','sei_payment_transaction_id', );
+    }
+
+    public function seInfrastructurePaymentDetails()
+    {
+        return $this->hasOne(SeInfrastructure::class, 'contract_id');
     }
 
     public function under_construction(): HasOne

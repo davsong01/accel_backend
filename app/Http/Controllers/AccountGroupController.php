@@ -18,16 +18,16 @@ class AccountGroupController extends Controller
     public function index(Request $request)
     {
 
-        $account_group = AccountGroup::where('company_id', $this->sessionDetails('company_id'))->latest();
+        $account_group = AccountGroup::where('company_id', sessionDetails('company_id'))->latest();
 
         if (!empty($request->status)) {
             $account_group = $account_group->where('status', $request->status);
         }
 
         if (!empty($request->paginate) && $request->paginate == 'false') {
-            $account_group = AccountGroup::where('company_id', $this->sessionDetails('company_id'))->latest()->get();
+            $account_group = AccountGroup::where('company_id', sessionDetails('company_id'))->latest()->get();
         } else {
-            $account_group = AccountGroup::where('company_id', $this->sessionDetails('company_id'))->latest()->paginate(20)->withQueryString();
+            $account_group = AccountGroup::where('company_id', sessionDetails('company_id'))->latest()->paginate(20)->withQueryString();
         }
 
         return response()->json(['message' => 'Success', 'data' => $account_group], 200);
@@ -39,7 +39,7 @@ class AccountGroupController extends Controller
 
     public function modifyAccountGroup($id)
     {
-        $account_group = AccountGroup::where('company_id', $this->sessionDetails('company_id'))->where('id', $id)->first();
+        $account_group = AccountGroup::where('company_id', sessionDetails('company_id'))->where('id', $id)->first();
         if ($account_group) {
             if ($account_group->status == 'active') {
                 $account_group->update(['status' => 'inactive']);
@@ -65,7 +65,7 @@ class AccountGroupController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => [
                 'required', Rule::unique('account_groups')->where(function ($query) {
-                    $query->where('company_id', $this->sessionDetails('company_id'));
+                    $query->where('company_id', sessionDetails('company_id'));
                 })
             ],
         ]);
@@ -77,7 +77,7 @@ class AccountGroupController extends Controller
             ], 412);
         }
 
-        $account_group = AccountGroup::updateOrCreate(['name' => $request->name, 'company_id' => $this->sessionDetails('company_id')], []);
+        $account_group = AccountGroup::updateOrCreate(['name' => $request->name, 'company_id' => sessionDetails('company_id')], []);
 
         LogService::admin(auth()->user()->id, null, 'Create or update an account group(' . $account_group->id . ')', 'CREATE');
         return response()->json(['message' => 'Created successfully', 'data' => $account_group], 200);
@@ -106,7 +106,7 @@ class AccountGroupController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => [
                 'required', Rule::unique('account_categories')->where(function ($query) use ($accountGroup) {
-                    $query->where('company_id', $this->sessionDetails('company_id'));
+                    $query->where('company_id', sessionDetails('company_id'));
                     $query->where('name', '!=', $accountGroup->name);
                 })
             ],
@@ -121,7 +121,7 @@ class AccountGroupController extends Controller
 
         $accountGroup->update([
             'name' => $request->name,
-            'company_id' => $this->sessionDetails('company_id'),
+            'company_id' => sessionDetails('company_id'),
         ]);
 
         LogService::admin(auth()->user()->id, null, 'Update an account group(' . $accountGroup->id . ')', 'UPDATE');

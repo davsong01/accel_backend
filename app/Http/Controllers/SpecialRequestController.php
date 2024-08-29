@@ -17,7 +17,7 @@ class SpecialRequestController extends Controller
      */
     public function index()
     {
-        $special_requests = SpecialRequest::where('company_id', $this->sessionDetails('company_id'))
+        $special_requests = SpecialRequest::where('company_id', sessionDetails('company_id'))
         ->latest()->paginate(20)->withQueryString();
 
         return response()->json(['message' => 'Success', 'data' => $special_requests], 200);
@@ -76,7 +76,7 @@ class SpecialRequestController extends Controller
      */
     public function search(Request $request)
     {
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
 
         $query = SpecialRequest::where('company_id', $company_id);
 

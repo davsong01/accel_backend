@@ -21,7 +21,7 @@ class PlotSizeController extends Controller
      */
     public function index()
     {
-        $plot = PlotSize::where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'desc')->get();
+        $plot = PlotSize::where('company_id', sessionDetails('company_id'))->orderBy('created_at', 'desc')->get();
 
         return response()->json(['message' => 'Success', 'data' => $plot], 200);
     }
@@ -41,8 +41,9 @@ class PlotSizeController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'size' => [
-                'required', Rule::unique('plot_sizes')->where(function ($query) {
-                    $query->where('company_id', $this->sessionDetails('company_id'));
+                'required',
+                Rule::unique('plot_sizes')->where(function ($query) use ($request) {
+                    $query->where('company_id', sessionDetails('company_id'));
                 })
             ],
         ]);
@@ -56,7 +57,7 @@ class PlotSizeController extends Controller
 
         $plot = PlotSize::updateOrcreate([
             'size' => $request->size,
-            'company_id' => $this->sessionDetails('company_id'),
+            'company_id' => sessionDetails('company_id'),
         ]);
 
         LogService::admin(auth()->user()->id, null, 'Create a plot size (' . $plot->id  . ')' , 'CREATE');
@@ -75,7 +76,7 @@ class PlotSizeController extends Controller
 
         Excel::import(new PlotSizeImport(), request()->file('file'));
 
-        return response()->json(['message' => 'Plot Sizes Added Succesfully', 'data' => null], 200);
+        return response()->json(['message' => 'Plot Sizes Added Successfully', 'data' => null], 200);
     }
 
     public function sampleBulkPlotSize()
@@ -118,7 +119,7 @@ class PlotSizeController extends Controller
 
         $plotsize->update([
             'size' => $request->size,
-            'company_id' => $this->sessionDetails('company_id'),
+            'company_id' => sessionDetails('company_id'),
         ]);
 
         LogService::admin(auth()->user()->id, null, 'Update a location size (' . $plotsize->id  . ')' , 'UPDATE');

@@ -20,7 +20,7 @@ class GeneratedLegalDocumentController extends Controller
         $legalDocuments = GeneratedLegalDocument::with(['customer', 'estate'])
             ->orderBy('created_at', 'desc')
             ->where([
-                'company_id' => $this->sessionDetails('company_id'),
+                'company_id' => sessionDetails('company_id'),
             ])
             ->paginate(20);
 
@@ -38,7 +38,7 @@ class GeneratedLegalDocumentController extends Controller
             ->orderBy('created_at', 'desc')
             ->where($params)
             ->where([
-                'company_id' => $this->sessionDetails('company_id'),
+                'company_id' => sessionDetails('company_id'),
             ])
             ->paginate(20);
 
@@ -71,7 +71,7 @@ class GeneratedLegalDocumentController extends Controller
             'document_template_id' => $request->document_template_id,
             'file_location' => $documentGen['filepath'] . $documentGen['filename'],
             'estate_id' => $legalDocumentTemplate->estate_id,
-            'company_id' => $this->sessionDetails('company_id'),
+            'company_id' => sessionDetails('company_id'),
         ]);
 
         return response()->json(['message' => 'Success', 'data' => $generatedLegalDocument], 200);
@@ -112,7 +112,7 @@ class GeneratedLegalDocumentController extends Controller
 
         $values = getOptions($customer_id, $legalDocumentTemplate);
         $destination = base_path($this->getPathToSaveFile('generated-legal-documents'));
-
+        
         return GeneratedDocumentService::handler($file['filepath'], $values, $destination);
     }
 }

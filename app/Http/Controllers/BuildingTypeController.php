@@ -21,7 +21,7 @@ class BuildingTypeController extends Controller
      */
     public function index()
     {
-        $building_types = BuildingType::where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'desc')->get();
+        $building_types = BuildingType::where('company_id', sessionDetails('company_id'))->orderBy('created_at', 'desc')->get();
         return response()->json(['message' => 'Success', 'data' => $building_types], 200);
     }
 
@@ -40,12 +40,13 @@ class BuildingTypeController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => [
-                'required', Rule::unique('building_types')->where(function ($query) {
-                    $query->where('company_id', $this->sessionDetails('company_id'));
+                'required',
+                Rule::unique('building_types')->where(function ($query) use ($request) {
+                    $query->where('company_id', sessionDetails('company_id'));
                 })
             ],
         ]);
-
+        
         if ($validator->fails()) {
             return response()->json([
                 'error' => $validator->messages()->first(),
@@ -55,7 +56,7 @@ class BuildingTypeController extends Controller
 
         $building_type = BuildingType::updateOrcreate([
             'name' => $request->name,
-            'company_id' => $this->sessionDetails('company_id'),
+            'company_id' => sessionDetails('company_id'),
         ]);
 
         LogService::admin(auth()->user()->id, NULL, 'Create a building type ('. $building_type->id . ')', 'CREATE');
@@ -119,7 +120,7 @@ class BuildingTypeController extends Controller
 
         $buildingType->update([
             'name' => $request->name,
-            'company_id' => $this->sessionDetails('company_id'),
+            'company_id' => sessionDetails('company_id'),
         ]);
 
         LogService::admin(auth()->user()->id, NULL, 'Update a building type ('. $buildingType->id .')', 'UPDATE');

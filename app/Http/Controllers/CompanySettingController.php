@@ -18,11 +18,11 @@ class CompanySettingController extends Controller
      */
     public function index()
     {
-        $companySetting = CompanySetting::where('company_id', $this->sessionDetails('company_id'))->first();
+        $companySetting = CompanySetting::where('company_id', sessionDetails('company_id'))->first();
 
         if (!$companySetting) {
             $companySetting = CompanySetting::create([
-                'company_id' =>  $this->sessionDetails('company_id'),
+                'company_id' =>  sessionDetails('company_id'),
             ]);
         }
 
@@ -43,7 +43,7 @@ class CompanySettingController extends Controller
 
         if (!$companySetting) {
             $companySetting = CompanySetting::create([
-                'company_id' =>  $this->sessionDetails('company_id'),
+                'company_id' =>  sessionDetails('company_id'),
                 'company_logo' => 'images/brands/logos/default.png',
                 'company_secondary_logo' => 'images/brands/logos/default.png',
                 'main_color' => '#149954',
@@ -97,7 +97,7 @@ class CompanySettingController extends Controller
     public function applicationSettings(Request $request)
     {
         $companySetting = CompanySetting::where('company_id', '!=', NULL)
-        ->where('company_id', $this->sessionDetails('company_id'))
+        ->where('company_id', sessionDetails('company_id'))
         ->first();
 
         if (!$companySetting)
@@ -159,7 +159,7 @@ class CompanySettingController extends Controller
             ], 412);
         }
 
-        $companySetting = CompanySetting::where('company_id', $this->sessionDetails('company_id'))->first();
+        $companySetting = CompanySetting::where('company_id', sessionDetails('company_id'))->first();
 
         $data = [
             'main_color' => $request->main_color,
@@ -175,7 +175,7 @@ class CompanySettingController extends Controller
             'twitter' => $request->twitter,
             'facebook' => $request->facebook,
             'linkedin' => $request->linkedin,
-            'company_id' => $this->sessionDetails('company_id')
+            'company_id' => sessionDetails('company_id')
         ];
 
 
@@ -202,7 +202,7 @@ class CompanySettingController extends Controller
      */
     public function staffAndRoles(Request $request, $staff_id = null)
     {
-        $staff = Staff::with(['user:id,first_name,middle_name,last_name'])->where(['staff.company_id' => $this->sessionDetails('company_id')])->orderBy('created_at', 'DESC');
+        $staff = Staff::with(['user:id,first_name,middle_name,last_name'])->where(['staff.company_id' => sessionDetails('company_id')])->orderBy('created_at', 'DESC');
 
         if (!empty($staff_id)) {
             $staff = $staff->where('id', $staff_id)->first();

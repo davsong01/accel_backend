@@ -138,7 +138,8 @@ if (!function_exists("generateEstateLegalDocumentSamples")) {
                 [
                     'created_by' => auth()->user()->staff->id,
                     'property_type_id' => $document->property_type_id,
-                    'file_location' => config('app.upload_path') . '/legal_document_samples/' . SAMPLE_LEGAL_DOCUMENTS[$document->id],
+                    'template_sample' => config('app.upload_path') . '/legal_document_samples/' . SAMPLE_LEGAL_DOCUMENTS[$document->id],
+                    // 'file_location' => config('app.upload_path') . '/legal_document_samples/' . SAMPLE_LEGAL_DOCUMENTS[$document->id],
                 ]
             );
         }
@@ -152,7 +153,7 @@ if (!function_exists("permissionsCheck")) {
         $error = '';
         $code = '';
 
-        $permission = RolePermission::select('role_ids', 'status', 'id', 'type', 'is_menu')->where(['route' => $routeName, 'type' => auth()->user()->type])->first();
+        $permission = RolePermission::select('status', 'id', 'type', 'is_menu')->where(['route' => $routeName, 'type' => auth()->user()->type])->first();
 
         $user_role_ids = getAllAccess();
 
@@ -167,12 +168,10 @@ if (!function_exists("permissionsCheck")) {
                 $code = 403;
             };
 
-
-            // $allowed_roles = explode(",", $permission->role_ids);
             // Link permissions to permission id
             $allowed_roles = explode(",", $permission->id);
             $check = !empty(array_intersect($allowed_roles, $user_role_ids));
-
+            
             if (!$check) {
                 $permissionx = false;
                 $error = 'You are not permitted to use this resource!';

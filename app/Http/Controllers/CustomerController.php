@@ -24,8 +24,8 @@ class CustomerController extends Controller
     public function index(Request $request)
     {
         $customers = Customer::with(['user', 'contracts:id,property_type_id,status,customer_id'])->withCount('contracts')
-            ->where('company_id', $this->sessionDetails('company_id'))->orderBy('created_at', 'DESC');
-       
+            ->where('company_id', sessionDetails('company_id'))->orderBy('created_at', 'DESC');
+    
         if (!empty($request->name)) {
             $customers = $customers->whereHas('user', function ($query) use ($request) {
                 $query->where('first_name', 'LIKE', "%{$request->name}%")
@@ -35,7 +35,7 @@ class CustomerController extends Controller
                     });
             })->with(['user', 'contracts:id,property_type_id,status,customer_id'])
                 ->withCount('contracts')
-                ->where('company_id', $this->sessionDetails('company_id'))
+                ->where('company_id', sessionDetails('company_id'))
                 ->orderBy('customers.created_at', 'DESC');
         }
 
@@ -112,7 +112,7 @@ class CustomerController extends Controller
 
         // $leads = Customer::with(['user:id,avatar,first_name,last_name,status,gender,phone_number'])->whereHas('contracts', function ($query) {
         //     $query->where('status', 'lead');
-        // })->withCount('contracts')->where('company_id', $this->sessionDetails('company_id'))
+        // })->withCount('contracts')->where('company_id', sessionDetails('company_id'))
         //     ->orderBy('customers.created_at', 'DESC');
 
         if (!empty($request->name)) {
@@ -132,23 +132,33 @@ class CustomerController extends Controller
 
     public function getSubscribers(Request $request)
     {
-       
         if (!empty($request->type)) {
-            $subscribers = Customer::with(['user:id,avatar,first_name,last_name,status,gender,phone_number,customerId'])->whereHas('contracts', function ($q) use ($request) {
-                $q->where('status', 'subscriber')->where('contract_status', $request->type);
-            })->withCount(['contracts' => function ($q)  use ($request) {
-                $q->where('status', 'subscriber')->where('contract_status',$request->type);
-            }])->orderBy('customers.created_at', 'DESC');
+            if($request->type == 'completed'){
+                $typeArray = ['completed'];
+            }else{
+                $typeArray = [$request->type];
+            }
+
+            $subscribers = Customer::with(['user:id,avatar,first_name,last_name,status,gender,phone_number,customerId'])
+            ->whereHas('contracts', function ($q) use ($typeArray) {
+                $q->where('status', 'subscriber')
+                ->whereNotNull('contract_status')
+                ->whereIn('contract_status', $typeArray);
+            })
+            ->withCount(['contracts' => function ($q) use ($typeArray) {
+                $q->where('status', 'subscriber')
+                    ->whereNotNull('contract_status')
+                    ->whereIn('contract_status', $typeArray);
+            }])
+            ->orderBy('customers.created_at', 'DESC');
         }else{
             $subscribers = Customer::with(['user:id,avatar,first_name,last_name,status,gender,phone_number,customerId'])->whereHas('contracts', function ($q) {
                 $q->where('status', 'subscriber');
             })->withCount(['contracts' => function ($q) {
                 $q->where('status', 'subscriber');
             }])->orderBy('customers.created_at', 'DESC');
-
-           
         }
-
+        
         // $subscribers = Customer::orderBy('customers.created_at')
         //     ->join('customer_contracts', 'customer_contracts.customer_id','customers.id')
         //     ->join('users', 'users.id','customers.id')
@@ -213,7 +223,7 @@ class CustomerController extends Controller
 
         // $prospect = Customer::with(['user:id,avatar,first_name,last_name,status,gender,phone_number'])->whereHas('contracts', function ($query) {
         //     $query->where('status', 'prospect');
-        // })->withCount('contracts')->where('company_id', $this->sessionDetails('company_id'))
+        // })->withCount('contracts')->where('company_id', sessionDetails('company_id'))
         //     ->orderBy('customers.created_at', 'DESC');
 
         if (!empty($request->name)) {
@@ -233,19 +243,19 @@ class CustomerController extends Controller
 
     public function CustomerCount()
     {
-        // $all = CustomerContract::where('company_id', $this->sessionDetails('company_id'))->count();
+        // $all = CustomerContract::where('company_id', sessionDetails('company_id'))->count();
         $all = Customer::count();
         $leads = Customer::whereHas('contracts', function ($query) {
             $query->where('status', 'lead');
-        })->where('company_id', $this->sessionDetails('company_id'))->count();
+        })->where('company_id', sessionDetails('company_id'))->count();
 
         $subscriber = Customer::whereHas('contracts', function ($query) {
             $query->where('status', 'subscriber');
-        })->where('company_id', $this->sessionDetails('company_id'))->count();
+        })->where('company_id', sessionDetails('company_id'))->count();
 
         $prospect = Customer::whereHas('contracts', function ($query) {
             $query->where('status', 'prospect');
-        })->where('company_id', $this->sessionDetails('company_id'))->count();
+        })->where('company_id', sessionDetails('company_id'))->count();
 
         $contract = [
             'all' => $all,
@@ -277,7 +287,7 @@ class CustomerController extends Controller
             'email' => ['required', 'email', 
                 Rule::unique('users')->where(fn ($query) =>
                     $query->where([
-                        'company_id' => $this->sessionDetails('company_id'),
+                        'company_id' => sessionDetails('company_id'),
                         'type' => 'customer'
                     ])
                 )
@@ -376,7 +386,7 @@ class CustomerController extends Controller
 
     public function singleCustomerContractCount($customer_id)
     {
-        $customer = Customer::withCount(['singleContract', 'jointContract', 'contracts'])->where('id', $customer_id)->where('company_id', $this->sessionDetails('company_id'))->first();
+        $customer = Customer::withCount(['singleContract', 'jointContract', 'contracts'])->where('id', $customer_id)->where('company_id', sessionDetails('company_id'))->first();
 
         if (!$customer) {
             return response()->json(['message' => 'No record found', 'data' => null], 404);
@@ -393,7 +403,7 @@ class CustomerController extends Controller
 
     public function customerIdentificationSetting()
     {
-        $customer_identification_settings = CustomerIdentificationSetting::where(['company_id' => $this->sessionDetails('company_id')])->first();
+        $customer_identification_settings = CustomerIdentificationSetting::where(['company_id' => sessionDetails('company_id')])->first();
 
         if ($customer_identification_settings) {
             $order = json_decode($customer_identification_settings->order_of_appearance, true);
@@ -438,7 +448,7 @@ class CustomerController extends Controller
         $data = $validator->valid();
         $data['order_of_appearance'] = isset($data['order_of_appearance']) ? json_encode($data['order_of_appearance']) : null;
 
-        $data['company_id'] = $this->sessionDetails('company_id');
+        $data['company_id'] = sessionDetails('company_id');
 
         $cis = CustomerIdentificationSetting::updateOrCreate(['company_id' => $data['company_id']], $data);
         LogService::admin(auth()->user()->id, null, 'Create or update a customer contract identification setting (' . $cis->id .')', 'CREATE');
@@ -452,7 +462,7 @@ class CustomerController extends Controller
 
     public function count(Request $request)
     {
-        $company_id = $this->sessionDetails('company_id');
+        $company_id = sessionDetails('company_id');
 
         $count = Customer::where('company_id', $company_id)->whereNotNull('company_id')->whereHas('contracts', fn($query) =>
             $query->whereIn('status',  explode(',', $request->input('status')))

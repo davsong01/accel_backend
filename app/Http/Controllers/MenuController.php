@@ -33,35 +33,6 @@ class MenuController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    // public function index(Request $request, $status = null)
-    // {
-    //     $individual_permissions = Session::get('individual_permissions');
-
-    //     $parents = RolePermission::where(['parent' => 0])->orderBy('order', 'ASC')->get();
-    //     $menus = RolePermission::orderBy('parent', 'asc')->orderBy('order', 'asc')->get();
-
-    //     $user_roles = auth()->user()->roles; // You can 
-
-    //     foreach ($menus as $parent) {
-    //         $rolex = [];
-    //         $roleIds = [];
-    //         $roles = isset($parent->role_ids) ? explode(',', $parent->role_ids) : [];
-
-    //         if (count($roles) > 0) {
-    //             foreach ($roles as $role) {
-    //                 $rrr = Role::where('id', $role)->first();
-    //                 $rolex[] = $rrr->name;
-    //                 $roleIds[] = $rrr->id;
-    //             }
-    //         }
-    //         $parent['roles'] = $rolex;
-    //         $parent['roleIds'] = $roleIds;
-    //     }
-
-    //     $roles = Role::where(['type' => 'staff'])->get();
-
-    //     return response()->json(['data' => $menus, 'message' => 'Success'], 200);
-    // }
 
     public function generateLinks($linkid, $link_name, $link_route, $link_slug, $link_icon, $description, $parent_id)
     {
@@ -123,7 +94,10 @@ class MenuController extends Controller
         // Get permissions from staff roles
         if (Session::has('staff_id')) {
             $access = getAllAccess();
-            $links = RolePermission::whereIn('id', $access)->where(['status' => 'active', 'is_menu' => 'yes', 'parent' => NULL, 'type' => 'staff', 'company_id' => $this->sessionDetails('company_id')])->orderBy('order', 'ASC')->get();
+            $links = RolePermission::whereIn('id', $access)
+            ->where(['status' => 'active', 'is_menu' => 'yes', 'parent' => NULL, 'type' => 'staff'])
+            // ->where('company_id', sessionDetails('company_id'))
+            ->orderBy('order', 'ASC')->get();
         }
 
         $lo = [];
@@ -241,8 +215,7 @@ class MenuController extends Controller
         $data['order'] = $request->order;
         $data['icon'] = $request->icon;
         $data['parent'] = $request->parent == 'none' ? 0 : $request->parent;
-        $data['role_ids'] = isset($request->role_ids) ? implode(',', $request->role_ids) : NULL;
-
+        
         $permission->update($data);
 
         return back()->with('message', 'Update succesful');
@@ -250,7 +223,10 @@ class MenuController extends Controller
 
     public function changeSpecialRequestStatus()
     {
-        $permission = RolePermission::where('slug', 'special-requests')->where('company_id', $this->sessionDetails('company_id'))->first();
+        $permission = RolePermission::where('slug', 'special-requests')
+        // ->where('company_id', sessionDetails('company_id'))
+        ->first();
+
         if ($permission) {
             if ($permission->status == 'active') {
                 $permission->update(['status' => 'inactive']);
@@ -275,7 +251,7 @@ class MenuController extends Controller
         } else {
             $packageAccess = getPackageAccess($access);
         }
-
+        
         $accessControls = RolePermission::with(['children' => function ($query) use ($packageAccess) {
             return $query->where(['status' => 'active', 'type' => 'staff'])->whereIn('id', $packageAccess)->orderBy('order', 'asc')->select('id', 'category', 'status', 'type', 'is_menu', 'menu_name', 'description', 'order', 'parent');
         }])->where(['status' => 'active', 'type' => 'staff'])
