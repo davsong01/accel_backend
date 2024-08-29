@@ -106,18 +106,17 @@ class StaffController extends Controller
     {
         $staff_id = !empty($staff_id) ? $staff_id : Auth::user()->staff->id;
 
-        $staff = Staff::with('current_approved_leave', 'user:id,first_name,middle_name,last_name')->where(['staff.company_id' => sessionDetails('company_id')])->where('staff.id', '!=', $staff_id)
-        ->leftJoin('employee_exits', fn($join) => 
-            $join->on('employee_exits.staff_id', '=', 'staff.id')
-        ->where('employee_exits.status', '=', 'APPROVED')
-        )->whereNull('employee_exits.id')->get();
+        $staff = Staff::with(['current_approved_leave', 'user:id,first_name,middle_name,last_name'])
+            ->where('company_id', $this->sessionDetails('company_id'))
+            ->where('id', '!=', $staff_id)
+            ->whereDoesntHave('employeeExits')
+            ->get();
 
         $staff = $staff->filter(function ($q) {
             if (count($q->current_approved_leave) < 1) {
                 return $q;
             }
         });
-
         return response()->json(['message' => 'Successfully retrieved', 'data' => $staff], 200);
     }
 
