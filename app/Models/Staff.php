@@ -106,4 +106,9 @@ class Staff extends Model
         return $this->belongsTo(Branch::class, 'branch_id');
     }
 
+    public function employeeExits() {
+        return $this->hasMany(EmployeeExit::class)
+            ->where('status', 'APPROVED');
+    }
+
 }
