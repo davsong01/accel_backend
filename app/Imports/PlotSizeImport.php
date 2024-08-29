@@ -6,11 +6,12 @@ use App\Models\PlotSize;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
 
-class PlotSizeImport implements ToCollection, WithHeadingRow
+class PlotSizeImport implements ToCollection, WithHeadingRow, SkipsEmptyRows
 {
 
     private $session;
@@ -37,7 +38,7 @@ class PlotSizeImport implements ToCollection, WithHeadingRow
                 ]
             )->validate();
 
-            PlotSize::updateOrCreate([
+            PlotSize::create([
                 'size' => $row['size'],
                 'company_id' => $company_id
             ]);

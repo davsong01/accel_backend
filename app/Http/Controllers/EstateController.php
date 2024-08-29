@@ -471,7 +471,7 @@ class EstateController extends Controller
             return response()->json(['errors' => $th->getMessage()], 412);
         }
 
-        return response()->json(['message' => 'Estates Added Succesfully', 'data' => null], 200);
+        return response()->json(['message' => 'Estates Added Successfully', 'data' => null], 200);
     }
 
     public function sampleBulkEstate()
