@@ -39,6 +39,7 @@ class JobRoleImport implements ToCollection, WithHeadingRow, SkipsEmptyRows
                     'name.required' => 'Undefined name in one or more rows, please check and try again',
                     'department.required' => 'Undefined department in one or more rows, please check and try again',
                     'department.exists' => 'Invalid department in one or more rows, please check and try again',
+                    'name.unique' => "The name '{$row['name']}' already exists for your company.",
                 ]
             )->validate();
 

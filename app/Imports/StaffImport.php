@@ -76,7 +76,8 @@ class StaffImport implements ToCollection, SkipsEmptyRows, WithHeadingRow
                 ],
                 [
                     'first_name.required' => 'Undefined firstname in one or more rows, please check and try again',
-                    'last_name.required' => 'Undefined last name in one or more rows, please check and try again'
+                    'last_name.required' => 'Undefined last name in one or more rows, please check and try again',
+                    'email.unique' => "The email '{$row['email']}' already exists for your company.",
                     // 'city.required' => 'Undefined city in one or more rows, please check and try again',
                     // 'location.required' => 'Undefined location in one or more rows, please check and try again',
                     // 'project_supervisor_staff_id.required' => 'Project Supervisor staff Id is invalid in one or more rows',

@@ -35,6 +35,7 @@ class DepartmentImport implements ToCollection, SkipsEmptyRows, WithHeadingRow
                 ],
                 [
                     'name.required' => 'Undefined name in one or more rows, please check and try again',
+                    'name.unique' => "The name '{$row['name']}' already exists for your company.",
                 ]
             )->validate();
 

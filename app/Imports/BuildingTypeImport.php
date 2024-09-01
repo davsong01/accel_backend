@@ -39,6 +39,8 @@ class BuildingTypeImport implements ToCollection, WithHeadingRow, SkipsEmptyRows
                 ],
                 [
                     'name.required' => 'One or more rows do not have name, please check and try again',
+                    'name.unique' => "The name '{$row['name']}' already exists for your company.",
+
                 ]
             )->validate();
 
