@@ -25,16 +25,19 @@ class PlotSizeImport implements ToCollection, WithHeadingRow, SkipsEmptyRows
     public function collection(Collection $rows)
     {
         $company_id = $this->session->sessionDetails('company_id');
-        
+    
         foreach ($rows as $row) {
             Validator::make(
                 $row->toArray(),
                 [
-                    'size' => 'required',
-                    Rule::unique('plot_sizes')->where(fn($query) => $query->where('company_id', $company_id)),
+                    'size' =>[
+                        'required',
+                        Rule::unique('plot_sizes')->where(fn($query) => $query->where('company_id', $company_id)),
+                    ],
                 ],
                 [
                     'size.required' => 'One or more rows do not have size, please check and try again',
+                    'size.unique' => "The size '{$row['size']}' already exists for your company.",
                 ]
             )->validate();
 

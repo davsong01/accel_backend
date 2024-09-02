@@ -76,7 +76,8 @@ class StaffImport implements ToCollection, SkipsEmptyRows, WithHeadingRow
                 ],
                 [
                     'first_name.required' => 'Undefined firstname in one or more rows, please check and try again',
-                    'last_name.required' => 'Undefined last name in one or more rows, please check and try again'
+                    'last_name.required' => 'Undefined last name in one or more rows, please check and try again',
+                    'email.unique' => "The email '{$row['email']}' already exists for your company.",
                     // 'city.required' => 'Undefined city in one or more rows, please check and try again',
                     // 'location.required' => 'Undefined location in one or more rows, please check and try again',
                     // 'project_supervisor_staff_id.required' => 'Project Supervisor staff Id is invalid in one or more rows',
@@ -95,22 +96,22 @@ class StaffImport implements ToCollection, SkipsEmptyRows, WithHeadingRow
             $lga = !empty($row['lga']) ? $this->getLgaId(trim($row['lga']), $company_id) : null;
             $date_of_employment = !empty($row['date_of_employment']) ? Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject(trim($row['date_of_employment']))) : null;
             $data['additional_details'] = json_encode([
-                'alternate_number' => trim($row['alternate_number']) ?? '',
-                'alternate_email' => trim($row['alternate_email']) ?? '',
-                'residential_address' => trim($row['residential_address']) ?? '',
-                'marital_status' => trim($row['marital_status']) ?? '',
+                'alternate_number' => trim($row['alternate_number'] ?? ''),
+                'alternate_email' => trim($row['alternate_email'] ?? ''),
+                'residential_address' => trim($row['residential_address'] ?? ''),
+                'marital_status' => trim($row['marital_status'] ?? ''),
                 'nationality' => $nationality ?? '',
                 'state' => $state_id ?? '',
                 'lga' => $lga ?? '',
             ]);
 
             $data['next_of_kin'] = json_encode([
-                'nok_first_name' => trim($row['nok_first_name']) ?? '',
-                'nok_last_name' => trim($row['nok_last_name']) ?? '',
-                'nok_phone_number' => trim($row['nok_phone_number']) ?? '',
-                'nok_house_address' => trim($row['nok_house_address']) ?? '',
-                'nok_email_address' => trim($row['nok_email_address']) ?? '',
-                'nok_relationship' => trim($row['nok_relationship']) ?? '',
+                'nok_first_name' => trim($row['nok_first_name'] ?? ''),
+                'nok_last_name' => trim($row['nok_last_name'] ?? ''),
+                'nok_phone_number' => trim($row['nok_phone_number'] ?? ''),
+                'nok_house_address' => trim($row['nok_house_address'] ?? ''),
+                'nok_email_address' => trim($row['nok_email_address'] ?? ''),
+                'nok_relationship' => trim($row['nok_relationship'] ?? ''),
             ]);
 
             try {
