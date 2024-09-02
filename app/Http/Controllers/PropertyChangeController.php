@@ -32,14 +32,18 @@ class PropertyChangeController extends Controller
         $validator = Validator::make($request->all(), [
             'branch_id' => ['required', "exists:branches,id,company_id,$company_id"],
             'customer_id' => ['required', "exists:customers,id,company_id,$company_id"],
-            'original_customer_contract_id' => ['required', "exists:customer_contracts,id,customer_id,$request->customer_id"],
-            'new_customer_contract_id' => ['required', "exists:customer_contracts,id,customer_id,$request->customer_id"],
-            'new_customer_contract_id' => [
-                'required', "exists:customer_contracts,id,customer_id,$request->customer_id",
-                fn ($attribute, $value, $fail) =>
-                $value === $request->original_customer_contract_id ?
-                    $fail('The new contract must be different from the original contract.') : null,
-            ],
+            'customer_contract_id' => ['required', "exists:customer_contracts,id,customer_id,$request->customer_id"],
+            'city_id' => ['required', "exists:cities,id,company_id,$company_id"],
+            'location_id' =>  ['required', "exists:locations,id,city_id,{$request->input('city_id')}"],
+            'estate_id' =>  ['required', "exists:estates,id,location_id,{$request->input('location_id')}"],
+            'plot_size_id' =>  ['required', "exists:plot_sizes,id,company_id,$company_id"],
+            // 'new_customer_contract_id' => ['required', "exists:customer_contracts,id,customer_id,$request->customer_id"],
+            // 'new_customer_contract_id' => [
+            //     'required', "exists:customer_contracts,id,customer_id,$request->customer_id",
+            //     fn ($attribute, $value, $fail) =>
+            //     $value === $request->original_customer_contract_id ?
+            //         $fail('The new contract must be different from the original contract.') : null,
+            // ],
             'comment' => ['sometimes', 'string'],
         ]);
 
@@ -83,14 +87,11 @@ class PropertyChangeController extends Controller
         $validator = Validator::make($request->all(), [
             'branch_id' => ['sometimes', "exists:branches,id,company_id,$company_id"],
             'customer_id' => ['sometimes', "exists:customers,id,company_id,$company_id"],
-            'original_customer_contract_id' => ['sometimes', "exists:customer_contracts,id,customer_id,$request->customer_id"],
-            'new_customer_contract_id' => ['sometimes', "exists:customer_contracts,id,customer_id,$request->customer_id"],
-            'new_customer_contract_id' => [
-                'sometimes', "exists:customer_contracts,id,customer_id,$request->customer_id",
-                fn ($attribute, $value, $fail) =>
-                $value === $request->original_customer_contract_id ?
-                    $fail('The new contract must be different from the original contract.') : null,
-            ],
+            // 'customer_contract_id' => ['required', "exists:customer_contracts,id,customer_id,{$request->input('customer_id')}"],
+            'city_id' => ['required', "exists:cities,id,company_id,$company_id"],
+            'location_id' =>  ['required', "exists:locations,id,city_id,{$request->input('city_id')}"],
+            'estate_id' =>  ['sometimes', "exists:estates,id,location_id,{$request->input('location_id')}"],
+            'plot_size_id' =>  ['sometimes', "exists:plot_sizes,id,company_id,$company_id"],
             'comment' => ['sometimes', 'string'],
             'status' => ['sometimes', 'in:PENDING,DECLINED,APPROVED']
         ]);

@@ -255,7 +255,7 @@ class Controller extends BaseController
             }
             $imageFile->save(base_path() . '/' . config('app.upload_path') . '/' . $folder . '/' . $name);
         } else {
-            $file->save(base_path() . '/' . config('app.upload_path') . '/' . $folder . '/' . $name);
+            $file->move(base_path() . '/' . config('app.upload_path') . '/' . $folder . '/', $name);
         }
 
         return config('app.upload_path') . '/' . $folder . '/' . $name;

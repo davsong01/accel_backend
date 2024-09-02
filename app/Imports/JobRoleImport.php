@@ -6,10 +6,12 @@ use App\Models\JobRole;
 use App\Models\Department;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
+use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
-class JobRoleImport implements ToCollection, WithHeadingRow
+class JobRoleImport implements ToCollection, WithHeadingRow, SkipsEmptyRows
 {
     private $session;
 
@@ -27,7 +29,10 @@ class JobRoleImport implements ToCollection, WithHeadingRow
             Validator::make(
                 $row->toArray(),
                 [
-                    'name' => 'required',
+                    'name' => [
+                        'required',
+                        Rule::unique('job_roles')->where(fn($query) => $query->where('company_id', $company_id)),
+                    ],
                     'department' => 'required|exists:departments,name,company_id,' . $company_id,
                 ],
                 [
@@ -39,7 +44,7 @@ class JobRoleImport implements ToCollection, WithHeadingRow
 
             $department_id = $this->getDepartmentId(trim($row['department']), $company_id);
            
-            JobRole::updateOrCreate([
+            JobRole::create([
                 'name' => $row['name'],
                 'department_id' => $department_id,
                 'company_id' =>  $company_id

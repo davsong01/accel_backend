@@ -6,10 +6,11 @@ use App\Models\BuildingType;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
-class BuildingTypeImport implements ToCollection, WithHeadingRow
+class BuildingTypeImport implements ToCollection, WithHeadingRow, SkipsEmptyRows
 {
     private $session;
 
@@ -41,7 +42,7 @@ class BuildingTypeImport implements ToCollection, WithHeadingRow
                 ]
             )->validate();
 
-            BuildingType::updateOrCreate([
+            BuildingType::create([
                 'name' => $row['name'],
                 'company_id' => $company_id
             ]);

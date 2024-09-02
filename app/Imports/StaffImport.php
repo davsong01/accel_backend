@@ -84,6 +84,7 @@ class StaffImport implements ToCollection, SkipsEmptyRows, WithHeadingRow
                     // 'property_type.required' => 'Property Typel is not defined in one or more rows'
                 ]
             )->validate();
+            
             $company_id = $this->company_id;
             $branch_id = !empty($row['branch']) ? $this->getBranchId(trim($row['branch']), $company_id) : null;
             $job_type_id = !empty($row['jobtype']) ? $this->getJobTypeId(trim($row['jobtype']), $company_id) : null;
@@ -92,8 +93,7 @@ class StaffImport implements ToCollection, SkipsEmptyRows, WithHeadingRow
             $nationality = !empty($row['nationality']) ? $this->getCountryId(trim($row['nationality']), $company_id) : null;
             $state_id = !empty($row['state']) ? $this->getStateId(trim($row['state']), $company_id) : null;
             $lga = !empty($row['lga']) ? $this->getLgaId(trim($row['lga']), $company_id) : null;
-            $date_of_employment = !empty($row['date_of_employment']) ? Carbon::createFromFormat('d/m/Y', trim($row['date_of_employment'])) : null;
-            
+            $date_of_employment = !empty($row['date_of_employment']) ? Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject(trim($row['date_of_employment']))) : null;
             $data['additional_details'] = json_encode([
                 'alternate_number' => trim($row['alternate_number']) ?? '',
                 'alternate_email' => trim($row['alternate_email']) ?? '',
@@ -140,6 +140,19 @@ class StaffImport implements ToCollection, SkipsEmptyRows, WithHeadingRow
                     // 'commision_percentage' => $row['commision_percentage'] ?? '',
                     'company_id' => $this->company_id,
                 ]);
+
+                $data = [
+                    ...$row, 'nationality' => $nationality, 'lga' => $lga, 
+                    'date_of_employment' => $date_of_employment,
+                ];
+
+                $data['type'] = 'staff.store';
+                $data['medium'] = 'email';
+                $data['user'] = $user;
+                $data['name'] = $user->first_name;
+                $data['recipient'] = $user->email ?? 'Staff';
+    
+                app('App\Http\Controllers\Controller')->logEmail($data);
                 //code...
             } catch (\Throwable $th) {
                 dd($th->getMessage(), $th->getLine());
